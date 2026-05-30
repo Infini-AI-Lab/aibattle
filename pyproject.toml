@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aibattle"
+version = "0.0.1"
+description = "AI Battle"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "hzzheng", email = "infiniailab5@gmail.com" }]
+keywords = ["ai", "battle"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/hzzheng/ai-battle"
+Issues = "https://github.com/hzzheng/ai-battle/issues"
