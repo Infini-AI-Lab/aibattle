@@ -74,6 +74,7 @@ class Runner:
         seat_swap: bool,
         logger: MatchLogger,
         max_concurrency: int = 1,
+        semaphore: "Optional[asyncio.Semaphore]" = None,
         progress: Optional[Callable] = None,
         on_episode_start: Optional[Callable] = None,
         on_step: Optional[Callable] = None,
@@ -118,7 +119,9 @@ class Runner:
         # under a semaphore. Results are stored by plan index, so output order is
         # deterministic even though completion order is not.
         results = [None] * len(specs)
-        sem = asyncio.Semaphore(max(1, max_concurrency))
+        # An externally supplied semaphore lets several matches share one global
+        # concurrency budget (e.g. a tournament running all games in parallel).
+        sem = semaphore if semaphore is not None else asyncio.Semaphore(max(1, max_concurrency))
         completed = 0
         # Running cumulative chip standing per agent name, across hands. Exact for
         # sequential (e.g. human) play; under parallelism it reflects whatever has

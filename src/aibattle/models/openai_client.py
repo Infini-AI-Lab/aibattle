@@ -7,6 +7,7 @@ config, so Fireworks-over-OpenAI-compat is the near-term path.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Optional, Union
 
 from .base import ModelClient, ModelOutput
@@ -52,12 +53,23 @@ class OpenAIClient(ModelClient):
         else:
             messages = prompt
 
-        resp = await self._client.chat.completions.create(
-            model=self.model_id,
-            messages=messages,
-            temperature=(self._default_temperature if temperature is None else temperature),
-            max_tokens=(self._default_max_tokens if max_tokens is None else max_tokens),
-        )
+        # Retry transient failures (rate limits, timeouts) with exponential
+        # backoff so high-concurrency runs don't turn a 429 into an invalid move.
+        last_exc = None
+        for attempt in range(5):
+            try:
+                resp = await self._client.chat.completions.create(
+                    model=self.model_id,
+                    messages=messages,
+                    temperature=(self._default_temperature if temperature is None else temperature),
+                    max_tokens=(self._default_max_tokens if max_tokens is None else max_tokens),
+                )
+                break
+            except Exception as e:  # noqa: BLE001 - includes RateLimit/APITimeout
+                last_exc = e
+                if attempt == 4:
+                    raise
+                await asyncio.sleep(min(30, 2 ** attempt))
         msg = resp.choices[0].message
         # Reasoning models expose chain-of-thought in a separate field; the name
         # varies by provider (reasoning_content / reasoning).
