@@ -1,0 +1,26 @@
+# Gomoku-Lite baseline calibration: random vs tactical heuristic. No API needed.
+game:
+  name: gomoku
+  version: "1.0.0"
+  params:
+    random_open: 2
+
+players:
+  player_0:
+    agent: { type: builtin, name: board_random }
+  player_1:
+    agent: { type: builtin, name: gomoku_heuristic }
+
+run:
+  episodes: 100
+  seed: 12345
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 32
+
+output:
+  dir: ./runs/gomoku_random_vs_heuristic
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

@@ -1,0 +1,26 @@
+# Connect Four baseline calibration: random vs tactical heuristic. No API needed.
+game:
+  name: connect4
+  version: "1.0.0"
+  params:
+    random_open: 2      # forced-random opening plies for episode variety
+
+players:
+  player_0:
+    agent: { type: builtin, name: board_random }
+  player_1:
+    agent: { type: builtin, name: connect4_heuristic }
+
+run:
+  episodes: 200
+  seed: 12345
+  seat_swap: true       # alternate who moves first (neutralizes first-move edge)
+  on_invalid_action: fallback
+  max_concurrency: 32
+
+output:
+  dir: ./runs/connect4_random_vs_heuristic
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

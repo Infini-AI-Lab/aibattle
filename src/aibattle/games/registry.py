@@ -5,10 +5,14 @@ from __future__ import annotations
 from .base import Game
 from .kuhn import KuhnPoker
 from .holdem import HoldemPoker
+from .connect4 import ConnectFour
+from .gomoku import Gomoku
 
 _GAMES = {
     KuhnPoker.name: KuhnPoker,
     HoldemPoker.name: HoldemPoker,
+    ConnectFour.name: ConnectFour,
+    Gomoku.name: Gomoku,
 }
 
 

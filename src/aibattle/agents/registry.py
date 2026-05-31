@@ -15,12 +15,18 @@ from .base import Agent
 from .random_agent import RandomAgent
 from .heuristic_agent import KuhnHeuristicAgent
 from .holdem_agents import RandomHoldemAgent, HoldemHeuristicAgent
+from .board_agents import (
+    RandomBoardAgent, Connect4HeuristicAgent, GomokuHeuristicAgent,
+)
 
 _BUILTINS = {
     "random": RandomAgent,
     "kuhn_heuristic": KuhnHeuristicAgent,
     "holdem_random": RandomHoldemAgent,
     "holdem_heuristic": HoldemHeuristicAgent,
+    "board_random": RandomBoardAgent,
+    "connect4_heuristic": Connect4HeuristicAgent,
+    "gomoku_heuristic": GomokuHeuristicAgent,
 }
 
 

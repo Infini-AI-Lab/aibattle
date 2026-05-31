@@ -24,10 +24,6 @@ from ..types import (
     StepRecord,
 )
 
-# Conservative, amount-free fallback order (shared by all games).
-FALLBACK_ORDER = ["check", "fold", "call"]
-
-
 def resolve_action(game: Game, state, player, response: AgentResponse, policy: str):
     """Validate the agent's move via the game; apply the invalid-action policy.
 
@@ -45,11 +41,11 @@ def resolve_action(game: Game, state, player, response: AgentResponse, policy: s
     if policy == "forfeit":
         return None, InvalidInfo(True, reason, requested, "forfeit")
 
-    # Fallback: first amount-free legal type by priority, else first legal type.
+    # Fallback: the game decides a safe legal move (e.g. center column for
+    # Connect Four; check>fold>call for poker).
     legal = game.legal_actions(state, player)
-    fb_type = next((t for t in FALLBACK_ORDER if t in legal),
-                   legal[0] if legal else INVALID)
-    return Move(type=fb_type, amount=None), InvalidInfo(True, reason, requested, "fallback")
+    fb = game.fallback_action(state, player, legal)
+    return fb, InvalidInfo(True, reason, requested, "fallback")
 
 
 @dataclass

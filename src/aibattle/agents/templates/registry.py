@@ -5,10 +5,14 @@ from __future__ import annotations
 from .base import GameTemplate
 from .kuhn import KuhnTemplate
 from .holdem import HoldemTemplate
+from .connect4 import Connect4Template
+from .gomoku import GomokuTemplate
 
 _TEMPLATES = {
     "kuhn_poker": KuhnTemplate,
     "holdem": HoldemTemplate,
+    "connect4": Connect4Template,
+    "gomoku": GomokuTemplate,
 }
 
 
