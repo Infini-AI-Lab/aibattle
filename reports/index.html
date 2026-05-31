@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>AI Battle Arena — Tournaments</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<style>
+  
+  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
+    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #232838; }
+  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
+    font-size:15px; margin-right:10px; }
+  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
+    padding:16px 2px; border-bottom:2px solid transparent; }
+  .navbar a.nav:hover { color:#e6e6e6; }
+  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
+  .wrap { max-width:880px; margin:0 auto; padding:40px 22px; }
+  h1 { font-size:28px; } .sub { color:#8b93a7; margin-bottom:32px; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .card { display:block; text-decoration:none; color:inherit; background:#171a23;
+    border:1px solid #232838; border-radius:14px; padding:24px; transition:.15s; }
+  .card:hover { border-color:#60a5fa; transform:translateY(-2px); }
+  .ctitle { font-size:21px; font-weight:700; color:#cdd6f4; }
+  .cmeta { font-size:12px; color:#8b93a7; margin:8px 0 16px; }
+  .champ { font-size:14px; color:#e6e6e6; } .metric { color:#a78bfa; font-weight:600; }
+  .cgo { margin-top:16px; font-size:13px; color:#60a5fa; }
+  @media (max-width:640px) { .cards { grid-template-columns:1fr; } }
+</style></head>
+<body><nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a><a class='nav active' href='index.html'>Overview</a><a class='nav' href='connect4_report.html'>🔴 Connect Four</a><a class='nav' href='gomoku_report.html'>⚫ Gomoku</a><a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em</a></nav><div class="wrap">
+  <h1>🎲 AI Battle Arena — Tournaments</h1>
+  <div class="sub">LLMs playing perfect-information board games &amp; Texas Hold'em · round-robin · skill analysis</div>
+  <div class="cards">
+        <a class="card" href="connect4_report.html">
+          <div class="ctitle">🔴 Connect Four</div>
+          <div class="cmeta">500 games · board 6×7 · first-mover 57%</div>
+          <div class="champ">🏆 gpt-oss-120b <span class='metric'>Elo 1754</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="gomoku_report.html">
+          <div class="ctitle">⚫ Gomoku-Lite</div>
+          <div class="cmeta">500 games · board 9×9 · first-mover 52%</div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>Elo 1783</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="holdem_tournament_report.html">
+          <div class="ctitle">🃏 Texas Hold'em</div>
+          <div class="cmeta">20 tables · 30 hands each · 5 models</div>
+          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>+37.1 bb/100</span></div>
+          <div class="cgo">View analysis →</div>
+        </a></div>
+</div></body></html>

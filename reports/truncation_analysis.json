@@ -1,0 +1,173 @@
+{
+  "connect4": {
+    "kimi-k2p6": {
+      "decisions": 1424,
+      "generations": 1424,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "minimax-m2p7": {
+      "decisions": 1386,
+      "generations": 1386,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "deepseek-v4-pro": {
+      "decisions": 1457,
+      "generations": 1457,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "glm-5p1": {
+      "decisions": 1554,
+      "generations": 1556,
+      "trunc_decisions": 0,
+      "trunc_generations": 2,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0013,
+      "invalid_rate": 0.0
+    },
+    "gpt-oss-120b": {
+      "decisions": 1450,
+      "generations": 1794,
+      "trunc_decisions": 54,
+      "trunc_generations": 398,
+      "invalid_decisions": 54,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0372,
+      "generation_trunc_rate": 0.2219,
+      "invalid_rate": 0.0372
+    }
+  },
+  "gomoku": {
+    "gpt-oss-120b": {
+      "decisions": 1404,
+      "generations": 1737,
+      "trunc_decisions": 87,
+      "trunc_generations": 420,
+      "invalid_decisions": 91,
+      "invalid_nontrunc": 4,
+      "decision_trunc_rate": 0.062,
+      "generation_trunc_rate": 0.2418,
+      "invalid_rate": 0.0648
+    },
+    "minimax-m2p7": {
+      "decisions": 1630,
+      "generations": 1667,
+      "trunc_decisions": 0,
+      "trunc_generations": 37,
+      "invalid_decisions": 1,
+      "invalid_nontrunc": 1,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0222,
+      "invalid_rate": 0.0006
+    },
+    "kimi-k2p6": {
+      "decisions": 1633,
+      "generations": 1638,
+      "trunc_decisions": 0,
+      "trunc_generations": 5,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0031,
+      "invalid_rate": 0.0
+    },
+    "glm-5p1": {
+      "decisions": 1394,
+      "generations": 1407,
+      "trunc_decisions": 0,
+      "trunc_generations": 13,
+      "invalid_decisions": 1,
+      "invalid_nontrunc": 1,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0092,
+      "invalid_rate": 0.0007
+    },
+    "deepseek-v4-pro": {
+      "decisions": 1703,
+      "generations": 1716,
+      "trunc_decisions": 0,
+      "trunc_generations": 13,
+      "invalid_decisions": 2,
+      "invalid_nontrunc": 2,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0076,
+      "invalid_rate": 0.0012
+    }
+  },
+  "holdem": {
+    "glm-5p1": {
+      "decisions": 517,
+      "generations": 519,
+      "trunc_decisions": 0,
+      "trunc_generations": 2,
+      "invalid_decisions": 4,
+      "invalid_nontrunc": 4,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0039,
+      "invalid_rate": 0.0077
+    },
+    "deepseek-v4-pro": {
+      "decisions": 460,
+      "generations": 460,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "gpt-oss-120b": {
+      "decisions": 466,
+      "generations": 466,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "kimi-k2p6": {
+      "decisions": 495,
+      "generations": 500,
+      "trunc_decisions": 0,
+      "trunc_generations": 5,
+      "invalid_decisions": 4,
+      "invalid_nontrunc": 4,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.01,
+      "invalid_rate": 0.0081
+    },
+    "qwen3p6-plus": {
+      "decisions": 649,
+      "generations": 835,
+      "trunc_decisions": 28,
+      "trunc_generations": 214,
+      "invalid_decisions": 29,
+      "invalid_nontrunc": 1,
+      "decision_trunc_rate": 0.0431,
+      "generation_trunc_rate": 0.2563,
+      "invalid_rate": 0.0447
+    }
+  }
+}

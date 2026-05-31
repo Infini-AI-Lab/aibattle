@@ -27,6 +27,37 @@ BB = 2
 
 STREETS = ("preflop", "flop", "turn", "river")
 HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
+
+# Shared top navigation, identical to the board reports so the pages feel like
+# one site. Targets are sibling files in reports/.
+NAV_ITEMS = [
+    ("index.html", "Overview", "overview"),
+    ("connect4_report.html", "🔴 Connect Four", "connect4"),
+    ("gomoku_report.html", "⚫ Gomoku", "gomoku"),
+    ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
+]
+
+NAV_CSS = """
+  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
+    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #232838; }
+  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
+    font-size:15px; margin-right:10px; }
+  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
+    padding:16px 2px; border-bottom:2px solid transparent; }
+  .navbar a.nav:hover { color:#e6e6e6; }
+  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+"""
+
+
+def _navbar(active: str) -> str:
+    links = "".join(
+        f"<a class='nav{' active' if key == active else ''}' href='{href}'>{label}</a>"
+        for href, label, key in NAV_ITEMS)
+    return ("<nav class='navbar'>"
+            "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
+            f"{links}</nav>")
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -459,9 +490,11 @@ def render_html(report: dict) -> str:
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
   :root {{ color-scheme: dark; }}
+  {NAV_CSS}
   body {{ font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
           background: #0f1117; color: #e6e6e6; }}
   .wrap {{ max-width: 1100px; margin: 0 auto; padding: 28px 22px 80px; }}
@@ -487,7 +520,7 @@ def render_html(report: dict) -> str:
   td.bucket {{ font-weight: 600; }}
   @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
-<body><div class="wrap">
+<body>{_navbar("holdem")}<div class="wrap">
   <h1>🃏 AI Battle Arena — Heads-Up Hold'em Tournament</h1>
   <div class="sub">{report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
 

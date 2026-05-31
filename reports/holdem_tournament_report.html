@@ -1,8 +1,21 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
   :root { color-scheme: dark; }
+  
+  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
+    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #232838; }
+  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
+    font-size:15px; margin-right:10px; }
+  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
+    padding:16px 2px; border-bottom:2px solid transparent; }
+  .navbar a.nav:hover { color:#e6e6e6; }
+  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+
   body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
           background: #0f1117; color: #e6e6e6; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 22px 80px; }
@@ -28,7 +41,7 @@
   td.bucket { font-weight: 600; }
   @media (max-width: 760px) { .grid2, .cards { grid-template-columns: 1fr; } }
 </style></head>
-<body><div class="wrap">
+<body><nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a><a class='nav' href='index.html'>Overview</a><a class='nav' href='connect4_report.html'>🔴 Connect Four</a><a class='nav' href='gomoku_report.html'>⚫ Gomoku</a><a class='nav active' href='holdem_tournament_report.html'>🃏 Hold'em</a></nav><div class="wrap">
   <h1>🃏 AI Battle Arena — Heads-Up Hold'em Tournament</h1>
   <div class="sub">20 games · 30 hands each · 5 models · round-robin</div>
 
