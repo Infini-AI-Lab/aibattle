@@ -121,10 +121,13 @@ class Runner:
         sem = semaphore if semaphore is not None else asyncio.Semaphore(max(1, max_concurrency))
         completed = 0
         # Running cumulative chip standing per agent name, across hands. Exact for
-        # sequential (e.g. human) play; under parallelism it reflects whatever has
-        # completed so far (informational only).
+        # sequential (e.g. human) play. Under parallelism, completion order is
+        # nondeterministic, so we keep the tally only for sequential play and do
+        # NOT expose it in prompts otherwise (see expose_standing) — exposing it
+        # would leak run-to-run variation into otherwise reproducible decisions.
         standing = {agent_a.name: 0.0, agent_b.name: 0.0}
         total = len(specs)
+        expose_standing = not (semaphore is not None or max_concurrency > 1)
 
         failures = 0
 
@@ -137,6 +140,7 @@ class Runner:
                     res = await self._play_episode(
                         game, agents, deal_seed, ep_i, pair, logger,
                         standing=standing, total_episodes=total,
+                        expose_standing=expose_standing,
                         on_episode_start=on_episode_start,
                         on_step=on_step,
                         on_episode_end=on_episode_end,
@@ -158,13 +162,15 @@ class Runner:
         return RunResult(episodes=episodes, log_path=logger.path, failures=failures)
 
     async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger,
-                            *, standing=None, total_episodes=0,
+                            *, standing=None, total_episodes=0, expose_standing=True,
                             on_episode_start=None, on_step=None, on_episode_end=None):
         rng = random.Random(deal_seed)
         # Snapshot the standing before this hand so all decisions this hand see
-        # the same pre-hand totals.
+        # the same pre-hand totals. Under parallel execution the snapshot is
+        # nondeterministic, so it is withheld from the prompt (empty) to keep
+        # decisions reproducible; the tally itself is still maintained.
         standing = standing if standing is not None else {}
-        pre_standing = dict(standing)
+        pre_standing = dict(standing) if expose_standing else {}
         state = game.initial_state(rng)
         step_index = 0
         invalid_count = {p: 0 for p in game.players}

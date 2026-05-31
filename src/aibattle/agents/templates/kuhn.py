@@ -37,10 +37,21 @@ class KuhnTemplate(GameTemplate):
         if not raw:
             return None
         text = raw.lower()
-        # Prefer a whole-word match of a legal action token.
-        for action in request.observation.legal_actions:
-            if re.search(rf"\b{re.escape(action)}\b", text):
-                return Move(type=action)
+        legal = request.observation.legal_actions
+        # Prefer the last non-empty line (the conclusion) over the whole text, and
+        # within a candidate take the action whose whole-word match occurs LAST.
+        # Reasoning text often names other legal actions first ("I considered
+        # check ... Final: bet"); list-order/first-occurrence matching would
+        # silently return the wrong (typically passive) action with no retry.
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        for candidate in ([lines[-1]] if lines else []) + [text]:
+            best, best_pos = None, -1
+            for action in legal:
+                for m in re.finditer(rf"\b{re.escape(action)}\b", candidate):
+                    if m.start() > best_pos:
+                        best, best_pos = action, m.start()
+            if best is not None:
+                return Move(type=best)
         return None
 
     def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:

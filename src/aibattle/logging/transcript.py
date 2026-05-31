@@ -42,7 +42,9 @@ def render_transcript(traj: dict) -> str:
         elif msg is not None:
             lines.append(f"Agent message: {msg}")
 
-        lines.append(f"Extracted action: {s['selected_action']}")
+        amt = s.get("selected_amount")
+        lines.append(f"Extracted action: {s['selected_action']}"
+                     + (f" {amt}" if amt is not None else ""))
         if s.get("invalid"):
             info = s.get("invalid_info", {})
             lines.append(

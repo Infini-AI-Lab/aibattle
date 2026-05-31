@@ -72,12 +72,17 @@ class MatchContext:
     standing: dict          # {agent_name: cumulative chip delta so far}
 
     def describe(self) -> str:
+        head = f"Hand {self.episode + 1} of {self.total_episodes}."
+        # Standings are omitted under parallel execution (passed empty), since
+        # which episodes have completed is nondeterministic and would otherwise
+        # leak run-to-run variation into the prompt.
+        if not self.standing:
+            return head
         mine = self.standing.get(self.you, 0)
         others = ", ".join(f"{n}: {v:+g}" for n, v in self.standing.items()
                            if n != self.you)
         opp = f"  Opponent standing: {others}." if others else ""
-        return (f"Hand {self.episode + 1} of {self.total_episodes}.  "
-                f"Your overall standing so far: {mine:+g} chips.{opp}")
+        return (f"{head}  Your overall standing so far: {mine:+g} chips.{opp}")
 
     def to_dict(self) -> dict:
         return {

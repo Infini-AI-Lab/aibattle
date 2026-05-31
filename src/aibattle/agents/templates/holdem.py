@@ -60,9 +60,15 @@ class HoldemTemplate(GameTemplate):
             for atype in ("all_in", "raise", "bet", "call", "check", "fold"):
                 if atype not in legal:
                     continue
-                if re.search(_ALIASES[atype], candidate):
+                am = re.search(_ALIASES[atype], candidate)
+                if am:
                     if atype in ("bet", "raise"):
-                        m = re.search(r"(\d+)", candidate)
+                        # Take the first number AFTER the action token ("raise 12"),
+                        # so a number earlier in the line ("facing a bet of 6, I
+                        # raise 12") can't be misread as the amount. Only if nothing
+                        # follows the token do we fall back to the rest of the line.
+                        m = (re.search(r"(\d+)", candidate[am.end():])
+                             or re.search(r"(\d+)", candidate))
                         if not m:
                             return None  # amount required but absent
                         return Move(type=atype, amount=int(m.group(1)))
