@@ -25,6 +25,13 @@ REPORT_DIR = "reports"
 BB = 2
 
 
+STREETS = ("preflop", "flop", "turn", "river")
+HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
+BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
+SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
+                 "full house")
+
+
 def _blank():
     return {
         "hands": 0, "decisions": 0, "chips": 0.0,
@@ -35,11 +42,80 @@ def _blank():
         "vpip_hands": 0, "pfr_hands": 0,
         "betsize_ratios": [], "latencies": [],
         "invalid_actions": 0, "invalid_amounts": 0,
+        # street-level decisions: street -> {action: count}
+        "by_street": {s: defaultdict(int) for s in STREETS},
+        # c-bet tracking: as preflop aggressor reaching flop
+        "cbet_opps": 0, "cbet_attempts": 0,
+        # facing c-bet: as caller-of-preflop-aggressor on flop
+        "facing_cbet": 0, "fold_to_cbet": 0,
+        # showdown participation
+        "saw_showdown": 0, "won_showdown": 0,
+        "showdown_hand_cats": defaultdict(int),
+        # preflop hand-bucket behavior: bucket -> {open/call/fold counts}
+        "pf_bucket": {b: {"open": 0, "call_only": 0, "fold": 0, "all": 0}
+                      for b in HAND_BUCKETS},
+        # bet sizing histogram (share of bet/raise actions by size bucket)
+        "betsize_bins": {b: 0 for b in BETSIZE_BUCKETS},
+        # latency samples for scatter (kept in ms then converted)
+        "lat_samples_ms": [],
     }
 
 
 _AMOUNT_REASONS = {"missing_amount", "non_integer_amount", "below_minimum",
                    "above_stack", "unexpected_amount"}
+
+# Chen-formula hand strength for heads-up preflop bucketing.
+_RANKS = "23456789TJQKA"
+_RANK_VAL = {r: i + 2 for i, r in enumerate(_RANKS)}  # 2..14
+_CHEN_HIGH = {"A": 10, "K": 8, "Q": 7, "J": 6, "T": 5, "9": 4.5, "8": 4,
+              "7": 3.5, "6": 3, "5": 2.5, "4": 2, "3": 1.5, "2": 1}
+
+
+def _chen_score(card1: str, card2: str) -> float:
+    r1, s1 = card1[0], card1[1]
+    r2, s2 = card2[0], card2[1]
+    if _RANK_VAL[r1] < _RANK_VAL[r2]:
+        r1, r2 = r2, r1
+    high = _CHEN_HIGH[r1]
+    suited = s1 == s2
+    pair = r1 == r2
+    if pair:
+        score = max(high * 2, 5)
+    else:
+        score = high
+        if suited:
+            score += 2
+        gap = _RANK_VAL[r1] - _RANK_VAL[r2] - 1
+        penalty = {0: 0, 1: -1, 2: -2, 3: -4}.get(gap, -5)
+        score += penalty
+        # straight bonus: connector/1-gap and both lower than Q
+        if gap <= 1 and _RANK_VAL[r1] < _RANK_VAL["Q"]:
+            score += 1
+    # round up to integer per Chen convention
+    return int(score + 0.999) if score > 0 else int(score)
+
+
+def _hand_bucket(card1: str, card2: str) -> str:
+    s = _chen_score(card1, card2)
+    if s >= 9:
+        return "premium"     # AA,KK,QQ,JJ,TT,AKs,AKo,AQs,AJs,KQs
+    if s >= 7:
+        return "strong"      # 99,AQo,AJo,KQo,ATs,KJs,QJs,strong suited
+    if s >= 5:
+        return "playable"    # small pairs, suited connectors, suited Ax
+    if s >= 3:
+        return "marginal"
+    return "trash"
+
+
+def _betsize_bucket(ratio: float) -> str:
+    if ratio < 0.5:
+        return "small"
+    if ratio < 1.0:
+        return "medium"
+    if ratio < 1.5:
+        return "pot"
+    return "over"
 
 
 def analyze(data: dict) -> dict:
@@ -80,17 +156,40 @@ def analyze(data: dict) -> dict:
             # step-level behavior; track per-(player) preflop voluntary action
             vpip_seen = {}      # name -> bool voluntarily put money in preflop
             pfr_seen = {}       # name -> bool raised preflop
+            # preflop-aggressor tracking (last preflop bet/raise/all_in)
+            last_pf_aggressor = None
+            # per-seat first action on each post-flop street
+            first_act_on_street = {}    # (seat, street) -> step
+            # per-seat preflop summary for hand-bucket bookkeeping
+            seat_pf_actions = {nm: [] for nm in seat_name.values()}
+            seat_hole = {}      # nm -> (c1, c2) from first observation
+
             for s in e["steps"]:
                 nm = s["agent_name"]
+                seat = s["player"]
                 st = stats[nm]
                 st["decisions"] += 1
                 act = s["selected_action"]
                 st["acts"][act] += 1
                 pub = s["observation"]["public"]
+                priv = s["observation"].get("private") or {}
                 to_call = pub.get("to_call", 0)
                 street = pub.get("street")
                 pot = pub.get("pot", 0) or 0
                 sc = pub.get("your_street_commit", 0) or 0
+
+                # per-street action counts
+                if street in STREETS:
+                    st["by_street"][street][act] += 1
+
+                # remember hole cards (set from first decision)
+                if nm not in seat_hole and priv.get("hole"):
+                    seat_hole[nm] = tuple(priv["hole"])
+
+                # first action per (seat, street) — used for c-bet detection
+                key = (seat, street)
+                if key not in first_act_on_street:
+                    first_act_on_street[key] = s
 
                 if to_call > 0:
                     st["facing_bet"] += 1
@@ -98,10 +197,12 @@ def analyze(data: dict) -> dict:
                         st["fold_facing_bet"] += 1
 
                 if street == "preflop":
+                    seat_pf_actions[nm].append(act)
                     if act in ("call", "bet", "raise", "all_in"):
                         vpip_seen[nm] = True
                     if act in ("raise", "all_in", "bet"):
                         pfr_seen[nm] = True
+                        last_pf_aggressor = nm
 
                 if act in ("bet", "raise", "all_in"):
                     amt = s.get("selected_amount")
@@ -109,7 +210,9 @@ def analyze(data: dict) -> dict:
                     if invested is None and act == "all_in":
                         invested = pub.get("your_stack", 0)
                     if invested and pot > 0:
-                        st["betsize_ratios"].append(invested / pot)
+                        ratio = invested / pot
+                        st["betsize_ratios"].append(ratio)
+                        st["betsize_bins"][_betsize_bucket(ratio)] += 1
 
                 lat = (s.get("response") or {}).get("metadata", {}).get("latency_ms")
                 if lat:
@@ -128,6 +231,49 @@ def analyze(data: dict) -> dict:
                 if pfr_seen.get(nm):
                     stats[nm]["pfr_hands"] += 1
 
+            # ---- preflop hand-bucket bookkeeping ----
+            for nm, hole in seat_hole.items():
+                if len(hole) != 2:
+                    continue
+                bucket = _hand_bucket(hole[0], hole[1])
+                bk = stats[nm]["pf_bucket"][bucket]
+                bk["all"] += 1
+                acts_pf = seat_pf_actions.get(nm, [])
+                if any(a in ("bet", "raise", "all_in") for a in acts_pf):
+                    bk["open"] += 1
+                elif "call" in acts_pf:
+                    bk["call_only"] += 1
+                elif "fold" in acts_pf:
+                    bk["fold"] += 1
+
+            # ---- c-bet and fold-to-c-bet (flop only) ----
+            if last_pf_aggressor is not None:
+                agg_seat = name_seat[last_pf_aggressor]
+                opp_seat = "player_1" if agg_seat == "player_0" else "player_0"
+                opp_name = seat_name[opp_seat]
+                agg_flop = first_act_on_street.get((agg_seat, "flop"))
+                if agg_flop is not None:
+                    stats[last_pf_aggressor]["cbet_opps"] += 1
+                    if agg_flop["selected_action"] in ("bet", "raise", "all_in"):
+                        stats[last_pf_aggressor]["cbet_attempts"] += 1
+                        # opponent's first response on the flop
+                        opp_flop = first_act_on_street.get((opp_seat, "flop"))
+                        if opp_flop is not None:
+                            stats[opp_name]["facing_cbet"] += 1
+                            if opp_flop["selected_action"] == "fold":
+                                stats[opp_name]["fold_to_cbet"] += 1
+
+            # ---- showdown participation / W$SD / made-hand categories ----
+            if reason == "showdown":
+                cats = e.get("hand_categories") or {}
+                for seat, nm in seat_name.items():
+                    stats[nm]["saw_showdown"] += 1
+                    cat = cats.get(seat)
+                    if cat:
+                        stats[nm]["showdown_hand_cats"][cat] += 1
+                if winner_name:
+                    stats[winner_name]["won_showdown"] += 1
+
         pair_games[frozenset((a, b))] += 1
 
     # finalize per-model derived metrics
@@ -140,6 +286,44 @@ def analyze(data: dict) -> dict:
         passive_acts = st["acts"]["call"] + st["acts"]["check"]
         agg_freq = aggr_acts / max(aggr_acts + passive_acts, 1)
         calls = max(st["acts"]["call"], 1)
+
+        # per-street action share (% of that street's actions that were aggressive)
+        by_street_out = {}
+        for street in STREETS:
+            acts = st["by_street"][street]
+            total = sum(acts.values())
+            aggr = acts["bet"] + acts["raise"] + acts["all_in"]
+            passive = acts["call"] + acts["check"]
+            by_street_out[street] = {
+                "decisions": total,
+                "agg_freq": round(aggr / max(aggr + passive, 1), 4),
+                "fold_share": round(acts["fold"] / max(total, 1), 4),
+                "mix": {k: acts[k] for k in
+                        ("fold", "check", "call", "bet", "raise", "all_in")},
+            }
+
+        # preflop hand-bucket open rates
+        pf_bucket_out = {}
+        for b in HAND_BUCKETS:
+            bk = st["pf_bucket"][b]
+            total = max(bk["all"], 1)
+            pf_bucket_out[b] = {
+                "hands": bk["all"],
+                "open_rate": round(bk["open"] / total, 4),
+                "call_rate": round(bk["call_only"] / total, 4),
+                "fold_rate": round(bk["fold"] / total, 4),
+            }
+
+        # bet-size distribution (share of bet/raise/all_in actions)
+        bs_total = max(sum(st["betsize_bins"].values()), 1)
+        betsize_dist = {b: round(st["betsize_bins"][b] / bs_total, 4)
+                        for b in BETSIZE_BUCKETS}
+
+        # showdown made-hand share
+        sd_total = max(sum(st["showdown_hand_cats"].values()), 1)
+        showdown_cat_dist = {c: round(st["showdown_hand_cats"][c] / sd_total, 4)
+                             for c in SHOWDOWN_CATS}
+
         out_models[m] = {
             "hands": st["hands"], "decisions": st["decisions"],
             "chips": round(st["chips"], 1),
@@ -162,6 +346,19 @@ def analyze(data: dict) -> dict:
             "action_mix": {k: st["acts"][k] for k in
                            ("fold", "check", "call", "bet", "raise", "all_in")},
             "style": _style(st["vpip_hands"] / n, agg_freq, st["acts"]["all_in"] / d),
+            # new
+            "by_street": by_street_out,
+            "cbet_rate": round(st["cbet_attempts"] / max(st["cbet_opps"], 1), 4),
+            "cbet_opps": st["cbet_opps"],
+            "fold_to_cbet": round(st["fold_to_cbet"] / max(st["facing_cbet"], 1), 4),
+            "facing_cbet": st["facing_cbet"],
+            "wtsd": round(st["saw_showdown"] / n, 4),
+            "wsd": round(st["won_showdown"] / max(st["saw_showdown"], 1), 4),
+            "saw_showdown": st["saw_showdown"],
+            "won_showdown": st["won_showdown"],
+            "pf_bucket": pf_bucket_out,
+            "betsize_dist": betsize_dist,
+            "showdown_cats": showdown_cat_dist,
         }
     h2h_out = {a: {b: round(h2h[a][b], 1) for b in models if b != a} for a in models}
     return {"models": models, "per_model": out_models, "h2h": h2h_out,
@@ -229,6 +426,37 @@ def render_html(report: dict) -> str:
                 hh += f"<td class='{cls}' style='--v:{v}'>{v:+.0f}</td>"
         hh += "</tr>"
 
+    # postflop / showdown table
+    pf_rows = ""
+    for m in ranked:
+        s = pm[m]
+        pf_rows += (
+            f"<tr><td class='model'>{m}</td>"
+            f"<td>{s['cbet_rate']*100:.0f}%</td>"
+            f"<td class='small'>{s['cbet_opps']}</td>"
+            f"<td>{s['fold_to_cbet']*100:.0f}%</td>"
+            f"<td class='small'>{s['facing_cbet']}</td>"
+            f"<td>{s['wtsd']*100:.0f}%</td>"
+            f"<td>{s['wsd']*100:.0f}%</td>"
+            f"<td class='small'>{s['saw_showdown']}/{s['won_showdown']}</td>"
+            f"</tr>"
+        )
+
+    # preflop hand-bucket table (open-rate matrix: rows = buckets, cols = models)
+    bucket_rows = ""
+    for b in HAND_BUCKETS:
+        bucket_rows += f"<tr><th class='model'>{b}</th>"
+        for m in models:
+            r = pm[m]["pf_bucket"][b]
+            open_pct = r["open_rate"] * 100
+            # intensity from open_rate
+            bg = f"rgba(74,222,128,{r['open_rate']:.2f})"
+            bucket_rows += (
+                f"<td style='background:{bg}'>{open_pct:.0f}%"
+                f"<div class='small'>n={r['hands']}</div></td>"
+            )
+        bucket_rows += "</tr>"
+
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -255,6 +483,8 @@ def render_html(report: dict) -> str:
   canvas {{ max-height: 340px; }}
   .grid2 {{ display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }}
   .note {{ color: #8b93a7; font-size: 12px; margin-top: 6px; }}
+  .small {{ color: #8b93a7; font-size: 11px; }}
+  td.bucket {{ font-weight: 600; }}
   @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
 <body><div class="wrap">
@@ -286,6 +516,45 @@ def render_html(report: dict) -> str:
     <div><h2>⏱️ Avg thinking time</h2><canvas id="latency"></canvas></div>
   </div>
 
+  <h2>📈 Aggression by street</h2>
+  <canvas id="streetAgg"></canvas>
+  <div class="note">Share of each model's actions on that street that were a bet/raise/all-in.
+    A model that c-bets but then check-folds turn/river will dip from flop → river.</div>
+
+  <h2>🎯 Postflop &amp; showdown stats</h2>
+  <table>
+    <tr><th class='model'>model</th><th>c-bet%</th><th>n</th><th>fold→c-bet%</th><th>n</th>
+        <th>WTSD%</th><th>W$SD%</th><th>SD seen / won</th></tr>
+    {pf_rows}
+  </table>
+  <div class="note">
+    <b>c-bet</b> = flop bet by the preflop aggressor. <b>fold→c-bet</b> = how often the
+    caller folds when facing a flop c-bet. <b>WTSD</b> = went to showdown%.
+    <b>W$SD</b> = won at showdown (of showdowns seen).
+  </div>
+
+  <h2>🃏 Preflop open-rate by hand strength</h2>
+  <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
+    bucket. A model that reads its cards opens premium ≫ trash.</div>
+  <table>
+    <tr><th class='model'>bucket</th>{''.join(f"<th>{m}</th>" for m in models)}</tr>
+    {bucket_rows}
+  </table>
+
+  <div class="grid2">
+    <div><h2>💸 Bet-sizing distribution</h2><canvas id="betsize"></canvas>
+      <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
+        medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div></div>
+    <div><h2>🧠 Latency vs win rate</h2><canvas id="latVsWin"></canvas>
+      <div class="note">Does thinking longer pay off? x = avg seconds per decision,
+        y = bb/100.</div></div>
+  </div>
+
+  <h2>🏅 Made-hand mix at showdown</h2>
+  <canvas id="madeHand"></canvas>
+  <div class="note">Share of the model's showdown hands that finished as each category
+    (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
+
   <h2>⚔️ Head-to-head chip results</h2>
   <div class="sub">Net chips the row model won against the column model (sums to zero per pair).</div>
   <table class="h2h">{hh}</table>
@@ -295,23 +564,26 @@ const R = {payload};
 const MODELS = R.models, PM = R.per_model;
 const COLORS = ['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa','#22d3ee'];
 const col = i => COLORS[i % COLORS.length];
+// stable per-model color, used everywhere a chart is keyed by model
+const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
+const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
 Chart.defaults.color = '#9aa3b5'; Chart.defaults.borderColor = '#232838';
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, {{ type:'scatter',
-  data:{{ datasets: MODELS.map((m,i)=>({{ label:m,
+  data:{{ datasets: MODELS.map(m=>({{ label:m,
       data:[{{x:PM[m].vpip*100, y:PM[m].agg_freq*100}}],
-      backgroundColor:col(i), pointRadius:9, pointHoverRadius:12 }})) }},
+      backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 }})) }},
   options:{{ scales:{{ x:{{title:{{display:true,text:'VPIP % (loose →)'}},min:0,max:100}},
                        y:{{title:{{display:true,text:'aggression % (aggressive ↑)'}},min:0,max:100}} }},
     plugins:{{ legend:{{position:'bottom'}} }} }} }});
 
-// bb/100 bar
+// bb/100 bar — colored by model (sign shown by value direction)
 const ranked = [...MODELS].sort((a,b)=>PM[b].bb_per_100-PM[a].bb_per_100);
 new Chart(bbchart, {{ type:'bar',
   data:{{ labels:ranked, datasets:[{{ data:ranked.map(m=>PM[m].bb_per_100),
-      backgroundColor:ranked.map(m=>PM[m].bb_per_100>=0?'#4ade80':'#f87171') }}] }},
+      backgroundColor:ranked.map(m=>mcol(m)) }}] }},
   options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
 
 // action distribution (stacked %)
@@ -327,8 +599,8 @@ new Chart(actions, {{ type:'bar',
 // style radar (normalized 0-100)
 new Chart(radar, {{ type:'radar',
   data:{{ labels:['loose (VPIP)','PF raise','aggression','all-in','bet size','calls bets (1-fold)'],
-    datasets:MODELS.map((m,i)=>({{label:m,borderColor:col(i),
-      backgroundColor:col(i)+'22',
+    datasets:MODELS.map(m=>({{label:m,borderColor:mcol(m),
+      backgroundColor:mcol(m)+'22',
       data:[PM[m].vpip*100,PM[m].pfr*100,PM[m].agg_freq*100,PM[m].allin_freq*100,
             Math.min(100,PM[m].avg_bet_xpot*50),(1-PM[m].fold_to_bet)*100]}})) }},
   options:{{ scales:{{r:{{min:0,max:100,ticks:{{display:false}}}}}},
@@ -337,8 +609,48 @@ new Chart(radar, {{ type:'radar',
 // latency
 new Chart(latency, {{ type:'bar',
   data:{{ labels:MODELS, datasets:[{{data:MODELS.map(m=>PM[m].avg_latency_s),
-      backgroundColor:MODELS.map((m,i)=>col(i))}}] }},
+      backgroundColor:MODELS.map(m=>mcol(m))}}] }},
   options:{{ plugins:{{legend:{{display:false}}}}, scales:{{y:{{title:{{display:true,text:'seconds / decision'}}}}}} }} }});
+
+// aggression by street (lines per model)
+const STREETS=['preflop','flop','turn','river'];
+new Chart(streetAgg, {{ type:'line',
+  data:{{ labels:STREETS, datasets:MODELS.map(m=>({{
+      label:m, borderColor:mcol(m), backgroundColor:mcol(m),
+      tension:0.25,
+      data:STREETS.map(s=>PM[m].by_street[s].agg_freq*100) }})) }},
+  options:{{ scales:{{y:{{title:{{display:true,text:'aggression %'}},min:0,max:100}}}},
+    plugins:{{legend:{{position:'bottom'}}}} }} }});
+
+// bet-sizing distribution (stacked %)
+const BS=['small','medium','pot','over'];
+const BSC={{small:'#94a3b8',medium:'#38bdf8',pot:'#fbbf24',over:'#f87171'}};
+new Chart(betsize, {{ type:'bar',
+  data:{{ labels:MODELS, datasets:BS.map(b=>({{ label:b, backgroundColor:BSC[b],
+      data:MODELS.map(m=>PM[m].betsize_dist[b]*100) }})) }},
+  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100,
+      title:{{display:true,text:'% of bets'}}}}}},
+    plugins:{{legend:{{position:'bottom'}}}} }} }});
+
+// latency vs bb/100 scatter
+new Chart(latVsWin, {{ type:'scatter',
+  data:{{ datasets:MODELS.map(m=>({{label:m,
+      data:[{{x:PM[m].avg_latency_s,y:PM[m].bb_per_100}}],
+      backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 }})) }},
+  options:{{ scales:{{
+      x:{{title:{{display:true,text:'avg seconds / decision'}},type:'logarithmic'}},
+      y:{{title:{{display:true,text:'bb / 100 hands'}}}} }},
+    plugins:{{legend:{{position:'bottom'}}}} }} }});
+
+// made-hand mix at showdown (stacked %)
+const CATS=['high card','pair','two pair','trips','straight','flush','full house'];
+const CC=['#6b7280','#94a3b8','#38bdf8','#4ade80','#fbbf24','#a78bfa','#f472b6'];
+new Chart(madeHand, {{ type:'bar',
+  data:{{ labels:MODELS, datasets:CATS.map((c,j)=>({{ label:c, backgroundColor:CC[j],
+      data:MODELS.map(m=>(PM[m].showdown_cats[c]||0)*100) }})) }},
+  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100,
+      title:{{display:true,text:'% of showdowns'}}}}}},
+    plugins:{{legend:{{position:'bottom'}}}} }} }});
 </script>
 </div></body></html>"""
 
