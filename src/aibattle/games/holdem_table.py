@@ -75,10 +75,19 @@ class MultiHoldemHand:
         street_commit = {p: 0 for p in order}
         contributed = {p: 0 for p in order}
 
-        # Blinds: SB left of button, BB left of SB. (N>=3; heads-up should use
-        # the dedicated holdem/holdem_match engine.)
-        sb_seat = (button + 1) % n
-        bb_seat = (button + 2) % n
+        # Blinds + first-to-act. For 3+ players: SB left of button, BB left of
+        # SB, UTG (first to act) left of BB. Heads-up (a table dwindled to 2) is
+        # the special case: the button IS the small blind and acts first preflop;
+        # the other player is the big blind and acts first postflop (handled by
+        # _advance, whose (button+1) start is already the non-button there).
+        if n == 2:
+            sb_seat = button
+            bb_seat = (button + 1) % 2
+            first = button
+        else:
+            sb_seat = (button + 1) % n
+            bb_seat = (button + 2) % n
+            first = (button + 3) % n
         sb, bb = order[sb_seat], order[bb_seat]
         for p, amt in ((sb, self.small_blind), (bb, self.big_blind)):
             pay = min(amt, stacks[p])
@@ -86,9 +95,6 @@ class MultiHoldemHand:
             street_commit[p] = pay
             contributed[p] = pay
         all_in = {p: stacks[p] == 0 for p in order}
-
-        # First to act preflop = left of BB (UTG).
-        first = (button + 3) % n
         s = TableHandState(
             order=list(order), button=button, deck=deck, hole=hole, board=[],
             street="preflop", stacks=stacks, street_commit=street_commit,
@@ -141,7 +147,13 @@ class MultiHoldemHand:
             return acts
         acts = ["fold", "call"]
         max_total = sc + stack
-        action_open = s.aggressor != player
+        # Action is reopened for raising only if this player has not acted since
+        # the last FULL bet/raise. acted_since is reset to {aggressor} on a full
+        # raise, and a short (non-reopening) all-in only ADDS the shover without
+        # resetting it — so an already-acted caller facing a short all-in is
+        # correctly barred from re-raising (multi-player; "aggressor != player"
+        # would wrongly allow non-aggressor callers to re-raise here).
+        action_open = player not in s.acted_since
         if action_open and max_total > s.current_bet:
             if max_total >= s.current_bet + s.last_raise_size:
                 acts.append("raise")
