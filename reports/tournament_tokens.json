@@ -1,0 +1,62 @@
+[
+  {
+    "model": "minimax-m2p7",
+    "decisions": 154,
+    "truncated": 0,
+    "trunc_rate": 0.0,
+    "tok_p50": 4749,
+    "tok_p90": 27706,
+    "tok_p99": 54155,
+    "tok_max": 54381,
+    "tok_mean": 9366,
+    "exact": true
+  },
+  {
+    "model": "kimi-k2p6",
+    "decisions": 126,
+    "truncated": 0,
+    "trunc_rate": 0.0,
+    "tok_p50": 5505,
+    "tok_p90": 20663,
+    "tok_p99": 27355,
+    "tok_max": 32923,
+    "tok_mean": 8299,
+    "exact": true
+  },
+  {
+    "model": "glm-5p1",
+    "decisions": 188,
+    "truncated": 0,
+    "trunc_rate": 0.0,
+    "tok_p50": 1914,
+    "tok_p90": 10684,
+    "tok_p99": 19733,
+    "tok_max": 22364,
+    "tok_mean": 3784,
+    "exact": true
+  },
+  {
+    "model": "deepseek-v4-pro",
+    "decisions": 129,
+    "truncated": 0,
+    "trunc_rate": 0.0,
+    "tok_p50": 654,
+    "tok_p90": 3249,
+    "tok_p99": 16979,
+    "tok_max": 20984,
+    "tok_mean": 1413,
+    "exact": true
+  },
+  {
+    "model": "gpt-oss-120b",
+    "decisions": 147,
+    "truncated": 0,
+    "trunc_rate": 0.0,
+    "tok_p50": 526,
+    "tok_p90": 1157,
+    "tok_p99": 1803,
+    "tok_max": 2272,
+    "tok_mean": 613,
+    "exact": true
+  }
+]

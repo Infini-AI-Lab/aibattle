@@ -29,6 +29,7 @@ coverage.xml
 
 # Secrets / local config
 .fireworks
+.fireworks-2
 .env
 .env.*
 *.key

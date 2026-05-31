@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Token usage — tournament</title><style>
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 22px 80px;}
+  h1{font-size:23px;} .sub{color:#8b93a7;}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid #20242e;}
+  th{color:#9aa3b5;} td.model,th.model{text-align:left;font-weight:600;color:#cdd6f4;}
+  .warn{color:#f87171;} .ok{color:#4ade80;}
+</style></head>
+<body><div class="wrap">
+<h1>🪙 Token usage &amp; truncation — tournament</h1>
+<div class="sub">Output tokens per decision (reasoning + answer). Source: exact (logged completion_tokens).
+Truncation = finish_reason "length".</div>
+<table><tr><th class='model'>model</th><th>decisions</th><th>truncated%</th>
+<th>mean</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr><tr><td class='model'>minimax-m2p7</td><td>154</td><td class='ok'>0.00%</td><td>9366</td><td>4749</td><td>27706</td><td>54155</td><td>54381</td></tr><tr><td class='model'>kimi-k2p6</td><td>126</td><td class='ok'>0.00%</td><td>8299</td><td>5505</td><td>20663</td><td>27355</td><td>32923</td></tr><tr><td class='model'>glm-5p1</td><td>188</td><td class='ok'>0.00%</td><td>3784</td><td>1914</td><td>10684</td><td>19733</td><td>22364</td></tr><tr><td class='model'>deepseek-v4-pro</td><td>129</td><td class='ok'>0.00%</td><td>1413</td><td>654</td><td>3249</td><td>16979</td><td>20984</td></tr><tr><td class='model'>gpt-oss-120b</td><td>147</td><td class='ok'>0.00%</td><td>613</td><td>526</td><td>1157</td><td>1803</td><td>2272</td></tr></table>
+</div></body></html>
