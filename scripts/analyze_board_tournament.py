@@ -396,6 +396,10 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
+    # Per-move replay viewer currently exists for Connect Four only.
+    replay_btn = (
+        f"<a class='replaybtn' href='{game}_replay.html'>▶ Watch game replays</a>"
+        if game == "connect4" else "")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>AI Battle Arena — {TITLE[game]}</title>
@@ -425,11 +429,16 @@ def render_game(game: str, rep: dict) -> str:
   .hlabel {{ font-size:11px; color:#9aa3b5; margin-bottom:6px; }}
   .board {{ display:grid; gap:1px; background:#232838; padding:1px; border-radius:4px; }}
   .cell {{ width:14px; height:14px; }}
+  .replaybtn {{ display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px;
+    text-decoration:none; }}
+  .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
   @media (max-width:760px) {{ .grid2 {{ grid-template-columns:1fr; }} }}
 </style></head>
 <body>{_navbar(game)}<div class="wrap">
   <h1>🎲 AI Battle Arena — {TITLE[game]}</h1>
   <div class="sub">Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
+  {replay_btn}
 
   <div class="kpis">
     <div class="kpi"><div class="v">{rep['elo'][ranked[0]]}</div><div class="l">top Elo · {ranked[0]}</div></div>

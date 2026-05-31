@@ -38,11 +38,16 @@
   .hlabel { font-size:11px; color:#9aa3b5; margin-bottom:6px; }
   .board { display:grid; gap:1px; background:#232838; padding:1px; border-radius:4px; }
   .cell { width:14px; height:14px; }
+  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px;
+    text-decoration:none; }
+  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
   @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
 </style></head>
 <body><nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a><a class='nav' href='index.html'>Overview</a><a class='nav' href='connect4_report.html'>🔴 Connect Four</a><a class='nav active' href='gomoku_report.html'>⚫ Gomoku</a><a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em</a></nav><div class="wrap">
   <h1>🎲 AI Battle Arena — ⚫ Gomoku-Lite</h1>
   <div class="sub">Perfect-information game · round-robin · 500 games · board 9×9</div>
+  
 
   <div class="kpis">
     <div class="kpi"><div class="v">1783</div><div class="l">top Elo · glm-5p1</div></div>
