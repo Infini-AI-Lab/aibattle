@@ -12,6 +12,7 @@ import asyncio
 import itertools
 import json
 import os
+import random
 import time
 import traceback
 from collections import defaultdict
@@ -39,7 +40,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 16384, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 4096, "timeout_s": 300,
         },
         "max_retries": 2,
     }
@@ -112,12 +113,18 @@ async def main():
             print(f"[{done}/{total}] {game}: {a} vs {b} FAILED: {ex}", flush=True)
             traceback.print_exc()
 
-    tasks = []
-    seed = 5000
-    for game in GAMES:
-        for a, b in pairs:
-            tasks.append(play(game, a, b, seed))
-            seed += 1
+    # Assign each match a stable seed by canonical (game, pair) position, then
+    # shuffle the LAUNCH order deterministically. With one global semaphore the
+    # first matches launched grab all the slots; launching all the slow deepseek
+    # pairs first starves the rest. Interleaving slow/fast matches keeps slot
+    # utilization high and lets fast pairs finish early. Seeds stay fixed to the
+    # match identity, so deals are reproducible regardless of launch order.
+    specs = []
+    for gi, game in enumerate(GAMES):
+        for pi, (a, b) in enumerate(pairs):
+            specs.append((game, a, b, 5000 + gi * len(pairs) + pi))
+    random.Random(12345).shuffle(specs)
+    tasks = [play(game, a, b, seed) for game, a, b, seed in specs]
     await asyncio.gather(*tasks)
     for g in GAMES:
         save(g)
