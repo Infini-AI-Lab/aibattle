@@ -50,8 +50,9 @@ def resolve_action(game: Game, state, player, response: AgentResponse, policy: s
 
 @dataclass
 class RunResult:
-    episodes: list  # list of episode-summary dicts
+    episodes: list  # list of episode-summary dicts (failed episodes excluded)
     log_path: Optional[str]
+    failures: int = 0  # episodes dropped due to an error (e.g. exhausted retries)
 
 
 class Runner:
@@ -125,25 +126,36 @@ class Runner:
         standing = {agent_a.name: 0.0, agent_b.name: 0.0}
         total = len(specs)
 
+        failures = 0
+
         async def _worker(idx, spec):
-            nonlocal completed
+            nonlocal completed, failures
             ep_i, pair, deal_seed, p0, p1 = spec
             agents = {"player_0": p0, "player_1": p1}
-            async with sem:
-                res = await self._play_episode(
-                    game, agents, deal_seed, ep_i, pair, logger,
-                    standing=standing, total_episodes=total,
-                    on_episode_start=on_episode_start,
-                    on_step=on_step,
-                    on_episode_end=on_episode_end,
-                )
+            try:
+                async with sem:
+                    res = await self._play_episode(
+                        game, agents, deal_seed, ep_i, pair, logger,
+                        standing=standing, total_episodes=total,
+                        on_episode_start=on_episode_start,
+                        on_step=on_step,
+                        on_episode_end=on_episode_end,
+                    )
+            except Exception as e:  # noqa: BLE001
+                # Isolate a single episode's failure (e.g. an exhausted-retry API
+                # error) so it neither aborts the match nor orphans its siblings.
+                failures += 1
+                results[idx] = None
+                return
             results[idx] = res
             completed += 1
             if progress is not None:
                 progress(completed, len(specs), res)
 
         await asyncio.gather(*(_worker(i, s) for i, s in enumerate(specs)))
-        return RunResult(episodes=results, log_path=logger.path)
+        # Drop episodes that failed (kept None), so callers get a clean list.
+        episodes = [r for r in results if r is not None]
+        return RunResult(episodes=episodes, log_path=logger.path, failures=failures)
 
     async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger,
                             *, standing=None, total_episodes=0,

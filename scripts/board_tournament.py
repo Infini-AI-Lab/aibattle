@@ -26,7 +26,7 @@ from aibattle.runner.runner import Runner
 GAMES = ["connect4", "gomoku"]
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "qwen3p6-plus"]
 EPISODES = 50
-MAX_CONCURRENCY = 1000          # global cap on concurrent games
+MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
 OUT = "runs/board_tournament"
 os.makedirs(OUT, exist_ok=True)
@@ -102,9 +102,11 @@ async def main():
                 else:
                     draws += 1
             done += 1
+            got = len(res.episodes)
+            drop = f"  DROPPED {res.failures}/{EPISODES}" if res.failures else ""
             print(f"[{done}/{total}] {game}: {a} vs {b} done in "
-                  f"{time.perf_counter() - ta:.0f}s | wins={dict(wins)} draws={draws}",
-                  flush=True)
+                  f"{time.perf_counter() - ta:.0f}s | episodes={got}/{EPISODES}{drop} "
+                  f"| wins={dict(wins)} draws={draws}", flush=True)
         except Exception as ex:
             done += 1
             print(f"[{done}/{total}] {game}: {a} vs {b} FAILED: {ex}", flush=True)
