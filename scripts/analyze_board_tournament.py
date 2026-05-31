@@ -396,10 +396,10 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
-    # Per-move replay viewer currently exists for Connect Four only.
+    # Per-move replay viewer exists for both board games.
     replay_btn = (
         f"<a class='replaybtn' href='{game}_replay.html'>▶ Watch game replays</a>"
-        if game == "connect4" else "")
+        if game in ("connect4", "gomoku") else "")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>AI Battle Arena — {TITLE[game]}</title>

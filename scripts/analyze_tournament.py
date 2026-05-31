@@ -518,11 +518,15 @@ def render_html(report: dict) -> str:
   .note {{ color: #8b93a7; font-size: 12px; margin-top: 6px; }}
   .small {{ color: #8b93a7; font-size: 11px; }}
   td.bucket {{ font-weight: 600; }}
+  .replaybtn {{ display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }}
+  .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
   @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
 <body>{_navbar("holdem")}<div class="wrap">
   <h1>🃏 AI Battle Arena — Heads-Up Hold'em Tournament</h1>
   <div class="sub">{report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
+  <a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>

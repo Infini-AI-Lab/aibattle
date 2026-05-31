@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — Hold'em Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080a11; --ink:#e8eaf0; --muted:#8b93a7; --faint:#5c6478;
+    --accent:#38bdf8; --line:rgba(255,255,255,.08); --panel:rgba(255,255,255,.025);
+    --red:#dc2647; --green:#4ade80;
+    --disp:'Rajdhani',sans-serif; --body:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html{color-scheme:dark}
+  body{margin:0; font-family:var(--body); color:var(--ink); background:var(--bg);
+    background-image:
+      radial-gradient(900px 500px at 12% -8%, rgba(56,189,248,.10), transparent 60%),
+      radial-gradient(900px 500px at 88% -8%, rgba(74,222,128,.08), transparent 60%),
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size:auto,auto,34px 34px,34px 34px; background-attachment:fixed;}
+  .navbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; flex-wrap:wrap;
+    gap:6px 18px; padding:0 24px; min-height:54px; background:rgba(8,10,17,.78); backdrop-filter:blur(12px); border-bottom:1px solid var(--line);}
+  .navbar .brand{font-family:var(--disp); font-weight:700; letter-spacing:.04em; font-size:17px; color:var(--ink); text-decoration:none; margin-right:10px;}
+  .navbar a.nav{color:var(--muted); text-decoration:none; font-size:13px; font-weight:500; padding:17px 2px; border-bottom:2px solid transparent;}
+  .navbar a.nav:hover{color:var(--ink);}
+  .navbar a.nav.active{color:#fff; border-bottom-color:var(--accent);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:30px 24px 90px;}
+  .eyebrow{font-family:var(--disp); font-weight:600; letter-spacing:.32em; text-transform:uppercase; font-size:12px; color:var(--accent); margin-bottom:6px;}
+  h1{font-family:var(--disp); font-weight:700; font-size:38px; letter-spacing:.01em; margin:0 0 4px; line-height:1;}
+  .lede{color:var(--muted); font-size:13.5px; max-width:660px; margin-bottom:22px;}
+  .lede b{color:#cdd3e1; font-weight:600;}
+
+  .selectors{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:18px;}
+  label.sel{display:block; font-family:var(--disp); font-weight:600; letter-spacing:.14em; text-transform:uppercase; font-size:11px; color:var(--faint); margin-bottom:5px;}
+  select{appearance:none; background:#11141d; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 34px 9px 13px; font-family:var(--body); font-size:13px; cursor:pointer;
+    background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238b93a7'/></svg>"); background-repeat:no-repeat; background-position:right 13px center;}
+  select:hover{border-color:#2f3a52;} select:focus{outline:none; border-color:var(--accent);}
+
+  .stage{display:grid; grid-template-columns:minmax(360px,1fr) minmax(300px,420px); gap:28px; align-items:start;}
+  @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
+
+  /* poker table */
+  .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
+    background:radial-gradient(130% 100% at 50% 50%,#15573f,#0c3a2c 68%,#0a2a21);
+    border:1px solid #1f6b52; border-radius:90px/64px; padding:24px 22px;
+    box-shadow:inset 0 0 70px rgba(0,0,0,.55), 0 22px 54px -22px rgba(0,0,0,.75);}
+  .seat{display:flex; align-items:center; gap:14px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.1);
+    border-radius:14px; padding:10px 14px; min-width:320px; position:relative; transition:.15s;}
+  .seat.acting{border-color:var(--accent); box-shadow:0 0 20px rgba(56,189,248,.4);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 24px rgba(74,222,128,.4);}
+  .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+    font-family:var(--disp); font-weight:700; font-size:16px; background:#0e1626; border:1px solid rgba(255,255,255,.14);}
+  .seat .meta{flex:1; min-width:0;}
+  .seat .nm{font-family:var(--disp); font-weight:700; font-size:17px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:11px; color:var(--muted); font-family:var(--mono); margin-top:2px;}
+  .pos{font-family:var(--disp); font-weight:600; font-size:10px; letter-spacing:.08em; color:#0a0d14; background:#cbd2dd; border-radius:5px; padding:1px 6px; margin-left:6px;}
+  .pos.btn{background:#fbbf24;}
+  .holes{display:flex; gap:6px;}
+  .ret{font-family:var(--disp); font-weight:700; font-size:16px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:#fb7185;}
+  .bubble{position:absolute; right:14px; top:-13px; font-family:var(--disp); font-weight:700; font-size:12px; letter-spacing:.04em;
+    padding:3px 10px; border-radius:999px; background:#0e1626; border:1px solid var(--accent); color:#bdf0ff; white-space:nowrap;}
+  .bubble.fold{border-color:#fb7185; color:#fda4af;}
+
+  .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
+  .potline{font-family:var(--disp); font-weight:600; letter-spacing:.1em; text-transform:uppercase; font-size:12px; color:#cfe8dd;}
+  .potline b{font-size:20px; color:#fff; margin:0 4px;}
+  .board{display:flex; gap:7px;}
+
+  .card{width:40px; height:56px; border-radius:7px; background:#f5f7fb; color:#15171c; border:1px solid #c7cedb;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--disp); font-weight:700;
+    box-shadow:0 2px 6px rgba(0,0,0,.45);}
+  .card .r{font-size:18px; line-height:1;} .card .s{font-size:15px; line-height:1;}
+  .card.red{color:#d4183d;}
+  .card.back{background:repeating-linear-gradient(45deg,#2b3656,#2b3656 4px,#222c46 4px,#222c46 8px); border:1px solid #3c4868;}
+  .card.empty{background:rgba(255,255,255,.05); border:1px dashed rgba(255,255,255,.14); box-shadow:none;}
+
+  .deck{margin-top:18px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px;}
+  .deckrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
+  button.btn{font-family:var(--disp); font-weight:600; letter-spacing:.03em; font-size:14px; background:#141926; color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:9px 13px; cursor:pointer; transition:.13s; display:inline-flex; align-items:center; gap:6px;}
+  button.btn:hover{border-color:var(--accent); color:#fff; transform:translateY(-1px);}
+  button.btn:active{transform:translateY(0);} button.btn:disabled{opacity:.35; cursor:default; transform:none;}
+  button.btn.step{border-color:#2c3850; background:#19223a;}
+  button.btn.primary{background:linear-gradient(180deg,#0e7490,#155e75); border-color:#22d3ee55; color:#e0f7ff;}
+  button.btn.primary:hover{border-color:#67e8f9;}
+  .scrub{display:flex; align-items:center; gap:12px; margin-top:12px;}
+  input[type=range]{-webkit-appearance:none; appearance:none; flex:1; height:6px; border-radius:999px; background:linear-gradient(90deg,#2a3b58,#1a2236); outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#bdf0ff,var(--accent)); cursor:pointer; box-shadow:0 0 0 4px rgba(56,189,248,.18), 0 2px 6px rgba(0,0,0,.5);}
+  input[type=range]::-moz-range-thumb{width:16px; height:16px; border:none; border-radius:50%; background:var(--accent); cursor:pointer;}
+  .movecount{font-family:var(--mono); font-size:12px; color:var(--muted); min-width:96px; text-align:right; white-space:nowrap;}
+  .tip{color:var(--faint); font-size:11.5px; margin-top:10px; font-family:var(--mono);}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .phead{padding:14px 18px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+    font-family:var(--disp); font-weight:600; letter-spacing:.18em; text-transform:uppercase; font-size:11px; color:var(--faint);}
+  .pbody{padding:18px;}
+  .movenum{font-family:var(--disp); font-weight:700; font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin-bottom:8px;}
+  .movenum b{font-size:36px; color:#fff; letter-spacing:0; margin-right:4px;} .movenum .tot{font-size:15px; color:var(--faint);}
+  .actor{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .actor .who{display:inline-flex; align-items:center; gap:8px; font-family:var(--disp); font-weight:700; font-size:21px; color:#fff;}
+  .seatdot{width:14px; height:14px; border-radius:50%; display:inline-block;}
+  .seatdot.player_0{background:#60a5fa;} .seatdot.player_1{background:#f472b6;}
+  .act{font-family:var(--disp); font-weight:700; font-size:17px; color:#bdf0ff; background:#0e1626; border:1px solid var(--accent); border-radius:8px; padding:1px 10px;}
+  .act.fold{color:#fda4af; border-color:#fb7185;}
+  .meta{color:var(--muted); font-size:12.5px; font-family:var(--mono); margin:10px 0 14px;}
+  .result{background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.3); border-radius:12px; padding:12px 14px; margin-bottom:14px;}
+  .result .rt{font-family:var(--disp); font-weight:700; font-size:16px; color:#bbf7d0;}
+  .result .rs{font-size:12px; color:var(--muted); margin-top:3px; font-family:var(--mono);}
+  .warn{display:flex; gap:8px; align-items:flex-start; background:rgba(251,146,60,.1); border:1px solid rgba(251,146,60,.35); border-radius:10px; padding:9px 12px; margin:0 0 13px; font-size:12.5px; color:#fdba74;}
+  .invalid{color:#fb7185; font-weight:600;}
+  .thinkbtn{font-family:var(--disp); font-weight:600; letter-spacing:.04em; font-size:13.5px; background:#141926; border:1px solid var(--line); color:var(--accent); border-radius:10px; padding:9px 14px; cursor:pointer; transition:.13s;}
+  .thinkbtn:hover{border-color:var(--accent); color:#bdf0ff;}
+  pre.think{white-space:pre-wrap; word-break:break-word; font-family:var(--mono); font-size:12.5px; line-height:1.62; color:#c4cbdb; background:#070a12; border:1px solid var(--line); border-radius:12px; padding:16px; max-height:460px; overflow:auto; margin-top:13px;}
+  pre.think::-webkit-scrollbar{width:9px;} pre.think::-webkit-scrollbar-thumb{background:#283248; border-radius:9px;}
+  .hidden{display:none;} .hint{color:var(--faint); font-size:12.5px; margin-top:10px;}
+  code{font-family:var(--mono); background:#11141d; padding:1px 5px; border-radius:5px;}
+  .summary{margin-top:24px; background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .movelist{display:flex; flex-wrap:wrap; gap:7px; padding:16px; max-height:200px; overflow:auto; align-items:center;}
+  .streetsep{flex-basis:100%; font-family:var(--disp); font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+    font-size:10px; color:var(--faint); margin-top:8px;}
+  .streetsep:first-child{margin-top:0;}
+  .mv{display:inline-flex; align-items:center; gap:6px; background:#141926; border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:5px 9px; font-family:var(--mono); font-size:12px; cursor:pointer; transition:.12s;}
+  .mv:hover{border-color:var(--accent);}
+  .mv.cur{border-color:var(--accent); background:#16263a; color:#fff; box-shadow:0 0 0 1px var(--accent);}
+  .mv.trunc{border-color:rgba(251,146,60,.5);}
+  .mv .n{color:var(--faint); font-size:11px;}
+  .mv .d{width:11px; height:11px; border-radius:50%; flex:none;}
+  .mv .d.player_0{background:#60a5fa;} .mv .d.player_1{background:#f472b6;}
+  .movelist::-webkit-scrollbar{width:8px;} .movelist::-webkit-scrollbar-thumb{background:#283248; border-radius:8px;}
+  .reveal{opacity:0; transform:translateY(10px); animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;}
+  @keyframes rise{to{opacity:1; transform:none;}}
+</style></head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="index.html">🎲 AI BATTLE ARENA</a>
+  <a class="nav" href="index.html">Overview</a>
+  <a class="nav" href="connect4_report.html">🔴 Connect Four</a>
+  <a class="nav" href="gomoku_report.html">⚫ Gomoku</a>
+  <a class="nav active" href="holdem_tournament_report.html">🃏 Hold'em</a>
+</nav>
+<div class="wrap">
+  <div class="eyebrow reveal" style="animation-delay:.02s">Match Replay</div>
+  <h1 class="reveal" style="animation-delay:.05s">TEXAS HOLD'EM</h1>
+  <div class="lede reveal" style="animation-delay:.1s">Heads-up, hand by hand. Step through the betting; <b>both hole cards are shown</b>
+    for analysis. Hit <b>Show reasoning</b> to see what the model was thinking for each action.</div>
+
+  <div class="selectors reveal" style="animation-delay:.14s">
+    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+  </div>
+
+  <div class="stage">
+    <div class="reveal" style="animation-delay:.2s">
+      <div class="felt">
+        <div id="seatTop"></div>
+        <div class="middle">
+          <div class="potline">Pot <b id="pot">0</b> · <span id="street">preflop</span></div>
+          <div class="board" id="cboard"></div>
+        </div>
+        <div id="seatBot"></div>
+      </div>
+      <div class="deck">
+        <div class="deckrow">
+          <button class="btn" id="first" title="Back to start">⏮</button>
+          <button class="btn step" id="prev" title="Previous action (←)">◀ Prev</button>
+          <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
+          <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
+          <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+        </div>
+        <div class="scrub">
+          <input type="range" id="slider" min="0" value="0">
+          <span class="movecount" id="movecount"></span>
+        </div>
+        <div class="tip">← / → step · space play/pause</div>
+      </div>
+    </div>
+    <div class="panel reveal" style="animation-delay:.24s">
+      <div class="phead">Action Analysis</div>
+      <div class="pbody" id="panel"></div>
+    </div>
+  </div>
+  <div class="summary reveal" style="animation-delay:.3s">
+    <div class="phead">Action summary · click to jump</div>
+    <div class="movelist" id="movelist"></div>
+  </div>
+</div>
+
+<script>
+const BASE = "../runs/tournament/replays/holdem/";
+const PLAY_MS = 950;
+const SPEEDS = [1, 2, 4];
+const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
+let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+const $ = id => document.getElementById(id);
+
+async function init(){
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  catch(e){
+    $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
+      "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
+      "<code>python3 scripts/build_replays.py</code> and serve the repo root.</div>";
+    return;
+  }
+  $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
+    `<option value="${i}">${p.a} vs ${p.b} · rep ${p.rep}</option>`).join("");
+  $("pairSel").onchange = () => loadPair(+$("pairSel").value);
+  $("epSel").onchange = () => selectEp(+$("epSel").value);
+  $("first").onclick = () => { stop(); cursor=0; render(); };
+  $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
+  $("next").onclick  = () => { stop(); step(1); };
+  $("play").onclick  = togglePlay;
+  $("speed").onclick = cycleSpeed;
+  $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
+  document.addEventListener("keydown", e => {
+    if (!ep) return;
+    if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
+    if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
+    if (e.key===" "){ togglePlay(); e.preventDefault(); }
+  });
+  await loadPair(0);
+}
+
+async function loadPair(i){
+  const p = manifest.pairs[i];
+  pairData = await (await fetch(BASE + p.file)).json();
+  $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
+    const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
+    const n = e.moves.length;
+    return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
+  }).join("");
+  selectEp(0);
+}
+
+function fmt(n){ return (n>0?"+":"") + n; }
+function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
+
+function selectEp(idx){
+  stop();
+  ep = pairData.episodes[idx];
+  cursor = 0;
+  // dealer/button is whoever's observation says "button"
+  btnSeat = null;
+  for (const m of ep.moves){ if (m.pos && /button/i.test(m.pos)){ btnSeat = m.player; break; } }
+  $("slider").max = ep.moves.length;
+  render();
+}
+
+// table state shown at `cursor`: pre-action state of move[cursor-1]; at the end
+// reveal the full board and the result.
+function stateAt(k){
+  if (!ep.moves.length) return {board:ep.final_board||[], pot:0, stacks:{}, acting:null, last:null, result:true};
+  if (k===0){ const m=ep.moves[0]; return {board:m.board, pot:m.pot, stacks:m.stacks, acting:m.player, last:null, result:false}; }
+  const m = ep.moves[k-1];
+  const result = (k===ep.moves.length);
+  const board = (result && (ep.final_board||[]).length > (m.board||[]).length) ? ep.final_board : m.board;
+  return {board, pot:m.pot, stacks:m.stacks, acting: result ? null : m.player, last:m, result};
+}
+
+function cardHTML(card, faceUp){
+  if (!faceUp) return `<div class="card back"></div>`;
+  if (!card) return `<div class="card back"></div>`;
+  const r = card.slice(0,-1), s = card.slice(-1).toLowerCase();
+  const red = (s==="d"||s==="h");
+  return `<div class="card${red?" red":""}"><span class="r">${r}</span><span class="s">${SUIT[s]||s}</span></div>`;
+}
+
+function actLabel(m){
+  const a=(m.action||"").toLowerCase();
+  if (a==="raise") return "RAISE " + (m.amount!=null?m.amount:"");
+  if (a==="all_in") return "ALL-IN";
+  if (a==="bet") return "BET " + (m.amount!=null?m.amount:"");
+  return a.toUpperCase();
+}
+
+function seatHTML(seat, st){
+  const agent = ep.seat_assignment[seat] || seat;
+  const stack = st.stacks[seat];
+  const holes = ep.holes[seat];
+  const faceUp = !!holes;
+  const isBtn = seat===btnSeat;
+  const posBadge = `<span class="pos${isBtn?" btn":""}">${isBtn?"BTN/SB":"BB"}</span>`;
+  const acting = st.acting===seat;
+  const isWinner = st.result && ep.winner===seat;
+  const bubble = (st.last && st.last.player===seat)
+    ? `<div class="bubble${/fold/i.test(st.last.action)?" fold":""}">${actLabel(st.last)}</div>` : "";
+  const ret = st.result
+    ? `<span class="ret ${ep.returns[seat]>=0?"pos":"neg"}">${fmt(ep.returns[seat])}</span>` : "";
+  const cards = (holes && holes.length ? holes : [null,null]).map(c => cardHTML(c, faceUp)).join("");
+  const cls = "seat" + (acting?" acting":"") + (isWinner?" winner":"");
+  return `<div class="${cls}">${bubble}
+    <div class="ava">${(agent[0]||"?").toUpperCase()}</div>
+    <div class="meta"><div class="nm">${agent}${posBadge}</div>
+      <div class="sub">stack ${stack!=null?stack:"—"}${ret?" · "+ret:""}</div></div>
+    <div class="holes">${cards}</div></div>`;
+}
+
+function render(){
+  const st = stateAt(cursor);
+  $("seatTop").innerHTML = seatHTML("player_0", st);
+  $("seatBot").innerHTML = seatHTML("player_1", st);
+  $("pot").textContent = st.pot!=null ? st.pot : "—";
+  $("street").textContent = (st.last ? st.last.street : (ep.moves[0]?ep.moves[0].street:"preflop")) || "preflop";
+  // community board: 5 slots
+  const board = st.board || [];
+  let cb = "";
+  for (let i=0;i<5;i++) cb += board[i] ? cardHTML(board[i], true) : `<div class="card empty"></div>`;
+  $("cboard").innerHTML = cb;
+  $("slider").value = cursor;
+  $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
+  $("prev").disabled = cursor===0;
+  $("next").disabled = cursor===ep.moves.length;
+  renderPanel(st);
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  let html="", lastStreet=null;
+  ep.moves.forEach((m,i)=>{
+    if (m.street!==lastStreet){ html += `<div class="streetsep">${m.street}</div>`; lastStreet=m.street; }
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    html += `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d ${m.player}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
+  });
+  ml.innerHTML = html;
+  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
+}
+
+function renderPanel(st){
+  const p = $("panel");
+  let html = "";
+  if (cursor===0){
+    html += `<div class="movenum">Hand start</div>` +
+      `<div class="meta">Blinds posted (BB ${ep.big_blind}). Button/SB acts first preflop.<br>` +
+      `Both hole cards are shown for analysis.</div>` +
+      `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`;
+    p.innerHTML = html; return;
+  }
+  const m = ep.moves[cursor-1];
+  const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
+  const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
+  const tid = "think-"+cursor;
+  if (st.result) html += resultBlock();
+  html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot ${m.player}"></span>${m.agent}</span>` +
+    `<span class="act${/fold/i.test(m.action)?" fold":""}">${actLabel(m)}</span></div>` +
+    `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
+  if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
+    `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += m.thinking
+    ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+      `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
+    : `<div class="hint">No reasoning recorded for this action.</div>`;
+  p.innerHTML = html;
+}
+
+function resultBlock(){
+  const w = ep.winner_name;
+  let cats = "";
+  if (ep.reason==="showdown" && ep.hand_categories){
+    cats = " · " + Object.keys(ep.seat_assignment).map(s =>
+      `${ep.seat_assignment[s]}: ${ep.hand_categories[s]}`).join(" vs ");
+  }
+  return `<div class="result"><div class="rt">🏆 ${w} wins ${fmt(ep.returns[ep.winner])}</div>` +
+    `<div class="rs">by ${ep.reason}${cats}</div></div>`;
+}
+
+function toggleThink(id){
+  showThink = !showThink;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  const btn=el && el.previousElementSibling;
+  if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function step(d){
+  const n=ep.moves.length;
+  if (cursor+d<0 || cursor+d>n) return;
+  cursor+=d; render();
+  if (cursor===n) stop();
+}
+function togglePlay(){ playing ? stop() : start(); }
+function start(){
+  if (cursor>=ep.moves.length) cursor=0;
+  playing=true; $("play").textContent="⏸ Pause";
+  timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
+}
+function stop(){ playing=false; $("play").textContent="▶ Play"; if(timer){clearInterval(timer); timer=null;} }
+function cycleSpeed(){
+  speedIdx=(speedIdx+1)%SPEEDS.length;
+  $("speed").textContent="⏩ " + SPEEDS[speedIdx] + "×";
+  if (playing){ clearInterval(timer); timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]); }
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+init();
+</script>
+</body></html>
