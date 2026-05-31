@@ -23,10 +23,11 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
-MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "qwen3p6-plus"]
-HANDS = 30
-REPS = 2
-MAX_CONCURRENCY = 40   # GLOBAL cap on concurrent hands across all games
+# qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
+MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
+HANDS = 20             # hands per game (single-hand Hold'em Lite); small smell test
+REPS = 1
+MAX_CONCURRENCY = 128  # GLOBAL cap on concurrent hands across all games
 OUT = "runs/tournament"
 os.makedirs(OUT, exist_ok=True)
 
@@ -38,7 +39,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 16384,
+            "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
         },
         "max_retries": 2,
     }

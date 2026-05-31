@@ -28,7 +28,7 @@ GAMES = ["connect4", "gomoku"]
 # qwen3p6-plus dropped: restrictive per-model 429 limit on this account (failed
 # 0/3 isolated calls while the others passed 3/3 under identical load).
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
-EPISODES = 50
+EPISODES = 10               # small "smell test"; raise later to add more (resume reuses)
 MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
 OUT = "runs/board_tournament"
@@ -42,7 +42,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 4096, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
         },
         "max_retries": 2,
     }

@@ -26,7 +26,8 @@ from aibattle.runner.runner import Runner
 
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
-EPISODES = 50               # matches per pair (seat-swapped)
+EPISODES = 10               # matches per pair (seat-swapped); raise later to add
+                            # more — per-episode resume reuses existing matches.
 MAX_HANDS = 20
 STARTING_STACK = 100
 MAX_CONCURRENCY = 128
@@ -41,7 +42,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 4096, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
         },
         "max_retries": 2,
     }
