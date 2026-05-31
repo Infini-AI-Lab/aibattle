@@ -13,19 +13,13 @@ from collections import defaultdict
 from typing import Callable, Optional
 
 
-def _read_all_records(path: str, progress: Optional[Callable] = None) -> list:
-    """Read and parse every JSONL record once, reporting parse progress."""
+def _parse_records(path: str):
+    """Parse every non-empty JSONL record once."""
     with open(path, encoding="utf-8") as fh:
-        lines = fh.readlines()
-    total = len(lines)
-    records = []
-    for i, line in enumerate(lines):
-        line = line.strip()
-        if line:
-            records.append(json.loads(line))
-        if progress is not None:
-            progress(i + 1, total)
-    return records
+        for line in fh:
+            line = line.strip()
+            if line:
+                yield json.loads(line)
 
 
 def evaluate(path: str, progress: Optional[Callable] = None) -> dict:
@@ -42,15 +36,25 @@ def evaluate(path: str, progress: Optional[Callable] = None) -> dict:
     action_counts = defaultdict(lambda: defaultdict(int))
     lengths = []
 
-    # Single read of the log; progress is reported over record parsing.
-    for rec in _read_all_records(path, progress):
+    # Single read of the log. Progress is reported per *episode* (the unit the
+    # user cares about): the denominator is the episode count from the match
+    # header, and the bar ticks as each episode's summary record is parsed.
+    total_eps = None
+    seen_eps = 0
+    for rec in _parse_records(path):
         rt = rec.get("record_type")
         if rt == "match":
             header = rec
+            total_eps = rec.get("episodes")
         elif rt == "step":
             steps.append(rec)
         elif rt == "episode":
             episodes.append(rec)
+            seen_eps += 1
+            if progress is not None:
+                progress(seen_eps, total_eps or seen_eps)
+    if progress is not None and not episodes:
+        progress(1, 1)  # nothing to do; close the bar cleanly
 
     # seat -> agent name per episode (steps precede the episode summary record).
     seat_maps = {ep["episode"]: ep["seat_assignment"] for ep in episodes}

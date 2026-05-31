@@ -60,6 +60,9 @@ def _build_external_agent(cfg: dict) -> Agent:
 
 def make_agent(cfg: dict, *, game_name: str, seed: int | None = None) -> Agent:
     atype = cfg.get("type")
+    if atype == "human":
+        from .human_agent import HumanAgent
+        return HumanAgent(name=cfg.get("name", "human"))
     if atype == "builtin":
         name = cfg.get("name")
         if name not in _BUILTINS:
@@ -72,4 +75,6 @@ def make_agent(cfg: dict, *, game_name: str, seed: int | None = None) -> Agent:
         return _build_model_agent(cfg, game_name)
     if atype == "external":
         return _build_external_agent(cfg)
-    raise ValueError(f"Unknown agent type {atype!r} (expected builtin|model|external)")
+    raise ValueError(
+        f"Unknown agent type {atype!r} (expected builtin|model|external|human)"
+    )

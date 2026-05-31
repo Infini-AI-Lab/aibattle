@@ -77,6 +77,34 @@ runs/exp/
 `aibattle eval <dir>` accepts a `match.jsonl` file, a single run directory, or a
 parent directory (in which case it evaluates the most recent run).
 
+### Play against an agent (interactive)
+
+Set one player's agent `type: human` and the run becomes an interactive
+terminal match — you're prompted for an action on your turns:
+
+```bash
+export FIREWORKS_API_KEY=$(cat .fireworks)
+aibattle run configs/human_vs_oss.yaml
+```
+
+```yaml
+players:
+  player_0:
+    agent:
+      type: human
+      name: you
+      show_thinking: false   # true -> print the opponent's FULL model output
+                             #         (reasoning included); false -> action only
+  player_1:
+    agent: { type: model, name: gpt-oss-120b, model: { ... } }
+```
+
+`show_thinking` controls how much of the opponent you see: with it on, the
+model's complete output (chain-of-thought + answer) is printed after each of
+its moves; with it off, you only see the action it chose. Interactive runs are
+always sequential, and `seat_swap` should be `false` (swapping reuses the same
+deal, which would reveal cards you already saw).
+
 ### Saving trajectories
 
 Two optional, human- and machine-friendly outputs are controlled in the

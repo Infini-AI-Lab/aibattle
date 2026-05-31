@@ -44,6 +44,40 @@ def _build_game_factory(game_cfg):
     return factory
 
 
+def _interactive_observer(show_thinking: bool):
+    """Build (on_episode_start, on_step, on_episode_end) callbacks for human play.
+
+    Human turns are handled by HumanAgent itself; these callbacks render the
+    opponent's moves — full model output (incl. thinking) when show_thinking,
+    otherwise just the action.
+    """
+    def on_episode_start(info):
+        seats = ", ".join(f"{p}={n}" for p, n in info["seat_assignment"].items())
+        print("\n" + "=" * 64)
+        print(f"Episode {info['episode']}   ({seats})")
+        print("=" * 64)
+
+    def on_step(info):
+        if info["agent_type"] == "human":
+            return  # the human already saw/typed this
+        print(f"\n>> {info['agent_name']} ({info['player']}) played: {info['action']}")
+        if show_thinking and info.get("raw_output"):
+            print("   --------------- model output ---------------")
+            for ln in str(info["raw_output"]).splitlines():
+                print(f"   {ln}")
+            print("   --------------------------------------------")
+
+    def on_episode_end(summary, final_render):
+        ret = ", ".join(f"{p}={v:+g}" for p, v in summary["returns"].items())
+        winner = summary.get("winner_name") or "tie"
+        print("\n" + "-" * 64)
+        print(f"Showdown: {final_render}")
+        print(f"Returns:  {ret}    Winner: {winner}")
+        print("-" * 64)
+
+    return on_episode_start, on_step, on_episode_end
+
+
 def _make_run_dir(base_dir: str) -> str:
     """Create a unique per-run subdirectory so concurrent/repeated runs can
     never write to the same files (which would corrupt each other's logs).
@@ -61,16 +95,21 @@ def _make_run_dir(base_dir: str) -> str:
 async def _run(config_path: str, rerun: bool = False) -> int:
     cfg = load_config(config_path)
 
+    # Interactive when any player is human; play is then live, so never skip it.
+    human_players = [pid for pid, a in cfg.players.items() if a.get("type") == "human"]
+    interactive = bool(human_players)
+
     # Skip re-running if a prior run already exists for this output dir, unless
     # --rerun is passed. This avoids wasting (paid) model calls on a repeat.
-    existing = _resolve_log(cfg.output.dir)
-    if existing and not rerun:
-        print(f"A run already exists for this config: {existing}")
-        print("Pass --rerun to run it again. Showing the existing summary:\n")
-        summary = evaluate(existing, progress=_progress_bar("Evaluating"))
-        print()
-        print(format_summary(summary))
-        return 0
+    if not interactive:
+        existing = _resolve_log(cfg.output.dir)
+        if existing and not rerun:
+            print(f"A run already exists for this config: {existing}")
+            print("Pass --rerun to run it again. Showing the existing summary:\n")
+            summary = evaluate(existing, progress=_progress_bar("Evaluating"))
+            print()
+            print(format_summary(summary))
+            return 0
 
     run_dir = _make_run_dir(cfg.output.dir)
 
@@ -91,12 +130,26 @@ async def _run(config_path: str, rerun: bool = False) -> int:
         print(f"  [{done:>{len(str(total))}}/{total}] {seats}  ->  "
               f"winner: {winner}  (len {result['length']})", flush=True)
 
-    mc = cfg.run.max_concurrency
+    # In interactive mode play must be sequential (one human, one input at a time)
+    # and we render moves via the observer instead of the progress bar.
+    obs_start = obs_step = obs_end = None
+    progress_cb = _progress
+    effective_mc = cfg.run.max_concurrency
+    if interactive:
+        effective_mc = 1
+        progress_cb = None
+        show_thinking = bool(cfg.players[human_players[0]].get("show_thinking", False))
+        obs_start, obs_step, obs_end = _interactive_observer(show_thinking)
+
+    mc = effective_mc
     mode = (f"parallel (up to {mc} episodes at once)" if mc > 1 else "sequential")
     print(f"Run dir: {run_dir}")
     print(f"Matchup: {agent_a.name} vs {agent_b.name}")
     print(f"Episodes: {cfg.run.episodes}  |  Execution: {mode}  |  "
           f"seat_swap: {cfg.run.seat_swap}  |  seed: {cfg.run.seed}", flush=True)
+    if interactive and cfg.run.seat_swap:
+        print("Note: seat_swap reuses the same deal across swapped seats — as a "
+              "human you'd see repeated cards. Consider seat_swap: false.", flush=True)
     with MatchLogger(log_path) as logger:
         result = await runner.run_match(
             agent_a, agent_b,
@@ -104,8 +157,11 @@ async def _run(config_path: str, rerun: bool = False) -> int:
             seed=cfg.run.seed,
             seat_swap=cfg.run.seat_swap,
             logger=logger,
-            max_concurrency=cfg.run.max_concurrency,
-            progress=_progress,
+            max_concurrency=effective_mc,
+            progress=progress_cb,
+            on_episode_start=obs_start,
+            on_step=obs_step,
+            on_episode_end=obs_end,
         )
 
     print(f"Ran {len(result.episodes)} episodes.")

@@ -80,9 +80,10 @@ def load_config(path: str) -> ArenaConfig:
         agent_cfg = (players[pid] or {}).get("agent")
         if not agent_cfg or "type" not in agent_cfg:
             raise ValueError(f"config.players.{pid}.agent.type is required")
-        if agent_cfg["type"] not in ("builtin", "model", "external"):
+        if agent_cfg["type"] not in ("builtin", "model", "external", "human"):
             raise ValueError(
-                f"config.players.{pid}.agent.type must be builtin|model|external"
+                f"config.players.{pid}.agent.type must be "
+                "builtin|model|external|human"
             )
 
     # --- run ---

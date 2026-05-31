@@ -65,6 +65,9 @@ class Runner:
         logger: MatchLogger,
         max_concurrency: int = 1,
         progress: Optional[Callable] = None,
+        on_episode_start: Optional[Callable] = None,
+        on_step: Optional[Callable] = None,
+        on_episode_end: Optional[Callable] = None,
     ) -> RunResult:
         game = self.game_factory()
         master = random.Random(seed)
@@ -113,7 +116,12 @@ class Runner:
             ep_i, pair, deal_seed, p0, p1 = spec
             agents = {"player_0": p0, "player_1": p1}
             async with sem:
-                res = await self._play_episode(game, agents, deal_seed, ep_i, pair, logger)
+                res = await self._play_episode(
+                    game, agents, deal_seed, ep_i, pair, logger,
+                    on_episode_start=on_episode_start,
+                    on_step=on_step,
+                    on_episode_end=on_episode_end,
+                )
             results[idx] = res
             completed += 1
             if progress is not None:
@@ -122,13 +130,22 @@ class Runner:
         await asyncio.gather(*(_worker(i, s) for i, s in enumerate(specs)))
         return RunResult(episodes=results, log_path=logger.path)
 
-    async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger):
+    async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger,
+                            *, on_episode_start=None, on_step=None, on_episode_end=None):
         rng = random.Random(deal_seed)
         state = game.initial_state(rng)
         step_index = 0
         invalid_count = {p: 0 for p in game.players}
         forfeiter = None
         steps = []  # accumulated for the per-episode trajectory
+
+        if on_episode_start is not None:
+            on_episode_start({
+                "episode": ep_index,
+                "pair_id": pair_id,
+                "seat_assignment": {p: agents[p].name for p in game.players},
+                "agent_types": {p: agents[p].agent_type for p in game.players},
+            })
 
         while not game.is_terminal(state):
             player = game.current_player(state)
@@ -163,6 +180,18 @@ class Runner:
             logger.step(ep_index, pair_id, rec)
             steps.append({"agent_name": agents[player].name, **serialize_step(rec)})
 
+            if on_step is not None:
+                on_step({
+                    "episode": ep_index,
+                    "step": step_index,
+                    "player": player,
+                    "agent_name": agents[player].name,
+                    "agent_type": agents[player].agent_type,
+                    "action": action if action is not None else INVALID,
+                    "raw_output": response.raw_output,
+                    "message": response.message,
+                })
+
             if action is None:  # forfeit
                 forfeiter = player
                 break
@@ -193,6 +222,9 @@ class Runner:
             "forfeit": forfeiter is not None,
         }
         logger.episode_end(summary)
+        if on_episode_end is not None:
+            # Full-information render (reveals all hidden state) for end-of-game.
+            on_episode_end(summary, game.render(state))
         # Full self-contained trajectory: summary fields + nested steps.
         return {
             "game": game.name,

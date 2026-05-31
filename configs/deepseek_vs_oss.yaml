@@ -15,7 +15,7 @@ players:
         model_id: accounts/fireworks/models/deepseek-v4-pro
         api_key_env: FIREWORKS_API_KEY
         temperature: 0.0
-        max_tokens: 2048
+        max_tokens: 16384
       max_retries: 2
   player_1:
     agent:
@@ -26,7 +26,7 @@ players:
         model_id: accounts/fireworks/models/gpt-oss-120b
         api_key_env: FIREWORKS_API_KEY
         temperature: 0.0
-        max_tokens: 2048
+        max_tokens: 16384
       max_retries: 2
 
 run:

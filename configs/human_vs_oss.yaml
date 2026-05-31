@@ -1,0 +1,44 @@
+# Play Kuhn Poker yourself against gpt-oss-120b (via Fireworks) in the terminal.
+#
+# One player is `human` -> the run becomes interactive and sequential. Set
+# `show_thinking: true` on the human to see the opponent's FULL model output
+# (reasoning included) after each of its moves; `false` shows only its action.
+#
+# seat_swap is off: with a human, swapping seats would reuse the same deal and
+# reveal cards you already saw.
+game:
+  name: kuhn_poker
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: human
+      name: you
+      show_thinking: false     # true -> also print the model's reasoning
+  player_1:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 16384
+      max_retries: 2
+
+run:
+  episodes: 5
+  seed: 0
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 1
+
+output:
+  dir: ./runs/human_vs_oss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true
