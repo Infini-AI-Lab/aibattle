@@ -1,0 +1,41 @@
+# Model-vs-baseline: gpt-oss-120b (via Fireworks, default model agent) vs heuristic.
+#
+# The Fireworks API key is read from the FIREWORKS_API_KEY env var, falling back
+# to a project-local .fireworks file. gpt-oss is a reasoning model, so give it a
+# generous max_tokens budget — its chain-of-thought must fit before the final
+# action word.
+game:
+  name: kuhn_poker
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 2048
+      max_retries: 2
+  player_1:
+    agent:
+      type: builtin
+      name: kuhn_heuristic
+
+run:
+  episodes: 20
+  seed: 7
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 32     # episodes run in parallel, up to this many at once
+
+output:
+  dir: ./runs/fireworks_vs_heuristic
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

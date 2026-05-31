@@ -15,6 +15,23 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+model = ["openai>=1.40"]
+anthropic = ["anthropic>=0.40"]
+http = ["requests>=2.31"]
+dev = [
+    "openai>=1.40",
+    "anthropic>=0.40",
+    "requests>=2.31",
+    "pytest>=8.0",
+]
+
+[project.scripts]
+aibattle = "aibattle.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/hzzheng/ai-battle"

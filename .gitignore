@@ -41,3 +41,9 @@ runs/
 .vscode/
 .DS_Store
 *.swp
+
+# Claude Code
+.claude/
+
+# Generated PDFs
+*.pdf

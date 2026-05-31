@@ -1,0 +1,29 @@
+# Baseline calibration: random agent vs Kuhn heuristic. No model API needed.
+game:
+  name: kuhn_poker
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: builtin
+      name: random
+  player_1:
+    agent:
+      type: builtin
+      name: kuhn_heuristic
+
+run:
+  episodes: 400
+  seed: 12345
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 32     # episodes run in parallel, up to this many at once
+
+output:
+  dir: ./runs/random_vs_heuristic
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true     # -> trajectories.json (all episodes, structured)
+  save_transcripts: true      # -> transcripts/episode_NNNN.txt (human-readable)
