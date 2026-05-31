@@ -7,6 +7,8 @@ It only orchestrates the standardized protocol and records what happened.
 from __future__ import annotations
 
 import asyncio
+import json
+import os
 import random
 from dataclasses import dataclass
 from typing import Callable, Optional
@@ -72,6 +74,7 @@ class Runner:
         logger: MatchLogger,
         max_concurrency: int = 1,
         semaphore: "Optional[asyncio.Semaphore]" = None,
+        episode_dir: Optional[str] = None,
         progress: Optional[Callable] = None,
         on_episode_start: Optional[Callable] = None,
         on_step: Optional[Callable] = None,
@@ -79,6 +82,16 @@ class Runner:
     ) -> RunResult:
         game = self.game_factory()
         master = random.Random(seed)
+
+        # Per-episode persistence + resume. When episode_dir is set, every episode
+        # is written to its own self-contained file ``ep<NNN>.json`` (data + full
+        # step log) the moment it finishes, via atomic temp+rename. On a later run
+        # an episode whose file already exists is loaded and skipped — no API
+        # calls, no shared aggregate to corrupt. Each episode is an independent
+        # unit of work keyed by its index, so an interrupt loses at most the
+        # episodes that were mid-flight.
+        if episode_dir:
+            os.makedirs(episode_dir, exist_ok=True)
 
         logger.match_header({
             "game": game.name,
@@ -134,6 +147,21 @@ class Runner:
         async def _worker(idx, spec):
             nonlocal completed, failures
             ep_i, pair, deal_seed, p0, p1 = spec
+            epath = (os.path.join(episode_dir, f"ep{ep_i:03d}.json")
+                     if episode_dir else None)
+            # Resume: a previously-completed episode is loaded from its file and
+            # skipped (no model calls). A half-written file can't exist because we
+            # persist via atomic rename, but guard against an unreadable one.
+            if epath and os.path.exists(epath):
+                try:
+                    with open(epath, encoding="utf-8") as fh:
+                        results[idx] = json.load(fh)
+                    completed += 1
+                    if progress is not None:
+                        progress(completed, len(specs), results[idx])
+                    return
+                except (json.JSONDecodeError, OSError):
+                    pass  # unreadable -> fall through and replay
             agents = {"player_0": p0, "player_1": p1}
             try:
                 async with sem:
@@ -151,6 +179,8 @@ class Runner:
                 failures += 1
                 results[idx] = None
                 return
+            if epath:
+                self._persist_episode(epath, res)
             results[idx] = res
             completed += 1
             if progress is not None:
@@ -160,6 +190,19 @@ class Runner:
         # Drop episodes that failed (kept None), so callers get a clean list.
         episodes = [r for r in results if r is not None]
         return RunResult(episodes=episodes, log_path=logger.path, failures=failures)
+
+    @staticmethod
+    def _persist_episode(path: str, record: dict) -> None:
+        """Write one episode's full record to its own file atomically.
+
+        Write to a temp sibling then os.replace() (atomic on POSIX), so a reader
+        or a resume only ever sees a complete file — never a partial write from
+        an interrupted run.
+        """
+        tmp = f"{path}.tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(record, fh, ensure_ascii=False)
+        os.replace(tmp, path)
 
     async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger,
                             *, standing=None, total_episodes=0, expose_standing=True,

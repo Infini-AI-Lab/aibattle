@@ -25,7 +25,9 @@ from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
 GAMES = ["connect4", "gomoku"]
-MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "qwen3p6-plus"]
+# qwen3p6-plus dropped: restrictive per-model 429 limit on this account (failed
+# 0/3 isolated calls while the others passed 3/3 under identical load).
+MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
 EPISODES = 50
 MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
@@ -72,7 +74,7 @@ async def main():
     t0 = time.perf_counter()
     print(f"Board tournament: {len(GAMES)} games x {len(pairs)} pairs x "
           f"{EPISODES} episodes = {total * EPISODES} games, global cap "
-          f"{MAX_CONCURRENCY}\n", flush=True)
+          f"{MAX_CONCURRENCY} (per-episode resume on)\n", flush=True)
 
     def save(game):
         json.dump(data[game], open(os.path.join(OUT, f"{game}_data.json"), "w"))
@@ -85,12 +87,15 @@ async def main():
                         on_invalid_action="fallback")
         ta = time.perf_counter()
         try:
-            with MatchLogger(os.path.join(gdir, "match.jsonl")) as lg:
+            # No-op logger: each episode persists its own self-contained file
+            # (data + full step log) under gdir via episode_dir, which is also the
+            # resume unit. No shared match.jsonl to rewrite or corrupt.
+            with MatchLogger(None) as lg:
                 res = await runner.run_match(
                     make_agent(acfg(a), game_name=game),
                     make_agent(acfg(b), game_name=game),
                     episodes=EPISODES, seed=seed, seat_swap=True,
-                    logger=lg, semaphore=global_sem,
+                    logger=lg, semaphore=global_sem, episode_dir=gdir,
                 )
             data[game]["games"].append({"a": a, "b": b, "seed": seed,
                                         "episodes": trim(res.episodes)})

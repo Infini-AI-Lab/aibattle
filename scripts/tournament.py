@@ -45,7 +45,7 @@ def acfg(name: str) -> dict:
 
 
 def trim(episodes: list) -> list:
-    """Drop the heavy raw chain-of-thought from the aggregate (kept in match.jsonl)."""
+    """Drop the heavy raw chain-of-thought from the aggregate (kept per-episode)."""
     out = []
     for e in episodes:
         e2 = dict(e)
@@ -78,8 +78,8 @@ async def main():
     # wall-clock collapses from sum-of-games to ~slowest-game.
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     print(f"Starting tournament: {len(games)} games x {HANDS} hands, "
-          f"ALL IN PARALLEL (global cap {MAX_CONCURRENCY} concurrent calls)\n",
-          flush=True)
+          f"ALL IN PARALLEL (global cap {MAX_CONCURRENCY} concurrent calls, "
+          f"per-episode resume on)\n", flush=True)
 
     def save():
         json.dump({"models": MODELS, "hands": HANDS, "reps": REPS,
@@ -93,12 +93,15 @@ async def main():
         runner = Runner(lambda: make_game("holdem"), on_invalid_action="fallback")
         ta = time.perf_counter()
         try:
-            with MatchLogger(os.path.join(gdir, "match.jsonl")) as lg:
+            # No-op logger: each hand persists its own self-contained file under
+            # gdir via episode_dir, which is also the resume unit. No shared
+            # match.jsonl to rewrite or corrupt.
+            with MatchLogger(None) as lg:
                 res = await runner.run_match(
                     make_agent(acfg(a), game_name="holdem"),
                     make_agent(acfg(b), game_name="holdem"),
                     episodes=HANDS, seed=seed, seat_swap=True,
-                    logger=lg, semaphore=global_sem,
+                    logger=lg, semaphore=global_sem, episode_dir=gdir,
                 )
             # append + save in one synchronous (await-free) block -> race-safe
             all_games.append({"gid": gid, "a": a, "b": b, "rep": rep,
