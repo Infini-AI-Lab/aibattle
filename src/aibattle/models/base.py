@@ -24,6 +24,14 @@ class ModelOutput:
 
     content: str
     reasoning: Optional[str] = None
+    finish_reason: Optional[str] = None  # "stop" = complete, "length" = truncated
+    completion_tokens: Optional[int] = None  # output tokens (reasoning + answer)
+    prompt_tokens: Optional[int] = None      # input tokens
+
+    @property
+    def truncated(self) -> bool:
+        """True if generation was cut off by the token cap (finish_reason=length)."""
+        return self.finish_reason == "length"
 
     def full_text(self) -> str:
         """The complete output, thinking included — used for logs/transcripts."""

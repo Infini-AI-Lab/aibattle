@@ -46,6 +46,10 @@ class ModelAgent(Agent):
                         "attempts": attempt + 1,
                         "latency_ms": latency_ms,
                         "has_reasoning": out.reasoning is not None,
+                        "finish_reason": out.finish_reason,
+                        "truncated": out.truncated,
+                        "completion_tokens": out.completion_tokens,
+                        "prompt_tokens": out.prompt_tokens,
                     },
                 )
             # Repair using the visible answer; pass full text if no answer at all.
@@ -60,6 +64,10 @@ class ModelAgent(Agent):
                 "attempts": self.max_retries + 1,
                 "latency_ms": latency_ms,
                 "has_reasoning": (out.reasoning is not None) if out else False,
+                "finish_reason": out.finish_reason if out else None,
+                "truncated": out.truncated if out else False,
+                "completion_tokens": out.completion_tokens if out else None,
+                "prompt_tokens": out.prompt_tokens if out else None,
                 "invalid": True,
             },
         )

@@ -77,8 +77,18 @@ class OpenAIClient(ModelClient):
                     raise
                 base = min(60, 2 ** attempt)
                 await asyncio.sleep(base * (0.5 + random.random()))
-        msg = resp.choices[0].message
+        choice = resp.choices[0]
+        msg = choice.message
         # Reasoning models expose chain-of-thought in a separate field; the name
         # varies by provider (reasoning_content / reasoning).
         reasoning = getattr(msg, "reasoning_content", None) or getattr(msg, "reasoning", None)
-        return ModelOutput(content=msg.content or "", reasoning=reasoning)
+        # finish_reason="length" means the output hit the token cap (truncated) —
+        # the model-agnostic truncation signal (don't infer from which field is
+        # empty; that flips per model). usage gives exact token counts.
+        usage = getattr(resp, "usage", None)
+        return ModelOutput(
+            content=msg.content or "", reasoning=reasoning,
+            finish_reason=choice.finish_reason,
+            completion_tokens=getattr(usage, "completion_tokens", None) if usage else None,
+            prompt_tokens=getattr(usage, "prompt_tokens", None) if usage else None,
+        )
