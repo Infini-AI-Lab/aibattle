@@ -51,6 +51,7 @@ def make_client(cfg: dict) -> ModelClient:
             temperature=float(cfg.get("temperature", 0.0)),
             max_tokens=int(cfg.get("max_tokens", 256)),
             system_prompt=cfg.get("system_prompt"),
+            timeout=float(cfg.get("timeout_s", 300)),
         )
 
     if provider == "anthropic":

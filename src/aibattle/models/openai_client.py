@@ -23,6 +23,7 @@ class OpenAIClient(ModelClient):
         temperature: float = 0.0,
         max_tokens: int = 256,
         system_prompt: Optional[str] = None,
+        timeout: float = 300.0,
     ):
         try:
             from openai import AsyncOpenAI
@@ -36,7 +37,10 @@ class OpenAIClient(ModelClient):
         self._default_temperature = temperature
         self._default_max_tokens = max_tokens
         self._system_prompt = system_prompt
-        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+        # Per-request timeout. A hung call is retried with backoff rather than
+        # blocking for the SDK default (600s). Keep it generous enough for a full
+        # reasoning generation (16k tokens can take a few minutes on slow models).
+        self._client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
 
     async def generate(
         self,
