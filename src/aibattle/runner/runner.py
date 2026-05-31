@@ -191,6 +191,102 @@ class Runner:
         episodes = [r for r in results if r is not None]
         return RunResult(episodes=episodes, log_path=logger.path, failures=failures)
 
+    async def run_table(
+        self,
+        agents: list,
+        *,
+        episodes: int,
+        seed: int,
+        logger: MatchLogger,
+        max_concurrency: int = 1,
+        semaphore: "Optional[asyncio.Semaphore]" = None,
+        episode_dir: Optional[str] = None,
+        seat_rotate: bool = True,
+        progress: Optional[Callable] = None,
+    ) -> RunResult:
+        """Run an N-player game (e.g. Hold'em Table Mode) for ``episodes`` table
+        sessions. ``agents`` is a list of N agents, one per seat.
+
+        Mirrors ``run_match`` but seats N agents instead of two and reuses the
+        same general per-episode loop (``_play_episode``), per-episode resume
+        (``episode_dir``), and shared-semaphore concurrency. By default the
+        agent→seat assignment rotates each episode to neutralize positional
+        advantage; the game also randomizes the button per session. Standings are
+        never exposed in prompts here (sessions run in parallel and are
+        nondeterministic in completion order).
+        """
+        game = self.game_factory()
+        n = len(game.players)
+        if len(agents) != n:
+            raise ValueError(f"run_table needs {n} agents for {game.name}, got {len(agents)}")
+        master = random.Random(seed)
+        if episode_dir:
+            os.makedirs(episode_dir, exist_ok=True)
+
+        logger.match_header({
+            "game": game.name,
+            "game_version": game.version,
+            "agents": {game.players[i]: {"name": agents[i].name,
+                                         "type": agents[i].agent_type}
+                       for i in range(n)},
+            "episodes": episodes,
+            "seed": seed,
+            "seat_rotate": seat_rotate,
+            "on_invalid_action": self.on_invalid_action,
+        })
+
+        # Plan: each session gets a deal seed (drawn up front so it is independent
+        # of completion order) and a seat assignment (rotated for fairness).
+        specs = []  # (ep_index, deal_seed, agents_by_player)
+        for ep in range(episodes):
+            deal_seed = master.randrange(2**31)
+            rot = ep % n if seat_rotate else 0
+            by_player = {game.players[i]: agents[(i + rot) % n] for i in range(n)}
+            specs.append((ep, deal_seed, by_player))
+
+        results = [None] * len(specs)
+        sem = semaphore if semaphore is not None else asyncio.Semaphore(max(1, max_concurrency))
+        completed = 0
+        failures = 0
+        standing = {a.name: 0.0 for a in agents}
+
+        async def _worker(idx, spec):
+            nonlocal completed, failures
+            ep_i, deal_seed, by_player = spec
+            epath = (os.path.join(episode_dir, f"ep{ep_i:03d}.json")
+                     if episode_dir else None)
+            if epath and os.path.exists(epath):
+                try:
+                    with open(epath, encoding="utf-8") as fh:
+                        results[idx] = json.load(fh)
+                    completed += 1
+                    if progress is not None:
+                        progress(completed, len(specs), results[idx])
+                    return
+                except (json.JSONDecodeError, OSError):
+                    pass
+            try:
+                async with sem:
+                    res = await self._play_episode(
+                        game, by_player, deal_seed, ep_i, 0, logger,
+                        standing=standing, total_episodes=len(specs),
+                        expose_standing=False,
+                    )
+            except Exception:  # noqa: BLE001
+                failures += 1
+                results[idx] = None
+                return
+            if epath:
+                self._persist_episode(epath, res)
+            results[idx] = res
+            completed += 1
+            if progress is not None:
+                progress(completed, len(specs), res)
+
+        await asyncio.gather(*(_worker(i, s) for i, s in enumerate(specs)))
+        episodes_out = [r for r in results if r is not None]
+        return RunResult(episodes=episodes_out, log_path=logger.path, failures=failures)
+
     @staticmethod
     def _persist_episode(path: str, record: dict) -> None:
         """Write one episode's full record to its own file atomically.

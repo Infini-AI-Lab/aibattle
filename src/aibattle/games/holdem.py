@@ -6,6 +6,12 @@ all-in, and showdown via the internal 7-card evaluator. Amounts are the
 player's TOTAL committed chips for the current street (raise-to semantics).
 
 State is treated as immutable: ``step`` clones and returns a new state.
+
+The hand engine is parameterized by starting stack and blinds and exposes
+``deal_hand(rng, stacks, button)`` so it can be reused as the per-hand sub-step
+of a multi-hand match (see ``holdem_match``): each hand is dealt from the
+players' carried-over stacks, and pot/deltas are computed relative to the
+per-hand ``start_stacks`` rather than a fixed constant.
 """
 
 from __future__ import annotations
@@ -43,6 +49,7 @@ class HoldemState:
     folded: dict
     history: list                     # public action log
     result: Optional[dict] = None     # set at terminal
+    start_stacks: Optional[dict] = None  # per-player chips at the start of THIS hand
 
 
 def _other(p: PlayerId) -> PlayerId:
@@ -54,32 +61,56 @@ class HoldemPoker(Game):
     version = "1.0.0"
     players = list(_PLAYERS)
 
+    def __init__(self, starting_stack: int = STARTING_STACK,
+                 small_blind: int = SMALL_BLIND, big_blind: int = BIG_BLIND):
+        self.starting_stack = starting_stack
+        self.small_blind = small_blind
+        self.big_blind = big_blind
+
     # -- setup --------------------------------------------------------------
     def initial_state(self, rng: random.Random) -> HoldemState:
         button = _PLAYERS[rng.randrange(2)]   # balanced across deals
+        stacks = {p: self.starting_stack for p in _PLAYERS}
+        return self.deal_hand(rng, stacks, button)
+
+    def deal_hand(self, rng: random.Random, stacks: dict,
+                  button: PlayerId) -> HoldemState:
+        """Deal a single hand from given per-player ``stacks`` and ``button``.
+
+        Precondition: both players can cover the big blind (callers that carry
+        stacks across hands, e.g. a match, must guarantee this so blind posting
+        never forces an all-in).
+        """
         deck = full_deck()
         rng.shuffle(deck)
         hole = {"player_0": (deck[0], deck[1]), "player_1": (deck[2], deck[3])}
         deck = deck[4:]
 
         sb, bb = button, _other(button)
-        stacks = {p: STARTING_STACK for p in _PLAYERS}
-        street_commit = {sb: SMALL_BLIND, bb: BIG_BLIND}
-        stacks[sb] -= SMALL_BLIND
-        stacks[bb] -= BIG_BLIND
+        stacks = dict(stacks)
+        start_stacks = dict(stacks)
+        street_commit = {sb: self.small_blind, bb: self.big_blind}
+        stacks[sb] -= self.small_blind
+        stacks[bb] -= self.big_blind
+        # Posting a blind that consumes the whole stack IS an all-in (can happen
+        # in a match when a player carries in exactly the big blind). Mark it so
+        # the engine doesn't try to make a 0-stack player act.
+        all_in = {p: stacks[p] == 0 for p in _PLAYERS}
 
         return HoldemState(
             button=button, deck=deck, hole=hole, board=[],
             street="preflop", stacks=stacks, street_commit=street_commit,
             to_act=sb,  # preflop the button/SB acts first
-            last_raise_size=BIG_BLIND,  # min raise-to = BB + BB
-            aggressor=bb, acted_since=set(), all_in={p: False for p in _PLAYERS},
+            last_raise_size=self.big_blind,  # min raise-to = BB + BB
+            aggressor=bb, acted_since=set(), all_in=all_in,
             folded={p: False for p in _PLAYERS}, history=[], result=None,
+            start_stacks=start_stacks,
         )
 
     # -- helpers ------------------------------------------------------------
     def _pot(self, s: HoldemState) -> int:
-        return 2 * STARTING_STACK - s.stacks["player_0"] - s.stacks["player_1"]
+        # Chips committed this hand = (start - behind) summed over players.
+        return sum(s.start_stacks.values()) - sum(s.stacks.values())
 
     def _max_commit(self, s: HoldemState) -> int:
         return max(s.street_commit.values())
@@ -102,7 +133,7 @@ class HoldemPoker(Game):
             return []
         if to_call == 0:
             acts = ["check"]
-            min_bet = sc + BIG_BLIND
+            min_bet = sc + self.big_blind
             if sc + stack >= min_bet:
                 acts.append("bet")
             acts.append("all_in")
@@ -141,7 +172,7 @@ class HoldemPoker(Game):
         if not isinstance(move.amount, int) or isinstance(move.amount, bool):
             return False, "non_integer_amount"
         if move.type == "bet":
-            min_total = sc + BIG_BLIND
+            min_total = sc + self.big_blind
         else:  # raise
             min_total = cur_max + s.last_raise_size
         if move.amount < min_total:
@@ -157,6 +188,7 @@ class HoldemPoker(Game):
             stacks=dict(s.stacks), street_commit=dict(s.street_commit),
             acted_since=set(s.acted_since), all_in=dict(s.all_in),
             folded=dict(s.folded), history=list(s.history),
+            start_stacks=dict(s.start_stacks),
         )
 
     def step(self, s: HoldemState, move: Move) -> HoldemState:
@@ -281,8 +313,9 @@ class HoldemPoker(Game):
         return s
 
     def _resolve_fold(self, s: HoldemState, winner: PlayerId) -> HoldemState:
-        # Net delta from the 50-chip start; uncalled chips handled by the formula.
-        deltas = {p: s.stacks[p] - STARTING_STACK for p in _PLAYERS}
+        # Net delta from this hand's starting stacks; uncalled chips are still in
+        # the loser's behind, so the pot formula nets out correctly.
+        deltas = {p: s.stacks[p] - s.start_stacks[p] for p in _PLAYERS}
         pot = self._pot(s)
         deltas[winner] += pot
         return self._finish(s, deltas, winner, "fold")
@@ -291,7 +324,7 @@ class HoldemPoker(Game):
         pot = self._pot(s)
         k0 = evaluate7(list(s.hole["player_0"]) + s.board)
         k1 = evaluate7(list(s.hole["player_1"]) + s.board)
-        base = {p: s.stacks[p] - STARTING_STACK for p in _PLAYERS}
+        base = {p: s.stacks[p] - s.start_stacks[p] for p in _PLAYERS}
         if k0 > k1:
             base["player_0"] += pot
             winner = "player_0"
@@ -314,10 +347,10 @@ class HoldemPoker(Game):
 
     def episode_metadata(self, s: HoldemState) -> dict:
         if not self.is_terminal(s) or not s.result:
-            return {"big_blind": BIG_BLIND}
+            return {"big_blind": self.big_blind}
         return {
             "reason": s.result.get("reason"),
-            "big_blind": BIG_BLIND,
+            "big_blind": self.big_blind,
             "hand_categories": s.result.get("hand_categories"),
             "final_board": s.result.get("board"),
         }
@@ -332,7 +365,7 @@ class HoldemPoker(Game):
 
         amount_range = {}
         if "bet" in legal:
-            amount_range["bet"] = {"min": sc + BIG_BLIND, "max": sc + stack}
+            amount_range["bet"] = {"min": sc + self.big_blind, "max": sc + stack}
         if "raise" in legal:
             amount_range["raise"] = {"min": cur_max + s.last_raise_size,
                                      "max": sc + stack}
