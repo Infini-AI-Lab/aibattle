@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
+          background: #0f1117; color: #e6e6e6; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 22px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 38px 0 12px; border-bottom: 1px solid #2a2f3a;
+        padding-bottom: 6px; }
+  .sub { color: #8b93a7; margin-bottom: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 7px 9px; text-align: center; border-bottom: 1px solid #20242e; }
+  th { color: #9aa3b5; font-weight: 600; }
+  td.model, th.model { text-align: left; font-weight: 600; color: #cdd6f4; }
+  .pos { color: #4ade80; } .neg { color: #f87171; }
+  .diag { color: #3a3f4b; }
+  .tag { background: #2a2f3a; color: #a5b4fc; border-radius: 10px; padding: 1px 8px;
+          font-size: 11px; margin-left: 3px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: #161a22; border: 1px solid #232838; border-radius: 12px;
+           padding: 16px; }
+  canvas { max-height: 340px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .note { color: #8b93a7; font-size: 12px; margin-top: 6px; }
+  @media (max-width: 760px) { .grid2, .cards { grid-template-columns: 1fr; } }
+</style></head>
+<body><div class="wrap">
+  <h1>🃏 AI Battle Arena — Heads-Up Hold'em Tournament</h1>
+  <div class="sub">20 games · 30 hands each · 5 models · round-robin</div>
+
+  <h2>🏆 Leaderboard &amp; player profiles</h2>
+  <table>
+    <tr><th>#</th><th class='model'>model</th><th>style</th><th>chips</th><th>bb/100</th>
+        <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
+        <th>all-in%</th><th>bet size</th><th>think</th></tr>
+    <tr>
+          <td>1</td><td class='model'>deepseek-v4-pro</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='pos'>+178</td>
+          <td class='pos'>+37.1</td>
+          <td>46%</td>
+          <td>50%</td>
+          <td>35%</td>
+          <td>42%</td>
+          <td>44%</td>
+          <td>2%</td>
+          <td>1.10x</td>
+          <td>33.0s</td>
+        </tr><tr>
+          <td>2</td><td class='model'>qwen3p6-plus</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='pos'>+176</td>
+          <td class='pos'>+36.7</td>
+          <td>53%</td>
+          <td>71%</td>
+          <td>16%</td>
+          <td>18%</td>
+          <td>22%</td>
+          <td>0%</td>
+          <td>0.92x</td>
+          <td>156.5s</td>
+        </tr><tr>
+          <td>3</td><td class='model'>gpt-oss-120b</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='neg'>-63</td>
+          <td class='neg'>-13.1</td>
+          <td>44%</td>
+          <td>55%</td>
+          <td>40%</td>
+          <td>43%</td>
+          <td>45%</td>
+          <td>1%</td>
+          <td>1.17x</td>
+          <td>3.4s</td>
+        </tr><tr>
+          <td>4</td><td class='model'>kimi-k2p6</td>
+          <td><b>Loose-Aggressive</b> <span class='tag'>LAG</span></td>
+          <td class='neg'>-88</td>
+          <td class='neg'>-18.3</td>
+          <td>53%</td>
+          <td>61%</td>
+          <td>47%</td>
+          <td>46%</td>
+          <td>30%</td>
+          <td>11%</td>
+          <td>1.76x</td>
+          <td>62.8s</td>
+        </tr><tr>
+          <td>5</td><td class='model'>glm-5p1</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='neg'>-203</td>
+          <td class='neg'>-42.3</td>
+          <td>50%</td>
+          <td>60%</td>
+          <td>28%</td>
+          <td>33%</td>
+          <td>30%</td>
+          <td>3%</td>
+          <td>1.42x</td>
+          <td>42.5s</td>
+        </tr>
+  </table>
+  <div class="note">VPIP = how often it voluntarily plays a hand (looseness). PFR = preflop raise %.
+    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.</div>
+
+  <div class="grid2">
+    <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>
+      <div class="note">x = looseness (VPIP), y = aggression. Upper-right = loose-aggressive (LAG), lower-left = nit.</div></div>
+    <div><h2>💰 Win rate (bb / 100 hands)</h2><canvas id="bbchart"></canvas></div>
+  </div>
+
+  <h2>♟️ Action tendencies</h2>
+  <canvas id="actions"></canvas>
+  <div class="note">Share of each action across all the model's decisions.</div>
+
+  <div class="grid2">
+    <div><h2>🧭 Style radar</h2><canvas id="radar"></canvas></div>
+    <div><h2>⏱️ Avg thinking time</h2><canvas id="latency"></canvas></div>
+  </div>
+
+  <h2>⚔️ Head-to-head chip results</h2>
+  <div class="sub">Net chips the row model won against the column model (sums to zero per pair).</div>
+  <table class="h2h"><tr><th></th><th>deepseek-v4-pro</th><th>gpt-oss-120b</th><th>kimi-k2p6</th><th>glm-5p1</th><th>qwen3p6-plus</th></tr><tr><th class='model'>deepseek-v4-pro</th><td class='diag'>—</td><td class='pos' style='--v:106.0'>+106</td><td class='neg' style='--v:-22.0'>-22</td><td class='pos' style='--v:53.0'>+53</td><td class='pos' style='--v:41.0'>+41</td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg' style='--v:-106.0'>-106</td><td class='diag'>—</td><td class='pos' style='--v:52.0'>+52</td><td class='pos' style='--v:8.0'>+8</td><td class='neg' style='--v:-17.0'>-17</td></tr><tr><th class='model'>kimi-k2p6</th><td class='pos' style='--v:22.0'>+22</td><td class='neg' style='--v:-52.0'>-52</td><td class='diag'>—</td><td class='pos' style='--v:107.0'>+107</td><td class='neg' style='--v:-165.0'>-165</td></tr><tr><th class='model'>glm-5p1</th><td class='neg' style='--v:-53.0'>-53</td><td class='neg' style='--v:-8.0'>-8</td><td class='neg' style='--v:-107.0'>-107</td><td class='diag'>—</td><td class='neg' style='--v:-35.0'>-35</td></tr><tr><th class='model'>qwen3p6-plus</th><td class='neg' style='--v:-41.0'>-41</td><td class='pos' style='--v:17.0'>+17</td><td class='pos' style='--v:165.0'>+165</td><td class='pos' style='--v:35.0'>+35</td><td class='diag'>—</td></tr></table>
+
+<script>
+const R = {"models": ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "qwen3p6-plus"], "per_model": {"deepseek-v4-pro": {"hands": 240, "decisions": 460, "chips": 178.0, "bb_per_100": 37.08, "win_rate": 0.4583, "wins": 110, "losses": 125, "ties": 5, "showdown_wins": 30, "fold_wins": 80, "vpip": 0.5, "pfr": 0.3542, "agg_freq": 0.4185, "agg_factor": 2.518, "fold_to_bet": 0.437, "allin_freq": 0.0174, "avg_bet_xpot": 1.103, "avg_latency_s": 33.0, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 104, "check": 151, "call": 56, "bet": 70, "raise": 71, "all_in": 8}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}}, "gpt-oss-120b": {"hands": 240, "decisions": 466, "chips": -63.0, "bb_per_100": -13.12, "win_rate": 0.4417, "wins": 106, "losses": 134, "ties": 0, "showdown_wins": 21, "fold_wins": 85, "vpip": 0.55, "pfr": 0.4042, "agg_freq": 0.429, "agg_factor": 2.579, "fold_to_bet": 0.4488, "allin_freq": 0.0086, "avg_bet_xpot": 1.171, "avg_latency_s": 3.4, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 114, "check": 144, "call": 57, "bet": 66, "raise": 81, "all_in": 4}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}}, "kimi-k2p6": {"hands": 240, "decisions": 495, "chips": -88.0, "bb_per_100": -18.33, "win_rate": 0.5292, "wins": 127, "losses": 109, "ties": 4, "showdown_wins": 27, "fold_wins": 100, "vpip": 0.6083, "pfr": 0.4667, "agg_freq": 0.4643, "agg_factor": 2.167, "fold_to_bet": 0.2976, "allin_freq": 0.1051, "avg_bet_xpot": 1.761, "avg_latency_s": 62.8, "invalid_actions": 0, "invalid_amounts": 4, "action_mix": {"fold": 75, "check": 159, "call": 66, "bet": 56, "raise": 87, "all_in": 52}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}}, "glm-5p1": {"hands": 240, "decisions": 517, "chips": -203.0, "bb_per_100": -42.29, "win_rate": 0.5, "wins": 120, "losses": 115, "ties": 5, "showdown_wins": 24, "fold_wins": 96, "vpip": 0.6042, "pfr": 0.275, "agg_freq": 0.3303, "agg_factor": 0.984, "fold_to_bet": 0.3011, "allin_freq": 0.0309, "avg_bet_xpot": 1.417, "avg_latency_s": 42.5, "invalid_actions": 0, "invalid_amounts": 4, "action_mix": {"fold": 84, "check": 161, "call": 129, "bet": 69, "raise": 58, "all_in": 16}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}}, "qwen3p6-plus": {"hands": 240, "decisions": 649, "chips": 176.0, "bb_per_100": 36.67, "win_rate": 0.5292, "wins": 127, "losses": 107, "ties": 6, "showdown_wins": 42, "fold_wins": 85, "vpip": 0.7083, "pfr": 0.1583, "agg_freq": 0.181, "agg_factor": 0.495, "fold_to_bet": 0.2156, "allin_freq": 0.0031, "avg_bet_xpot": 0.923, "avg_latency_s": 156.5, "invalid_actions": 28, "invalid_amounts": 1, "action_mix": {"fold": 69, "check": 267, "call": 208, "bet": 62, "raise": 41, "all_in": 2}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}}}, "h2h": {"deepseek-v4-pro": {"gpt-oss-120b": 106.0, "kimi-k2p6": -22.0, "glm-5p1": 53.0, "qwen3p6-plus": 41.0}, "gpt-oss-120b": {"deepseek-v4-pro": -106.0, "kimi-k2p6": 52.0, "glm-5p1": 8.0, "qwen3p6-plus": -17.0}, "kimi-k2p6": {"deepseek-v4-pro": 22.0, "gpt-oss-120b": -52.0, "glm-5p1": 107.0, "qwen3p6-plus": -165.0}, "glm-5p1": {"deepseek-v4-pro": -53.0, "gpt-oss-120b": -8.0, "kimi-k2p6": -107.0, "qwen3p6-plus": -35.0}, "qwen3p6-plus": {"deepseek-v4-pro": -41.0, "gpt-oss-120b": 17.0, "kimi-k2p6": 165.0, "glm-5p1": 35.0}}, "hands_per_game": 30, "num_games": 20};
+const MODELS = R.models, PM = R.per_model;
+const COLORS = ['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa','#22d3ee'];
+const col = i => COLORS[i % COLORS.length];
+const cssText = getComputedStyle(document.body).color;
+Chart.defaults.color = '#9aa3b5'; Chart.defaults.borderColor = '#232838';
+
+// player-type scatter (VPIP x aggression)
+new Chart(scatter, { type:'scatter',
+  data:{ datasets: MODELS.map((m,i)=>({ label:m,
+      data:[{x:PM[m].vpip*100, y:PM[m].agg_freq*100}],
+      backgroundColor:col(i), pointRadius:9, pointHoverRadius:12 })) },
+  options:{ scales:{ x:{title:{display:true,text:'VPIP % (loose →)'},min:0,max:100},
+                       y:{title:{display:true,text:'aggression % (aggressive ↑)'},min:0,max:100} },
+    plugins:{ legend:{position:'bottom'} } } });
+
+// bb/100 bar
+const ranked = [...MODELS].sort((a,b)=>PM[b].bb_per_100-PM[a].bb_per_100);
+new Chart(bbchart, { type:'bar',
+  data:{ labels:ranked, datasets:[{ data:ranked.map(m=>PM[m].bb_per_100),
+      backgroundColor:ranked.map(m=>PM[m].bb_per_100>=0?'#4ade80':'#f87171') }] },
+  options:{ indexAxis:'y', plugins:{legend:{display:false}} } });
+
+// action distribution (stacked %)
+const ACTS=['fold','check','call','bet','raise','all_in'];
+const ACOL={fold:'#6b7280',check:'#94a3b8',call:'#38bdf8',bet:'#fbbf24',raise:'#fb923c',all_in:'#f87171'};
+new Chart(actions, { type:'bar',
+  data:{ labels:MODELS, datasets:ACTS.map(a=>({ label:a, backgroundColor:ACOL[a],
+      data:MODELS.map(m=>{const mix=PM[m].action_mix;const tot=Object.values(mix).reduce((x,y)=>x+y,0)||1;
+        return 100*mix[a]/tot;}) })) },
+  options:{ scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'% of actions'}}},
+    plugins:{legend:{position:'bottom'}} } });
+
+// style radar (normalized 0-100)
+new Chart(radar, { type:'radar',
+  data:{ labels:['loose (VPIP)','PF raise','aggression','all-in','bet size','calls bets (1-fold)'],
+    datasets:MODELS.map((m,i)=>({label:m,borderColor:col(i),
+      backgroundColor:col(i)+'22',
+      data:[PM[m].vpip*100,PM[m].pfr*100,PM[m].agg_freq*100,PM[m].allin_freq*100,
+            Math.min(100,PM[m].avg_bet_xpot*50),(1-PM[m].fold_to_bet)*100]})) },
+  options:{ scales:{r:{min:0,max:100,ticks:{display:false}}},
+    plugins:{legend:{position:'bottom'}} } });
+
+// latency
+new Chart(latency, { type:'bar',
+  data:{ labels:MODELS, datasets:[{data:MODELS.map(m=>PM[m].avg_latency_s),
+      backgroundColor:MODELS.map((m,i)=>col(i))}] },
+  options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'seconds / decision'}}} } });
+</script>
+</div></body></html>

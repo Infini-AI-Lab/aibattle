@@ -20,6 +20,8 @@ from collections import defaultdict
 
 DATA = "runs/tournament/tournament_data.json"
 OUT = "runs/tournament/report.html"
+# Tracked copy committed to the repo (runs/ is gitignored).
+REPORT_DIR = "reports"
 BB = 2
 
 
@@ -349,7 +351,15 @@ def main():
         f.write(html)
     # also dump computed stats as json for inspection
     json.dump(report, open("runs/tournament/analysis.json", "w"), indent=2)
+    # tracked copy for the repo (runs/ is gitignored)
+    os.makedirs(REPORT_DIR, exist_ok=True)
+    repo_html = os.path.join(REPORT_DIR, "holdem_tournament_report.html")
+    with open(repo_html, "w", encoding="utf-8") as f:
+        f.write(html)
+    json.dump(report, open(os.path.join(REPORT_DIR, "holdem_tournament_analysis.json"), "w"),
+              indent=2)
     print(f"Wrote {OUT}")
+    print(f"Wrote {repo_html} (tracked)")
     print(f"Models analyzed: {report['num_games']} games, "
           f"{report['hands_per_game']} hands each")
     for m in sorted(report["per_model"],

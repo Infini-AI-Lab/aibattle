@@ -1,0 +1,225 @@
+{
+  "models": [
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "qwen3p6-plus"
+  ],
+  "per_model": {
+    "deepseek-v4-pro": {
+      "hands": 240,
+      "decisions": 460,
+      "chips": 178.0,
+      "bb_per_100": 37.08,
+      "win_rate": 0.4583,
+      "wins": 110,
+      "losses": 125,
+      "ties": 5,
+      "showdown_wins": 30,
+      "fold_wins": 80,
+      "vpip": 0.5,
+      "pfr": 0.3542,
+      "agg_freq": 0.4185,
+      "agg_factor": 2.518,
+      "fold_to_bet": 0.437,
+      "allin_freq": 0.0174,
+      "avg_bet_xpot": 1.103,
+      "avg_latency_s": 33.0,
+      "invalid_actions": 0,
+      "invalid_amounts": 0,
+      "action_mix": {
+        "fold": 104,
+        "check": 151,
+        "call": 56,
+        "bet": 70,
+        "raise": 71,
+        "all_in": 8
+      },
+      "style": {
+        "label": "Loose-Passive",
+        "tags": [
+          "calling station"
+        ]
+      }
+    },
+    "gpt-oss-120b": {
+      "hands": 240,
+      "decisions": 466,
+      "chips": -63.0,
+      "bb_per_100": -13.12,
+      "win_rate": 0.4417,
+      "wins": 106,
+      "losses": 134,
+      "ties": 0,
+      "showdown_wins": 21,
+      "fold_wins": 85,
+      "vpip": 0.55,
+      "pfr": 0.4042,
+      "agg_freq": 0.429,
+      "agg_factor": 2.579,
+      "fold_to_bet": 0.4488,
+      "allin_freq": 0.0086,
+      "avg_bet_xpot": 1.171,
+      "avg_latency_s": 3.4,
+      "invalid_actions": 0,
+      "invalid_amounts": 0,
+      "action_mix": {
+        "fold": 114,
+        "check": 144,
+        "call": 57,
+        "bet": 66,
+        "raise": 81,
+        "all_in": 4
+      },
+      "style": {
+        "label": "Loose-Passive",
+        "tags": [
+          "calling station"
+        ]
+      }
+    },
+    "kimi-k2p6": {
+      "hands": 240,
+      "decisions": 495,
+      "chips": -88.0,
+      "bb_per_100": -18.33,
+      "win_rate": 0.5292,
+      "wins": 127,
+      "losses": 109,
+      "ties": 4,
+      "showdown_wins": 27,
+      "fold_wins": 100,
+      "vpip": 0.6083,
+      "pfr": 0.4667,
+      "agg_freq": 0.4643,
+      "agg_factor": 2.167,
+      "fold_to_bet": 0.2976,
+      "allin_freq": 0.1051,
+      "avg_bet_xpot": 1.761,
+      "avg_latency_s": 62.8,
+      "invalid_actions": 0,
+      "invalid_amounts": 4,
+      "action_mix": {
+        "fold": 75,
+        "check": 159,
+        "call": 66,
+        "bet": 56,
+        "raise": 87,
+        "all_in": 52
+      },
+      "style": {
+        "label": "Loose-Aggressive",
+        "tags": [
+          "LAG"
+        ]
+      }
+    },
+    "glm-5p1": {
+      "hands": 240,
+      "decisions": 517,
+      "chips": -203.0,
+      "bb_per_100": -42.29,
+      "win_rate": 0.5,
+      "wins": 120,
+      "losses": 115,
+      "ties": 5,
+      "showdown_wins": 24,
+      "fold_wins": 96,
+      "vpip": 0.6042,
+      "pfr": 0.275,
+      "agg_freq": 0.3303,
+      "agg_factor": 0.984,
+      "fold_to_bet": 0.3011,
+      "allin_freq": 0.0309,
+      "avg_bet_xpot": 1.417,
+      "avg_latency_s": 42.5,
+      "invalid_actions": 0,
+      "invalid_amounts": 4,
+      "action_mix": {
+        "fold": 84,
+        "check": 161,
+        "call": 129,
+        "bet": 69,
+        "raise": 58,
+        "all_in": 16
+      },
+      "style": {
+        "label": "Loose-Passive",
+        "tags": [
+          "calling station"
+        ]
+      }
+    },
+    "qwen3p6-plus": {
+      "hands": 240,
+      "decisions": 649,
+      "chips": 176.0,
+      "bb_per_100": 36.67,
+      "win_rate": 0.5292,
+      "wins": 127,
+      "losses": 107,
+      "ties": 6,
+      "showdown_wins": 42,
+      "fold_wins": 85,
+      "vpip": 0.7083,
+      "pfr": 0.1583,
+      "agg_freq": 0.181,
+      "agg_factor": 0.495,
+      "fold_to_bet": 0.2156,
+      "allin_freq": 0.0031,
+      "avg_bet_xpot": 0.923,
+      "avg_latency_s": 156.5,
+      "invalid_actions": 28,
+      "invalid_amounts": 1,
+      "action_mix": {
+        "fold": 69,
+        "check": 267,
+        "call": 208,
+        "bet": 62,
+        "raise": 41,
+        "all_in": 2
+      },
+      "style": {
+        "label": "Loose-Passive",
+        "tags": [
+          "calling station"
+        ]
+      }
+    }
+  },
+  "h2h": {
+    "deepseek-v4-pro": {
+      "gpt-oss-120b": 106.0,
+      "kimi-k2p6": -22.0,
+      "glm-5p1": 53.0,
+      "qwen3p6-plus": 41.0
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": -106.0,
+      "kimi-k2p6": 52.0,
+      "glm-5p1": 8.0,
+      "qwen3p6-plus": -17.0
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 22.0,
+      "gpt-oss-120b": -52.0,
+      "glm-5p1": 107.0,
+      "qwen3p6-plus": -165.0
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": -53.0,
+      "gpt-oss-120b": -8.0,
+      "kimi-k2p6": -107.0,
+      "qwen3p6-plus": -35.0
+    },
+    "qwen3p6-plus": {
+      "deepseek-v4-pro": -41.0,
+      "gpt-oss-120b": 17.0,
+      "kimi-k2p6": 165.0,
+      "glm-5p1": 35.0
+    }
+  },
+  "hands_per_game": 30,
+  "num_games": 20
+}
