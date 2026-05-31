@@ -21,6 +21,7 @@ from .games.registry import make_game
 from .logging.logger import MatchLogger
 from .logging.transcript import render_transcript
 from .runner.runner import Runner
+from .termcolor import action_label, decorate
 
 
 def _progress_bar(label: str, width: int = 30) -> "callable":
@@ -60,7 +61,8 @@ def _interactive_observer(show_thinking: bool):
     def on_step(info):
         if info["agent_type"] == "human":
             return  # the human already saw/typed this
-        print(f"\n>> {info['agent_name']} ({info['player']}) played: {info['action']}")
+        played = action_label(info["action"], info.get("amount"))
+        print(f"\n>> {info['agent_name']} ({info['player']}) played: {played}")
         if show_thinking and info.get("raw_output"):
             print("   --------------- model output ---------------")
             for ln in str(info["raw_output"]).splitlines():
@@ -71,7 +73,7 @@ def _interactive_observer(show_thinking: bool):
         ret = ", ".join(f"{p}={v:+g}" for p, v in summary["returns"].items())
         winner = summary.get("winner_name") or "tie"
         print("\n" + "-" * 64)
-        print(f"Showdown: {final_render}")
+        print(f"Showdown: {decorate(final_render)}")
         print(f"Returns:  {ret}    Winner: {winner}")
         print("-" * 64)
 

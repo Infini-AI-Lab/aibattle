@@ -11,7 +11,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from ...types import Action, AgentRequest
+from ...types import AgentRequest, Move
 
 
 class GameTemplate(ABC):
@@ -20,8 +20,8 @@ class GameTemplate(ABC):
         ...
 
     @abstractmethod
-    def parse(self, raw: str, legal_actions: list) -> Optional[Action]:
-        """Return a legal action, or None if nothing parseable was found."""
+    def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:
+        """Return a Move (action type + optional amount), or None if unparseable."""
 
     @abstractmethod
     def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:

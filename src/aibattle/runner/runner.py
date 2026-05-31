@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from typing import Callable, Optional
 
 from ..games.base import Game
-from ..games.kuhn import ACTION_PRIORITY
 from ..agents.base import Agent
 from ..logging.logger import MatchLogger, serialize_step
 from ..types import (
@@ -20,26 +19,37 @@ from ..types import (
     AgentRequest,
     AgentResponse,
     InvalidInfo,
+    MatchContext,
+    Move,
     StepRecord,
 )
 
+# Conservative, amount-free fallback order (shared by all games).
+FALLBACK_ORDER = ["check", "fold", "call"]
 
-def resolve_action(response: AgentResponse, legal: list, policy: str):
-    """Apply the invalid-action policy. Returns (action_or_None, InvalidInfo).
 
-    A None action signals a forfeit (only under policy == "forfeit").
+def resolve_action(game: Game, state, player, response: AgentResponse, policy: str):
+    """Validate the agent's move via the game; apply the invalid-action policy.
+
+    Returns (move_or_None, InvalidInfo). A None move signals a forfeit (only
+    under policy == "forfeit").
     """
-    requested = response.action
-    if requested in legal:
-        return requested, InvalidInfo(invalid=False)
+    move = Move(type=response.action, amount=response.amount)
+    ok, reason = game.validate_action(state, player, move)
+    if ok:
+        return move, InvalidInfo(invalid=False)
 
-    reason = "no_action" if requested == INVALID else "illegal_action"
+    if reason is None:
+        reason = "no_action" if move.type == INVALID else "illegal_action"
+    requested = move.label()
     if policy == "forfeit":
         return None, InvalidInfo(True, reason, requested, "forfeit")
 
-    # fallback: pick the highest-priority legal action deterministically
-    fallback = next((a for a in ACTION_PRIORITY if a in legal), legal[0])
-    return fallback, InvalidInfo(True, reason, requested, "fallback")
+    # Fallback: first amount-free legal type by priority, else first legal type.
+    legal = game.legal_actions(state, player)
+    fb_type = next((t for t in FALLBACK_ORDER if t in legal),
+                   legal[0] if legal else INVALID)
+    return Move(type=fb_type, amount=None), InvalidInfo(True, reason, requested, "fallback")
 
 
 @dataclass
@@ -110,6 +120,11 @@ class Runner:
         results = [None] * len(specs)
         sem = asyncio.Semaphore(max(1, max_concurrency))
         completed = 0
+        # Running cumulative chip standing per agent name, across hands. Exact for
+        # sequential (e.g. human) play; under parallelism it reflects whatever has
+        # completed so far (informational only).
+        standing = {agent_a.name: 0.0, agent_b.name: 0.0}
+        total = len(specs)
 
         async def _worker(idx, spec):
             nonlocal completed
@@ -118,6 +133,7 @@ class Runner:
             async with sem:
                 res = await self._play_episode(
                     game, agents, deal_seed, ep_i, pair, logger,
+                    standing=standing, total_episodes=total,
                     on_episode_start=on_episode_start,
                     on_step=on_step,
                     on_episode_end=on_episode_end,
@@ -131,8 +147,13 @@ class Runner:
         return RunResult(episodes=results, log_path=logger.path)
 
     async def _play_episode(self, game, agents, deal_seed, ep_index, pair_id, logger,
-                            *, on_episode_start=None, on_step=None, on_episode_end=None):
+                            *, standing=None, total_episodes=0,
+                            on_episode_start=None, on_step=None, on_episode_end=None):
         rng = random.Random(deal_seed)
+        # Snapshot the standing before this hand so all decisions this hand see
+        # the same pre-hand totals.
+        standing = standing if standing is not None else {}
+        pre_standing = dict(standing)
         state = game.initial_state(rng)
         step_index = 0
         invalid_count = {p: 0 for p in game.players}
@@ -161,20 +182,29 @@ class Runner:
                 # step, and seat — independent of execution order.
                 decision_seed=(deal_seed * 1000003 + step_index * 9176
                                + game.players.index(player)) & 0x7FFFFFFF,
+                match=MatchContext(
+                    episode=ep_index,
+                    total_episodes=total_episodes,
+                    you=agents[player].name,
+                    standing=pre_standing,
+                ),
             )
             response = await agents[player].act(request)
-            action, info = resolve_action(
-                response, obs.legal_actions, self.on_invalid_action
+            move, info = resolve_action(
+                game, state, player, response, self.on_invalid_action
             )
             if info.invalid:
                 invalid_count[player] += 1
 
+            sel_type = move.type if move is not None else INVALID
+            sel_amount = move.amount if move is not None else None
             rec = StepRecord(
                 step_index=step_index,
                 player=player,
                 observation=obs,
                 response=response,
-                selected_action=action if action is not None else INVALID,
+                selected_action=sel_type,
+                selected_amount=sel_amount,
                 invalid_info=info,
             )
             logger.step(ep_index, pair_id, rec)
@@ -187,16 +217,17 @@ class Runner:
                     "player": player,
                     "agent_name": agents[player].name,
                     "agent_type": agents[player].agent_type,
-                    "action": action if action is not None else INVALID,
+                    "action": sel_type,
+                    "amount": sel_amount,
                     "raw_output": response.raw_output,
                     "message": response.message,
                 })
 
-            if action is None:  # forfeit
+            if move is None:  # forfeit
                 forfeiter = player
                 break
 
-            state = game.step(state, action)
+            state = game.step(state, move)
             step_index += 1
 
         if forfeiter is not None:
@@ -209,6 +240,11 @@ class Runner:
             if returns and len(set(returns.values())) == 1:
                 winner = None  # tie (not possible in Kuhn, but general)
 
+        # Update the running match standing (by agent name) for later hands.
+        for p in game.players:
+            standing[agents[p].name] = standing.get(agents[p].name, 0.0) + returns[p]
+
+        meta = game.episode_metadata(state) if forfeiter is None else {}
         summary = {
             "episode": ep_index,
             "pair_id": pair_id,
@@ -220,6 +256,7 @@ class Runner:
             "length": step_index,
             "invalid_count": invalid_count,
             "forfeit": forfeiter is not None,
+            **meta,
         }
         logger.episode_end(summary)
         if on_episode_end is not None:

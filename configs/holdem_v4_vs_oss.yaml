@@ -1,0 +1,45 @@
+# Heads-Up Hold'em Lite: deepseek-v4-pro vs gpt-oss-120b via Fireworks.
+# Both are reasoning models -> generous max_tokens so chain-of-thought fits
+# before the final action line.
+game:
+  name: holdem
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: deepseek-v4-pro
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/deepseek-v4-pro
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 16384
+      max_retries: 2
+  player_1:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 16384
+      max_retries: 2
+
+run:
+  episodes: 20
+  seed: 7
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 32
+
+output:
+  dir: ./runs/holdem_v4_vs_oss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

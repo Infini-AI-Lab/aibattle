@@ -27,7 +27,6 @@ class ModelAgent(Agent):
         self.max_retries = max_retries
 
     async def act(self, request: AgentRequest) -> AgentResponse:
-        legal = request.observation.legal_actions
         prompt = self.template.render_prompt(request)
         out = None
         t0 = time.perf_counter()
@@ -35,11 +34,12 @@ class ModelAgent(Agent):
         for attempt in range(self.max_retries + 1):
             out = await self.client.generate(prompt)
             # Parse the final answer only; the reasoning is for logging.
-            action = self.template.parse(out.content, legal)
-            if action is not None:
+            move = self.template.parse(out.content, request)
+            if move is not None:
                 latency_ms = round((time.perf_counter() - t0) * 1000, 1)
                 return AgentResponse(
-                    action=action,
+                    action=move.type,
+                    amount=move.amount,
                     message=out.content,
                     raw_output=out.full_text(),  # full output incl. thinking
                     metadata={

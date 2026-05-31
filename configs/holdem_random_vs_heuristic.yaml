@@ -1,0 +1,29 @@
+# Hold'em baseline calibration: random vs heuristic. No API key needed.
+game:
+  name: holdem
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: builtin
+      name: holdem_random
+  player_1:
+    agent:
+      type: builtin
+      name: holdem_heuristic
+
+run:
+  episodes: 400
+  seed: 12345
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 32
+
+output:
+  dir: ./runs/holdem_random_vs_heuristic
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

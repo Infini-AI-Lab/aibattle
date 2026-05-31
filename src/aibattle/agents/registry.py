@@ -14,10 +14,13 @@ from typing import Any
 from .base import Agent
 from .random_agent import RandomAgent
 from .heuristic_agent import KuhnHeuristicAgent
+from .holdem_agents import RandomHoldemAgent, HoldemHeuristicAgent
 
 _BUILTINS = {
     "random": RandomAgent,
     "kuhn_heuristic": KuhnHeuristicAgent,
+    "holdem_random": RandomHoldemAgent,
+    "holdem_heuristic": HoldemHeuristicAgent,
 }
 
 

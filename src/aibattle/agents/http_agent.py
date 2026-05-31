@@ -35,6 +35,7 @@ class HttpAgent(Agent):
             "step_index": request.step_index,
             "instructions": request.instructions,
             "observation": request.observation.to_dict(),
+            "match": request.match.to_dict() if request.match else None,
         }
 
     async def act(self, request: AgentRequest) -> AgentResponse:
@@ -54,6 +55,7 @@ class HttpAgent(Agent):
 
         return AgentResponse(
             action=data.get("action", INVALID),
+            amount=data.get("amount"),
             message=data.get("message"),
             raw_output=data.get("raw_output"),
             metadata=data.get("metadata", {}),

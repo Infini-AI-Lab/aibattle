@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from ...types import Action, AgentRequest
+from ...types import AgentRequest, Move
 from .base import GameTemplate
 
 _RULES = (
@@ -24,21 +24,23 @@ class KuhnTemplate(GameTemplate):
     def render_prompt(self, request: AgentRequest) -> str:
         obs = request.observation
         legal = ", ".join(obs.legal_actions)
+        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
         return (
             f"{_RULES}\n\n"
+            f"{ctx}"
             f"{obs.rendered}\n\n"
             f"Choose exactly one of these legal actions: {legal}.\n"
             f"Respond with ONLY the single action word, nothing else."
         )
 
-    def parse(self, raw: str, legal_actions: list) -> Optional[Action]:
+    def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:
         if not raw:
             return None
         text = raw.lower()
         # Prefer a whole-word match of a legal action token.
-        for action in legal_actions:
+        for action in request.observation.legal_actions:
             if re.search(rf"\b{re.escape(action)}\b", text):
-                return action
+                return Move(type=action)
         return None
 
     def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:

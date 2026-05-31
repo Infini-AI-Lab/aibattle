@@ -26,6 +26,7 @@ def serialize_step(rec: StepRecord) -> dict:
         "observation": rec.observation.to_dict(),
         "response": rec.response.to_dict(),
         "selected_action": rec.selected_action,
+        "selected_amount": rec.selected_amount,
         "invalid": rec.invalid_info.invalid,
         "invalid_info": rec.invalid_info.to_dict(),
     }

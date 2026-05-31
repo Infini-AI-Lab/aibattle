@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from .base import GameTemplate
 from .kuhn import KuhnTemplate
+from .holdem import HoldemTemplate
 
 _TEMPLATES = {
     "kuhn_poker": KuhnTemplate,
+    "holdem": HoldemTemplate,
 }
 
 

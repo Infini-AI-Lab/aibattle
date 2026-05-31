@@ -14,7 +14,7 @@ import random
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-from ..types import Action, Observation, PlayerId
+from ..types import Action, Move, Observation, PlayerId
 
 State = Any  # game-defined; opaque outside the game module
 
@@ -38,11 +38,23 @@ class Game(ABC):
 
     @abstractmethod
     def legal_actions(self, state: State, player: PlayerId) -> list:
-        ...
+        """Return the legal action *types* (strings) for the current player."""
+
+    def validate_action(self, state: State, player: PlayerId, move: Move):
+        """Validate a chosen Move. Returns (ok: bool, reason: Optional[str]).
+
+        Default: discrete games — the type must be legal and carry no amount.
+        Numeric games (Hold'em) override to validate bet/raise amounts.
+        """
+        if move.type not in self.legal_actions(state, player):
+            return False, "illegal_action_type"
+        if move.amount is not None:
+            return False, "unexpected_amount"
+        return True, None
 
     @abstractmethod
-    def step(self, state: State, action: Action) -> State:
-        """Advance the game. Precondition: action is legal for current player."""
+    def step(self, state: State, move: Move) -> State:
+        """Advance the game. Precondition: move is valid for the current player."""
 
     @abstractmethod
     def is_terminal(self, state: State) -> bool:
@@ -51,6 +63,11 @@ class Game(ABC):
     @abstractmethod
     def returns(self, state: State) -> dict:
         """Terminal payoffs in chips, keyed by PlayerId. Zero-sum for Kuhn."""
+
+    def episode_metadata(self, state: State) -> dict:
+        """Extra game-specific fields to stamp into the episode summary/log
+        (e.g. end reason, big blind). Default: none."""
+        return {}
 
     @abstractmethod
     def render(self, state: State, *, perspective: Optional[PlayerId] = None) -> str:

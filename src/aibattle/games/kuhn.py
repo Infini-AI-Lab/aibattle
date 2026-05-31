@@ -19,13 +19,11 @@ import random
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ..types import Action, Observation, PlayerId
+from ..types import Action, Move, Observation, PlayerId
 from .base import Game
 
 _RANK = {"J": 0, "Q": 1, "K": 2}
 _PLAYERS = ["player_0", "player_1"]
-# Deterministic fallback priority used by the runner on invalid actions.
-ACTION_PRIORITY = ["fold", "check", "call", "bet"]
 
 
 @dataclass(frozen=True)
@@ -67,11 +65,11 @@ class KuhnPoker(Game):
             return True
         return False
 
-    def step(self, state: KuhnState, action: Action) -> KuhnState:
+    def step(self, state: KuhnState, move: Move) -> KuhnState:
         player = self.current_player(state)
         legal = self.legal_actions(state, player)
-        assert action in legal, f"illegal action {action!r}; legal={legal}"
-        return KuhnState(cards=state.cards, history=state.history + (action,))
+        assert move.type in legal, f"illegal action {move.type!r}; legal={legal}"
+        return KuhnState(cards=state.cards, history=state.history + (move.type,))
 
     # -- payoffs ------------------------------------------------------------
     def _contributions(self, state: KuhnState) -> dict:

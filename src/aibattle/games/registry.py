@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from .base import Game
 from .kuhn import KuhnPoker
+from .holdem import HoldemPoker
 
 _GAMES = {
     KuhnPoker.name: KuhnPoker,
+    HoldemPoker.name: HoldemPoker,
 }
 
 

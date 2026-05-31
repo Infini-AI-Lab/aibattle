@@ -1,0 +1,43 @@
+# Play Heads-Up Texas Hold'em Lite yourself against gpt-oss-120b (via Fireworks).
+#
+# One player is `human` -> interactive, sequential terminal play. On your turn
+# you'll see your hole cards, the board, the pot, and the legal actions; for
+# bet/raise you'll be prompted for an integer amount (total street commitment)
+# within the shown range. `show_thinking: true` prints the model's full
+# reasoning after each of its moves; false shows only its action.
+game:
+  name: holdem
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: human
+      name: you
+      show_thinking: false     # true -> also print the model's reasoning
+  player_1:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 16384
+      max_retries: 2
+
+run:
+  episodes: 5
+  seed: 0
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 1
+
+output:
+  dir: ./runs/holdem_human_vs_oss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true
