@@ -35,10 +35,12 @@ import json
 import os
 
 DATA_DIR = "runs/board_tournament"
+HOLDEM_DIR = "runs/tournament"
 GAMES = {"connect4": {"need": 4}, "gomoku": {"need": 5}}
 THINK_MARK = "===== thinking ====="
 ANSWER_MARK = "===== answer ====="
 _GOMOKU_COLS = "ABCDEFGHI"
+_PLAYERS = ("player_0", "player_1")
 
 # Truncation detection. These are reasoning models on a 16,384-token budget; a
 # generation that exhausts it stops mid-thought. Two fingerprints:
@@ -177,6 +179,98 @@ def build_game(game: str, need: int):
           f"({total/1e6:.1f} MB total · largest pair {largest/1e6:.1f} MB)")
 
 
+def _other(p):
+    return _PLAYERS[1 - _PLAYERS.index(p)]
+
+
+def _holdem_move(s: dict, thinking: str) -> dict:
+    """One betting action with the table state the player saw when deciding."""
+    pub = s["observation"]["public"]
+    me = s["player"]
+    invalid = bool(s.get("invalid"))
+    return {
+        "ply": s["step"],
+        "player": me,
+        "agent": s["agent_name"],
+        "action": s["selected_action"],
+        "amount": s.get("selected_amount"),
+        "pos": pub.get("position"),
+        "street": pub.get("street"),
+        "board": pub.get("board", []),
+        "pot": pub.get("pot"),
+        "to_call": pub.get("to_call"),
+        # observation is from the actor's POV; normalise stacks to seat ids
+        "stacks": {me: pub.get("your_stack"), _other(me): pub.get("opp_stack")},
+        "invalid": invalid,
+        "latency_ms": (s.get("response") or {}).get("metadata", {}).get("latency_ms"),
+        "thinking": thinking,
+        "trunc": _truncated(thinking, invalid),
+    }
+
+
+def build_holdem():
+    """Heads-up Hold'em: one file per pairing+rep; each hand is an episode.
+
+    The reasoning lives in match.jsonl (the tournament JSON drops it); hole cards
+    are gathered per player from their own observations (an actor sees only its
+    own hole), so a player who folds preflop without acting stays face-down.
+    """
+    path = os.path.join(HOLDEM_DIR, "tournament_data.json")
+    if not os.path.exists(path):
+        print(f"skip holdem: no data at {path}")
+        return
+    data = json.load(open(path))
+    out_dir = os.path.join(HOLDEM_DIR, "replays", "holdem")
+    os.makedirs(out_dir, exist_ok=True)
+
+    manifest_pairs = []
+    for g in data["games"]:
+        a, b, rep = g["a"], g["b"], g["rep"]
+        think = _thinking_lookup(os.path.join(HOLDEM_DIR, f"{a}__vs__{b}__r{rep}"))
+
+        hands, man_hands = [], []
+        for e in g["episodes"]:
+            holes = {}
+            moves = []
+            for s in e["steps"]:
+                hole = s["observation"]["private"].get("hole")
+                if hole and s["player"] not in holes:
+                    holes[s["player"]] = hole
+                moves.append(_holdem_move(s, think.get((e["episode"], s["step"]), "")))
+            hands.append({
+                "episode": e["episode"],
+                "seat_assignment": e["seat_assignment"],
+                "holes": holes,
+                "big_blind": e.get("big_blind"),
+                "final_board": e.get("final_board", []),
+                "hand_categories": e.get("hand_categories"),
+                "winner": e.get("winner"),
+                "winner_name": e.get("winner_name"),
+                "returns": e["returns"],
+                "reason": e.get("reason"),
+                "length": e["length"],
+                "moves": moves,
+            })
+            man_hands.append({
+                "i": e["episode"], "winner": e.get("winner_name"),
+                "reason": e.get("reason"), "length": e["length"],
+                "returns": e["returns"],
+            })
+
+        fname = f"{a}__vs__{b}__r{rep}.json"
+        json.dump({"game": "holdem", "a": a, "b": b, "rep": rep, "episodes": hands},
+                  open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
+        manifest_pairs.append({"file": fname, "a": a, "b": b, "rep": rep,
+                               "episodes": man_hands})
+
+    manifest = {"game": "holdem", "pairs": manifest_pairs}
+    json.dump(manifest, open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8"))
+    total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
+    largest = max(os.path.getsize(os.path.join(out_dir, p["file"])) for p in manifest_pairs)
+    print(f"[holdem] wrote {len(manifest_pairs)} pairings + manifest to {out_dir} "
+          f"({total/1e6:.1f} MB total · largest {largest/1e6:.1f} MB)")
+
+
 def main():
     for game, cfg in GAMES.items():
         path = os.path.join(DATA_DIR, f"{game}_data.json")
@@ -184,6 +278,7 @@ def main():
             print(f"skip {game}: no data at {path}")
             continue
         build_game(game, cfg["need"])
+    build_holdem()
 
 
 if __name__ == "__main__":

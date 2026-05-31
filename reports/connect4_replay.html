@@ -158,6 +158,18 @@
   .hidden{display:none;}
   .hint{color:var(--faint); font-size:12.5px; margin-top:10px;}
   code{font-family:var(--mono); background:#11141d; padding:1px 5px; border-radius:5px;}
+  .summary{margin-top:24px; background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
+  .movelist{display:flex; flex-wrap:wrap; gap:7px; padding:16px; max-height:190px; overflow:auto;}
+  .mv{display:inline-flex; align-items:center; gap:6px; background:#141926; border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:5px 9px; font-family:var(--mono); font-size:12px; cursor:pointer; transition:.12s;}
+  .mv:hover{border-color:var(--accent);}
+  .mv.cur{border-color:var(--accent); background:#16263a; color:#fff; box-shadow:0 0 0 1px var(--accent);}
+  .mv.trunc{border-color:rgba(251,146,60,.5);}
+  .mv .n{color:var(--faint); font-size:11px;}
+  .mv .d{width:11px; height:11px; border-radius:50%; flex:none;}
+  .mv .d.p0{background:#1c1c20; box-shadow:inset 0 0 0 1px rgba(255,255,255,.32);}
+  .mv .d.p1{background:#eef1f5;}
+  .movelist::-webkit-scrollbar{width:8px;} .movelist::-webkit-scrollbar-thumb{background:#283248; border-radius:8px;}
 
   /* page-load reveal */
   .reveal{opacity:0; transform:translateY(10px); animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;}
@@ -210,6 +222,10 @@
       <div class="phead">Move Analysis</div>
       <div class="pbody" id="panel"></div>
     </div>
+  </div>
+  <div class="summary reveal" style="animation-delay:.3s">
+    <div class="phead">Action summary · click to jump</div>
+    <div class="movelist" id="movelist"></div>
   </div>
 </div>
 
@@ -354,6 +370,20 @@ function render(animateLast=false) {
   $("prev").disabled = cursor===0;
   $("next").disabled = cursor===ep.moves.length;
   renderPanel();
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  ml.innerHTML = ep.moves.map((m,i)=>{
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    return `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d ${seatColor(m.player)}"></span>col ${m.col}${m.trunc?" ⚠":""}</button>`;
+  }).join("");
+  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
 }
 
 function renderPanel() {
