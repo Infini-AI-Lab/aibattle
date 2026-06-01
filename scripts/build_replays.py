@@ -326,6 +326,198 @@ def build_holdem():
           f"({total/1e6:.1f} MB total · largest {largest/1e6:.1f} MB)")
 
 
+MATCH_DIR = "runs/match_tournament"
+TABLE_DIR = "runs/table_tournament"
+
+
+def _think_of(s: dict) -> str:
+    return _split_thinking((s.get("response") or {}).get("raw_output") or "")
+
+
+def _meta(s: dict, key: str):
+    return (s.get("response") or {}).get("metadata", {}).get(key)
+
+
+def _group_by_hand(steps: list, key: str) -> "dict":
+    """Steps in play order grouped by their hand index, preserving order."""
+    hands = {}
+    for s in steps:
+        h = s["observation"]["public"].get(key)
+        hands.setdefault(h, []).append(s)
+    return hands
+
+
+def _holes_from_steps(steps: list) -> dict:
+    """{player: [card, card]} gathered from each actor's own observation.
+
+    Heads-up/ring hands only reveal an actor's own hole, so a player who never
+    acts (e.g. folds out of the blinds without a decision) stays face-down.
+    """
+    holes = {}
+    for s in steps:
+        hole = s["observation"]["private"].get("hole")
+        if hole and s["player"] not in holes:
+            holes[s["player"]] = hole
+    return holes
+
+
+def _match_move(s: dict) -> dict:
+    """One betting action in a heads-up match hand (carried stacks)."""
+    pub = s["observation"]["public"]
+    me = s["player"]
+    invalid = bool(s.get("invalid"))
+    thinking = _think_of(s)
+    return {
+        "ply": s["step"], "player": me, "agent": s["agent_name"],
+        "action": s["selected_action"], "amount": s.get("selected_amount"),
+        "pos": pub.get("position"), "street": pub.get("street"),
+        "board": pub.get("board", []), "pot": pub.get("pot"),
+        "to_call": pub.get("to_call"),
+        # in-hand chip stacks (carry across hands in a match)
+        "stacks": {me: pub.get("your_stack"), _other(me): pub.get("opp_stack")},
+        # match-level chip totals at the start of this hand
+        "chips": {me: pub.get("match_your_chips"), _other(me): pub.get("match_opp_chips")},
+        "invalid": invalid, "latency_ms": _meta(s, "latency_ms"),
+        "tokens": _meta(s, "completion_tokens"),
+        "thinking": thinking, "trunc": _truncated(thinking, invalid),
+    }
+
+
+def build_match():
+    """Heads-up MATCH mode: one file per pairing; a match is many hands with
+    carried stacks. The aggregate match_data.json drops steps, so we read the
+    per-episode ep*.json files (thinking lives inline in response.raw_output)."""
+    pair_dirs = sorted(d for d in glob.glob(os.path.join(MATCH_DIR, "*__vs__*"))
+                       if os.path.isdir(d))
+    if not pair_dirs:
+        print(f"skip match: no pair dirs under {MATCH_DIR}")
+        return
+    out_dir = os.path.join(MATCH_DIR, "replays", "match")
+    os.makedirs(out_dir, exist_ok=True)
+
+    manifest_pairs = []
+    for pd in pair_dirs:
+        a, b = os.path.basename(pd).split("__vs__")
+        ep_files = sorted(glob.glob(os.path.join(pd, "ep*.json")))
+        matches, man_matches = [], []
+        for path in ep_files:
+            o = json.load(open(path, encoding="utf-8"))
+            hsmap = {hs["hand"]: hs for hs in o.get("hand_summaries", [])}
+            hands = _group_by_hand(o["steps"], "match_hand")
+            hand_objs = []
+            for hno in sorted(hands, key=lambda x: (x is None, x)):
+                steps_h = hands[hno]
+                moves = [_match_move(s) for s in steps_h]
+                pub0 = steps_h[0]["observation"]["public"]
+                p0 = steps_h[0]["player"]
+                hs = hsmap.get(hno, {})
+                hand_objs.append({
+                    "hand": hno, "button": hs.get("button"),
+                    "winner": hs.get("winner"), "reason": hs.get("reason"),
+                    "deltas": hs.get("deltas"), "stacks_after": hs.get("stacks_after"),
+                    "chips_before": {p0: pub0.get("match_your_chips"),
+                                     _other(p0): pub0.get("match_opp_chips")},
+                    "big_blind": o.get("big_blind"),
+                    "holes": _holes_from_steps(steps_h),
+                    "final_board": max((m["board"] for m in moves), key=len, default=[]),
+                    "moves": moves,
+                })
+            matches.append({
+                "episode": o["episode"], "seat_assignment": o["seat_assignment"],
+                "winner": o.get("winner"), "winner_name": o.get("winner_name"),
+                "returns": o.get("returns"), "final_stacks": o.get("final_stacks"),
+                "hands_played": o.get("hands_played"), "reason": o.get("reason"),
+                "max_hands": o.get("max_hands"), "big_blind": o.get("big_blind"),
+                "hands": hand_objs,
+            })
+            man_matches.append({"i": o["episode"], "winner": o.get("winner_name"),
+                                "hands": o.get("hands_played"), "reason": o.get("reason")})
+
+        fname = f"match__{a}__vs__{b}.json"
+        json.dump({"game": "match", "a": a, "b": b, "episodes": matches},
+                  open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
+        manifest_pairs.append({"file": fname, "a": a, "b": b, "episodes": man_matches})
+
+    json.dump({"game": "match", "pairs": manifest_pairs},
+              open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8"))
+    total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
+    print(f"[match] wrote {len(manifest_pairs)} pairings + manifest to {out_dir} "
+          f"({total/1e6:.1f} MB total)")
+
+
+def _table_move(s: dict) -> dict:
+    """One betting action at a 5-handed table. The per-step `seats` snapshot
+    carries every player's live stack/status/committed, so the viewer can draw
+    the whole table from each move alone."""
+    pub = s["observation"]["public"]
+    me = s["player"]
+    invalid = bool(s.get("invalid"))
+    thinking = _think_of(s)
+    return {
+        "ply": s["step"], "player": me, "agent": s["agent_name"],
+        "action": s["selected_action"], "amount": s.get("selected_amount"),
+        "street": pub.get("street"), "board": pub.get("board", []),
+        "pot": pub.get("pot"), "to_call": pub.get("to_call"),
+        "button": pub.get("button"), "seats": pub.get("seats"),
+        "invalid": invalid, "latency_ms": _meta(s, "latency_ms"),
+        "tokens": _meta(s, "completion_tokens"),
+        "thinking": thinking, "trunc": _truncated(thinking, invalid),
+    }
+
+
+def build_table():
+    """Multi-agent TABLE mode: one file per session (a session = up to N hands
+    among all 5 models, scored by finishing rank). Steps come from the
+    per-episode ep*.json files under runs/table_tournament/table/."""
+    ep_files = sorted(glob.glob(os.path.join(TABLE_DIR, "table", "ep*.json")))
+    if not ep_files:
+        print(f"skip table: no ep files under {TABLE_DIR}/table")
+        return
+    out_dir = os.path.join(TABLE_DIR, "replays", "table")
+    os.makedirs(out_dir, exist_ok=True)
+
+    man_sessions = []
+    for path in ep_files:
+        o = json.load(open(path, encoding="utf-8"))
+        seat = o["seat_assignment"]
+        hsmap = {hs["hand"]: hs for hs in o.get("hand_summaries", [])}
+        hands = _group_by_hand(o["steps"], "table_hand")
+        hand_objs = []
+        for hno in sorted(hands, key=lambda x: (x is None, x)):
+            steps_h = hands[hno]
+            moves = [_table_move(s) for s in steps_h]
+            hs = hsmap.get(hno, {})
+            hand_objs.append({
+                "hand": hno,
+                "button": hs.get("button") or (moves[0]["button"] if moves else None),
+                "winner": hs.get("winner"), "reason": hs.get("reason"),
+                "deltas": hs.get("deltas"), "stacks_after": hs.get("stacks_after"),
+                "holes": _holes_from_steps(steps_h),
+                "final_board": max((m["board"] for m in moves), key=len, default=[]),
+                "moves": moves,
+            })
+        session = {
+            "episode": o["episode"], "seat_assignment": seat,
+            "num_players": o.get("num_players"), "ranking": o.get("ranking"),
+            "rank_of": o.get("rank_of"), "final_stacks": o.get("final_stacks"),
+            "bust_order": o.get("bust_order"), "hands_played": o.get("hands_played"),
+            "reason": o.get("reason"), "hands": hand_objs,
+        }
+        fname = f"session{o['episode']:03d}.json"
+        json.dump(session, open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
+        man_sessions.append({
+            "file": fname, "i": o["episode"], "hands": o.get("hands_played"),
+            "ranking": [seat.get(p, p) for p in (o.get("ranking") or [])],
+        })
+
+    json.dump({"game": "table", "num_players": man_sessions and 5,
+               "sessions": man_sessions},
+              open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8"))
+    total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
+    print(f"[table] wrote {len(man_sessions)} sessions + manifest to {out_dir} "
+          f"({total/1e6:.1f} MB total)")
+
+
 def main():
     for game, cfg in GAMES.items():
         path = os.path.join(DATA_DIR, f"{game}_data.json")
@@ -334,6 +526,8 @@ def main():
             continue
         build_game(game, cfg["need"])
     build_holdem()
+    build_match()
+    build_table()
 
 
 if __name__ == "__main__":

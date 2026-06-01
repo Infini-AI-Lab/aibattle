@@ -14,9 +14,47 @@ import json
 import os
 from collections import defaultdict
 
+import poker_behavior as pb
+
 DATA = "runs/match_tournament/match_data.json"
+EP_GLOB = "runs/match_tournament/*__vs__*/ep*.json"
 OUT_HTML = "runs/match_tournament/match_report.html"
 REPORT_DIR = "reports"
+
+NAV_ITEMS = [
+    ("index.html", "Overview", "overview"),
+    ("connect4_report.html", "🔴 Connect Four", "connect4"),
+    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
+    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
+    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
+    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
+    ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
+]
+
+NAV_CSS = """
+  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
+    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #232838; }
+  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
+    font-size:15px; margin-right:10px; }
+  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
+    padding:16px 2px; border-bottom:2px solid transparent; }
+  .navbar a.nav:hover { color:#e6e6e6; }
+  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
+"""
+
+
+def _navbar(active: str) -> str:
+    links = "".join(
+        f"<a class='nav{' active' if key == active else ''}' href='{href}'>{label}</a>"
+        for href, label, key in NAV_ITEMS)
+    return ("<nav class='navbar'>"
+            "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
+            f"{links}</nav>")
 
 _STYLE = """
   body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
@@ -76,10 +114,12 @@ def analyze(data: dict) -> dict:
             "leaderboard": rows, "h2h_wins": h2h, "h2h_played": h2h_played}
 
 
-def render_html(rep: dict) -> str:
+def render_html(rep: dict, beh: dict) -> str:
     models = rep["models"]; lb = rep["leaderboard"]
     labels = [r["model"] for r in lb]
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
+    wincols = pb.colors_for(labels)
+    beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
 
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -101,10 +141,11 @@ def render_html(rep: dict) -> str:
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Match Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<style>{_STYLE}</style></head>
-<body><div class="wrap">
+<style>{NAV_CSS}{_STYLE}</style></head>
+<body>{_navbar("match")}<div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em Match Mode</h1>
-  <div class="sub">Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · primary metric: match win rate</div>
+  <div class="sub">Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
+  <a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
   <h2>Leaderboard</h2>
@@ -115,10 +156,11 @@ def render_html(rep: dict) -> str:
   </table>
   <h2>Head-to-head <span class="note">(row's wins / matches vs column)</span></h2>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
+  {beh_html}
   <script>
   new Chart(document.getElementById('wr'), {{
     type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:'#4ade80'}}]}},
+    data:{{labels:{json.dumps(labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:{json.dumps(wincols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},
       scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}},
                x:{{grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}}}}}}
@@ -130,7 +172,9 @@ def render_html(rep: dict) -> str:
 def main():
     data = json.load(open(DATA))
     rep = analyze(data)
-    html = render_html(rep)
+    beh = pb.behavior(EP_GLOB, "match_hand", rep["models"])
+    rep["behavior"] = beh
+    html = render_html(rep, beh)
     os.makedirs(REPORT_DIR, exist_ok=True)
     for path in (OUT_HTML, os.path.join(REPORT_DIR, "match_tournament_report.html")):
         with open(path, "w", encoding="utf-8") as f:

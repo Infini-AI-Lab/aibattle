@@ -56,7 +56,9 @@ NAV_ITEMS = [
     ("index.html", "Overview", "overview"),
     ("connect4_report.html", "🔴 Connect Four", "connect4"),
     ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
-    ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
+    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
+    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
+    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
     ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
 ]
 
@@ -553,16 +555,39 @@ def render_index(reps: dict) -> str:
             f" · first-mover {rep['first_player_win_rate']*100:.0f}%",
             f"🏆 {champ} <span class='metric'>Elo {rep['elo'][champ]}</span>")
 
+    # Three Hold'em formats, distinct enough to stand alone: 1-Hand (each hand
+    # scored independently, bb/100), Match (heads-up, stacks carried, win the
+    # match), and Table (5-handed ring, scored by finishing rank).
     holdem_path = os.path.join(REPORT_DIR, "holdem_tournament_analysis.json")
     if os.path.exists(holdem_path):
         h = json.load(open(holdem_path))
         pm = h["per_model"]
         champ = max(h["models"], key=lambda m: pm[m]["bb_per_100"])
         cards += _index_card(
-            "holdem_tournament_report.html", "🃏 Texas Hold'em",
-            f"{h['num_games']} tables · {h['hands_per_game']} hands each"
-            f" · {len(h['models'])} models",
+            "holdem_tournament_report.html", "🃏 Hold'em 1-Hand",
+            f"heads-up · {h['num_games']} tables · {h['hands_per_game']} hands each"
+            f" · per-hand bb/100",
             f"🏆 {champ} <span class='metric'>{pm[champ]['bb_per_100']:+.1f} bb/100</span>")
+
+    match_path = os.path.join(REPORT_DIR, "match_tournament_analysis.json")
+    if os.path.exists(match_path):
+        m = json.load(open(match_path))
+        champ = m["leaderboard"][0]
+        cards += _index_card(
+            "match_tournament_report.html", "🃏 Hold'em Match",
+            f"heads-up · {m['episodes_per_pair']} matches/pair · up to "
+            f"{m['max_hands']} hands · stacks carried",
+            f"🏆 {champ['model']} <span class='metric'>{champ['win_rate']*100:.0f}% match wins</span>")
+
+    table_path = os.path.join(REPORT_DIR, "table_tournament_analysis.json")
+    if os.path.exists(table_path):
+        t = json.load(open(table_path))
+        champ = max(t["leaderboard"], key=lambda r: (r["top1_rate"], -r["avg_rank"]))
+        cards += _index_card(
+            "table_tournament_report.html", "🃏 Hold'em Table",
+            f"{t['num_players']}-handed · {t['sessions']} sessions · up to "
+            f"{t['max_hands']} hands · top-1 rate",
+            f"🏆 {champ['model']} <span class='metric'>{champ['top1_rate']*100:.0f}% top-1</span>")
 
     # Kuhn is a solved game scored against GTO; the leaderboard is pre-ranked, so
     # the champion is simply the first entry. Net chips/hand is the headline.

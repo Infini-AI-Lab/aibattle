@@ -248,7 +248,9 @@ def render_html(rep: dict) -> str:
            "<a class='nav' href='index.html'>Overview</a>"
            "<a class='nav' href='connect4_report.html'>🔴 Connect Four</a>"
            "<a class='nav' href='gomoku_report.html'>⚫ Gomoku-Lite</a>"
-           "<a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em</a>"
+           "<a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em 1-Hand</a>"
+           "<a class='nav' href='match_tournament_report.html'>🃏 Hold'em Match</a>"
+           "<a class='nav' href='table_tournament_report.html'>🃏 Hold'em Table</a>"
            "<a class='nav active' href='kuhn_tournament_report.html'>🃏 Kuhn</a></nav>")
 
     return f"""<!DOCTYPE html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Battle Arena — Hold'em Replay</title>
+<title>AI Battle Arena — Hold'em Match Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,19 +32,28 @@
   .wrap{max-width:1180px; margin:0 auto; padding:30px 24px 90px;}
   .eyebrow{font-family:var(--disp); font-weight:600; letter-spacing:.32em; text-transform:uppercase; font-size:12px; color:var(--accent); margin-bottom:6px;}
   h1{font-family:var(--disp); font-weight:700; font-size:38px; letter-spacing:.01em; margin:0 0 4px; line-height:1;}
-  .lede{color:var(--muted); font-size:13.5px; max-width:660px; margin-bottom:22px;}
+  .lede{color:var(--muted); font-size:13.5px; max-width:680px; margin-bottom:22px;}
   .lede b{color:#cdd3e1; font-weight:600;}
 
-  .selectors{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:18px;}
+  .selectors{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px;}
   label.sel{display:block; font-family:var(--disp); font-weight:600; letter-spacing:.14em; text-transform:uppercase; font-size:11px; color:var(--faint); margin-bottom:5px;}
   select{appearance:none; background:#11141d; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 34px 9px 13px; font-family:var(--body); font-size:13px; cursor:pointer;
     background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238b93a7'/></svg>"); background-repeat:no-repeat; background-position:right 13px center;}
   select:hover{border-color:#2f3a52;} select:focus{outline:none; border-color:var(--accent);}
 
+  /* match scoreboard */
+  .matchbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; padding:12px 16px;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;}
+  .mside{display:flex; align-items:baseline; gap:8px;}
+  .mside .nm{font-family:var(--disp); font-weight:700; font-size:16px; color:#fff;}
+  .mside .ch{font-family:var(--mono); font-size:15px; color:#bdf0ff;}
+  .mbar{flex:1; min-width:160px; height:12px; border-radius:999px; overflow:hidden; background:#f472b6; display:flex;}
+  .mbar .fill{background:#60a5fa; height:100%;}
+  .mtag{font-family:var(--disp); font-weight:600; letter-spacing:.1em; text-transform:uppercase; font-size:11px; color:var(--faint);}
+
   .stage{display:grid; grid-template-columns:minmax(360px,1fr) minmax(300px,420px); gap:28px; align-items:start;}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
 
-  /* poker table */
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
     background:radial-gradient(130% 100% at 50% 50%,#15573f,#0c3a2c 68%,#0a2a21);
     border:1px solid #1f6b52; border-radius:90px/64px; padding:24px 22px;
@@ -79,6 +88,8 @@
   .card.red{color:#d4183d;}
   .card.back{background:repeating-linear-gradient(45deg,#2b3656,#2b3656 4px,#222c46 4px,#222c46 8px); border:1px solid #3c4868;}
   .card.empty{background:rgba(255,255,255,.05); border:1px dashed rgba(255,255,255,.14); box-shadow:none;}
+  .card.unknown{background:#241b2e; border:1px dashed #6d5a8a; color:#b794d6; box-shadow:none; justify-content:center;}
+  .card.unknown::after{content:"?"; font-size:20px;}
 
   .deck{margin-top:18px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px;}
   .deckrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
@@ -144,21 +155,24 @@
   <a class="nav" href="index.html">Overview</a>
   <a class="nav" href="connect4_report.html">🔴 Connect Four</a>
   <a class="nav" href="gomoku_report.html">⚫ Gomoku-Lite</a>
-  <a class="nav active" href="holdem_tournament_report.html">🃏 Hold'em 1-Hand</a>
-  <a class="nav" href="match_tournament_report.html">🃏 Hold'em Match</a>
+  <a class="nav" href="holdem_tournament_report.html">🃏 Hold'em 1-Hand</a>
+  <a class="nav active" href="match_tournament_report.html">🃏 Hold'em Match</a>
   <a class="nav" href="table_tournament_report.html">🃏 Hold'em Table</a>
   <a class="nav" href="kuhn_tournament_report.html">🃏 Kuhn</a>
 </nav>
 <div class="wrap">
   <div class="eyebrow reveal" style="animation-delay:.02s">Match Replay</div>
-  <h1 class="reveal" style="animation-delay:.05s">TEXAS HOLD'EM</h1>
-  <div class="lede reveal" style="animation-delay:.1s">Heads-up, hand by hand. Step through the betting; <b>both hole cards are shown</b>
-    for analysis. Hit <b>Show reasoning</b> to see what the model was thinking for each action.</div>
+  <h1 class="reveal" style="animation-delay:.05s">HOLD'EM · MATCH</h1>
+  <div class="lede reveal" style="animation-delay:.1s">Heads-up duel — stacks carry hand to hand until one player busts (or the hand cap hits).
+    Pick a <b>match</b>, then step through any <b>hand</b>. The scoreboard tracks the running chip count; <b>both hole cards</b> are shown.</div>
 
   <div class="selectors reveal" style="animation-delay:.14s">
     <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
-    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+    <div><label class="sel">Match</label><select id="matchSel"></select></div>
+    <div><label class="sel">Hand</label><select id="handSel"></select></div>
   </div>
+
+  <div class="matchbar reveal" id="matchbar" style="animation-delay:.16s"></div>
 
   <div class="stage">
     <div class="reveal" style="animation-delay:.2s">
@@ -177,6 +191,7 @@
           <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
           <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
           <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+          <button class="btn" id="nexthand" title="Next hand">Hand ▶▶</button>
         </div>
         <div class="scrub">
           <input type="range" id="slider" min="0" value="0">
@@ -197,11 +212,17 @@
 </div>
 
 <script>
-const BASE = "runs/tournament/replays/holdem/";
+const BASE = "runs/match_tournament/replays/match/";
 const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
 const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
-let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+// one colour per MODEL (kept in sync with scripts/poker_behavior.py), so a model
+// keeps its colour across matches even though seats swap.
+const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
+                  "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
+function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
+let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
+    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
@@ -213,17 +234,19 @@ async function init(){
     return;
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
-    `<option value="${i}">${p.a} vs ${p.b} · rep ${p.rep}</option>`).join("");
+    `<option value="${i}">${p.a} vs ${p.b}</option>`).join("");
   $("pairSel").onchange = () => loadPair(+$("pairSel").value);
-  $("epSel").onchange = () => selectEp(+$("epSel").value);
+  $("matchSel").onchange = () => selectMatch(+$("matchSel").value);
+  $("handSel").onchange = () => selectHand(+$("handSel").value);
   $("first").onclick = () => { stop(); cursor=0; render(); };
   $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
   $("next").onclick  = () => { stop(); step(1); };
   $("play").onclick  = togglePlay;
   $("speed").onclick = cycleSpeed;
+  $("nexthand").onclick = nextHand;
   $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
   document.addEventListener("keydown", e => {
-    if (!ep) return;
+    if (!hand) return;
     if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
@@ -234,42 +257,54 @@ async function init(){
 async function loadPair(i){
   const p = manifest.pairs[i];
   pairData = await (await fetch(BASE + p.file)).json();
-  $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
-    const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
-    const n = e.moves.length;
-    return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
+  $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
+    const w = mt.winner_name || "—";
+    return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
   }).join("");
-  selectEp(0);
+  selectMatch(0);
+}
+
+function selectMatch(idx){
+  match = pairData.episodes[idx];
+  $("handSel").innerHTML = match.hands.map((h,hidx) => {
+    const wn = h.winner ? (match.seat_assignment[h.winner]||h.winner) : "split";
+    return `<option value="${hidx}">Hand ${h.hand}/${match.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
+  }).join("");
+  selectHand(0);
 }
 
 function fmt(n){ return (n>0?"+":"") + n; }
 function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
 
-function selectEp(idx){
+function selectHand(hidx){
   stop();
-  ep = pairData.episodes[idx];
+  hand = match.hands[hidx];
+  $("handSel").value = hidx;
   cursor = 0;
-  // dealer/button is whoever's observation says "button"
-  btnSeat = null;
-  for (const m of ep.moves){ if (m.pos && /button/i.test(m.pos)){ btnSeat = m.player; break; } }
-  $("slider").max = ep.moves.length;
+  btnSeat = hand.button;
+  $("slider").max = hand.moves.length;
   render();
+}
+
+function nextHand(){
+  const hidx = +$("handSel").value;
+  if (hidx < match.hands.length - 1) selectHand(hidx + 1);
 }
 
 // table state shown at `cursor`: pre-action state of move[cursor-1]; at the end
 // reveal the full board and the result.
 function stateAt(k){
-  if (!ep.moves.length) return {board:ep.final_board||[], pot:0, stacks:{}, acting:null, last:null, result:true};
-  if (k===0){ const m=ep.moves[0]; return {board:m.board, pot:m.pot, stacks:m.stacks, acting:m.player, last:null, result:false}; }
-  const m = ep.moves[k-1];
-  const result = (k===ep.moves.length);
-  const board = (result && (ep.final_board||[]).length > (m.board||[]).length) ? ep.final_board : m.board;
+  const moves = hand.moves;
+  if (!moves.length) return {board:hand.final_board||[], pot:0, stacks:{}, acting:null, last:null, result:true};
+  if (k===0){ const m=moves[0]; return {board:m.board, pot:m.pot, stacks:m.stacks, acting:m.player, last:null, result:false}; }
+  const m = moves[k-1];
+  const result = (k===moves.length);
+  const board = (result && (hand.final_board||[]).length > (m.board||[]).length) ? hand.final_board : m.board;
   return {board, pot:m.pot, stacks:m.stacks, acting: result ? null : m.player, last:m, result};
 }
 
 function cardHTML(card, faceUp){
-  if (!faceUp) return `<div class="card back"></div>`;
-  if (!card) return `<div class="card back"></div>`;
+  if (!faceUp || !card) return `<div class="card back"></div>`;
   const r = card.slice(0,-1), s = card.slice(-1).toLowerCase();
   const red = (s==="d"||s==="h");
   return `<div class="card${red?" red":""}"><span class="r">${r}</span><span class="s">${SUIT[s]||s}</span></div>`;
@@ -284,18 +319,19 @@ function actLabel(m){
 }
 
 function seatHTML(seat, st){
-  const agent = ep.seat_assignment[seat] || seat;
+  const agent = match.seat_assignment[seat] || seat;
   const stack = st.stacks[seat];
-  const holes = ep.holes[seat];
+  const holes = hand.holes[seat];
   const faceUp = !!holes;
   const isBtn = seat===btnSeat;
   const posBadge = `<span class="pos${isBtn?" btn":""}">${isBtn?"BTN/SB":"BB"}</span>`;
   const acting = st.acting===seat;
-  const isWinner = st.result && ep.winner===seat;
+  const isWinner = st.result && hand.winner===seat;
   const bubble = (st.last && st.last.player===seat)
     ? `<div class="bubble${/fold/i.test(st.last.action)?" fold":""}">${actLabel(st.last)}</div>` : "";
-  const ret = st.result
-    ? `<span class="ret ${ep.returns[seat]>=0?"pos":"neg"}">${fmt(ep.returns[seat])}</span>` : "";
+  const delta = hand.deltas ? hand.deltas[seat] : null;
+  const ret = (st.result && delta!=null)
+    ? `<span class="ret ${delta>=0?"pos":"neg"}">${fmt(delta)}</span>` : "";
   const cards = (holes && holes.length ? holes : [null,null]).map(c => cardHTML(c, faceUp)).join("");
   const cls = "seat" + (acting?" acting":"") + (isWinner?" winner":"");
   return `<div class="${cls}">${bubble}
@@ -305,21 +341,42 @@ function seatHTML(seat, st){
     <div class="holes">${cards}</div></div>`;
 }
 
+function renderMatchbar(){
+  // running chip count = live in-hand stacks at the current cursor (they carry)
+  const st = stateAt(cursor);
+  const a="player_0", b="player_1";
+  let ca = st.stacks[a], cb = st.stacks[b];
+  if (ca==null || cb==null){ ca = hand.chips_before[a]; cb = hand.chips_before[b]; }
+  const total = (ca||0)+(cb||0) || 1;
+  const pct = Math.round((ca||0)/total*100);
+  $("matchbar").innerHTML =
+    `<span class="mtag">Match standing</span>` +
+    `<div class="mside"><span class="nm">${match.seat_assignment[a]}</span><span class="ch">${ca!=null?ca:"—"}</span></div>` +
+    `<div class="mbar" title="chip share"><div class="fill" style="width:${pct}%"></div></div>` +
+    `<div class="mside"><span class="ch">${cb!=null?cb:"—"}</span><span class="nm">${match.seat_assignment[b]}</span></div>`;
+}
+
 function render(){
   const st = stateAt(cursor);
   $("seatTop").innerHTML = seatHTML("player_0", st);
   $("seatBot").innerHTML = seatHTML("player_1", st);
   $("pot").textContent = st.pot!=null ? st.pot : "—";
-  $("street").textContent = (st.last ? st.last.street : (ep.moves[0]?ep.moves[0].street:"preflop")) || "preflop";
-  // community board: 5 slots
+  $("street").textContent = (st.last ? st.last.street : (hand.moves[0]?hand.moves[0].street:"preflop")) || "preflop";
   const board = st.board || [];
+  // A showdown always uses 5 community cards, but when players are all-in the
+  // runout is dealt with no further decisions, so it's never logged. Mark the
+  // missing slots as unknown rather than implying they were never dealt.
+  const unknown = st.result && hand.reason==="showdown" && board.length<5;
   let cb = "";
-  for (let i=0;i<5;i++) cb += board[i] ? cardHTML(board[i], true) : `<div class="card empty"></div>`;
+  for (let i=0;i<5;i++) cb += board[i] ? cardHTML(board[i], true)
+    : `<div class="card ${unknown?"unknown":"empty"}"></div>`;
   $("cboard").innerHTML = cb;
   $("slider").value = cursor;
-  $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
+  $("movecount").textContent = `action ${cursor} / ${hand.moves.length}`;
   $("prev").disabled = cursor===0;
-  $("next").disabled = cursor===ep.moves.length;
+  $("next").disabled = cursor===hand.moves.length;
+  $("nexthand").disabled = (+$("handSel").value) >= match.hands.length-1;
+  renderMatchbar();
   renderPanel(st);
   renderMoveList();
 }
@@ -329,12 +386,12 @@ function jump(k){ stop(); cursor=k; render(); }
 function renderMoveList(){
   const ml=$("movelist");
   let html="", lastStreet=null;
-  ep.moves.forEach((m,i)=>{
+  hand.moves.forEach((m,i)=>{
     if (m.street!==lastStreet){ html += `<div class="streetsep">${m.street}</div>`; lastStreet=m.street; }
     const cur = cursor===i+1 ? " cur" : "";
     const tr = m.trunc ? " trunc" : "";
     html += `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
-      `<span class="d ${m.player}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
+      `<span class="d" style="background:${scol(m.player)}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
   });
   ml.innerHTML = html;
   const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
@@ -344,19 +401,20 @@ function renderPanel(st){
   const p = $("panel");
   let html = "";
   if (cursor===0){
-    html += `<div class="movenum">Hand start</div>` +
-      `<div class="meta">Blinds posted (BB ${ep.big_blind}). Button/SB acts first preflop.<br>` +
-      `Both hole cards are shown for analysis.</div>` +
+    html += `<div class="movenum">Hand ${hand.hand} start</div>` +
+      `<div class="meta">Blinds posted (BB ${hand.big_blind}). Button/SB acts first preflop.<br>` +
+      `Chips entering: ${match.seat_assignment.player_0} ${hand.chips_before.player_0} — ` +
+      `${hand.chips_before.player_1} ${match.seat_assignment.player_1}.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`;
     p.innerHTML = html; return;
   }
-  const m = ep.moves[cursor-1];
+  const m = hand.moves[cursor-1];
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
   if (st.result) html += resultBlock();
-  html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
-    `<div class="actor"><span class="who"><span class="seatdot ${m.player}"></span>${m.agent}</span>` +
+  html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
     `<span class="act${/fold/i.test(m.action)?" fold":""}">${actLabel(m)}</span></div>` +
     `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
@@ -370,14 +428,15 @@ function renderPanel(st){
 }
 
 function resultBlock(){
-  const w = ep.winner_name;
-  let cats = "";
-  if (ep.reason==="showdown" && ep.hand_categories){
-    cats = " · " + Object.keys(ep.seat_assignment).map(s =>
-      `${ep.seat_assignment[s]}: ${ep.hand_categories[s]}`).join(" vs ");
-  }
-  return `<div class="result"><div class="rt">🏆 ${w} wins ${fmt(ep.returns[ep.winner])}</div>` +
-    `<div class="rs">by ${ep.reason}${cats}</div></div>`;
+  const w = hand.winner ? (match.seat_assignment[hand.winner]||hand.winner) : null;
+  const d = hand.deltas || {};
+  const title = w ? `🏆 ${w} wins the hand` : "🤝 Split pot";
+  const line = Object.keys(match.seat_assignment).map(s =>
+    `${match.seat_assignment[s]} ${fmt(d[s]!=null?d[s]:0)}`).join(" · ");
+  const runout = (hand.reason==="showdown" && (hand.final_board||[]).length<5)
+    ? `<div class="rs" style="color:#c9a0e8">⚠ turn/river not recorded — players were all-in; the board runout isn't logged.</div>` : "";
+  return `<div class="result"><div class="rt">${title}</div>` +
+    `<div class="rs">by ${hand.reason} · ${line}</div>${runout}</div>`;
 }
 
 function toggleThink(id){
@@ -388,14 +447,14 @@ function toggleThink(id){
 }
 
 function step(d){
-  const n=ep.moves.length;
+  const n=hand.moves.length;
   if (cursor+d<0 || cursor+d>n) return;
   cursor+=d; render();
   if (cursor===n) stop();
 }
 function togglePlay(){ playing ? stop() : start(); }
 function start(){
-  if (cursor>=ep.moves.length) cursor=0;
+  if (cursor>=hand.moves.length) cursor=0;
   playing=true; $("play").textContent="⏸ Pause";
   timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
 }

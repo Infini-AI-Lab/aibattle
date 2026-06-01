@@ -27,7 +27,7 @@
   .cgo { margin-top:16px; font-size:13px; color:#60a5fa; }
   @media (max-width:640px) { .cards { grid-template-columns:1fr; } }
 </style></head>
-<body><nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a><a class='nav active' href='index.html'>Overview</a><a class='nav' href='connect4_report.html'>🔴 Connect Four</a><a class='nav' href='gomoku_report.html'>⚫ Gomoku-Lite</a><a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em</a><a class='nav' href='kuhn_tournament_report.html'>🃏 Kuhn</a></nav><div class="wrap">
+<body><nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a><a class='nav active' href='index.html'>Overview</a><a class='nav' href='connect4_report.html'>🔴 Connect Four</a><a class='nav' href='gomoku_report.html'>⚫ Gomoku-Lite</a><a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em 1-Hand</a><a class='nav' href='match_tournament_report.html'>🃏 Hold'em Match</a><a class='nav' href='table_tournament_report.html'>🃏 Hold'em Table</a><a class='nav' href='kuhn_tournament_report.html'>🃏 Kuhn</a></nav><div class="wrap">
   <h1>🎲 AI Battle Arena — Tournaments</h1>
   <div class="sub">LLMs playing perfect-information board games &amp; Texas Hold'em · round-robin · skill analysis</div>
   <div class="cards">
@@ -44,9 +44,21 @@
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="holdem_tournament_report.html">
-          <div class="ctitle">🃏 Texas Hold'em</div>
-          <div class="cmeta">10 tables · 20 hands each · 5 models</div>
+          <div class="ctitle">🃏 Hold'em 1-Hand</div>
+          <div class="cmeta">heads-up · 10 tables · 20 hands each · per-hand bb/100</div>
           <div class="champ">🏆 glm-5p1 <span class='metric'>+60.6 bb/100</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="match_tournament_report.html">
+          <div class="ctitle">🃏 Hold'em Match</div>
+          <div class="cmeta">heads-up · 10 matches/pair · up to 20 hands · stacks carried</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>65% match wins</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="table_tournament_report.html">
+          <div class="ctitle">🃏 Hold'em Table</div>
+          <div class="cmeta">5-handed · 10 sessions · up to 30 hands · top-1 rate</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>40% top-1</span></div>
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="kuhn_tournament_report.html">

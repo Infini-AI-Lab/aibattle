@@ -34,7 +34,9 @@ NAV_ITEMS = [
     ("index.html", "Overview", "overview"),
     ("connect4_report.html", "🔴 Connect Four", "connect4"),
     ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
-    ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
+    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
+    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
+    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
     ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
 ]
 
@@ -536,8 +538,8 @@ def render_html(report: dict) -> str:
   @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
 <body>{_navbar("holdem")}<div class="wrap">
-  <h1>🃏 AI Battle Arena — Heads-Up Hold'em Tournament</h1>
-  <div class="sub">{report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
+  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode</h1>
+  <div class="sub">heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   <a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>

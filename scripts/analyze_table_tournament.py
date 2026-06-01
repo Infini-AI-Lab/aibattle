@@ -13,9 +13,47 @@ import json
 import os
 from collections import defaultdict
 
+import poker_behavior as pb
+
 DATA = "runs/table_tournament/table_data.json"
+EP_GLOB = "runs/table_tournament/table/ep*.json"
 OUT_HTML = "runs/table_tournament/table_report.html"
 REPORT_DIR = "reports"
+
+NAV_ITEMS = [
+    ("index.html", "Overview", "overview"),
+    ("connect4_report.html", "🔴 Connect Four", "connect4"),
+    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
+    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
+    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
+    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
+    ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
+]
+
+NAV_CSS = """
+  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
+    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
+    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #232838; }
+  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
+    font-size:15px; margin-right:10px; }
+  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
+    padding:16px 2px; border-bottom:2px solid transparent; }
+  .navbar a.nav:hover { color:#e6e6e6; }
+  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
+"""
+
+
+def _navbar(active: str) -> str:
+    links = "".join(
+        f"<a class='nav{' active' if key == active else ''}' href='{href}'>{label}</a>"
+        for href, label, key in NAV_ITEMS)
+    return ("<nav class='navbar'>"
+            "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
+            f"{links}</nav>")
 
 _STYLE = """
   body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
@@ -47,47 +85,55 @@ def analyze(data: dict) -> dict:
         m = row["model"]
         row["rank_distribution"] = {str(k): dist[m].get(k, 0) for k in range(1, n + 1)}
         row["bust_rate"] = round(busts[m] / sess, 3)
+    # Rank by top-1 rate (share of sessions finished 1st); break ties by the
+    # lower average finishing rank. The runner sorts data["summary"] by avg_rank,
+    # so re-sort here to make top-1 rate the primary ranking metric.
+    summary.sort(key=lambda r: (-r["top1_rate"], r["avg_rank"]))
     return {"models": models, "num_players": n, "sessions": data["sessions"],
             "max_hands": data["max_hands"], "leaderboard": summary}
 
 
-def render_html(rep: dict) -> str:
+def render_html(rep: dict, beh: dict) -> str:
     n = rep["num_players"]; lb = rep["leaderboard"]
     labels = [r["model"] for r in lb]
     avg_rank = [r["avg_rank"] for r in lb]
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
+    cols = pb.colors_for(labels)
+    beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
     rankhdr = "".join(f"<th>#{k}</th>" for k in range(1, n + 1))
     trows = ""
     for i, r in enumerate(lb, 1):
         rd = r["rank_distribution"]
         rc = "".join(f"<td>{rd.get(str(k),0)}</td>" for k in range(1, n + 1))
         trows += (f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
-                  f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
+                  f"<td>{r['top1_rate']*100:.0f}%</td><td>{r['avg_rank']}</td>"
                   f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>{rc}</tr>")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<style>{_STYLE}</style></head>
-<body><div class="wrap">
+<style>{NAV_CSS}{_STYLE}</style></head>
+<body>{_navbar("table")}<div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em Table Mode</h1>
-  <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · primary metric: average finishing rank (lower is better)</div>
+  <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by top-1 rate (share of sessions won; ties broken by avg finishing rank)</div>
+  <a class="replaybtn" href="table_replay.html">▶ Watch table replays</a>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>
   </div>
   <h2>Leaderboard <span class="note">(+ finishing-place distribution)</span></h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>avg rank</th><th>top-1%</th>
+    <tr><th>#</th><th class='model'>model</th><th>top-1%</th><th>avg rank</th>
         <th>avg final stack</th><th>bust%</th>{rankhdr}</tr>
     {trows}
   </table>
+  {beh_html}
   <script>
   const axc={{grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}};
   new Chart(document.getElementById('ar'),{{type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'avg rank',data:{json.dumps(avg_rank)},backgroundColor:'#60a5fa'}}]}},
+    data:{{labels:{json.dumps(labels)},datasets:[{{label:'avg rank',data:{json.dumps(avg_rank)},backgroundColor:{json.dumps(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,max:{n},...axc}},x:axc}}}}}});
   new Chart(document.getElementById('t1'),{{type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'top-1 %',data:{json.dumps(top1)},backgroundColor:'#4ade80'}}]}},
+    data:{{labels:{json.dumps(labels)},datasets:[{{label:'top-1 %',data:{json.dumps(top1)},backgroundColor:{json.dumps(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,max:100,...axc}},x:axc}}}}}});
   </script>
 </div></body></html>"""
@@ -96,7 +142,9 @@ def render_html(rep: dict) -> str:
 def main():
     data = json.load(open(DATA))
     rep = analyze(data)
-    html = render_html(rep)
+    beh = pb.behavior(EP_GLOB, "table_hand", rep["models"])
+    rep["behavior"] = beh
+    html = render_html(rep, beh)
     os.makedirs(REPORT_DIR, exist_ok=True)
     for path in (OUT_HTML, os.path.join(REPORT_DIR, "table_tournament_report.html")):
         with open(path, "w", encoding="utf-8") as f:
