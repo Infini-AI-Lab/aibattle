@@ -24,7 +24,7 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
-GAMES = ["connect4", "gomoku"]
+GAMES = os.environ.get("BOARD_GAMES", "connect4,gomoku").split(",")
 # qwen3p6-plus dropped: restrictive per-model 429 limit on this account (failed
 # 0/3 isolated calls while the others passed 3/3 under identical load).
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
@@ -42,7 +42,8 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 131072,
+            "timeout_s": int(os.environ.get("BOARD_TIMEOUT", "300")),
         },
         "max_retries": 2,
     }

@@ -1,0 +1,137 @@
+{
+  "models": [
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
+  ],
+  "max_hands": 20,
+  "episodes_per_pair": 10,
+  "leaderboard": [
+    {
+      "model": "kimi-k2p6",
+      "matches": 40,
+      "win_rate": 0.65,
+      "wins": 26,
+      "draws": 0,
+      "busted_out_rate": 0.1,
+      "avg_hands_per_match": 17.1,
+      "avg_win_margin": 94.2
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "matches": 40,
+      "win_rate": 0.575,
+      "wins": 23,
+      "draws": 0,
+      "busted_out_rate": 0.125,
+      "avg_hands_per_match": 16.7,
+      "avg_win_margin": 112.3
+    },
+    {
+      "model": "gpt-oss-120b",
+      "matches": 40,
+      "win_rate": 0.475,
+      "wins": 19,
+      "draws": 0,
+      "busted_out_rate": 0.2,
+      "avg_hands_per_match": 15.8,
+      "avg_win_margin": 119.4
+    },
+    {
+      "model": "glm-5p1",
+      "matches": 40,
+      "win_rate": 0.425,
+      "wins": 17,
+      "draws": 0,
+      "busted_out_rate": 0.225,
+      "avg_hands_per_match": 17.4,
+      "avg_win_margin": 81.5
+    },
+    {
+      "model": "minimax-m2p7",
+      "matches": 40,
+      "win_rate": 0.375,
+      "wins": 15,
+      "draws": 0,
+      "busted_out_rate": 0.275,
+      "avg_hands_per_match": 15.3,
+      "avg_win_margin": 138.1
+    }
+  ],
+  "h2h_wins": {
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0,
+      "gpt-oss-120b": 6,
+      "kimi-k2p6": 5,
+      "glm-5p1": 7,
+      "minimax-m2p7": 5
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 4,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 4,
+      "glm-5p1": 5,
+      "minimax-m2p7": 6
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 5,
+      "gpt-oss-120b": 6,
+      "kimi-k2p6": 0,
+      "glm-5p1": 7,
+      "minimax-m2p7": 8
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": 3,
+      "gpt-oss-120b": 5,
+      "kimi-k2p6": 3,
+      "glm-5p1": 0,
+      "minimax-m2p7": 6
+    },
+    "minimax-m2p7": {
+      "deepseek-v4-pro": 5,
+      "gpt-oss-120b": 4,
+      "kimi-k2p6": 2,
+      "glm-5p1": 4,
+      "minimax-m2p7": 0
+    }
+  },
+  "h2h_played": {
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0,
+      "gpt-oss-120b": 10,
+      "kimi-k2p6": 10,
+      "glm-5p1": 10,
+      "minimax-m2p7": 10
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 10,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 10,
+      "glm-5p1": 10,
+      "minimax-m2p7": 10
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 10,
+      "gpt-oss-120b": 10,
+      "kimi-k2p6": 0,
+      "glm-5p1": 10,
+      "minimax-m2p7": 10
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": 10,
+      "gpt-oss-120b": 10,
+      "kimi-k2p6": 10,
+      "glm-5p1": 0,
+      "minimax-m2p7": 10
+    },
+    "minimax-m2p7": {
+      "deepseek-v4-pro": 10,
+      "gpt-oss-120b": 10,
+      "kimi-k2p6": 10,
+      "glm-5p1": 10,
+      "minimax-m2p7": 0
+    }
+  }
+}

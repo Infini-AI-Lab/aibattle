@@ -42,7 +42,8 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 131072,
+            "timeout_s": int(os.environ.get("HOLDEM_TIMEOUT", "900")),
         },
         "max_retries": 2,
     }
