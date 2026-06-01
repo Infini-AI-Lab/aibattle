@@ -55,7 +55,7 @@ def _favicon(emoji: str) -> str:
 NAV_ITEMS = [
     ("index.html", "Overview", "overview"),
     ("connect4_report.html", "🔴 Connect Four", "connect4"),
-    ("gomoku_report.html", "⚫ Gomoku", "gomoku"),
+    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
     ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
     ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
 ]
@@ -563,6 +563,18 @@ def render_index(reps: dict) -> str:
             f"{h['num_games']} tables · {h['hands_per_game']} hands each"
             f" · {len(h['models'])} models",
             f"🏆 {champ} <span class='metric'>{pm[champ]['bb_per_100']:+.1f} bb/100</span>")
+
+    # Kuhn is a solved game scored against GTO; the leaderboard is pre-ranked, so
+    # the champion is simply the first entry. Net chips/hand is the headline.
+    kuhn_path = os.path.join(REPORT_DIR, "kuhn_tournament_analysis.json")
+    if os.path.exists(kuhn_path):
+        k = json.load(open(kuhn_path))
+        lb = k["leaderboard"]
+        champ = lb[0]
+        cards += _index_card(
+            "kuhn_tournament_report.html", "🃏 Kuhn Poker",
+            f"{k['episodes_per_pair']} hands/pair · solved game · GTO scoring",
+            f"🏆 {champ['model']} <span class='metric'>{champ['net_per_hand']:+.3f} net/hand</span>")
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Tournaments</title>

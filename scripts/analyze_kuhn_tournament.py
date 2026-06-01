@@ -247,7 +247,7 @@ def render_html(rep: dict) -> str:
     nav = ("<nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
            "<a class='nav' href='index.html'>Overview</a>"
            "<a class='nav' href='connect4_report.html'>🔴 Connect Four</a>"
-           "<a class='nav' href='gomoku_report.html'>⚫ Gomoku</a>"
+           "<a class='nav' href='gomoku_report.html'>⚫ Gomoku-Lite</a>"
            "<a class='nav' href='holdem_tournament_report.html'>🃏 Hold'em</a>"
            "<a class='nav active' href='kuhn_tournament_report.html'>🃏 Kuhn</a></nav>")
 

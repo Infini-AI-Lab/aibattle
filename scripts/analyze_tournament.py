@@ -33,7 +33,7 @@ HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 NAV_ITEMS = [
     ("index.html", "Overview", "overview"),
     ("connect4_report.html", "🔴 Connect Four", "connect4"),
-    ("gomoku_report.html", "⚫ Gomoku", "gomoku"),
+    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
     ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
     ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
 ]
