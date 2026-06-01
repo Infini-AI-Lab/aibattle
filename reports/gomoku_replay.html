@@ -131,6 +131,7 @@
   .thinkbtn{font-family:var(--disp); font-weight:600; letter-spacing:.04em; font-size:13.5px; background:#141926; border:1px solid var(--line);
     color:var(--accent); border-radius:10px; padding:9px 14px; cursor:pointer; transition:.13s;}
   .thinkbtn:hover{border-color:var(--accent); color:#bdf0ff;}
+  .toktag{display:inline-block; margin-left:10px; font-size:12px; color:var(--muted); font-family:var(--mono); vertical-align:middle;}
   pre.think{white-space:pre-wrap; word-break:break-word; font-family:var(--mono); font-size:12.5px; line-height:1.62; color:#c4cbdb;
     background:#070a12; border:1px solid var(--line); border-radius:12px; padding:16px; max-height:460px; overflow:auto; margin-top:13px;}
   pre.think::-webkit-scrollbar{width:9px;} pre.think::-webkit-scrollbar-thumb{background:#283248; border-radius:9px;}
@@ -159,6 +160,7 @@
   <a class="nav" href="connect4_report.html">🔴 Connect Four</a>
   <a class="nav active" href="gomoku_report.html">⚫ Gomoku</a>
   <a class="nav" href="holdem_tournament_report.html">🃏 Hold'em</a>
+  <a class="nav" href="kuhn_tournament_report.html">🃏 Kuhn</a>
 </nav>
 <div class="wrap">
   <div class="eyebrow reveal" style="animation-delay:.02s">Match Replay</div>
@@ -211,7 +213,7 @@
 </div>
 
 <script>
-const BASE = "../runs/board_tournament/replays/gomoku/";
+const BASE = "runs/board_tournament/replays/gomoku/";
 const COLS = "ABCDEFGHI";
 const PLAY_MS = 850;
 const SPEEDS = [1, 2, 4];
@@ -390,6 +392,7 @@ function renderPanel() {
     warn +
     (m.thinking
       ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+        (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
         `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
       : `<div class="hint">No reasoning recorded for this move.</div>`);
 }

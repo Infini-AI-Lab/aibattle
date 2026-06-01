@@ -35,6 +35,7 @@ NAV_ITEMS = [
     ("connect4_report.html", "🔴 Connect Four", "connect4"),
     ("gomoku_report.html", "⚫ Gomoku", "gomoku"),
     ("holdem_tournament_report.html", "🃏 Hold'em", "holdem"),
+    ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
 ]
 
 NAV_CSS = """
@@ -71,7 +72,7 @@ def _blank():
         "acts": defaultdict(int),
         "facing_bet": 0, "fold_facing_bet": 0,
         "vpip_hands": 0, "pfr_hands": 0,
-        "betsize_ratios": [], "latencies": [],
+        "betsize_ratios": [], "latencies": [], "comp_tokens": [],
         "invalid_actions": 0, "invalid_amounts": 0,
         # street-level decisions: street -> {action: count}
         "by_street": {s: defaultdict(int) for s in STREETS},
@@ -245,9 +246,13 @@ def analyze(data: dict) -> dict:
                         st["betsize_ratios"].append(ratio)
                         st["betsize_bins"][_betsize_bucket(ratio)] += 1
 
-                lat = (s.get("response") or {}).get("metadata", {}).get("latency_ms")
+                meta = (s.get("response") or {}).get("metadata", {})
+                lat = meta.get("latency_ms")
                 if lat:
                     st["latencies"].append(lat)
+                ctok = meta.get("completion_tokens")
+                if isinstance(ctok, (int, float)):
+                    st["comp_tokens"].append(ctok)
 
                 if s.get("invalid"):
                     reason_i = (s.get("invalid_info") or {}).get("reason")
@@ -372,6 +377,8 @@ def analyze(data: dict) -> dict:
                             if st["betsize_ratios"] else 0.0,
             "avg_latency_s": round(sum(st["latencies"]) / len(st["latencies"]) / 1000, 1)
                              if st["latencies"] else 0.0,
+            "avg_comp_tokens": round(sum(st["comp_tokens"]) / len(st["comp_tokens"]))
+                               if st["comp_tokens"] else 0,
             "invalid_actions": st["invalid_actions"],
             "invalid_amounts": st["invalid_amounts"],
             "action_mix": {k: st["acts"][k] for k in
@@ -441,6 +448,7 @@ def render_html(report: dict) -> str:
           <td>{s['allin_freq']*100:.0f}%</td>
           <td>{s['avg_bet_xpot']:.2f}x</td>
           <td>{s['avg_latency_s']:.1f}s</td>
+          <td>{s['avg_comp_tokens']:,}</td>
         </tr>"""
 
     # head-to-head matrix
@@ -479,12 +487,16 @@ def render_html(report: dict) -> str:
         bucket_rows += f"<tr><th class='model'>{b}</th>"
         for m in models:
             r = pm[m]["pf_bucket"][b]
-            open_pct = r["open_rate"] * 100
-            # intensity from open_rate
-            bg = f"rgba(74,222,128,{r['open_rate']:.2f})"
+            rate = r["open_rate"]
+            open_pct = rate * 100
+            # neutral blue heatmap: a single hue scaled by open-rate. Flip to dark
+            # text once the fill is saturated enough to wash out light text.
+            bg = f"rgba(96,165,250,{rate:.2f})"
+            txt = "#0f1117" if rate > 0.55 else "#e6e6e6"
+            sub = "#27324a" if rate > 0.55 else "#8b93a7"
             bucket_rows += (
-                f"<td style='background:{bg}'>{open_pct:.0f}%"
-                f"<div class='small'>n={r['hands']}</div></td>"
+                f"<td style='background:{bg};color:{txt}'>{open_pct:.0f}%"
+                f"<div class='small' style='color:{sub}'>n={r['hands']}</div></td>"
             )
         bucket_rows += "</tr>"
 
@@ -532,11 +544,12 @@ def render_html(report: dict) -> str:
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>chips</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
-        <th>all-in%</th><th>bet size</th><th>think</th></tr>
+        <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     {rows}
   </table>
   <div class="note">VPIP = how often it voluntarily plays a hand (looseness). PFR = preflop raise %.
-    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.</div>
+    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
+    think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
   <div class="grid2">
     <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>

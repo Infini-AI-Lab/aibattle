@@ -1,0 +1,191 @@
+{
+  "models": [
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
+  ],
+  "episodes_per_pair": 30,
+  "gto_bet": {
+    "K": 1.0,
+    "Q": 0.0,
+    "J": 0.3333333333333333
+  },
+  "leaderboard": [
+    {
+      "model": "glm-5p1",
+      "hands": 120,
+      "decisions": 144,
+      "win_rate": 0.533,
+      "net_per_hand": 0.05,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 2580,
+      "k_folds": 0,
+      "k_fold_chances": 0,
+      "j_calls": 0,
+      "j_call_chances": 16,
+      "blunders": 0,
+      "blunder_spots": 16,
+      "blunder_rate": 0.0,
+      "bet_K": 0.878,
+      "bet_Q": 0.0,
+      "bet_J": 0.296
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "hands": 120,
+      "decisions": 148,
+      "win_rate": 0.483,
+      "net_per_hand": 0.025,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 3095,
+      "k_folds": 0,
+      "k_fold_chances": 2,
+      "j_calls": 0,
+      "j_call_chances": 18,
+      "blunders": 0,
+      "blunder_spots": 20,
+      "blunder_rate": 0.0,
+      "bet_K": 1.0,
+      "bet_Q": 0.0,
+      "bet_J": 0.034
+    },
+    {
+      "model": "gpt-oss-120b",
+      "hands": 120,
+      "decisions": 143,
+      "win_rate": 0.458,
+      "net_per_hand": 0.008,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 823,
+      "k_folds": 0,
+      "k_fold_chances": 1,
+      "j_calls": 0,
+      "j_call_chances": 19,
+      "blunders": 0,
+      "blunder_spots": 20,
+      "blunder_rate": 0.0,
+      "bet_K": 0.872,
+      "bet_Q": 0.185,
+      "bet_J": 0.0
+    },
+    {
+      "model": "minimax-m2p7",
+      "hands": 120,
+      "decisions": 144,
+      "win_rate": 0.483,
+      "net_per_hand": -0.025,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 13697,
+      "k_folds": 0,
+      "k_fold_chances": 2,
+      "j_calls": 0,
+      "j_call_chances": 18,
+      "blunders": 0,
+      "blunder_spots": 20,
+      "blunder_rate": 0.0,
+      "bet_K": 0.905,
+      "bet_Q": 0.156,
+      "bet_J": 0.0
+    },
+    {
+      "model": "kimi-k2p6",
+      "hands": 120,
+      "decisions": 140,
+      "win_rate": 0.542,
+      "net_per_hand": -0.058,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 14229,
+      "k_folds": 0,
+      "k_fold_chances": 1,
+      "j_calls": 0,
+      "j_call_chances": 12,
+      "blunders": 0,
+      "blunder_spots": 13,
+      "blunder_rate": 0.0,
+      "bet_K": 1.0,
+      "bet_Q": 0.0,
+      "bet_J": 0.615
+    }
+  ],
+  "h2h_net": {
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0.0,
+      "gpt-oss-120b": 0.0,
+      "kimi-k2p6": 4.0,
+      "glm-5p1": -4.0,
+      "minimax-m2p7": 3.0
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 0.0,
+      "gpt-oss-120b": 0.0,
+      "kimi-k2p6": -3.0,
+      "glm-5p1": 1.0,
+      "minimax-m2p7": 3.0
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": -4.0,
+      "gpt-oss-120b": 3.0,
+      "kimi-k2p6": 0.0,
+      "glm-5p1": -1.0,
+      "minimax-m2p7": -5.0
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": 4.0,
+      "gpt-oss-120b": -1.0,
+      "kimi-k2p6": 1.0,
+      "glm-5p1": 0.0,
+      "minimax-m2p7": 2.0
+    },
+    "minimax-m2p7": {
+      "deepseek-v4-pro": -3.0,
+      "gpt-oss-120b": -3.0,
+      "kimi-k2p6": 5.0,
+      "glm-5p1": -2.0,
+      "minimax-m2p7": 0.0
+    }
+  },
+  "h2h_hands": {
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0,
+      "gpt-oss-120b": 30,
+      "kimi-k2p6": 30,
+      "glm-5p1": 30,
+      "minimax-m2p7": 30
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 30,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 30,
+      "glm-5p1": 30,
+      "minimax-m2p7": 30
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 30,
+      "gpt-oss-120b": 30,
+      "kimi-k2p6": 0,
+      "glm-5p1": 30,
+      "minimax-m2p7": 30
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": 30,
+      "gpt-oss-120b": 30,
+      "kimi-k2p6": 30,
+      "glm-5p1": 0,
+      "minimax-m2p7": 30
+    },
+    "minimax-m2p7": {
+      "deepseek-v4-pro": 30,
+      "gpt-oss-120b": 30,
+      "kimi-k2p6": 30,
+      "glm-5p1": 30,
+      "minimax-m2p7": 0
+    }
+  }
+}

@@ -31,8 +31,23 @@ reconstructs from there, or the winning line won't line up.
 
 from __future__ import annotations
 
+import glob
 import json
 import os
+import random
+import sys
+
+# Hole cards are only logged in observations of players who actually acted, so a
+# hand that ends on an immediate fold leaves the non-acting winner face-down.
+# The deal is fully deterministic from the per-hand seed, though, so we re-deal
+# from the game's own logic to recover BOTH players' cards for the viewer. This
+# couples build_holdem to the aibattle package; if it isn't importable we fall
+# back to the observation-derived holes (acting players only).
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+try:
+    from aibattle.games.registry import make_game
+except Exception:  # pragma: no cover - degrade gracefully
+    make_game = None
 
 DATA_DIR = "runs/board_tournament"
 HOLDEM_DIR = "runs/tournament"
@@ -91,9 +106,27 @@ def _split_thinking(raw: str) -> str:
 
 
 def _thinking_lookup(pair_dir: str) -> dict:
-    """{(episode, step): thinking} for one match.jsonl."""
-    path = os.path.join(pair_dir, "match.jsonl")
+    """{(episode, step): thinking} for one match.
+
+    The chain-of-thought lives in ``response.raw_output`` and is dropped from the
+    aggregate tournament JSON, so we read it back from the per-match logs. New
+    runs write one ``ep<NNN>.json`` file per episode; older runs wrote a single
+    ``match.jsonl``. Support both, preferring the per-episode files.
+    """
     out = {}
+    ep_files = sorted(glob.glob(os.path.join(pair_dir, "ep*.json")))
+    if ep_files:
+        for path in ep_files:
+            try:
+                o = json.load(open(path, encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            ep = o.get("episode")
+            for s in o.get("steps", []):
+                raw = (s.get("response") or {}).get("raw_output") or ""
+                out[(ep, s["step"])] = _split_thinking(raw)
+        return out
+    path = os.path.join(pair_dir, "match.jsonl")
     if not os.path.exists(path):
         return out
     with open(path, encoding="utf-8") as fh:
@@ -114,6 +147,7 @@ def _encode_move(game: str, s: dict, thinking: str) -> dict:
         "agent": s["agent_name"],
         "invalid": invalid,
         "latency_ms": (s.get("response") or {}).get("metadata", {}).get("latency_ms"),
+        "tokens": (s.get("response") or {}).get("metadata", {}).get("completion_tokens"),
         "thinking": thinking,
         "trunc": _truncated(thinking, invalid),
     }
@@ -183,6 +217,24 @@ def _other(p):
     return _PLAYERS[1 - _PLAYERS.index(p)]
 
 
+def _dealt_holes(game: str, seed) -> dict:
+    """Re-deal a hand from its seed to recover both players' hole cards.
+
+    The deal is deterministic (``initial_state`` shuffles a full deck with
+    ``random.Random(seed)``), so this reproduces the exact hole cards every
+    player was dealt — including one who folded without acting and was never
+    captured in an observation. Returns {player: [card, card]} or {} if the
+    game package isn't importable or the seed is missing.
+    """
+    if make_game is None or seed is None:
+        return {}
+    try:
+        st = make_game(game).initial_state(random.Random(seed))
+        return {p: list(c) for p, c in st.hole.items()}
+    except Exception:
+        return {}
+
+
 def _holdem_move(s: dict, thinking: str) -> dict:
     """One betting action with the table state the player saw when deciding."""
     pub = s["observation"]["public"]
@@ -203,6 +255,7 @@ def _holdem_move(s: dict, thinking: str) -> dict:
         "stacks": {me: pub.get("your_stack"), _other(me): pub.get("opp_stack")},
         "invalid": invalid,
         "latency_ms": (s.get("response") or {}).get("metadata", {}).get("latency_ms"),
+        "tokens": (s.get("response") or {}).get("metadata", {}).get("completion_tokens"),
         "thinking": thinking,
         "trunc": _truncated(thinking, invalid),
     }
@@ -230,7 +283,9 @@ def build_holdem():
 
         hands, man_hands = [], []
         for e in g["episodes"]:
-            holes = {}
+            # Authoritative full deal from the seed (both players, even a folder
+            # who never acted); fall back to observation holes if unavailable.
+            holes = _dealt_holes(e.get("game", "holdem"), e.get("seed"))
             moves = []
             for s in e["steps"]:
                 hole = s["observation"]["private"].get("hole")

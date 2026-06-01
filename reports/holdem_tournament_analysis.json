@@ -26,6 +26,7 @@
       "allin_freq": 0.0078,
       "avg_bet_xpot": 1.489,
       "avg_latency_s": 27.9,
+      "avg_comp_tokens": 1413,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
@@ -171,6 +172,7 @@
       "allin_freq": 0.0136,
       "avg_bet_xpot": 1.279,
       "avg_latency_s": 3.4,
+      "avg_comp_tokens": 613,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
@@ -316,6 +318,7 @@
       "allin_freq": 0.0,
       "avg_bet_xpot": 0.982,
       "avg_latency_s": 117.2,
+      "avg_comp_tokens": 8299,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
@@ -461,6 +464,7 @@
       "allin_freq": 0.016,
       "avg_bet_xpot": 1.279,
       "avg_latency_s": 88.9,
+      "avg_comp_tokens": 3784,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
@@ -606,6 +610,7 @@
       "allin_freq": 0.013,
       "avg_bet_xpot": 1.319,
       "avg_latency_s": 42.2,
+      "avg_comp_tokens": 9366,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
