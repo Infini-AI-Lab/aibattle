@@ -33,10 +33,12 @@ class HoldemTableTemplate(HoldemTemplate):
     def render_prompt(self, request: AgentRequest) -> str:
         obs = request.observation
         legal = ", ".join(obs.legal_actions)
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+        # No MatchContext "Hand X of N" line here: in Table mode one episode wraps
+        # the whole session, so MatchContext.episode is the SESSION index (always
+        # "1 of 1" with SESSIONS=1) and would contradict the true within-session
+        # hand counter that the engine already emits in obs.rendered.
         return (
             f"{_TABLE_RULES}\n\n"
-            f"{ctx}"
             f"{obs.rendered}\n\n"
             f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"

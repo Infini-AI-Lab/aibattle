@@ -23,10 +23,12 @@ class HoldemMatchTemplate(HoldemTemplate):
     def render_prompt(self, request: AgentRequest) -> str:
         obs = request.observation
         legal = ", ".join(obs.legal_actions)
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+        # No MatchContext "Hand X of N" line here: in Match mode one episode wraps
+        # the whole match, so MatchContext.episode is the MATCH index (always
+        # "1 of 1" with EPISODES=1) and would contradict the true within-match
+        # hand counter that the engine already emits in obs.rendered.
         return (
             f"{_MATCH_RULES}\n\n"
-            f"{ctx}"
             f"{obs.rendered}\n\n"
             f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"
