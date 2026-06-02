@@ -83,7 +83,24 @@ async def main():
           f"{MAX_CONCURRENCY} (per-episode resume on)\n", flush=True)
 
     def save(game):
-        json.dump(data[game], open(os.path.join(OUT, f"{game}_data.json"), "w"))
+        # Merge into the existing aggregate by pair identity (a, b) instead of
+        # overwriting. A BOARD_PAIRS-filtered run only holds its own pairs in
+        # memory; a blind overwrite would wipe the other pairs' summaries from a
+        # previous full run. Keep on-disk pairs, overlay this run's pairs.
+        path = os.path.join(OUT, f"{game}_data.json")
+        merged = {g["a"] + "\x00" + g["b"]: g for g in data[game]["games"]}
+        if os.path.exists(path):
+            try:
+                prev = json.load(open(path))
+                for g in prev.get("games", []):
+                    merged.setdefault(g["a"] + "\x00" + g["b"], g)
+            except (json.JSONDecodeError, OSError):
+                pass  # corrupt/unreadable -> just write what we have
+        out = dict(data[game])
+        out["games"] = list(merged.values())
+        tmp = path + ".tmp"
+        json.dump(out, open(tmp, "w"))
+        os.replace(tmp, path)
 
     async def play(game, a, b, seed):
         nonlocal done
