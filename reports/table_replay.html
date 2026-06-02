@@ -54,11 +54,11 @@
   @media (max-width:980px){ .stage{grid-template-columns:1fr;} }
 
   /* 5-seat table */
-  .felt5{position:relative; display:grid; gap:10px;
+  .felt5{position:relative; display:grid; gap:10px; align-items:center;
     grid-template-columns:1fr 1.5fr 1fr;
     grid-template-areas:"s2 top s3" "s1 mid s4" "bl s0 br";
     background:radial-gradient(130% 100% at 50% 45%,#15573f,#0c3a2c 68%,#0a2a21);
-    border:1px solid #1f6b52; border-radius:120px/86px; padding:22px 20px;
+    border:1px solid #1f6b52; border-radius:88px/68px; padding:34px 30px;
     box-shadow:inset 0 0 70px rgba(0,0,0,.55), 0 22px 54px -22px rgba(0,0,0,.75);}
   .slot0{grid-area:s0;} .slot1{grid-area:s1;} .slot2{grid-area:s2;}
   .slot3{grid-area:s3;} .slot4{grid-area:s4;}
@@ -74,6 +74,7 @@
     font-family:var(--disp); font-weight:700; font-size:13px; color:#0a0d14;}
   .seat .nm{font-family:var(--disp); font-weight:700; font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .seat .sub{font-size:10.5px; color:var(--muted); font-family:var(--mono);}
+  .seat .stk{color:#cfe8dd; font-weight:700;}
   .seat .row2{display:flex; align-items:center; justify-content:space-between; gap:8px;}
   .holes{display:flex; gap:4px;}
   .pos{font-family:var(--disp); font-weight:600; font-size:9px; letter-spacing:.06em; color:#0a0d14; background:#fbbf24; border-radius:4px; padding:1px 5px;}
@@ -202,6 +203,7 @@
           <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
           <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
           <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+          <button class="btn" id="prevhand" title="Previous hand">◀◀ Hand</button>
           <button class="btn" id="nexthand" title="Next hand">Hand ▶▶</button>
         </div>
         <div class="scrub">
@@ -256,6 +258,7 @@ async function init(){
   $("next").onclick  = () => { stop(); step(1); };
   $("play").onclick  = togglePlay;
   $("speed").onclick = cycleSpeed;
+  $("prevhand").onclick = prevHand;
   $("nexthand").onclick = nextHand;
   $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
   document.addEventListener("keydown", e => {
@@ -270,7 +273,6 @@ async function init(){
 async function loadSession(i){
   const meta = manifest.sessions[i];
   session = await (await fetch(BASE + meta.file)).json();
-  renderStandings();
   $("handSel").innerHTML = session.hands.map((h,hidx) => {
     const wn = winnerNames(h).join(", ") || "—";
     return `<option value="${hidx}">Hand ${h.hand}/${session.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
@@ -290,20 +292,26 @@ function winnerNames(h){
   return handWinners(h).map(s => session.seat_assignment[s]||s);
 }
 
-function renderStandings(){
-  const rk = session.rank_of || {};
-  const fs = session.final_stacks || {};
-  // order by finishing rank
-  const order = (session.ranking && session.ranking.length)
-    ? session.ranking : Object.keys(session.seat_assignment);
-  $("standings").innerHTML = order.map(seat => {
-    const r = rk[seat];
-    const bust = (fs[seat]||0) <= 0;
+// Live leaderboard for the strip above the table: rank seats by their stack at
+// the CURRENT view, so it tracks the standings hand-by-hand (and action-by-
+// action) instead of freezing on the session's final result.
+function renderStandings(st){
+  const stackOf = seat => {
+    if (st && st.result && hand && hand.stacks_after && hand.stacks_after[seat]!=null)
+      return hand.stacks_after[seat];
+    const info = (st && st.seats && st.seats[seat]) || {};
+    return info.stack!=null ? info.stack : (session.final_stacks||{})[seat];
+  };
+  const order = Object.keys(session.seat_assignment)
+    .sort((a,b) => (stackOf(b)||0) - (stackOf(a)||0));
+  $("standings").innerHTML = order.map((seat,i) => {
+    const stk = stackOf(seat);
+    const bust = (stk||0) <= 0;
     return `<div class="stand${bust?" bust":""}">` +
-      `<span class="rk${r===1?" gold":""}">${r?("#"+r):"·"}</span>` +
+      `<span class="rk${i===0?" gold":""}">#${i+1}</span>` +
       `<span class="seatdot" style="background:${scol(seat)}"></span>` +
       `<span class="nm">${session.seat_assignment[seat]}</span>` +
-      `<span class="fs">${fs[seat]!=null?fs[seat]:"—"}</span></div>`;
+      `<span class="fs">${stk!=null?stk:"—"}</span></div>`;
   }).join("");
 }
 
@@ -320,6 +328,11 @@ function selectHand(hidx){
 function nextHand(){
   const hidx = +$("handSel").value;
   if (hidx < session.hands.length - 1) selectHand(hidx + 1);
+}
+
+function prevHand(){
+  const hidx = +$("handSel").value;
+  if (hidx > 0) selectHand(hidx - 1);
 }
 
 // state at cursor k: k=0 is pre-first-action; k>0 reflects after move[k-1]; the
@@ -381,12 +394,13 @@ function seatHTML(seat, st){
   return `<div class="${cls}">${bubble}
     <div class="top"><div class="ava" style="background:${scol(seat)}">${(agent[0]||"?").toUpperCase()}</div>
       <div style="min-width:0"><div class="nm">${agent}</div>
-        <div class="sub">stack ${stack!=null?stack:"—"} ${tags}</div></div></div>
+        <div class="sub"><span class="stk">🪙 ${stack!=null?stack:"—"}</span> ${tags}</div></div></div>
     <div class="row2"><div class="holes">${cards}</div><div>${ret||commit}</div></div></div>`;
 }
 
 function render(){
   const st = stateAt(cursor);
+  renderStandings(st);
   for (const seat of SLOTS){
     const slotEl = $("slot" + seat.split("_")[1]);
     if (slotEl) slotEl.innerHTML = seatHTML(seat, st);
@@ -404,7 +418,8 @@ function render(){
   $("slider").value = cursor;
   $("movecount").textContent = `action ${cursor} / ${hand.moves.length}`;
   $("prev").disabled = cursor===0;
-  $("next").disabled = cursor===hand.moves.length;
+  $("next").disabled = cursor===hand.moves.length && (+$("handSel").value) >= session.hands.length-1;
+  $("prevhand").disabled = (+$("handSel").value) <= 0;
   $("nexthand").disabled = (+$("handSel").value) >= session.hands.length-1;
   renderPanel(st);
   renderMoveList();
@@ -423,7 +438,10 @@ function renderMoveList(){
       `<span class="d" style="background:${scol(m.player)}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
   });
   ml.innerHTML = html;
-  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
 }
 
 function renderPanel(st){
@@ -449,7 +467,7 @@ function renderPanel(st){
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
   html += m.thinking
-    ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+    ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
       `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
     : `<div class="hint">No reasoning recorded for this action.</div>`;
@@ -468,18 +486,23 @@ function resultBlock(){
     `<div class="rs">by ${hand.reason} · ${line}</div>${runout}</div>`;
 }
 
-function toggleThink(id){
+function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
-  const btn=el && el.previousElementSibling;
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
 }
 
 function step(d){
   const n=hand.moves.length;
-  if (cursor+d<0 || cursor+d>n) return;
+  if (cursor+d<0) return;
+  if (cursor+d>n){
+    // past the end of this hand: roll into the next hand (resume autoplay if it was playing)
+    const hidx = +$("handSel").value;
+    if (hidx < session.hands.length-1){ const go=playing; selectHand(hidx+1); if(go) start(); }
+    else stop();
+    return;
+  }
   cursor+=d; render();
-  if (cursor===n) stop();
 }
 function togglePlay(){ playing ? stop() : start(); }
 function start(){

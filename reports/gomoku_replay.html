@@ -364,7 +364,10 @@ function renderMoveList(){
     return `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
       `<span class="d ${seatColor(m.player)}"></span>${m.coord}${m.trunc?" ⚠":""}</button>`;
   }).join("");
-  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
 }
 
 function renderPanel() {
@@ -393,16 +396,15 @@ function renderPanel() {
     `<div class="meta">${color} · ply ${m.ply} · ⏱ ${lat} thinking${inv}</div>` +
     warn +
     (m.thinking
-      ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+      ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
         (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
         `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
       : `<div class="hint">No reasoning recorded for this move.</div>`);
 }
 
-function toggleThink(id){
+function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
-  const btn=el && el.previousElementSibling;
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
 }
 

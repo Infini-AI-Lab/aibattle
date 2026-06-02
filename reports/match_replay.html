@@ -191,6 +191,7 @@
           <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
           <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
           <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+          <button class="btn" id="prevhand" title="Previous hand">◀◀ Hand</button>
           <button class="btn" id="nexthand" title="Next hand">Hand ▶▶</button>
         </div>
         <div class="scrub">
@@ -243,6 +244,7 @@ async function init(){
   $("next").onclick  = () => { stop(); step(1); };
   $("play").onclick  = togglePlay;
   $("speed").onclick = cycleSpeed;
+  $("prevhand").onclick = prevHand;
   $("nexthand").onclick = nextHand;
   $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
   document.addEventListener("keydown", e => {
@@ -289,6 +291,11 @@ function selectHand(hidx){
 function nextHand(){
   const hidx = +$("handSel").value;
   if (hidx < match.hands.length - 1) selectHand(hidx + 1);
+}
+
+function prevHand(){
+  const hidx = +$("handSel").value;
+  if (hidx > 0) selectHand(hidx - 1);
 }
 
 // table state shown at `cursor`: pre-action state of move[cursor-1]; at the end
@@ -374,7 +381,8 @@ function render(){
   $("slider").value = cursor;
   $("movecount").textContent = `action ${cursor} / ${hand.moves.length}`;
   $("prev").disabled = cursor===0;
-  $("next").disabled = cursor===hand.moves.length;
+  $("next").disabled = cursor===hand.moves.length && (+$("handSel").value) >= match.hands.length-1;
+  $("prevhand").disabled = (+$("handSel").value) <= 0;
   $("nexthand").disabled = (+$("handSel").value) >= match.hands.length-1;
   renderMatchbar();
   renderPanel(st);
@@ -394,7 +402,10 @@ function renderMoveList(){
       `<span class="d" style="background:${scol(m.player)}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
   });
   ml.innerHTML = html;
-  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
 }
 
 function renderPanel(st){
@@ -420,7 +431,7 @@ function renderPanel(st){
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
   html += m.thinking
-    ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+    ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
       `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
     : `<div class="hint">No reasoning recorded for this action.</div>`;
@@ -439,18 +450,23 @@ function resultBlock(){
     `<div class="rs">by ${hand.reason} · ${line}</div>${runout}</div>`;
 }
 
-function toggleThink(id){
+function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
-  const btn=el && el.previousElementSibling;
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
 }
 
 function step(d){
   const n=hand.moves.length;
-  if (cursor+d<0 || cursor+d>n) return;
+  if (cursor+d<0) return;
+  if (cursor+d>n){
+    // past the end of this hand: roll into the next hand (resume autoplay if it was playing)
+    const hidx = +$("handSel").value;
+    if (hidx < match.hands.length-1){ const go=playing; selectHand(hidx+1); if(go) start(); }
+    else stop();
+    return;
+  }
   cursor+=d; render();
-  if (cursor===n) stop();
 }
 function togglePlay(){ playing ? stop() : start(); }
 function start(){

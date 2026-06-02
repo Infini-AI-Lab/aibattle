@@ -337,7 +337,10 @@ function renderMoveList(){
       `<span class="d ${m.player}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
   });
   ml.innerHTML = html;
-  const c=ml.querySelector(".cur"); if(c) c.scrollIntoView({block:"nearest"});
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
 }
 
 function renderPanel(st){
@@ -362,7 +365,7 @@ function renderPanel(st){
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
   html += m.thinking
-    ? `<button class="thinkbtn" onclick="toggleThink('${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+    ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
       `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
     : `<div class="hint">No reasoning recorded for this action.</div>`;
@@ -380,10 +383,9 @@ function resultBlock(){
     `<div class="rs">by ${ep.reason}${cats}</div></div>`;
 }
 
-function toggleThink(id){
+function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
-  const btn=el && el.previousElementSibling;
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
 }
 
