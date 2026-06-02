@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import random
 import time
 import traceback
 from collections import defaultdict
@@ -28,11 +29,15 @@ from aibattle.runner.runner import Runner
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
 SESSIONS = int(os.environ.get("TABLE_SESSIONS", "50"))  # seat-rotated; raise
                             # later to add more — per-episode resume reuses sessions.
-MAX_HANDS = 30
-STARTING_STACK = 100
+MAX_HANDS = 40
+STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
 OUT = "runs/table_tournament"
 os.makedirs(OUT, exist_ok=True)
+# Per-run base seed: random by default (fresh deals each run), overridable via
+# RUN_SEED, and LOGGED (banner + data.json) for on-demand reproducibility. It
+# seeds the whole session/deal sequence. (RUN_SEED=8000 reproduces v1 deals.)
+RUN_SEED = int(os.environ.get("RUN_SEED", random.SystemRandom().randrange(2**31)))
 
 
 def acfg(name: str) -> dict:
@@ -42,7 +47,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 131072,
+            "temperature": 0.6, "max_tokens": 131072,
             "timeout_s": int(os.environ.get("HOLDEM_TIMEOUT", "900")),
         },
         "max_retries": 2,
@@ -61,15 +66,15 @@ async def main():
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     t0 = time.perf_counter()
     print(f"Table tournament: {n}-player table, {SESSIONS} sessions x "
-          f"{MAX_HANDS} hands, global cap {MAX_CONCURRENCY}, per-episode resume on\n",
-          flush=True)
+          f"{MAX_HANDS} hands, RUN_SEED={RUN_SEED}, temp=0.6, global cap "
+          f"{MAX_CONCURRENCY}, per-episode resume on\n", flush=True)
 
     agents = [make_agent(acfg(m), game_name="holdem_table") for m in MODELS]
     gdir = os.path.join(OUT, "table")
     os.makedirs(gdir, exist_ok=True)
     with MatchLogger(None) as lg:
         res = await runner.run_table(
-            agents, episodes=SESSIONS, seed=8000, logger=lg,
+            agents, episodes=SESSIONS, seed=RUN_SEED, logger=lg,
             semaphore=global_sem, episode_dir=gdir, seat_rotate=True,
         )
 
@@ -107,7 +112,7 @@ async def main():
     summary.sort(key=lambda r: r["avg_rank"])
 
     data = {"mode": "table", "models": MODELS, "num_players": n,
-            "sessions": SESSIONS, "max_hands": MAX_HANDS,
+            "sessions": SESSIONS, "max_hands": MAX_HANDS, "run_seed": RUN_SEED,
             "starting_stack": STARTING_STACK, "summary": summary,
             "session_results": sessions, "failures": res.failures}
     json.dump(data, open(os.path.join(OUT, "table_data.json"), "w"))

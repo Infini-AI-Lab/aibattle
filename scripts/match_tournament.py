@@ -28,11 +28,15 @@ from aibattle.runner.runner import Runner
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
 EPISODES = 10               # matches per pair (seat-swapped); raise later to add
                             # more — per-episode resume reuses existing matches.
-MAX_HANDS = 20
-STARTING_STACK = 100
+MAX_HANDS = 30
+STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
 OUT = "runs/match_tournament"
 os.makedirs(OUT, exist_ok=True)
+# Per-run base seed: random by default (fresh deals each run), overridable via
+# RUN_SEED, and LOGGED (banner + data.json) for on-demand reproducibility. Each
+# pair's deal sequence is RUN_SEED + pair-index. (RUN_SEED=7000 reproduces v1.)
+RUN_SEED = int(os.environ.get("RUN_SEED", random.SystemRandom().randrange(2**31)))
 
 
 def acfg(name: str) -> dict:
@@ -42,7 +46,7 @@ def acfg(name: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{name}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 131072,
+            "temperature": 0.6, "max_tokens": 131072,
             "timeout_s": int(os.environ.get("HOLDEM_TIMEOUT", "900")),
         },
         "max_retries": 2,
@@ -58,13 +62,14 @@ async def main():
     pairs = list(itertools.combinations(MODELS, 2))
     total = len(pairs)
     data = {"mode": "match", "models": MODELS, "episodes_per_pair": EPISODES,
-            "max_hands": MAX_HANDS, "starting_stack": STARTING_STACK, "pairs": []}
+            "max_hands": MAX_HANDS, "starting_stack": STARTING_STACK,
+            "run_seed": RUN_SEED, "pairs": []}
     done = 0
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     t0 = time.perf_counter()
     print(f"Match tournament: {total} pairs x {EPISODES} matches "
-          f"({MAX_HANDS} hands each), global cap {MAX_CONCURRENCY}, "
-          f"per-episode resume on\n", flush=True)
+          f"({MAX_HANDS} hands each), RUN_SEED={RUN_SEED}, temp=0.6, "
+          f"global cap {MAX_CONCURRENCY}, per-episode resume on\n", flush=True)
 
     def save():
         json.dump(data, open(os.path.join(OUT, "match_data.json"), "w"))
@@ -105,7 +110,7 @@ async def main():
             print(f"[{done}/{total}] {a} vs {b} FAILED: {ex}", flush=True)
             traceback.print_exc()
 
-    specs = [(a, b, 7000 + i) for i, (a, b) in enumerate(pairs)]
+    specs = [(a, b, RUN_SEED + i) for i, (a, b) in enumerate(pairs)]
     random.Random(99).shuffle(specs)
     await asyncio.gather(*(play(a, b, s) for a, b, s in specs))
     save()

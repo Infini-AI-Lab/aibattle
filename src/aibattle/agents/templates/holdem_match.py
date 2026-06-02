@@ -28,6 +28,7 @@ class HoldemMatchTemplate(HoldemTemplate):
             f"{_MATCH_RULES}\n\n"
             f"{ctx}"
             f"{obs.rendered}\n\n"
+            f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"
             "Respond with ONLY the action (and an integer amount for bet/raise), "
             "e.g. `call`, `check`, `fold`, `all_in`, `bet 6`, or `raise 12`. "

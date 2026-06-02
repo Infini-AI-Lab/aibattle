@@ -62,7 +62,8 @@ def trim(episodes: list) -> list:
         for s in e.get("steps", []):
             s2 = dict(s)
             resp = dict(s2.get("response") or {})
-            resp.pop("raw_output", None)   # full copy lives in match.jsonl
+            resp.pop("raw_output", None)   # full copy lives in the ep file
+            resp.pop("prompt", None)       # repeats each step; kept in ep file
             s2["response"] = resp
             steps.append(s2)
         e2["steps"] = steps

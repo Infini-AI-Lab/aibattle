@@ -10,7 +10,7 @@ from .base import GameTemplate
 
 _RULES = (
     "You are playing Heads-Up Texas Hold'em Lite (no-limit style, one hand). "
-    "Each player starts with 50 chips; small blind 1, big blind 2. You are dealt "
+    "Each player starts with 200 chips; small blind 1, big blind 2. You are dealt "
     "two private hole cards; five community cards are revealed across preflop, "
     "flop, turn, and river. Make the best five-card hand at showdown.\n"
     "Actions:\n"
@@ -35,6 +35,33 @@ _ALIASES = {
 
 
 class HoldemTemplate(GameTemplate):
+    @staticmethod
+    def _history_block(obs) -> str:
+        """Render this hand's public action log (per street) so the model sees
+        the betting LINE, not just the numeric snapshot. The data is already on
+        obs.history; the numeric state alone loses who raised/called and the
+        sizing sequence. Returns "" when there's been no action yet.
+        """
+        history = getattr(obs, "history", None) or []
+        if not history:
+            return ""
+        streets = [["preflop", []]]  # [label, [action strings]]
+        for ev in history:
+            if "street" in ev:  # street-transition marker {street, board}
+                board = " ".join(ev.get("board", []))
+                streets.append([ev["street"] + (f" ({board})" if board else ""), []])
+            else:
+                p, a = ev.get("player"), ev.get("action")
+                # show sizing for aggressive actions; plain for fold/check/call
+                entry = (f"{p} {a} to {ev['to']}"
+                         if a in ("bet", "raise", "all_in") and "to" in ev
+                         else f"{p} {a}")
+                streets[-1][1].append(entry)
+        body = [f"  {label}: {', '.join(acts)}" for label, acts in streets if acts]
+        if not body:
+            return ""
+        return "Action this hand:\n" + "\n".join(body) + "\n\n"
+
     def render_prompt(self, request: AgentRequest) -> str:
         obs = request.observation
         legal = ", ".join(obs.legal_actions)
@@ -43,6 +70,7 @@ class HoldemTemplate(GameTemplate):
             f"{_RULES}\n\n"
             f"{ctx}"
             f"{obs.rendered}\n\n"
+            f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"
             "Respond with ONLY the action (and an integer amount for bet/raise), "
             "e.g. `call`, `check`, `fold`, `all_in`, `bet 6`, or `raise 12`. "

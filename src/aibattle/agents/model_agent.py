@@ -28,6 +28,7 @@ class ModelAgent(Agent):
 
     async def act(self, request: AgentRequest) -> AgentResponse:
         prompt = self.template.render_prompt(request)
+        input_prompt = prompt  # exact decision context; logged for replay/analysis
         out = None
         t0 = time.perf_counter()
 
@@ -42,6 +43,7 @@ class ModelAgent(Agent):
                     amount=move.amount,
                     message=out.content,
                     raw_output=out.full_text(),  # full output incl. thinking
+                    prompt=input_prompt,
                     metadata={
                         "attempts": attempt + 1,
                         "latency_ms": latency_ms,
@@ -60,6 +62,7 @@ class ModelAgent(Agent):
             action=INVALID,
             message=out.content if out else None,
             raw_output=out.full_text() if out else None,
+            prompt=input_prompt,
             metadata={
                 "attempts": self.max_retries + 1,
                 "latency_ms": latency_ms,

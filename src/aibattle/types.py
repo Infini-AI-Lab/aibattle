@@ -123,6 +123,7 @@ class AgentResponse:
     amount: Optional[int] = None        # required for bet/raise in numeric games
     message: Optional[str] = None       # optional natural-language rationale
     raw_output: Optional[str] = None    # optional unparsed model output
+    prompt: Optional[str] = None        # exact input the model saw (for replay/analysis)
     metadata: dict = field(default_factory=dict)  # latency, tokens, retries...
 
     def to_dict(self) -> dict:
@@ -131,6 +132,7 @@ class AgentResponse:
             "amount": self.amount,
             "message": self.message,
             "raw_output": self.raw_output,
+            "prompt": self.prompt,
             "metadata": self.metadata,
         }
 
