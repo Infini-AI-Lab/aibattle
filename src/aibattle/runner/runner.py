@@ -69,7 +69,7 @@ class Runner:
         agent_b: Agent,
         *,
         episodes: int,
-        seed: int,
+        seed: Optional[int] = None,
         seat_swap: bool,
         logger: MatchLogger,
         max_concurrency: int = 1,
@@ -81,7 +81,11 @@ class Runner:
         on_episode_end: Optional[Callable] = None,
     ) -> RunResult:
         game = self.game_factory()
-        master = random.Random(seed)
+        # seed=None -> every episode draws its own independent random deal seed
+        # (fully random, independent games; the seed is saved per-episode so each
+        # game is self-describing). seed=int -> deterministic sequence, used where
+        # reproducible deals are wanted (e.g. the board tournament's fixed seeds).
+        master = random.SystemRandom() if seed is None else random.Random(seed)
 
         # Per-episode persistence + resume. When episode_dir is set, every episode
         # is written to its own self-contained file ``ep<NNN>.json`` (data + full
@@ -107,9 +111,10 @@ class Runner:
             "max_concurrency": max_concurrency,
         })
 
-        # Build the full episode plan deterministically up front. Deal seeds are
-        # drawn sequentially from the master RNG, so deals are reproducible
-        # regardless of the order episodes actually execute in.
+        # Build the full episode plan up front so each episode's deal seed is
+        # fixed before execution (independent of completion order). With a fixed
+        # `seed` the sequence is reproducible; with seed=None each draw is an
+        # independent OS-entropy random.
         specs = []  # (ep_index, pair_id, deal_seed, p0_agent, p1_agent)
         ep_index = 0
         pair_id = 0
@@ -196,7 +201,7 @@ class Runner:
         agents: list,
         *,
         episodes: int,
-        seed: int,
+        seed: Optional[int] = None,
         logger: MatchLogger,
         max_concurrency: int = 1,
         semaphore: "Optional[asyncio.Semaphore]" = None,
@@ -219,7 +224,9 @@ class Runner:
         n = len(game.players)
         if len(agents) != n:
             raise ValueError(f"run_table needs {n} agents for {game.name}, got {len(agents)}")
-        master = random.Random(seed)
+        # seed=None -> each session is fully random and independent (its own
+        # OS-entropy deal seed, saved per-episode). seed=int -> deterministic.
+        master = random.SystemRandom() if seed is None else random.Random(seed)
         if episode_dir:
             os.makedirs(episode_dir, exist_ok=True)
 
@@ -235,13 +242,22 @@ class Runner:
             "on_invalid_action": self.on_invalid_action,
         })
 
-        # Plan: each session gets a deal seed (drawn up front so it is independent
-        # of completion order) and a seat assignment (rotated for fairness).
+        # Plan: each session gets a deal seed (fixed up front so it is independent
+        # of completion order) and a seat assignment.
         specs = []  # (ep_index, deal_seed, agents_by_player)
         for ep in range(episodes):
             deal_seed = master.randrange(2**31)
-            rot = ep % n if seat_rotate else 0
-            by_player = {game.players[i]: agents[(i + rot) % n] for i in range(n)}
+            if seed is None and seat_rotate:
+                # Fully random, independent session: seats are a random permutation
+                # derived from this session's own seed, so the single saved seed
+                # reproduces both the deck and the seating.
+                shuffled = list(agents)
+                random.Random(deal_seed).shuffle(shuffled)
+                by_player = {game.players[i]: shuffled[i] for i in range(n)}
+            else:
+                # Deterministic seating: rotate by episode index (or pin order).
+                rot = ep % n if seat_rotate else 0
+                by_player = {game.players[i]: agents[(i + rot) % n] for i in range(n)}
             specs.append((ep, deal_seed, by_player))
 
         results = [None] * len(specs)

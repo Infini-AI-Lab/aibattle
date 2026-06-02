@@ -25,18 +25,18 @@ from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
-MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
-EPISODES = 10               # matches per pair (seat-swapped); raise later to add
-                            # more — per-episode resume reuses existing matches.
+MODELS = os.environ.get("MODELS",
+    "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
+EPISODES = int(os.environ.get("EPISODES", "10"))  # matches per pair (independent deals);
+                            # raise later to add more — per-episode resume reuses.
 MAX_HANDS = 30
 STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
 OUT = "runs/match_tournament"
 os.makedirs(OUT, exist_ok=True)
-# Per-run base seed: random by default (fresh deals each run), overridable via
-# RUN_SEED, and LOGGED (banner + data.json) for on-demand reproducibility. Each
-# pair's deal sequence is RUN_SEED + pair-index. (RUN_SEED=7000 reproduces v1.)
-RUN_SEED = int(os.environ.get("RUN_SEED", random.SystemRandom().randrange(2**31)))
+# Deals are fully random and independent: every match draws its own OS-entropy
+# deal seeds inside the runner (seed=None), saved per ep<NNN>.json. No run-level
+# seed to log or re-pass — a resumed run fills missing matches with fresh deals.
 
 
 def acfg(name: str) -> dict:
@@ -63,18 +63,18 @@ async def main():
     total = len(pairs)
     data = {"mode": "match", "models": MODELS, "episodes_per_pair": EPISODES,
             "max_hands": MAX_HANDS, "starting_stack": STARTING_STACK,
-            "run_seed": RUN_SEED, "pairs": []}
+            "pairs": []}
     done = 0
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     t0 = time.perf_counter()
     print(f"Match tournament: {total} pairs x {EPISODES} matches "
-          f"({MAX_HANDS} hands each), RUN_SEED={RUN_SEED}, temp=0.6, "
+          f"({MAX_HANDS} hands each), random independent deals, temp=0.6, "
           f"global cap {MAX_CONCURRENCY}, per-episode resume on\n", flush=True)
 
     def save():
         json.dump(data, open(os.path.join(OUT, "match_data.json"), "w"))
 
-    async def play(a, b, seed):
+    async def play(a, b):
         nonlocal done
         gdir = os.path.join(OUT, f"{a}__vs__{b}")
         os.makedirs(gdir, exist_ok=True)
@@ -85,7 +85,7 @@ async def main():
                 res = await runner.run_match(
                     make_agent(acfg(a), game_name="holdem_match"),
                     make_agent(acfg(b), game_name="holdem_match"),
-                    episodes=EPISODES, seed=seed, seat_swap=True,
+                    episodes=EPISODES, seat_swap=False,
                     logger=lg, semaphore=global_sem, episode_dir=gdir,
                 )
             # Match win rate per model (by seat assignment).
@@ -96,7 +96,7 @@ async def main():
                     wins[w] += 1
                 else:
                     draws += 1
-            data["pairs"].append({"a": a, "b": b, "seed": seed,
+            data["pairs"].append({"a": a, "b": b,
                                   "episodes": [_trim(e) for e in res.episodes]})
             save()
             done += 1
@@ -110,9 +110,9 @@ async def main():
             print(f"[{done}/{total}] {a} vs {b} FAILED: {ex}", flush=True)
             traceback.print_exc()
 
-    specs = [(a, b, RUN_SEED + i) for i, (a, b) in enumerate(pairs)]
-    random.Random(99).shuffle(specs)
-    await asyncio.gather(*(play(a, b, s) for a, b, s in specs))
+    specs = list(pairs)
+    random.Random(99).shuffle(specs)  # deterministic launch order (slow/fast interleave)
+    await asyncio.gather(*(play(a, b) for a, b in specs))
     save()
     print(f"\nMATCH TOURNAMENT DONE in {time.perf_counter()-t0:.0f}s", flush=True)
 

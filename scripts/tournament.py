@@ -1,6 +1,7 @@
 """Round-robin Hold'em tournament across 5 Fireworks models.
 
-10 unique pairs x 2 reps = 20 games, 30 hands each (seat-swapped). Full
+10 unique pairs x 2 reps = 20 games, 30 hands each. Every hand is an
+independent deal (no seat-swap duplicate): each episode draws its own cards. Full
 per-game logs go to runs/tournament/<a>__vs__<b>__rN/match.jsonl; a trimmed
 aggregate (no raw chain-of-thought, to stay loadable) is saved incrementally to
 runs/tournament/tournament_data.json for analysis.
@@ -12,7 +13,6 @@ import asyncio
 import itertools
 import json
 import os
-import random
 import time
 import traceback
 from collections import defaultdict
@@ -25,17 +25,17 @@ from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
-MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
-HANDS = 20             # hands per game (single-hand Hold'em Lite); small smell test
+MODELS = os.environ.get("MODELS",
+    "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
+HANDS = int(os.environ.get("HANDS", "20"))   # hands per game (Hold'em Lite)
 REPS = 1
 MAX_CONCURRENCY = 128  # GLOBAL cap on concurrent hands across all games
 OUT = "runs/tournament"
 os.makedirs(OUT, exist_ok=True)
-# Per-run base seed: random by default (fresh deals each run), overridable via
-# RUN_SEED, and LOGGED (banner + data.json) so any run is reproducible on demand.
-# Each game's deal sequence is RUN_SEED + game-index, so this one number
-# reproduces the whole run. (RUN_SEED=1000 reproduces the original v1 deals.)
-RUN_SEED = int(os.environ.get("RUN_SEED", random.SystemRandom().randrange(2**31)))
+# Deals are fully random and independent: every hand draws its own OS-entropy
+# deal seed inside the runner (seed=None), and that seed is saved in each
+# ep<NNN>.json. There is no run-level seed to log or re-pass — a resumed run just
+# fills missing hands with fresh independent deals.
 
 
 def acfg(name: str) -> dict:
@@ -76,7 +76,7 @@ async def main():
     gid = 0
     for rep in range(REPS):
         for a, b in pairs:
-            games.append((gid, a, b, rep, RUN_SEED + gid))
+            games.append((gid, a, b, rep))
             gid += 1
 
     all_games = []
@@ -87,15 +87,15 @@ async def main():
     # wall-clock collapses from sum-of-games to ~slowest-game.
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     print(f"Starting tournament: {len(games)} games x {HANDS} hands, "
-          f"RUN_SEED={RUN_SEED}, temp=0.6, ALL IN PARALLEL (global cap "
+          f"random independent deals, temp=0.6, ALL IN PARALLEL (global cap "
           f"{MAX_CONCURRENCY} concurrent calls, per-episode resume on)\n", flush=True)
 
     def save():
         json.dump({"models": MODELS, "hands": HANDS, "reps": REPS,
-                   "run_seed": RUN_SEED, "games": all_games},
+                   "games": all_games},
                   open(os.path.join(OUT, "tournament_data.json"), "w"))
 
-    async def play(gid, a, b, rep, seed):
+    async def play(gid, a, b, rep):
         nonlocal done
         gdir = os.path.join(OUT, f"{a}__vs__{b}__r{rep}")
         os.makedirs(gdir, exist_ok=True)
@@ -110,12 +110,12 @@ async def main():
                 res = await runner.run_match(
                     make_agent(acfg(a), game_name="holdem"),
                     make_agent(acfg(b), game_name="holdem"),
-                    episodes=HANDS, seed=seed, seat_swap=True,
+                    episodes=HANDS, seat_swap=False,
                     logger=lg, semaphore=global_sem, episode_dir=gdir,
                 )
             # append + save in one synchronous (await-free) block -> race-safe
             all_games.append({"gid": gid, "a": a, "b": b, "rep": rep,
-                              "seed": seed, "episodes": trim(res.episodes)})
+                              "episodes": trim(res.episodes)})
             save()
             tally = defaultdict(float)
             for e in res.episodes:
