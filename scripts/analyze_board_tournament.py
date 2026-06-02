@@ -160,31 +160,56 @@ def bradley_terry(models, h2h, iters=300):
     """Fit Bradley-Terry strengths from pairwise results; return (strength, elo).
 
     Draws count as half a win to each side. Elo is the BT log-strength on the
-    400/decade scale, recentred so the field averages 1500.
+    400/decade scale, recentred so the rated field averages 1500.
+
+    A model with no wins/draws (or no losses/draws) has no finite BT rating —
+    its strength diverges to ±infinity. Such degenerate records are excluded
+    from the fit and reported with elo=None (rendered as "—"), so a model that
+    e.g. went 0-40 doesn't drag its own and the field's ratings to nonsense.
     """
-    W = {m: 0.0 for m in models}
-    N = defaultdict(lambda: defaultdict(float))
+    wins = {m: 0.0 for m in models}
+    losses = {m: 0.0 for m in models}
+    draws = {m: 0.0 for m in models}
     for a in models:
         for b in models:
+            if a == b:
+                continue
+            w, l, d = h2h[a][b]
+            wins[a] += w
+            losses[a] += l
+            draws[a] += d
+
+    # Rated = mixed record (at least one win-or-draw AND one loss-or-draw).
+    rated = [m for m in models
+             if (wins[m] + draws[m]) > 0 and (losses[m] + draws[m]) > 0]
+
+    W = {m: 0.0 for m in rated}
+    N = defaultdict(lambda: defaultdict(float))
+    for a in rated:
+        for b in rated:  # ignore games vs unrated models in the fit
             if a == b:
                 continue
             w, l, d = h2h[a][b]
             W[a] += w + 0.5 * d
             N[a][b] += w + l + d
 
-    p = {m: 1.0 for m in models}
+    p = {m: 1.0 for m in rated}
     for _ in range(iters):
         newp = {}
-        for i in models:
+        for i in rated:
             denom = sum(N[i][j] / (p[i] + p[j])
-                        for j in models if j != i and N[i][j])
+                        for j in rated if j != i and N[i][j])
             newp[i] = (W[i] / denom) if denom > 0 else p[i]
-        gm = math.exp(sum(math.log(max(v, 1e-9)) for v in newp.values()) / len(newp))
-        p = {i: newp[i] / gm for i in models}
+        gm = math.exp(sum(math.log(max(v, 1e-9)) for v in newp.values())
+                      / len(newp)) if newp else 1.0
+        p = {i: newp[i] / gm for i in rated}
 
-    raw = {m: 400 * math.log10(max(p[m], 1e-9)) for m in models}
-    mean = sum(raw.values()) / len(raw)
-    elo = {m: int(round(1500 + raw[m] - mean)) for m in models}
+    elo = {m: None for m in models}
+    if rated:
+        raw = {m: 400 * math.log10(max(p[m], 1e-9)) for m in rated}
+        mean = sum(raw.values()) / len(raw)
+        for m in rated:
+            elo[m] = int(round(1500 + raw[m] - mean))
     return p, elo
 
 
@@ -354,11 +379,21 @@ def _heat_html(heat):
     return "".join(out)
 
 
+def _elo_key(elo, m):
+    """Sort key putting unrated (elo=None) models last in a descending sort."""
+    return elo[m] if elo[m] is not None else float("-inf")
+
+
+def _elo_txt(e):
+    return "—" if e is None else str(e)
+
+
 def render_game(game: str, rep: dict) -> str:
     payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
-    ranked = sorted(models, key=lambda m: rep["elo"][m], reverse=True)
+    elo = rep["elo"]
+    ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
 
     # results / tactics table
     rows = ""
@@ -368,7 +403,7 @@ def render_game(game: str, rep: dict) -> str:
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
-          <td>{rep['elo'][m]}</td>
+          <td>{_elo_txt(rep['elo'][m])}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
           <td>{s['first_move_win_rate']*100:.0f}%</td>
@@ -444,7 +479,7 @@ def render_game(game: str, rep: dict) -> str:
   {replay_btn}
 
   <div class="kpis">
-    <div class="kpi"><div class="v">{rep['elo'][ranked[0]]}</div><div class="l">top Elo · {ranked[0]}</div></div>
+    <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
     <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
     <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
   </div>
@@ -456,7 +491,8 @@ def render_game(game: str, rep: dict) -> str:
         <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     {rows}
   </table>
-  <div class="note">Elo from a Bradley-Terry fit over all head-to-head results (field mean 1500).
+  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
+    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
     win-take = took an immediate win when one existed; block = removed an opponent's immediate
     winning threat; miss/allow = missed wins / allowed losses (blunders). These are objective
     tactical-accuracy measures read from the board.</div>
@@ -487,11 +523,12 @@ const R = {payload};
 const pm=R.per_model, M=R.models, COLORS=['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa'];
 Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
 const ranked=[...M].sort((a,b)=>R.elo[b]-R.elo[a]);
+const eloRanked=ranked.filter(m=>R.elo[m]!=null);  // unrated (—) models omitted from the chart
 
 new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:ranked, datasets:[{{label:'Elo', backgroundColor:'#a78bfa',
-    data:ranked.map(m=>R.elo[m])}}]}},
-  options:{{ indexAxis:'y', scales:{{x:{{min:Math.min(...Object.values(R.elo))-40}}}},
+  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:'#a78bfa',
+    data:eloRanked.map(m=>R.elo[m])}}]}},
+  options:{{ indexAxis:'y', scales:{{x:{{min:Math.min(...eloRanked.map(m=>R.elo[m]))-40}}}},
     plugins:{{legend:{{display:false}}}} }} }});
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
@@ -548,12 +585,12 @@ def render_index(reps: dict) -> str:
         rep = reps.get(game)
         if not rep:
             continue
-        champ = max(rep["models"], key=lambda m: rep["elo"][m])
+        champ = max(rep["models"], key=lambda m: _elo_key(rep["elo"], m))
         cards += _index_card(
             f"{game}_report.html", TITLE[game],
             f"{rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}"
             f" · first-mover {rep['first_player_win_rate']*100:.0f}%",
-            f"🏆 {champ} <span class='metric'>Elo {rep['elo'][champ]}</span>")
+            f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>")
 
     # Three Hold'em formats, distinct enough to stand alone: 1-Hand (each hand
     # scored independently, bb/100), Match (heads-up, stacks carried, win the
@@ -657,9 +694,9 @@ def main():
         pm = rep["per_model"]
         print(f"=== {game} ({rep['num_games']} games · "
               f"first-mover win {rep['first_player_win_rate']*100:.0f}%) ===")
-        for m in sorted(pm, key=lambda x: rep["elo"][x], reverse=True):
+        for m in sorted(pm, key=lambda x: _elo_key(rep["elo"], x), reverse=True):
             s = pm[m]
-            print(f"  {m:<16} elo={rep['elo'][m]:>4} net/g={s['net_per_game']:+.2f} "
+            print(f"  {m:<16} elo={_elo_txt(rep['elo'][m]):>4} net/g={s['net_per_game']:+.2f} "
                   f"win%={s['win_rate']*100:3.0f} win-take={s['win_take_rate']*100:3.0f}% "
                   f"block={s['block_rate']*100:3.0f}% invalid={s['invalid_rate']*100:.1f}%")
 

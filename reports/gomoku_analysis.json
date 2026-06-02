@@ -851,11 +851,11 @@
     }
   },
   "elo": {
-    "deepseek-v4-pro": 2444,
-    "gpt-oss-120b": -2100,
-    "kimi-k2p6": 2444,
-    "glm-5p1": 2524,
-    "minimax-m2p7": 2188
+    "deepseek-v4-pro": 1544,
+    "gpt-oss-120b": null,
+    "kimi-k2p6": 1544,
+    "glm-5p1": 1624,
+    "minimax-m2p7": 1288
   },
   "len_bins": [
     "7\u20139",

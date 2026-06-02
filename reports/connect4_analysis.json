@@ -13,24 +13,24 @@
   ],
   "per_model": {
     "deepseek-v4-pro": {
-      "games": 37,
-      "wins": 29,
+      "games": 40,
+      "wins": 32,
       "losses": 8,
       "draws": 0,
-      "win_rate": 0.7838,
+      "win_rate": 0.8,
       "draw_rate": 0.0,
-      "net_per_game": 0.5676,
-      "first_move_win_rate": 0.8824,
-      "win_take_rate": 0.9667,
-      "win_opps": 30,
+      "net_per_game": 0.6,
+      "first_move_win_rate": 0.9,
+      "win_take_rate": 0.9697,
+      "win_opps": 33,
       "block_rate": 0.9231,
       "block_opps": 39,
       "missed_wins": 1,
       "allowed_losses": 3,
       "invalid_rate": 0.0,
-      "decisions": 304,
-      "avg_len": 16.19,
-      "avg_latency_s": 781.2,
+      "decisions": 320,
+      "avg_len": 15.7,
+      "avg_latency_s": 781.4,
       "heat": [
         [
           1,
@@ -54,17 +54,17 @@
           3,
           7,
           7,
-          16,
+          17,
           13,
-          5,
+          6,
           3
         ],
         [
           0,
           2,
           17,
-          22,
-          17,
+          23,
+          19,
           8,
           3
         ],
@@ -72,35 +72,35 @@
           5,
           10,
           8,
-          20,
-          14,
-          11,
+          22,
+          16,
+          12,
           8
         ],
         [
           6,
           8,
-          15,
-          14,
           16,
-          5,
-          8
+          16,
+          17,
+          6,
+          9
         ]
       ],
       "phase_blunder_rate": {
         "early": 0.0,
         "mid": 0.0556,
-        "late": 0.0652
+        "late": 0.0612
       },
       "phase_opps": {
         "early": 5,
         "mid": 18,
-        "late": 46
+        "late": 49
       },
       "len_hist": [
-        2,
+        3,
         1,
-        10,
+        12,
         8,
         8,
         4,
@@ -313,24 +313,24 @@
       ]
     },
     "glm-5p1": {
-      "games": 37,
+      "games": 40,
       "wins": 20,
-      "losses": 16,
+      "losses": 19,
       "draws": 1,
-      "win_rate": 0.5405,
-      "draw_rate": 0.027,
-      "net_per_game": 0.1081,
+      "win_rate": 0.5,
+      "draw_rate": 0.025,
+      "net_per_game": 0.025,
       "first_move_win_rate": 0.65,
       "win_take_rate": 0.9524,
       "win_opps": 21,
-      "block_rate": 0.7917,
-      "block_opps": 48,
+      "block_rate": 0.7451,
+      "block_opps": 51,
       "missed_wins": 1,
-      "allowed_losses": 10,
+      "allowed_losses": 13,
       "invalid_rate": 0.0,
-      "decisions": 337,
-      "avg_len": 18.11,
-      "avg_latency_s": 651.1,
+      "decisions": 350,
+      "avg_len": 17.48,
+      "avg_latency_s": 640.9,
       "heat": [
         [
           1,
@@ -346,7 +346,7 @@
           3,
           4,
           6,
-          4,
+          5,
           5,
           4
         ],
@@ -355,7 +355,7 @@
           6,
           11,
           8,
-          6,
+          8,
           13,
           5
         ],
@@ -363,26 +363,26 @@
           3,
           7,
           13,
+          19,
           17,
-          17,
-          17,
+          19,
           8
         ],
         [
           2,
           6,
           13,
-          21,
+          22,
           28,
-          18,
+          19,
           7
         ],
         [
           3,
-          6,
-          14,
+          7,
+          15,
           16,
-          12,
+          14,
           12,
           7
         ]
@@ -390,17 +390,17 @@
       "phase_blunder_rate": {
         "early": 0.0,
         "mid": 0.1429,
-        "late": 0.2045
+        "late": 0.2553
       },
       "phase_opps": {
         "early": 11,
         "mid": 14,
-        "late": 44
+        "late": 47
       },
       "len_hist": [
-        3,
+        4,
         2,
-        5,
+        7,
         5,
         7,
         7,
@@ -526,7 +526,7 @@
         0
       ],
       "glm-5p1": [
-        6,
+        9,
         1,
         0
       ],
@@ -583,7 +583,7 @@
     "glm-5p1": {
       "deepseek-v4-pro": [
         1,
-        6,
+        9,
         0
       ],
       "gpt-oss-120b": [
@@ -626,11 +626,11 @@
     }
   },
   "elo": {
-    "deepseek-v4-pro": 1705,
-    "gpt-oss-120b": 1360,
-    "kimi-k2p6": 1652,
-    "glm-5p1": 1525,
-    "minimax-m2p7": 1258
+    "deepseek-v4-pro": 1723,
+    "gpt-oss-120b": 1358,
+    "kimi-k2p6": 1653,
+    "glm-5p1": 1510,
+    "minimax-m2p7": 1256
   },
   "len_bins": [
     "5\u20138",
@@ -646,6 +646,6 @@
     "34\u201337",
     "37\u201340"
   ],
-  "first_player_win_rate": 0.6186,
-  "num_games": 97
+  "first_player_win_rate": 0.63,
+  "num_games": 100
 }
