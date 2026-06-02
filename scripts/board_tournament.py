@@ -33,6 +33,11 @@ MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
 OUT = "runs/board_tournament"
 os.makedirs(OUT, exist_ok=True)
+# BOARD_VERBOSE=1 prints a timestamped line per move (via the runner's on_step
+# hook) so a long-running game is observable mid-episode — which step it's on,
+# who moved, and how big the generation was. Off by default to keep normal runs
+# quiet; turn on when debugging a slow/stuck pair.
+VERBOSE = bool(os.environ.get("BOARD_VERBOSE"))
 
 
 def acfg(name: str) -> dict:
@@ -87,6 +92,15 @@ async def main():
         runner = Runner(lambda g=game: make_game(g, {"random_open": RANDOM_OPEN}),
                         on_invalid_action="fallback")
         ta = time.perf_counter()
+
+        def _step_cb(ev, _g=game, _a=a, _b=b):
+            # Per-move heartbeat. The gap between consecutive lines for the same
+            # ep is that move's wall time, so a stuck/slow move is obvious.
+            raw = ev.get("raw_output") or ""
+            print(f"{time.strftime('%H:%M:%S')} [{_g} {_a}v{_b} ep{ev['episode']:02d} "
+                  f"s{ev['step']:02d}] {ev['agent_name']} -> {ev['action']} "
+                  f"(len={len(raw)})", flush=True)
+
         try:
             # No-op logger: each episode persists its own self-contained file
             # (data + full step log) under gdir via episode_dir, which is also the
@@ -97,6 +111,7 @@ async def main():
                     make_agent(acfg(b), game_name=game),
                     episodes=EPISODES, seed=seed, seat_swap=True,
                     logger=lg, semaphore=global_sem, episode_dir=gdir,
+                    on_step=_step_cb if VERBOSE else None,
                 )
             data[game]["games"].append({"a": a, "b": b, "seed": seed,
                                         "episodes": trim(res.episodes)})
@@ -129,6 +144,14 @@ async def main():
     for gi, game in enumerate(GAMES):
         for pi, (a, b) in enumerate(pairs):
             specs.append((game, a, b, 5000 + gi * len(pairs) + pi))
+    # Optional pair filter (BOARD_PAIRS="modelA,modelB"): keep only matches whose
+    # two models are both in that set. Seeds stay tied to the full-roster pair
+    # index above, so a filtered run reproduces the same deals as the full run —
+    # used to backfill a single pair in isolation. Filter AFTER seed assignment.
+    _bp = os.environ.get("BOARD_PAIRS")
+    if _bp:
+        want = set(_bp.split(","))
+        specs = [s for s in specs if {s[1], s[2]} <= want]
     random.Random(12345).shuffle(specs)
     tasks = [play(game, a, b, seed) for game, a, b, seed in specs]
     await asyncio.gather(*tasks)
