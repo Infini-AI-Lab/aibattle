@@ -24,6 +24,8 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
+import _heartbeat  # debug per-move heartbeat -> data-log/ (gitignored)
+
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = os.environ.get("MODELS",
     "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
@@ -65,9 +67,11 @@ async def main():
     runner = Runner(game_factory, on_invalid_action="fallback")
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     t0 = time.perf_counter()
+    hb_fh, hb_path = _heartbeat.open_log("table")
     print(f"Table tournament: {n}-player table, {SESSIONS} sessions x "
           f"{MAX_HANDS} hands, random independent deals + random seats, temp=0.6, "
-          f"global cap {MAX_CONCURRENCY}, per-episode resume on\n", flush=True)
+          f"global cap {MAX_CONCURRENCY}, per-episode resume on\n"
+          f"debug heartbeat -> {hb_path}\n", flush=True)
 
     agents = [make_agent(acfg(m), game_name="holdem_table") for m in MODELS]
     gdir = os.path.join(OUT, "table")
@@ -76,6 +80,7 @@ async def main():
         res = await runner.run_table(
             agents, episodes=SESSIONS, logger=lg,
             semaphore=global_sem, episode_dir=gdir, seat_rotate=True,
+            on_step=_heartbeat.make_cb(hb_fh, "table"),
         )
 
     # Aggregate by model NAME across sessions (seats rotate, so map via the

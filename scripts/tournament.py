@@ -24,6 +24,8 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
+import _heartbeat  # debug per-move heartbeat -> data-log/ (gitignored)
+
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = os.environ.get("MODELS",
     "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
@@ -86,9 +88,11 @@ async def main():
     # number of in-flight model calls is bounded (avoids rate limits) while the
     # wall-clock collapses from sum-of-games to ~slowest-game.
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
+    hb_fh, hb_path = _heartbeat.open_log("lite")
     print(f"Starting tournament: {len(games)} games x {HANDS} hands, "
           f"random independent deals, temp=0.6, ALL IN PARALLEL (global cap "
-          f"{MAX_CONCURRENCY} concurrent calls, per-episode resume on)\n", flush=True)
+          f"{MAX_CONCURRENCY} concurrent calls, per-episode resume on)\n"
+          f"debug heartbeat -> {hb_path}\n", flush=True)
 
     def save():
         json.dump({"models": MODELS, "hands": HANDS, "reps": REPS,
@@ -112,6 +116,7 @@ async def main():
                     make_agent(acfg(b), game_name="holdem"),
                     episodes=HANDS, seat_swap=False,
                     logger=lg, semaphore=global_sem, episode_dir=gdir,
+                    on_step=_heartbeat.make_cb(hb_fh, f"{a}v{b}"),
                 )
             # append + save in one synchronous (await-free) block -> race-safe
             all_games.append({"gid": gid, "a": a, "b": b, "rep": rep,

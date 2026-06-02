@@ -24,6 +24,8 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
+import _heartbeat  # debug per-move heartbeat -> data-log/ (gitignored)
+
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = os.environ.get("MODELS",
     "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
@@ -67,9 +69,11 @@ async def main():
     done = 0
     global_sem = asyncio.Semaphore(MAX_CONCURRENCY)
     t0 = time.perf_counter()
+    hb_fh, hb_path = _heartbeat.open_log("match")
     print(f"Match tournament: {total} pairs x {EPISODES} matches "
           f"({MAX_HANDS} hands each), random independent deals, temp=0.6, "
-          f"global cap {MAX_CONCURRENCY}, per-episode resume on\n", flush=True)
+          f"global cap {MAX_CONCURRENCY}, per-episode resume on\n"
+          f"debug heartbeat -> {hb_path}\n", flush=True)
 
     def save():
         json.dump(data, open(os.path.join(OUT, "match_data.json"), "w"))
@@ -87,6 +91,7 @@ async def main():
                     make_agent(acfg(b), game_name="holdem_match"),
                     episodes=EPISODES, seat_swap=False,
                     logger=lg, semaphore=global_sem, episode_dir=gdir,
+                    on_step=_heartbeat.make_cb(hb_fh, f"{a}v{b}"),
                 )
             # Match win rate per model (by seat assignment).
             wins = defaultdict(int); draws = 0

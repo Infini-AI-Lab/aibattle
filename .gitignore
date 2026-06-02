@@ -39,6 +39,9 @@ coverage.xml
 runs/
 reports/runs
 
+# Debug heartbeat logs (per-move progress traces)
+data-log/
+
 # Editor / OS
 .idea/
 .vscode/

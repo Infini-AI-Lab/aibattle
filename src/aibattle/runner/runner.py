@@ -208,6 +208,7 @@ class Runner:
         episode_dir: Optional[str] = None,
         seat_rotate: bool = True,
         progress: Optional[Callable] = None,
+        on_step: Optional[Callable] = None,
     ) -> RunResult:
         """Run an N-player game (e.g. Hold'em Table Mode) for ``episodes`` table
         sessions. ``agents`` is a list of N agents, one per seat.
@@ -286,7 +287,7 @@ class Runner:
                     res = await self._play_episode(
                         game, by_player, deal_seed, ep_i, 0, logger,
                         standing=standing, total_episodes=len(specs),
-                        expose_standing=False,
+                        expose_standing=False, on_step=on_step,
                     )
             except Exception:  # noqa: BLE001
                 failures += 1
@@ -393,6 +394,7 @@ class Runner:
                     "amount": sel_amount,
                     "raw_output": response.raw_output,
                     "message": response.message,
+                    "public": obs.public,   # hand no., street, board, etc.
                 })
 
             if move is None:  # forfeit
