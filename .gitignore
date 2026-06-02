@@ -37,6 +37,7 @@ coverage.xml
 
 # Arena run outputs (logs, summaries)
 runs/
+reports/runs
 
 # Editor / OS
 .idea/
