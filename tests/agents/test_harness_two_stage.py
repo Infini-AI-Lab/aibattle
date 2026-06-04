@@ -18,9 +18,9 @@ async def test_two_calls_estimate_then_decide(make_request):
     resp = await agent.act(req)
     assert resp.action == "bet"
     assert agent.client.call_count == 2
-    # Call 1 carries the estimate instruction.
-    assert "estimate the opponent" in agent.client.calls[0]["prompt"].lower()
-    # Call 2 (decision) carries the estimate text produced in stage 1.
+    # Call 1 carries the (game-neutral) assessment instruction.
+    assert "assess the opponent" in agent.client.calls[0]["prompt"].lower()
+    # Call 2 (decision) carries the assessment text produced in stage 1.
     assert "opponent likely has a weak card" in agent.client.calls[1]["prompt"]
 
 

@@ -1,10 +1,13 @@
 """Structured Chain-of-Thought harness.
 
-A single generation, but the decision prompt is augmented with a generic
-structured-reasoning instruction (analyze hand strength, pot odds, the
-opponent's likely actions, THEN give the action on the last line). The shared
-parse/repair loop still backs it, so a non-conforming answer is repaired exactly
-as for ModelAgent.
+A single generation, but the decision prompt is augmented with a generic,
+game-agnostic structured-reasoning instruction (assess the current state and
+objective, immediate opportunities/threats, the opponent's likely plan from the
+visible history, and the legal options — THEN give the action on the last line).
+The instruction text is domain-neutral so it works for any game (Kuhn, Hold'em,
+Connect Four, Gomoku); the game-specific content comes from the template. The
+shared parse/repair loop still backs it, so a non-conforming answer is repaired
+exactly as for ModelAgent.
 
 Ref: Wei et al. 2022, "Chain-of-Thought Prompting Elicits Reasoning in LLMs"
 (arXiv:2201.11903).
@@ -16,9 +19,10 @@ from ...types import AgentRequest, AgentResponse
 from .base import HarnessAgent
 
 _DEFAULT_COT = (
-    "Before answering, reason step by step: (1) your own position/strength, "
-    "(2) the pot odds or stakes, (3) the opponent's likely actions or range, "
-    "given the action history. Then put your final action on the LAST line."
+    "Before answering, reason step by step: (1) the current state and your "
+    "objective, (2) the immediate opportunities and threats, (3) the opponent's "
+    "likely plan, inferred from the visible history, and (4) your legal options. "
+    "Then put your final action on the LAST line."
 )
 
 

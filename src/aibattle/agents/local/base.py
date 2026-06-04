@@ -2,9 +2,11 @@
 
 A *harness* sits on top of the same ``ModelClient`` + ``GameTemplate`` that
 ``ModelAgent`` uses, but orchestrates MORE than one generation per decision —
-e.g. estimate the opponent's range then decide, sample-and-vote, or
+e.g. assess the opponent/situation then decide, sample-and-vote, or
 draft-critique-revise. These are prompt-engineering / multi-step-reasoning
-techniques, NOT integrations of external agent frameworks.
+techniques, NOT integrations of external agent frameworks. They are game-agnostic:
+intermediate prompts use only generic strategic wording, and the game-specific
+content always comes from the template.
 
 ``HarnessAgent`` provides the composable primitives every harness reuses:
 
@@ -98,8 +100,8 @@ class HarnessAgent(Agent):
     def _compose(self, request: AgentRequest, *, extra_context: str) -> str:
         """Game-agnostic mid-prompt: the final decision prompt plus extra context.
 
-        Used to thread an intermediate reasoning artifact (an opponent-range
-        estimate, a critique) into the final decision step without any
+        Used to thread an intermediate reasoning artifact (an opponent/situation
+        assessment, a critique) into the final decision step without any
         game-specific prompt logic — the game part stays in the template.
         """
         base = self._final_prompt(request)

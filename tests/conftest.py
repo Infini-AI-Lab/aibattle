@@ -97,10 +97,42 @@ def _make_request(*, numeric: bool = False, game: str = "kuhn_poker",
     )
 
 
+def _make_board_request(*, game: str = "connect4", legal_actions=None,
+                        player: str = "player_0", step_index: int = 0,
+                        game_version: str = "1.0.0") -> AgentRequest:
+    """A minimal board-game request (empty private; string legal actions).
+
+    Used to pin the game-agnostic-prompt contract: a harness's default
+    intermediate prompts must carry no poker vocabulary when the template is a
+    board template. The ``rendered`` text deliberately avoids any poker words.
+    """
+    if game == "connect4":
+        legal = legal_actions if legal_actions is not None else ["0", "1", "2", "3"]
+        rendered = ("You are X in Connect Four (6 rows x 7 columns). "
+                    "Drop a piece into a column. Legal columns: " + ", ".join(legal) + ".")
+    else:  # gomoku
+        legal = legal_actions if legal_actions is not None else ["A1", "B2", "C3"]
+        rendered = ("You are X in Gomoku (9x9). Place a stone on an empty cell; "
+                    "connect five in a row. Legal cells: " + ", ".join(legal) + ".")
+    obs = Observation(player=player, private={}, public={"board": []},
+                      history=[], legal_actions=legal, rendered=rendered)
+    return AgentRequest(
+        game=game, game_version=game_version, player=player, observation=obs,
+        instructions="Respond with exactly one legal action token.",
+        step_index=step_index, decision_seed=None, match=None,
+    )
+
+
 @pytest.fixture
 def make_request():
     """Factory fixture building a minimal AgentRequest (discrete or numeric)."""
     return _make_request
+
+
+@pytest.fixture
+def make_board_request():
+    """Factory fixture building a minimal board-game AgentRequest."""
+    return _make_board_request
 
 
 @pytest.fixture

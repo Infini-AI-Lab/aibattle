@@ -1,10 +1,14 @@
 """Self-Refine (draft -> critique -> revise) harness.
 
 Gen-1 produces a draft action with reasoning. Then for ``rounds`` iterations, the
-same model critiques the current draft (is this the highest-EV legal action? is
+same model critiques the current draft (is this the best legal action, or is
 there a better one?) and the draft is revised. The final revision goes through
 the shared parse/repair loop. Each round's draft and critique are recorded under
 metadata["harness"].
+
+The default critique prompt is game-agnostic — it asks only whether the proposed
+action is the best legal option, with no game-specific wording — so it works for
+any game (Kuhn, Hold'em, Connect Four, Gomoku).
 
 Ref: Madaan et al. 2023, "Self-Refine: Iterative Refinement with Self-Feedback"
 (arXiv:2303.17651, NeurIPS 2023).
@@ -16,9 +20,9 @@ from ...types import AgentRequest, AgentResponse
 from .base import HarnessAgent
 
 _DEFAULT_CRITIQUE = (
-    "Critique the proposed action above: is it the highest-EV legal action "
-    "given the situation, or would a different legal action be better? Point out "
-    "any mistakes. Do NOT give a final action yet — only critique."
+    "Critique the proposed action above: is it the best legal action given the "
+    "situation, or would a different legal action be better? Point out any "
+    "mistakes. Do NOT give a final action yet — only critique."
 )
 
 
