@@ -28,6 +28,7 @@ dev = [
     "anthropic>=0.40",
     "requests>=2.31",
     "pytest>=8.0",
+    "pytest-asyncio>=0.23",
 ]
 
 [project.scripts]
@@ -36,3 +37,10 @@ aibattle = "aibattle.cli:main"
 [project.urls]
 Homepage = "https://github.com/hzzheng/ai-battle"
 Issues = "https://github.com/hzzheng/ai-battle/issues"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "integration: end-to-end tests through the real Runner/game (still offline)",
+]
