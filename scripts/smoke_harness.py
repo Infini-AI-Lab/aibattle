@@ -47,7 +47,7 @@ async def one(harness):
         meta = resp.get("metadata") or {}
         h = meta.get("harness") or {}
         if s.get("agent_name", "").endswith("-bot"):
-            print(f"  step{s.get('step_index')} -> {s.get('selected_action')} "
+            print(f"  step{s.get('step')} -> {s.get('selected_action')} "
                   f"{s.get('selected_amount') or ''}  harness={ {k: h[k] for k in h if k != 'history'} }")
 
 

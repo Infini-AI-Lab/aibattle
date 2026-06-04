@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from aibattle.agents.local.self_consistency import SelfConsistencyAgent
 from aibattle.agents.templates.kuhn import KuhnTemplate
+from aibattle.models.base import ModelOutput
 from aibattle.types import INVALID
 from tests.conftest import FakeModelClient
 
@@ -49,3 +50,26 @@ async def test_all_unparseable_falls_back_to_repair_then_invalid(make_request):
     assert resp.action == INVALID
     assert resp.metadata["harness"]["fallback"] is True
     assert resp.metadata["harness"]["parsed"] == 0
+
+
+async def test_success_metadata_includes_observability_fields(make_request):
+    req = make_request()
+    # Script ModelOutputs so the representative winning sample carries model fields.
+    win = ModelOutput(content="bet", finish_reason="stop", completion_tokens=7,
+                      prompt_tokens=33, reasoning="some thinking")
+    other = ModelOutput(content="check", finish_reason="stop")
+    agent = SelfConsistencyAgent(client=FakeModelClient([win, win, other]),
+                                 template=KuhnTemplate(), name="sc", n=3)
+    resp = await agent.act(req)
+    assert resp.action == "bet"
+    m = resp.metadata
+    # Same observability keys the final-loop-backed harnesses record.
+    assert m["attempts"] == 1
+    assert "latency_ms" in m
+    assert m["finish_reason"] == "stop"
+    assert m["truncated"] is False
+    assert m["completion_tokens"] == 7
+    assert m["prompt_tokens"] == 33
+    assert m["has_reasoning"] is True
+    # Harness-specific block still present.
+    assert m["harness"]["winner"] == "bet"
