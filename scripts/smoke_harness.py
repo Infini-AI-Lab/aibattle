@@ -26,7 +26,9 @@ def acfg(harness):
     return {"type": "local", "harness": harness, "name": f"{harness}-bot",
             "model": {"provider": "fireworks", "model_id": MODEL_ID,
                       "api_key_env": "FIREWORKS_API_KEY",
-                      "temperature": 0.3, "max_tokens": 2048, "timeout_s": 120},
+                      # generous budget: reasoning models need room for the
+                      # chain-of-thought before the final action word.
+                      "temperature": 0.3, "max_tokens": 8192, "timeout_s": 300},
             "harness_args": args, "max_retries": 1}
 
 

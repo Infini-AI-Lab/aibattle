@@ -1,107 +1,108 @@
-# Plan: LocalAgent 推理 Harness(CoT / 投票 / 两阶段 / Self-Refine)
+# Plan: LocalAgent Reasoning Harnesses (CoT / Vote / Two-Stage / Self-Refine)
 
 ## Context
 
-`aibattle`(AI Battle Arena)是评估优先的多智能体博弈竞技场。当前 agent 层的 `ModelAgent` 是"单次 generation"的 LLM 包装:`observation → GameTemplate → prompt → 模型 → text → parse → action`。
+`aibattle` (AI Battle Arena) is an evaluation-first multi-agent game arena. The current `ModelAgent` in the agent layer is a "single-generation" LLM wrapper: `observation → GameTemplate → prompt → model → text → parse → action`.
 
-本次目标:在 `ModelAgent` 之上**自研一批轻量的推理 harness / inference-time scaffolding**——通过多次 LLM 调用、结构化中间步骤来提升单个 agent 的决策质量。**注意**:这不是接入 LangChain/AutoGen 等外部框架(那是被否决的第一版理解),而是在框架内部实现 prompt 工程与多步推理能力。
+Goal of this batch: build **a set of lightweight in-house reasoning harnesses / inference-time scaffolding** on top of `ModelAgent` — improving a single agent's decision quality through multiple LLM calls and structured intermediate steps. **Note**: this is NOT integrating external frameworks like LangChain/AutoGen (that was a rejected first interpretation); it is implementing prompt-engineering and multi-step reasoning capabilities inside the framework itself.
 
-### 首批四个 harness
+### The first four harnesses
 
-1. **结构化 CoT** — 单次 generation,强制先输出结构化推理(牌力 / 底池赔率 / 对手可能动作)再给动作。最轻量,其余三个的基础。
-2. **Self-Consistency(多数投票)** — 同一 prompt 用 `temperature>0` 跑 N 次,对动作做多数投票。算力换稳定性。
-3. **两阶段:估计 → 决策** — Gen-1 估计对手牌力/范围 → 拼进 prompt → Gen-2 做最终决策。
-4. **Self-Refine(自批评)** — Gen-1 初步动作+理由 → Gen-2 批评(审视 EV)→ Gen-3 修正。
+1. **Structured CoT** — a single generation, but the model is forced to emit structured reasoning (state, immediate opportunities/threats, the opponent's likely plan) before giving the action. The lightest one and the basis for the other three.
+2. **Self-Consistency (majority vote)** — run the same prompt N times at `temperature > 0` and take a majority vote over the actions. Trades compute for stability.
+3. **Two-Stage: assess → decide** — Gen-1 assesses the opponent/situation → spliced into the prompt → Gen-2 makes the final decision.
+4. **Self-Refine (self-critique)** — Gen-1 initial action + rationale → Gen-2 critique (is it the best option?) → Gen-3 revision.
 
-### 学术支撑(已联网核实)
+### Academic support (verified online)
 
-- **CoT**:[Chain-of-Thought Prompting Elicits Reasoning in LLMs (Wei et al., 2022, arXiv:2201.11903)](https://arxiv.org/abs/2201.11903) — 中间推理步骤显著提升复杂推理。
-- **Self-Consistency**:[Self-Consistency Improves CoT Reasoning (Wang et al., 2022, arXiv:2203.11171)](https://arxiv.org/abs/2203.11171) — 采样多条路径再投票,GSM8K 56.5%→74.4%。
-- **两阶段/估计对手范围**:[How Far Are LLMs from Professional Poker Players? (arXiv:2602.00528, 2026)](https://arxiv.org/abs/2602.00528) 把扑克拆为"用隐藏信息行动、估计对手范围、预判未来";[PokerSkill (arXiv:2605.30094)](https://arxiv.org/html/2605.30094v1) 用三阶段纯提示 scaffolding 达专家级、无需训练或求解器。
-- **Self-Refine**:[Self-Refine: Iterative Refinement with Self-Feedback (Madaan et al., 2023, arXiv:2303.17651)](https://arxiv.org/abs/2303.17651) — 同一 LLM 当生成者/批评者/修正者,平均提升约 20%(NeurIPS 2023)。
-- **(下一步)对手建模需要记忆**:[Readable Minds: Emergent ToM in LLM Poker Agents (arXiv:2604.04157)](https://arxiv.org/abs/2604.04157) — LLM 只有配持久记忆才发展出对手模型,印证"对手建模需跨手状态",本次先做无状态是对的。
+- **CoT**: [Chain-of-Thought Prompting Elicits Reasoning in LLMs (Wei et al., 2022, arXiv:2201.11903)](https://arxiv.org/abs/2201.11903) — intermediate reasoning steps significantly improve complex reasoning.
+- **Self-Consistency**: [Self-Consistency Improves CoT Reasoning (Wang et al., 2022, arXiv:2203.11171)](https://arxiv.org/abs/2203.11171) — sample multiple reasoning paths then vote, GSM8K 56.5%→74.4%.
+- **Two-stage / opponent-range estimation**: [How Far Are LLMs from Professional Poker Players? (arXiv:2602.00528, 2026)](https://arxiv.org/abs/2602.00528) decomposes poker into "act under hidden info, estimate opponent ranges, anticipate the future"; [PokerSkill (arXiv:2605.30094)](https://arxiv.org/html/2605.30094v1) reaches expert level with three-stage pure-prompt scaffolding, no training or solver required.
+- **Self-Refine**: [Self-Refine: Iterative Refinement with Self-Feedback (Madaan et al., 2023, arXiv:2303.17651)](https://arxiv.org/abs/2303.17651) — the same LLM acts as generator/critic/reviser, ~20% average improvement (NeurIPS 2023).
+- **(Next step) opponent modeling needs memory**: [Readable Minds: Emergent ToM in LLM Poker Agents (arXiv:2604.04157)](https://arxiv.org/abs/2604.04157) — LLMs only develop opponent models when equipped with persistent memory, confirming that "opponent modeling needs cross-hand state"; doing stateless first this round is the right call.
 
-### 关键决策(已与用户确认)
+### Key decisions (confirmed with the user)
 
-1. **范围**:四个 harness 全做;**无状态**(每次 `act()` 独立),对手建模/反思等跨手记忆暂缓。
-2. **抽象**:**通用 harness + 游戏无关**——中间 prompt 通用拼接,最终决策步复用 `GameTemplate.parse`;一次写好适用所有游戏(Kuhn/Holdem/Connect4/Gomoku)。
-3. **代码组织**:**共享基类 + 可组合步骤**(便于以后组合,如 CoT+投票)。
-4. **可配置**:N(投票次数)、迭代轮数、temperature、自定义中间提示文本等在 YAML 里**可覆盖**(各有合理默认)。
-5. **基石**:先把 `ModelAgent` 的 render/generate/parse/repair 循环抽成共享 helper,harness 复用它。
-6. **config 类型**:新增 `type: local`,用 `harness: <名字>` 选具体 harness。
+1. **Scope**: build all four harnesses; **stateless** (each `act()` is independent); cross-hand memory such as opponent modeling/reflection is deferred.
+2. **Abstraction**: **generic harness + game-agnostic** — intermediate prompts use generic concatenation, and the final decision step reuses `GameTemplate.parse`; write once, works for all games (Kuhn/Holdem/Connect4/Gomoku).
+3. **Code organization**: **shared base class + composable steps** (to make future composition easy, e.g. CoT + voting).
+4. **Configurable**: N (number of votes), iteration rounds, temperature, custom intermediate prompt text, etc. are **overridable** in YAML (each with a sensible default).
+5. **Keystone**: first extract `ModelAgent`'s render/generate/parse/repair loop into a shared helper, then have the harnesses reuse it.
+6. **Config type**: add `type: local`, select a concrete harness via `harness: <name>`.
 
 ---
 
-## 实现部分
+## Implementation
 
-### 步骤 1(基石):抽取共享原语
+### Step 1 (keystone): extract shared primitives
 
-**新建 [src/aibattle/agents/template_loop.py](src/aibattle/agents/template_loop.py)**,提供 harness 共用的原语:
+**Create [src/aibattle/agents/template_loop.py](src/aibattle/agents/template_loop.py)** providing the primitives shared by the harnesses:
 
-- `GenerateResult`(dataclass)— 归一化一次 generation 的输出:`content`(供 parse)、`full_text`(供日志,可含 thinking)、`meta`(provider 字段,合并进 metadata)。
-- `async def run_template_loop(template, generate, request, *, max_retries=2) -> AgentResponse` — 逐字复刻 [model_agent.py](src/aibattle/agents/model_agent.py) 现有的 render→generate→parse→repair→INVALID 逻辑 + metadata 组装。`generate: Callable[[str], Awaitable[GenerateResult]]`。
-- 一个**投票/解析辅助** `parse_or_none(template, text, request) -> Optional[Move]`(薄封装 `template.parse`),供 harness 在中间步用。
+- `GenerateResult` (dataclass) — normalizes the output of one generation: `content` (for parse), `full_text` (for logging, may include thinking), `meta` (provider fields, merged into metadata).
+- `async def run_template_loop(template, generate, request, *, max_retries=2) -> AgentResponse` — replicates verbatim the existing render→generate→parse→repair→INVALID logic and metadata assembly from [model_agent.py](src/aibattle/agents/model_agent.py). `generate: Callable[[str], Awaitable[GenerateResult]]`.
+- A **vote/parse helper** `parse_or_none(template, text, request) -> Optional[Move]` (thin wrapper over `template.parse`), used by harnesses in intermediate steps.
 
-**改造 [src/aibattle/agents/model_agent.py](src/aibattle/agents/model_agent.py)**:`act()` 把 `ModelOutput → GenerateResult`(保留 `has_reasoning`/`finish_reason`/`truncated`/`completion_tokens`/`prompt_tokens` 这些 metadata key 不变),`return await run_template_loop(...)`。
+**Refactor [src/aibattle/agents/model_agent.py](src/aibattle/agents/model_agent.py)**: `act()` maps `ModelOutput → GenerateResult` (keeping the `has_reasoning`/`finish_reason`/`truncated`/`completion_tokens`/`prompt_tokens` metadata keys unchanged) and `return await run_template_loop(...)`.
 
-> **风险(最高)**:日志/replay 依赖 `ModelAgent` 的 metadata key。循环须输出相同 key。实现后用 `scripts/smoke_v2.py` 跑一局 diff 前后日志确认。
+> **Risk (highest)**: logs/replay depend on `ModelAgent`'s metadata keys. The loop must emit identical keys. After implementing, run one game via `scripts/smoke_v2.py` and diff the before/after logs to confirm.
 
-### 步骤 2:LocalAgent 基类 + 可组合步骤
+### Step 2: LocalAgent base class + composable steps
 
-**新建 [src/aibattle/agents/local/base.py](src/aibattle/agents/local/base.py)**:
+**Create [src/aibattle/agents/local/base.py](src/aibattle/agents/local/base.py)**:
 
-`HarnessAgent(Agent)`(`agent_type = "local"`)— 共享基类,持有 `client: ModelClient`、`template: GameTemplate`、`name`、`max_retries`,并提供可组合的步骤原语,各 harness 复用:
+`HarnessAgent(Agent)` (`agent_type = "local"`) — a shared base class holding `client: ModelClient`, `template: GameTemplate`, `name`, `max_retries`, and providing composable step primitives reused by every harness:
 
 ```python
 class HarnessAgent(Agent):
     agent_type = "local"
     def __init__(self, *, client, template, name, max_retries=2, **harness_cfg): ...
 
-    # 原语(供子类编排):
-    async def _generate(self, prompt: str) -> GenerateResult: ...      # 调 client,归一化
+    # Primitives (for subclasses to orchestrate):
+    async def _generate(self, prompt: str) -> GenerateResult: ...      # call client, normalize
     def _final_prompt(self, request) -> str: ...                       # template.render_prompt
     def _parse(self, text, request) -> Optional[Move]: ...             # template.parse
-    def _vote(self, moves: list[Move]) -> Move: ...                    # 多数投票(并列取首个合法)
-    def _compose(self, request, *, extra_context: str) -> str: ...     # 通用中间-prompt 拼接
+    def _vote(self, moves: list[Move]) -> Move: ...                    # majority vote (tie -> first legal)
+    def _compose(self, request, *, extra_context: str) -> str: ...     # generic mid-prompt concatenation
 
-    # 抽象:子类实现编排,返回 AgentResponse(把中间产物塞进 metadata)
+    # Abstract: subclass implements the orchestration, returns AgentResponse
+    # (stashing intermediate artifacts into metadata)
     @abstractmethod
     async def act(self, request) -> AgentResponse: ...
 ```
 
-中间产物(估计文本 / 候选列表 / 批评意见)统一塞进 `AgentResponse.metadata["harness"]`,供日志/replay 审查 harness 是否真的帮到决策。
+Intermediate artifacts (assessment text / candidate list / critique) are stashed into `AgentResponse.metadata["harness"]`, so logs/replay can audit whether the harness actually helped the decision.
 
-### 步骤 3:四个 harness 子类
+### Step 3: the four harness subclasses
 
-各占一文件,均 `agent_type="local"`,复用步骤 2 原语 + 步骤 1 基石:
+Each in its own file, all `agent_type="local"`, reusing the Step 2 primitives + the Step 1 keystone:
 
-- **[src/aibattle/agents/local/cot.py](src/aibattle/agents/local/cot.py) `StructuredCoTAgent`** — 在 `template.render_prompt` 末尾追加通用结构化指令("先逐项分析:你的牌力、底池赔率、对手可能的动作/范围,再在最后一行给出动作"),单次 generate,`run_template_loop` 的 parse/repair 兜底。参数:`cot_instructions`(可覆盖)。
-- **[src/aibattle/agents/local/self_consistency.py](src/aibattle/agents/local/self_consistency.py) `SelfConsistencyAgent`** — 同 prompt 并发跑 `n` 次(`temperature` 可配),各自 parse 出 Move,`_vote` 取多数;全失败则退回单次 + repair。参数:`n`(默认 5)、`temperature`(默认 0.7)。metadata 记录票型分布。
-- **[src/aibattle/agents/local/two_stage.py](src/aibattle/agents/local/two_stage.py) `TwoStageAgent`** — Gen-1 用通用"估计提示"(默认:"基于公开信息和行动历史,估计对手可能的牌力/范围,简要说明")→ `_compose` 把估计拼进 → Gen-2 走最终决策步 + parse/repair。参数:`estimate_prompt`(可覆盖)。metadata 记录 Gen-1 估计文本。
-- **[src/aibattle/agents/local/self_refine.py](src/aibattle/agents/local/self_refine.py) `SelfRefineAgent`** — Gen-1 初步动作+理由 → Gen-2 批评(通用"审视该动作 EV/是否更优"提示)→ Gen-3 修正 + parse/repair。参数:`rounds`(默认 1 轮批评)、`critique_prompt`(可覆盖)。metadata 记录每轮初稿/批评。
+- **[src/aibattle/agents/local/cot.py](src/aibattle/agents/local/cot.py) `StructuredCoTAgent`** — appends a generic, game-agnostic structured-reasoning instruction to `template.render_prompt` ("First analyze, item by item: the current state and your objective, the immediate opportunities and threats, the opponent's likely plan inferred from the visible history, and your legal options; then give the action on the last line"), a single generate, with `run_template_loop`'s parse/repair as the backstop. Param: `cot_instructions` (overridable).
+- **[src/aibattle/agents/local/self_consistency.py](src/aibattle/agents/local/self_consistency.py) `SelfConsistencyAgent`** — run the same prompt `n` times concurrently (`temperature` configurable), parse each into a Move, `_vote` takes the majority; if all fail, fall back to a single + repair. Params: `n` (default 5), `temperature` (default 0.7). metadata records the vote distribution.
+- **[src/aibattle/agents/local/two_stage.py](src/aibattle/agents/local/two_stage.py) `TwoStageAgent`** — Gen-1 uses a generic "assessment prompt" (default: "Based only on the public information and action history so far, assess the opponent's likely position, plan, pressure, or available threats, and briefly explain your reasoning") → `_compose` splices the assessment in → Gen-2 runs the final decision step + parse/repair. Param: `estimate_prompt` (overridable). metadata records the Gen-1 assessment text.
+- **[src/aibattle/agents/local/self_refine.py](src/aibattle/agents/local/self_refine.py) `SelfRefineAgent`** — Gen-1 initial action + rationale → Gen-2 critique (generic "is this the best legal action, or is there a better one?" prompt) → Gen-3 revision + parse/repair. Params: `rounds` (default 1 critique round), `critique_prompt` (overridable). metadata records each round's draft/critique.
 
-所有中间提示**游戏无关**(只引用 `observation.rendered` / `history` / `legal_actions`),最终步永远复用 `GameTemplate`,因此自动适用全部游戏。
+All intermediate prompts are **game-agnostic** (they only reference `observation.rendered` / `history` / `legal_actions`), and the final step always reuses `GameTemplate`, so they automatically apply to all games.
 
-### 步骤 4:registry + loader + 默认参数
+### Step 4: registry + loader + default params
 
-- **改 [src/aibattle/agents/registry.py](src/aibattle/agents/registry.py)**:新增 `_build_local_agent(cfg, game_name, seed)`,按 `cfg["harness"]` 在子注册表 `{cot, self_consistency, two_stage, self_refine}` 选类;复用 `make_client(cfg["model"])` + `make_template(game_name)` 构造;把 `cfg.get("harness_args", {})` 透传给 harness。`make_agent` 增加 `local` 分支。
-- **改 [src/aibattle/config/loader.py](src/aibattle/config/loader.py) 第 83 行**:类型白名单加 `"local"`,错误信息同步。
-- 每个 harness 的可配置参数(`n`/`temperature`/`rounds`/`*_prompt`)都有合理默认,YAML 仅覆盖需要的项。
+- **Edit [src/aibattle/agents/registry.py](src/aibattle/agents/registry.py)**: add `_build_local_agent(cfg, game_name, seed)` selecting a class from the sub-registry `{cot, self_consistency, two_stage, self_refine}` by `cfg["harness"]`; construct via `make_client(cfg["model"])` + `make_template(game_name)`; pass `cfg.get("harness_args", {})` through to the harness. Add a `local` branch to `make_agent`.
+- **Edit [src/aibattle/config/loader.py](src/aibattle/config/loader.py) (line 83)**: add `"local"` to the type whitelist, update the error message accordingly.
+- Each harness's configurable params (`n`/`temperature`/`rounds`/`*_prompt`) have sensible defaults; YAML only overrides what it needs.
 
-### 步骤 5:pyproject.toml
+### Step 5: pyproject.toml
 
-**改 [pyproject.toml](pyproject.toml)**:`dev` 加 `pytest-asyncio>=0.23`;新增 `[tool.pytest.ini_options]`(`asyncio_mode="auto"`、`testpaths=["tests"]`、`markers`)。harness 复用现有 `openai`/`anthropic` client,无新运行时依赖。
+**Edit [pyproject.toml](pyproject.toml)**: add `pytest-asyncio>=0.23` to `dev`; add `[tool.pytest.ini_options]` (`asyncio_mode="auto"`, `testpaths=["tests"]`, `markers`). The harnesses reuse the existing `openai`/`anthropic` clients, so no new runtime dependency.
 
-### 实现顺序
+### Implementation order
 
-1. `template_loop.py` + 改 `model_agent.py` → smoke 验证 metadata 不变。
-2. `local/base.py`(`HarnessAgent` + 原语)。
-3. 四个 harness 子类(cot → self_consistency → two_stage → self_refine)。
-4. registry `local` 分发 + loader 白名单。
-5. `pyproject.toml` + pytest 配置。
-6. TDD 测试套件。
+1. `template_loop.py` + refactor `model_agent.py` → smoke-verify metadata unchanged.
+2. `local/base.py` (`HarnessAgent` + primitives).
+3. The four harness subclasses (cot → self_consistency → two_stage → self_refine).
+4. registry `local` dispatch + loader whitelist.
+5. `pyproject.toml` + pytest config.
+6. TDD test suite.
 
-### 示例 YAML
+### Example YAML
 
 ```yaml
 players:
@@ -112,7 +113,7 @@ players:
       name: deepseek-twostage
       model: { provider: fireworks, model_id: accounts/fireworks/models/deepseek-v4-pro,
                api_key_env: FIREWORKS_API_KEY, temperature: 0.0, max_tokens: 16384 }
-      harness_args: { estimate_prompt: "先估计对手在当前行动线下最可能的牌力区间" }
+      harness_args: { estimate_prompt: "First assess the opponent's most likely position given the current action line" }
   player_1:
     agent:
       type: local
@@ -123,15 +124,15 @@ players:
 
 ---
 
-## 测试部分(TDD,先写测试钉契约)
+## Testing (TDD — write tests first to pin the contract)
 
-新建 `tests/` 布局:
+Create the `tests/` layout:
 
 ```
 tests/
   conftest.py
   agents/
-    test_template_loop.py     # 共享基石
+    test_template_loop.py     # shared keystone
     test_harness_cot.py
     test_harness_self_consistency.py
     test_harness_two_stage.py
@@ -139,92 +140,153 @@ tests/
   config/
     test_registry_and_loader.py
   integration/
-    test_runner_e2e.py        # 经真实 Runner 端到端(离线)
+    test_runner_e2e.py        # end-to-end through the real Runner (offline)
 ```
 
-### conftest.py 共享 fixtures
+### conftest.py shared fixtures
 
-- **`make_request`**(工厂)— 不启动 game 构造最小 `AgentRequest`+`Observation`,discrete/numeric 两变体,可覆盖 `legal_actions`/`decision_seed`/`match`。
-- **`FakeModelClient`** — 子类化 `ModelClient`,`generate()` **返回真实 `ModelOutput`**(字符串自动包装),记录每次 `prompt`/`temperature`/`max_tokens` 到 `self.calls`,**支持按调用序脚本化**多个输出(harness 多步必需),脚本耗尽 `AssertionError`(抓过度调用)。
-  > 关键:`ModelAgent`/harness 依赖 `out.full_text()`,fake 必须返 `ModelOutput`。
-- **`real_kuhn`** — `make_game("kuhn_poker")` + `Runner` + `MatchLogger(None)`(零文件写),离线端到端。
+- **`make_request`** (factory) — builds a minimal `AgentRequest`+`Observation` without starting a game, with discrete/numeric variants, overridable `legal_actions`/`decision_seed`/`match`.
+- **`FakeModelClient`** — subclasses `ModelClient`; `generate()` **returns a real `ModelOutput`** (strings auto-wrapped), records each `prompt`/`temperature`/`max_tokens` into `self.calls`, **supports scripting multiple outputs in call order** (needed for multi-step harnesses), and raises `AssertionError` when the script is exhausted (catches over-calling).
+  > Key: `ModelAgent`/harnesses depend on `out.full_text()`, so the fake must return `ModelOutput`.
+- **`real_kuhn`** — `make_game("kuhn_poker")` + `Runner` + `MatchLogger(None)` (zero file writes), offline end-to-end.
 
-### 各测试要点
+### Per-test focus
 
-**`test_template_loop.py`**(全离线,`FakeModelClient` + 真实 `KuhnTemplate`/`HoldemTemplate`):
-- 首次成功→`attempts==1`、只调一次且 prompt 是渲染结果。
-- 一次 repair 后成功→第二次 prompt 等于 `repair_prompt(request, bad)`、`attempts==2`。
-- 耗尽→`INVALID`、`attempts==max_retries+1`、`invalid==True`。
-- numeric 金额解析、缺金额触发 repair;metadata 透传 token/`truncated`/`has_reasoning`;`raw_output==full_text()`。
-- **`ModelAgent` 委托一致性**:真实 `ModelAgent` 结果 == 直接调 helper(防回归锚点)。
+**`test_template_loop.py`** (fully offline, `FakeModelClient` + real `KuhnTemplate`/`HoldemTemplate`):
+- First-try success → `attempts==1`, exactly one call and the prompt is the rendered result.
+- Success after one repair → second prompt equals `repair_prompt(request, bad)`, `attempts==2`.
+- Exhausted → `INVALID`, `attempts==max_retries+1`, `invalid==True`.
+- Numeric amount parsing, missing-amount triggers repair; metadata passes through token/`truncated`/`has_reasoning`; `raw_output==full_text()`.
+- **`ModelAgent` delegation consistency**: the real `ModelAgent` result == calling the helper directly (anti-regression anchor).
 
 **`test_harness_cot.py`**:
-- render 出的 prompt 含结构化指令;最终能 parse 出动作;garbage→repair→INVALID 链路正常。
-- `cot_instructions` 覆盖生效(自定义文本出现在发给 client 的 prompt 里)。
+- The rendered prompt contains the structured instruction; the final output parses to an action; garbage→repair→INVALID path works.
+- `cot_instructions` override takes effect (custom text appears in the prompt sent to the client).
 
 **`test_harness_self_consistency.py`**:
-- 脚本 `n` 个输出(如 `["bet","bet","check","bet","check"]`)→ 投票得 `bet`;`metadata["harness"]` 含票型分布。
-- `n`/`temperature` 透传(断言 `FakeModelClient.calls` 调了 n 次、temperature 正确)。
-- 全部不可 parse → 退回 repair → 最终 INVALID。
-- 并列(2 vs 2 vs ...)取首个合法 Move(确定性,便于复现)。
+- Script `n` outputs (e.g. `["bet","bet","check","bet","check"]`) → vote yields `bet`; `metadata["harness"]` contains the vote distribution.
+- `n`/`temperature` pass-through (assert `FakeModelClient.calls` was called n times with the right temperature).
+- All unparseable → fall back to repair → finally INVALID.
+- Tie (2 vs 2 vs ...) takes the first legal Move (deterministic, reproducible).
 
 **`test_harness_two_stage.py`**:
-- 两次调用:第一次 prompt 含"估计"指令、第二次 prompt **含第一次的估计文本**(断言拼接);最终 parse 出动作。
-- `metadata["harness"]["estimate"]` 记录 Gen-1 文本。
-- `estimate_prompt` 覆盖生效。
-- Gen-2 garbage→repair。
+- Two calls: the first prompt contains the "assessment" instruction, the second prompt **contains the assessment text from the first** (assert the concatenation); the final output parses to an action.
+- `metadata["harness"]["estimate"]` records the Gen-1 text.
+- `estimate_prompt` override takes effect.
+- Gen-2 garbage→repair.
 
 **`test_harness_self_refine.py`**:
-- 三步调用顺序正确:初稿→批评→修正;第三次 prompt 含批评内容(断言拼接)。
-- `rounds` 控制批评轮数(rounds=2 → 调用次数相应增加)。
-- `metadata["harness"]` 记录每轮初稿/批评。
-- 修正后仍不可 parse → repair/INVALID 兜底。
+- Correct three-step call order: draft→critique→revise; the third prompt contains the critique content (assert the concatenation).
+- `rounds` controls the number of critique rounds (rounds=2 → call count increases accordingly).
+- `metadata["harness"]` records each round's draft/critique.
+- If the revision still doesn't parse → repair/INVALID backstop.
 
 **`test_registry_and_loader.py`**:
-- `make_agent({"type":"local","harness":"two_stage","model":{...}}, game_name="kuhn_poker")` 构造出对应 harness;`harness_args` 透传;`game_name` 解析到正确 template。
-- 未知 `harness` 名 / 缺 `model` → 清晰报错。
-- `load_config`(`tmp_path` 临时 YAML)接受 `type: local`、拒绝未知 type、仍要求 `agent.type`。
+- `make_agent({"type":"local","harness":"two_stage","model":{...}}, game_name="kuhn_poker")` constructs the corresponding harness; `harness_args` pass-through; `game_name` resolves to the correct template.
+- Unknown `harness` name / missing `model` → clear error.
+- `load_config` (temp YAML via `tmp_path`) accepts `type: local`, rejects unknown types, still requires `agent.type`.
 
-**`test_runner_e2e.py`**(`@pytest.mark.integration`,离线):
-- 用 `FakeModelClient` 驱动一个 harness agent 打完整 Kuhn match(`MatchLogger(None)`、`episode_dir=None`)→ `episodes` 数对、`failures==0`、`returns` 零和。
-- harness 返回 `INVALID` 时 `fallback` 策略生效、match 完成。
-- harness 是 drop-in `Agent`:与 builtin/random 对打跑通。
+**`test_runner_e2e.py`** (`@pytest.mark.integration`, offline):
+- Drive a harness agent with `FakeModelClient` through a full Kuhn match (`MatchLogger(None)`, `episode_dir=None`) → correct `episodes` count, `failures==0`, zero-sum `returns`.
+- When the harness returns `INVALID`, the `fallback` policy applies and the match completes.
+- The harness is a drop-in `Agent`: plays through against builtin/random.
 
 ### Marker / CI
 
-- **默认快速层**(仅新增 `pytest-asyncio`):template_loop、四个 harness、registry/loader——全离线、用 `FakeModelClient`。
-- **`@pytest.mark.integration`**:runner e2e,离线但稍慢。
-- 除 loader 用 `tmp_path` 外无测试写仓库文件系统;所有 match 用 `MatchLogger(None)`。
+- **Default fast tier** (only `pytest-asyncio` added): template_loop, the four harnesses, registry/loader — all offline, using `FakeModelClient`.
+- **`@pytest.mark.integration`**: runner e2e, offline but slightly slower.
+- No test writes to the repo filesystem except the loader's use of `tmp_path`; every match uses `MatchLogger(None)`.
 
 ---
 
-## Verification(端到端验证)
+## Verification (end-to-end)
 
-1. **测试**:`uv pip install -e ".[dev]"` → `pytest`(全绿,离线)。
-2. **metadata 回归**:`python scripts/smoke_v2.py`(需 `.fireworks`)确认 `ModelAgent` 重构后日志 metadata key 不变。
-3. **harness 手测**:写两个 `type: local` config(如 `two_stage` vs baseline `model`),`aibattle run` 一个 Kuhn/Holdem config 跑通,检查 `trajectories.json` 里 `metadata["harness"]` 有中间推理痕迹。
-4. **对照实验**:同一模型 baseline(`model`)vs 各 harness 跑小规模锦标赛(复用 `scripts/*_tournament.py` 模式),看胜率/平均收益是否提升——验证 harness 实际效果。
-
----
-
-## 关键文件
-
-**新建**:
-- [src/aibattle/agents/template_loop.py](src/aibattle/agents/template_loop.py) — 共享基石
-- [src/aibattle/agents/local/base.py](src/aibattle/agents/local/base.py) — `HarnessAgent` + 可组合原语
-- [src/aibattle/agents/local/cot.py](src/aibattle/agents/local/cot.py) / [self_consistency.py](src/aibattle/agents/local/self_consistency.py) / [two_stage.py](src/aibattle/agents/local/two_stage.py) / [self_refine.py](src/aibattle/agents/local/self_refine.py)
-- `tests/`(conftest + 7 个测试模块)
-
-**修改**:
-- [src/aibattle/agents/model_agent.py](src/aibattle/agents/model_agent.py) — 委托 `run_template_loop`
-- [src/aibattle/agents/registry.py](src/aibattle/agents/registry.py) — `local` 分发(子注册表 + `harness_args` 透传 + `game_name`)
-- [src/aibattle/config/loader.py](src/aibattle/config/loader.py) — 类型白名单加 `local`
-- [pyproject.toml](pyproject.toml) — `pytest-asyncio` + `[tool.pytest.ini_options]`
+1. **Tests**: `uv pip install -e ".[dev]"` → `pytest` (all green, offline).
+2. **metadata regression**: `python scripts/smoke_v2.py` (needs `.fireworks`) to confirm `ModelAgent`'s log metadata keys are unchanged after the refactor.
+3. **Manual harness test**: write two `type: local` configs (e.g. `two_stage` vs baseline `model`), `aibattle run` a Kuhn/Holdem config, and check that `metadata["harness"]` in `trajectories.json` has intermediate-reasoning traces.
+4. **Controlled experiment**: run a small tournament of the same model baseline (`model`) vs each harness (reusing the `scripts/*_tournament.py` pattern) and see whether win rate / mean payoff improves — validating the harnesses' actual effect.
 
 ---
 
-## 后续(本次不做,已规划)
+## Key files
 
-- **跨手记忆型 harness**:对手建模(统计对手在各状态的下注/诈唬频率)、对局后反思(Reflexion 式 lesson memory)。需 agent 持有跨 `act()` 状态——架构上的下一步,有 [Readable Minds (arXiv:2604.04157)](https://arxiv.org/abs/2604.04157) 支撑。
-- **工具增强**:接确定性 equity 计算器 / 底池赔率工具,弥补 LLM 算术短板(扑克杀手级应用)。
-- **harness 组合**:如 CoT+投票、两阶段+self-refine(共享基类的可组合步骤已为此预留)。
+**New**:
+- [src/aibattle/agents/template_loop.py](src/aibattle/agents/template_loop.py) — shared keystone
+- [src/aibattle/agents/local/base.py](src/aibattle/agents/local/base.py) — `HarnessAgent` + composable primitives
+- [src/aibattle/agents/local/cot.py](src/aibattle/agents/local/cot.py) / [self_consistency.py](src/aibattle/agents/local/self_consistency.py) / [two_stage.py](src/aibattle/agents/local/two_stage.py) / [self_refine.py](src/aibattle/agents/local/self_refine.py) — the four example harnesses
+- [scripts/smoke_harness.py](scripts/smoke_harness.py) — run the four harnesses live (one hand each) and print their intermediate reasoning
+- [configs/harness_cot_vs_self_consistency.yaml](configs/harness_cot_vs_self_consistency.yaml) — example config wiring two harnesses head-to-head
+
+**Modified**:
+- [src/aibattle/agents/model_agent.py](src/aibattle/agents/model_agent.py) — delegates to `run_template_loop`
+- [src/aibattle/agents/registry.py](src/aibattle/agents/registry.py) — `local` dispatch (sub-registry + `harness_args` pass-through + `game_name`)
+- [src/aibattle/config/loader.py](src/aibattle/config/loader.py) — add `local` to the type whitelist
+
+---
+
+## Experiment results (ablation: bare model vs each harness)
+
+A controlled ablation was run with `scripts/harness_ablation.py`: the SAME model
+(`gpt-oss-120b` via Fireworks) plays against itself, one seat bare (`type: model`)
+and one seat wrapped in a harness, seats swapped to be position-neutral. Any
+payoff difference therefore comes from the harness scaffolding alone. Numbers are
+from the harness's perspective; a harness "beats" the bare model only when
+`mean/hand > 0` **and** the 95% CI does not cross 0.
+
+**Kuhn Poker (8 hands per matchup):**
+
+| harness          | mean/hand | ±ci95 | win% | invalid% | verdict        |
+|------------------|----------:|------:|-----:|---------:|----------------|
+| cot              |    +0.000 | 0.741 |  50% |       0% | no sig. diff   |
+| self_consistency |    +0.000 | 0.741 |  50% |       0% | no sig. diff   |
+| two_stage        |    +0.000 | 1.171 |  50% |       0% | no sig. diff   |
+| self_refine      |    −0.125 | 1.076 |  50% |       0% | no sig. diff   |
+
+**Heads-Up Hold'em (6 hands per matchup):**
+
+| harness          | mean/hand | ±ci95 | win% | invalid% | verdict        |
+|------------------|----------:|------:|-----:|---------:|----------------|
+| cot              |    +0.667 | 3.306 |  67% |       0% | no sig. diff   |
+| self_consistency |    +0.000 | 1.753 |  50% |       0% | no sig. diff   |
+| two_stage        |    +0.000 | 1.753 |  50% |       0% | no sig. diff   |
+| self_refine      |    +0.333 | 3.843 |  67% |       0% | no sig. diff   |
+
+### Findings
+
+1. **No harness beats the bare model with statistical significance** in either
+   game. Every CI crosses 0. (Hold'em's apparent +0.667 / 67% for cot is noise —
+   the CI is ±3.3, far wider than the mean; Hold'em single-hand variance is huge.)
+2. **The harnesses run cleanly on a complex game**: 0% invalid-action rate on
+   Hold'em across all four harnesses confirms the prompt/parse/repair/numeric-bet
+   paths are correct end-to-end — a genuine result, independent of skill effect.
+3. **Structured CoT is essentially redundant for reasoning models.** Inspecting
+   raw outputs, the *bare* model already emits a full chain-of-thought (it is a
+   reasoning model and cites near-optimal strategy unprompted). CoT only adds
+   structure/length to reasoning the model already does — it does not create it.
+   The original CoT result (Wei 2022) assumed *non-reasoning* models; that premise
+   no longer holds for 2026-era reasoning models. **The real value must come from
+   what a single forward pass cannot give** (cross-hand memory, exact tool
+   computation, enforced information structure) — see Follow-up.
+
+### Caveats
+
+- **Sample sizes are tiny** (6–8 hands) — these runs show *direction and that the
+  harnesses operate*, not a verdict. Hold'em especially needs 50–100+ hands to
+  narrow the CI enough to conclude anything about skill.
+- **Kuhn is too simple** (a solved game with a known optimal policy), so a single
+  forward pass already plays near-optimally and leaves no room for scaffolding.
+
+Reproduce: pit a `type: local` harness against a `type: model` baseline of the
+SAME model in a config (see `configs/harness_cot_vs_self_consistency.yaml` for the
+shape) and `aibattle run` it, then `aibattle eval` the run dir. The throwaway
+ablation driver used for the numbers above was removed during cleanup.
+(Note: `kimi-k2p6` over-thinks trivial decisions — ~84 s and >4096 tokens for one
+Kuhn move — so it is impractical here; use a lighter model such as `gpt-oss-120b`.)
+
+---
+
+## Follow-up (out of scope for this batch, already planned)
+
+- **Cross-hand memory harnesses**: opponent modeling (track an opponent's bet/bluff frequency per state), post-game reflection (Reflexion-style lesson memory). Requires the agent to hold state across `act()` calls — the next architectural step, supported by [Readable Minds (arXiv:2604.04157)](https://arxiv.org/abs/2604.04157).
+- **Tool augmentation**: wire in a deterministic equity calculator / pot-odds tool to compensate for LLMs' weak arithmetic (a killer app for poker).
+- **Harness composition**: e.g. CoT + voting, two-stage + self-refine (the shared base class's composable steps already reserve room for this).
