@@ -35,8 +35,12 @@ from aibattle.games.gomoku import coord_to_rc
 
 GAMES = ["connect4", "gomoku"]
 NEED = {"connect4": 4, "gomoku": 5}
-DATA_DIR = "runs/board_tournament"
-REPORT_DIR = "reports"
+# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
+# parallel coached mirror; unset, paths default to the base run. Filenames are
+# unchanged, so the coached index/nav cross-links resolve within the subdir.
+_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
+DATA_DIR = f"runs/board_tournament{_VARIANT}"
+REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 PLAYERS = ["player_0", "player_1"]
 PHASES = ["early", "mid", "late"]
 TITLE = {"connect4": "🔴 Connect Four", "gomoku": "⚫ Gomoku-Lite"}
@@ -405,10 +409,11 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
-    # Per-move replay viewer exists for both board games.
+    # Per-move replay viewer exists for both board games. The coached variant
+    # has no replay viewers built (they fetch run data at runtime), so omit it.
     replay_btn = (
         f"<a class='replaybtn' href='{game}_replay.html'>▶ Watch game replays</a>"
-        if game in ("connect4", "gomoku") else "")
+        if game in ("connect4", "gomoku") and not _VARIANT else "")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>AI Battle Arena — {TITLE[game]}</title>

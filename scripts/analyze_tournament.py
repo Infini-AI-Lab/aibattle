@@ -18,10 +18,14 @@ import json
 import os
 from collections import defaultdict
 
-DATA = "runs/tournament/tournament_data.json"
-OUT = "runs/tournament/report.html"
+# A "variant" suffix (e.g. "_coached") retargets every path at a parallel run,
+# so the same script renders a coached mirror without touching the base report.
+# Set AIBATTLE_VARIANT="_coached" and AIBATTLE_REPORT_DIR="reports/coached".
+_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
+DATA = f"runs/tournament{_VARIANT}/tournament_data.json"
+OUT = f"runs/tournament{_VARIANT}/report.html"
 # Tracked copy committed to the repo (runs/ is gitignored).
-REPORT_DIR = "reports"
+REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 BB = 2
 
 
@@ -400,6 +404,9 @@ def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
     payload = json.dumps(report)
+    # Coached variant has no replay viewer built; omit the button so it never 404s.
+    replay_btn = ("" if _VARIANT else
+                  '<a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>')
 
     # ranked leaderboard by bb/100
     ranked = sorted(models, key=lambda m: pm[m]["bb_per_100"], reverse=True)
@@ -511,7 +518,7 @@ def render_html(report: dict) -> str:
 <body><div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode</h1>
   <div class="sub">heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
-  <a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>
+  {replay_btn}
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
@@ -685,7 +692,7 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(html)
     # also dump computed stats as json for inspection
-    json.dump(report, open("runs/tournament/analysis.json", "w"), indent=2)
+    json.dump(report, open(os.path.join(os.path.dirname(OUT), "analysis.json"), "w"), indent=2)
     # tracked copy for the repo (runs/ is gitignored)
     os.makedirs(REPORT_DIR, exist_ok=True)
     repo_html = os.path.join(REPORT_DIR, "holdem_tournament_report.html")

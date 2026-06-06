@@ -16,10 +16,13 @@ from collections import defaultdict
 
 import poker_behavior as pb
 
-DATA = "runs/match_tournament/match_data.json"
-EP_GLOB = "runs/match_tournament/*__vs__*/ep*.json"
-OUT_HTML = "runs/match_tournament/match_report.html"
-REPORT_DIR = "reports"
+# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
+# parallel coached mirror; unset, paths default to the base run.
+_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
+DATA = f"runs/match_tournament{_VARIANT}/match_data.json"
+EP_GLOB = f"runs/match_tournament{_VARIANT}/*__vs__*/ep*.json"
+OUT_HTML = f"runs/match_tournament{_VARIANT}/match_report.html"
+REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
@@ -99,6 +102,9 @@ def render_html(rep: dict, beh: dict) -> str:
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
+    # Coached variant has no replay viewer built; omit the button so it never 404s.
+    replay_btn = ("" if _VARIANT else
+                  '<a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>')
 
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -134,7 +140,7 @@ def render_html(rep: dict, beh: dict) -> str:
 <body><div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em Match Mode</h1>
   <div class="sub">Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
-  <a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>
+  {replay_btn}
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
   <h2>Leaderboard</h2>

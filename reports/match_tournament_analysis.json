@@ -1,9 +1,9 @@
 {
   "models": [
     "deepseek-v4-pro",
+    "glm-5p1",
     "gpt-oss-120b",
     "kimi-k2p6",
-    "glm-5p1",
     "minimax-m2p7"
   ],
   "max_hands": 30,
@@ -63,74 +63,74 @@
   "h2h_wins": {
     "deepseek-v4-pro": {
       "deepseek-v4-pro": 0,
+      "glm-5p1": 25,
       "gpt-oss-120b": 23,
       "kimi-k2p6": 19,
-      "glm-5p1": 25,
       "minimax-m2p7": 28
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": 15,
+      "glm-5p1": 0,
+      "gpt-oss-120b": 27,
+      "kimi-k2p6": 22,
+      "minimax-m2p7": 23
     },
     "gpt-oss-120b": {
       "deepseek-v4-pro": 17,
+      "glm-5p1": 13,
       "gpt-oss-120b": 0,
       "kimi-k2p6": 14,
-      "glm-5p1": 13,
       "minimax-m2p7": 15
     },
     "kimi-k2p6": {
       "deepseek-v4-pro": 20,
+      "glm-5p1": 18,
       "gpt-oss-120b": 26,
       "kimi-k2p6": 0,
-      "glm-5p1": 18,
       "minimax-m2p7": 27
-    },
-    "glm-5p1": {
-      "deepseek-v4-pro": 15,
-      "gpt-oss-120b": 27,
-      "kimi-k2p6": 22,
-      "glm-5p1": 0,
-      "minimax-m2p7": 23
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 12,
+      "glm-5p1": 17,
       "gpt-oss-120b": 25,
       "kimi-k2p6": 13,
-      "glm-5p1": 17,
       "minimax-m2p7": 0
     }
   },
   "h2h_played": {
     "deepseek-v4-pro": {
       "deepseek-v4-pro": 0,
+      "glm-5p1": 40,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
-      "glm-5p1": 40,
-      "minimax-m2p7": 40
-    },
-    "gpt-oss-120b": {
-      "deepseek-v4-pro": 40,
-      "gpt-oss-120b": 0,
-      "kimi-k2p6": 40,
-      "glm-5p1": 40,
-      "minimax-m2p7": 40
-    },
-    "kimi-k2p6": {
-      "deepseek-v4-pro": 40,
-      "gpt-oss-120b": 40,
-      "kimi-k2p6": 0,
-      "glm-5p1": 40,
       "minimax-m2p7": 40
     },
     "glm-5p1": {
       "deepseek-v4-pro": 40,
+      "glm-5p1": 0,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
-      "glm-5p1": 0,
+      "minimax-m2p7": 40
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 40,
+      "glm-5p1": 40,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 40,
+      "minimax-m2p7": 40
+    },
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 40,
+      "glm-5p1": 40,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 0,
       "minimax-m2p7": 40
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 40,
+      "glm-5p1": 40,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
-      "glm-5p1": 40,
       "minimax-m2p7": 0
     }
   },
@@ -162,6 +162,35 @@
         "flop": 0.222,
         "turn": 0.223,
         "river": 0.14
+      }
+    },
+    "glm-5p1": {
+      "decisions": 9861,
+      "hands": 3872,
+      "vpip": 0.649,
+      "pfr": 0.274,
+      "aggression": 0.511,
+      "fold_to_bet": 0.364,
+      "allin_rate": 0.006,
+      "avg_betsize": 1.19,
+      "wtsd": 0.231,
+      "wsd": 0.512,
+      "hand_win": 0.392,
+      "avg_tokens": 5193,
+      "avg_latency_s": 99.8,
+      "action_mix": {
+        "fold": 0.195,
+        "check": 0.323,
+        "call": 0.236,
+        "bet": 0.141,
+        "raise": 0.1,
+        "all_in": 0.006
+      },
+      "street_aggr": {
+        "preflop": 0.251,
+        "flop": 0.252,
+        "turn": 0.256,
+        "river": 0.204
       }
     },
     "gpt-oss-120b": {
@@ -220,35 +249,6 @@
         "flop": 0.206,
         "turn": 0.196,
         "river": 0.12
-      }
-    },
-    "glm-5p1": {
-      "decisions": 9861,
-      "hands": 3872,
-      "vpip": 0.649,
-      "pfr": 0.274,
-      "aggression": 0.511,
-      "fold_to_bet": 0.364,
-      "allin_rate": 0.006,
-      "avg_betsize": 1.19,
-      "wtsd": 0.231,
-      "wsd": 0.512,
-      "hand_win": 0.392,
-      "avg_tokens": 5193,
-      "avg_latency_s": 99.8,
-      "action_mix": {
-        "fold": 0.195,
-        "check": 0.323,
-        "call": 0.236,
-        "bet": 0.141,
-        "raise": 0.1,
-        "all_in": 0.006
-      },
-      "street_aggr": {
-        "preflop": 0.251,
-        "flop": 0.252,
-        "turn": 0.256,
-        "river": 0.204
       }
     },
     "minimax-m2p7": {

@@ -29,9 +29,12 @@ import json
 import os
 from collections import defaultdict
 
-DATA = "runs/kuhn_tournament/kuhn_data.json"
-OUT_HTML = "runs/kuhn_tournament/kuhn_report.html"
-REPORT_DIR = "reports"
+# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
+# parallel coached mirror; unset, paths default to the base run.
+_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
+DATA = f"runs/kuhn_tournament{_VARIANT}/kuhn_data.json"
+OUT_HTML = f"runs/kuhn_tournament{_VARIANT}/kuhn_report.html"
+REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # this page includes those two files in <head> via NAV_HEAD and the bar is
