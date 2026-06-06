@@ -9,13 +9,20 @@ from ...types import AgentRequest, Move
 from .base import GameTemplate
 
 
+_RULES = (
+    "You are playing Connect Four (6 rows x 7 columns). Drop a piece into a "
+    "column; it falls to the lowest empty cell. Connect four (horizontal, "
+    "vertical, or diagonal) to win."
+)
+
+
 class Connect4Template(GameTemplate):
-    def render_prompt(self, request: AgentRequest) -> str:
-        obs = request.observation
-        legal = ", ".join(obs.legal_actions)
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+    def rules(self, request: AgentRequest) -> str:
+        return _RULES
+
+    def instruction(self, request: AgentRequest) -> str:
+        legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{ctx}{obs.rendered}\n\n"
             f"Choose one legal column from: {legal}.\n"
             "Respond with ONLY the column number (put it on the last line if you "
             "reason first)."
@@ -33,9 +40,6 @@ class Connect4Template(GameTemplate):
                     return Move(type=tok)
         return None
 
-    def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:
+    def repair_hint(self, request: AgentRequest, bad_output: str) -> str:
         legal = ", ".join(request.observation.legal_actions)
-        return (
-            f"{self.render_prompt(request)}\n\n"
-            f"Your previous reply had no valid column. Reply with exactly one of: {legal}."
-        )
+        return f"Your previous reply had no valid column. Reply with exactly one of: {legal}."

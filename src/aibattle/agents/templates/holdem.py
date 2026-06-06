@@ -35,6 +35,10 @@ _ALIASES = {
 
 
 class HoldemTemplate(GameTemplate):
+    # Lite mode shows the cross-hand "Match: Hand X of N" context; Match/Table
+    # modes suppress it (their own engine emits a within-session hand counter).
+    _show_match_ctx = True
+
     @staticmethod
     def _history_block(obs) -> str:
         """Render this hand's public action log (per street) so the model sees
@@ -60,17 +64,22 @@ class HoldemTemplate(GameTemplate):
         body = [f"  {label}: {', '.join(acts)}" for label, acts in streets if acts]
         if not body:
             return ""
-        return "Action this hand:\n" + "\n".join(body) + "\n\n"
+        return "Action this hand:\n" + "\n".join(body)
 
-    def render_prompt(self, request: AgentRequest) -> str:
+    def rules(self, request: AgentRequest) -> str:
+        return _RULES
+
+    def state(self, request: AgentRequest) -> str:
         obs = request.observation
-        legal = ", ".join(obs.legal_actions)
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+        ctx = (f"Match: {request.match.describe()}\n"
+               if self._show_match_ctx and request.match else "")
+        hist = self._history_block(obs)
+        body = f"{ctx}{obs.rendered}"
+        return f"{body}\n\n{hist}" if hist else body
+
+    def instruction(self, request: AgentRequest) -> str:
+        legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{_RULES}\n\n"
-            f"{ctx}"
-            f"{obs.rendered}\n\n"
-            f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"
             "Respond with ONLY the action (and an integer amount for bet/raise), "
             "e.g. `call`, `check`, `fold`, `all_in`, `bet 6`, or `raise 12`. "
@@ -103,10 +112,9 @@ class HoldemTemplate(GameTemplate):
                     return Move(type=atype)
         return None
 
-    def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:
+    def repair_hint(self, request: AgentRequest, bad_output: str) -> str:
         legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{self.render_prompt(request)}\n\n"
             f"Your previous reply did not contain a valid action. "
             f"Reply with exactly one of: {legal} (with an integer amount for bet/raise)."
         )

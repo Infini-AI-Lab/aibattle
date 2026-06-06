@@ -30,17 +30,18 @@ _TABLE_RULES = (
 
 
 class HoldemTableTemplate(HoldemTemplate):
-    def render_prompt(self, request: AgentRequest) -> str:
-        obs = request.observation
-        legal = ", ".join(obs.legal_actions)
-        # No MatchContext "Hand X of N" line here: in Table mode one episode wraps
-        # the whole session, so MatchContext.episode is the SESSION index (always
-        # "1 of 1" with SESSIONS=1) and would contradict the true within-session
-        # hand counter that the engine already emits in obs.rendered.
+    # No MatchContext "Hand X of N" line: in Table mode one episode wraps the
+    # whole session, so MatchContext.episode is the SESSION index (always "1 of
+    # 1" with SESSIONS=1) and would contradict the true within-session hand
+    # counter the engine already emits in obs.rendered.
+    _show_match_ctx = False
+
+    def rules(self, request: AgentRequest) -> str:
+        return _TABLE_RULES
+
+    def instruction(self, request: AgentRequest) -> str:
+        legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{_TABLE_RULES}\n\n"
-            f"{obs.rendered}\n\n"
-            f"{self._history_block(obs)}"
             f"Choose exactly one legal action: {legal}.\n"
             "Respond with ONLY the action (and an integer amount for bet/raise), "
             "e.g. `fold`, `check`, `call`, `all_in`, `bet 6`, or `raise 12`. "

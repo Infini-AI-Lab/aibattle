@@ -14,12 +14,19 @@ from .base import GameTemplate
 _COORD = re.compile(r"\b([A-I])-?([1-9])\b", re.IGNORECASE)
 
 
+_RULES = (
+    "You are playing Gomoku-Lite (9x9). Place a stone on any empty cell; connect "
+    "five in a row (horizontal, vertical, or diagonal) to win. Columns are A-I, "
+    "rows 1-9; center is E5."
+)
+
+
 class GomokuTemplate(GameTemplate):
-    def render_prompt(self, request: AgentRequest) -> str:
-        obs = request.observation
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+    def rules(self, request: AgentRequest) -> str:
+        return _RULES
+
+    def instruction(self, request: AgentRequest) -> str:
         return (
-            f"{ctx}{obs.rendered}\n\n"
             "Respond with ONLY a coordinate for an empty cell, e.g. E5 "
             "(column letter A-I, row number 1-9). Put it on the last line if you "
             "reason first."
@@ -37,9 +44,8 @@ class GomokuTemplate(GameTemplate):
                     return Move(type=coord)
         return None
 
-    def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:
+    def repair_hint(self, request: AgentRequest, bad_output: str) -> str:
         return (
-            f"{self.render_prompt(request)}\n\n"
             "Your previous reply was not a valid empty cell. Reply with one "
             "coordinate like E5 that is currently empty."
         )

@@ -160,12 +160,10 @@ class Gomoku(Game):
         return "\n".join(lines)
 
     def _render(self, s: GomokuState, player: PlayerId) -> str:
+        # Pure state; the rules prose lives in the agent's prompt template.
         return (
-            f"You are {_SYM[player]} in Gomoku-Lite (9x9). Place a stone on any "
-            f"empty cell; connect five in a row (horizontal, vertical, or "
-            f"diagonal) to win. Columns are A-I, rows 1-9; center is E5.\n"
-            f"{self._grid_str(s)}\n"
-            f"Choose any empty cell, e.g. E5."
+            f"You are {_SYM[player]}.\n"
+            f"{self._grid_str(s)}"
         )
 
     def render(self, s: GomokuState, *, perspective: Optional[PlayerId] = None) -> str:

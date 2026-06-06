@@ -21,14 +21,12 @@ _RULES = (
 
 
 class KuhnTemplate(GameTemplate):
-    def render_prompt(self, request: AgentRequest) -> str:
-        obs = request.observation
-        legal = ", ".join(obs.legal_actions)
-        ctx = f"Match: {request.match.describe()}\n" if request.match else ""
+    def rules(self, request: AgentRequest) -> str:
+        return _RULES
+
+    def instruction(self, request: AgentRequest) -> str:
+        legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{_RULES}\n\n"
-            f"{ctx}"
-            f"{obs.rendered}\n\n"
             f"Choose exactly one of these legal actions: {legal}.\n"
             f"Respond with ONLY the single action word, nothing else."
         )
@@ -54,10 +52,9 @@ class KuhnTemplate(GameTemplate):
                 return Move(type=best)
         return None
 
-    def repair_prompt(self, request: AgentRequest, bad_output: str) -> str:
+    def repair_hint(self, request: AgentRequest, bad_output: str) -> str:
         legal = ", ".join(request.observation.legal_actions)
         return (
-            f"{self.render_prompt(request)}\n\n"
             f"Your previous reply ({bad_output!r}) did not contain a valid action. "
             f"Reply with exactly one word from: {legal}."
         )

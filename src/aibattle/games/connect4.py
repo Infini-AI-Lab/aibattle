@@ -138,10 +138,9 @@ class ConnectFour(Game):
         return "\n".join(lines)
 
     def _render(self, s: Connect4State, player: PlayerId, legal: list) -> str:
+        # Pure state; the rules prose lives in the agent's prompt template.
         return (
-            f"You are {_SYM[player]} in Connect Four (6 rows x 7 columns).\n"
-            f"Drop a piece into a column; it falls to the lowest empty cell. "
-            f"Connect four (horizontal, vertical, or diagonal) to win.\n"
+            f"You are {_SYM[player]}.\n"
             f"{self._grid_str(s)}\n"
             f"Legal columns: {', '.join(legal)}."
         )
