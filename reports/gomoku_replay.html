@@ -36,6 +36,11 @@
     padding:17px 2px; border-bottom:2px solid transparent;}
   .navbar a.nav:hover{color:var(--ink);}
   .navbar a.nav.active{color:#fff; border-bottom-color:var(--accent);}
+  .navbar .navgrp{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); align-self:center; padding-left:12px; margin-left:2px; border-left:1px solid var(--line);}
+  .navbar .navclust{font-size:13px; color:var(--muted); align-self:center; margin-left:4px;}
+  .navbar a.navarena{text-decoration:none;}
+  .navbar a.navarena:hover{color:var(--ink);}
+  .navbar .soon{font-size:9px; color:#0b1020; background:var(--muted); border-radius:999px; padding:1px 6px; margin-left:6px; letter-spacing:.03em;}
 
   .wrap{max-width:1180px; margin:0 auto; padding:30px 24px 90px;}
   .eyebrow{font-family:var(--disp); font-weight:600; letter-spacing:.32em; text-transform:uppercase;
@@ -155,15 +160,18 @@
 </style></head>
 <body>
 <nav class="navbar">
-  <a class="brand" href="index.html">🎲 AI BATTLE ARENA</a>
+  <a class="brand" href="index.html">🎲 AI Battle Arena</a>
   <a class="nav" href="index.html">Overview</a>
+  <a class="navgrp navarena" href="index.html#model">Model Arena</a>
   <a class="nav" href="connect4_report.html">🔴 Connect Four</a>
-  <a class="nav active" href="gomoku_report.html">⚫ Gomoku-Lite</a>
-  <a class="nav" href="holdem_tournament_report.html">🃏 Hold'em 1-Hand</a>
-  <a class="nav" href="match_tournament_report.html">🃏 Hold'em Match</a>
-  <a class="nav" href="table_tournament_report.html">🃏 Hold'em Table</a>
+  <a class="nav active" href="gomoku_report.html">⚫ Gomoku</a>
   <a class="nav" href="kuhn_tournament_report.html">🃏 Kuhn</a>
-</nav>
+  <span class="navclust">🃏 Hold'em</span>
+  <a class="nav" href="holdem_tournament_report.html">1-Hand</a>
+  <a class="nav" href="match_tournament_report.html">Match</a>
+  <a class="nav" href="table_tournament_report.html">Table</a>
+  <a class="navgrp navarena" href="index.html#agentic">Agentic Arena<span class="soon">soon</span></a>
+  </nav>
 <div class="wrap">
   <div class="eyebrow reveal" style="animation-delay:.02s">Match Replay</div>
   <h1 class="reveal" style="animation-delay:.05s">GOMOKU</h1>

@@ -21,16 +21,6 @@ EP_GLOB = "runs/match_tournament/*__vs__*/ep*.json"
 OUT_HTML = "runs/match_tournament/match_report.html"
 REPORT_DIR = "reports"
 
-NAV_ITEMS = [
-    ("index.html", "Overview", "overview"),
-    ("connect4_report.html", "🔴 Connect Four", "connect4"),
-    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
-    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
-    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
-    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
-    ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
-]
-
 NAV_CSS = """
   .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
     flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
@@ -42,23 +32,46 @@ NAV_CSS = """
     padding:16px 2px; border-bottom:2px solid transparent; }
   .navbar a.nav:hover { color:#e6e6e6; }
   .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+  .navbar .navgrp { font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:#6b7280; align-self:center; padding-left:12px; margin-left:2px;
+    border-left:1px solid #2a3142; }
+  .navbar .navclust { font-size:13px; color:#8b93a7; align-self:center; margin-left:4px; }
+  .navbar a.navarena { text-decoration:none; }
+  .navbar a.navarena:hover { color:#cbd5e1; }
+  .navbar .soon { font-size:9px; color:#0b1020; background:#6b7280; border-radius:999px;
+    padding:1px 6px; margin-left:6px; letter-spacing:.03em; }
   .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
     border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:#60a5fa; color:#fff; }
 """
 
 
+# Top-level grouping mirrors the overview's primary axis — the two arenas. The
+# Model Arena lists its game report pages (Hold'em's three variants cluster under
+# one label); the Agentic Arena has no pages yet, so it links to the overview's
+# #agentic section and is marked "soon".
 def _navbar(active: str) -> str:
-    links = "".join(
-        f"<a class='nav{' active' if key == active else ''}' href='{href}'>{label}</a>"
-        for href, label, key in NAV_ITEMS)
+    def link(href, label, key):
+        cls = "nav active" if key == active else "nav"
+        return f"<a class='{cls}' href='{href}'>{label}</a>"
     return ("<nav class='navbar'>"
             "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
-            f"{links}</nav>")
+            + link("index.html", "Overview", "overview")
+            + "<a class='navgrp navarena' href='index.html#model'>Model Arena</a>"
+            + link("connect4_report.html", "🔴 Connect Four", "connect4")
+            + link("gomoku_report.html", "⚫ Gomoku", "gomoku")
+            + link("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn")
+            + "<span class='navclust'>🃏 Hold'em</span>"
+            + link("holdem_tournament_report.html", "1-Hand", "holdem")
+            + link("match_tournament_report.html", "Match", "match")
+            + link("table_tournament_report.html", "Table", "table")
+            + "<a class='navgrp navarena' href='index.html#agentic'>Agentic Arena"
+              "<span class='soon'>soon</span></a>"
+            + "</nav>")
 
 _STYLE = """
   body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
-  .wrap { max-width:1080px; margin:0 auto; padding:28px 22px 80px; }
+  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
   h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
   .sub { color:#8b93a7; }
   table { border-collapse:collapse; width:100%; font-size:13px; margin-top:10px; }

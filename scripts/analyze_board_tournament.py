@@ -52,16 +52,6 @@ def _favicon(emoji: str) -> str:
 
 # Shared top navigation across every report page. All targets are sibling files
 # in reports/, so relative hrefs resolve. (key) marks the active tab.
-NAV_ITEMS = [
-    ("index.html", "Overview", "overview"),
-    ("connect4_report.html", "🔴 Connect Four", "connect4"),
-    ("gomoku_report.html", "⚫ Gomoku-Lite", "gomoku"),
-    ("holdem_tournament_report.html", "🃏 Hold'em 1-Hand", "holdem"),
-    ("match_tournament_report.html", "🃏 Hold'em Match", "match"),
-    ("table_tournament_report.html", "🃏 Hold'em Table", "table"),
-    ("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn"),
-]
-
 NAV_CSS = """
   .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
     flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
@@ -73,16 +63,39 @@ NAV_CSS = """
     padding:16px 2px; border-bottom:2px solid transparent; }
   .navbar a.nav:hover { color:#e6e6e6; }
   .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
+  .navbar .navgrp { font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:#6b7280; align-self:center; padding-left:12px; margin-left:2px;
+    border-left:1px solid #2a3142; }
+  .navbar .navclust { font-size:13px; color:#8b93a7; align-self:center; margin-left:4px; }
+  .navbar a.navarena { text-decoration:none; }
+  .navbar a.navarena:hover { color:#cbd5e1; }
+  .navbar .soon { font-size:9px; color:#0b1020; background:#6b7280; border-radius:999px;
+    padding:1px 6px; margin-left:6px; letter-spacing:.03em; }
 """
 
 
+# Top-level grouping mirrors the overview's primary axis — the two arenas. The
+# Model Arena lists its game report pages (Hold'em's three variants cluster under
+# one label); the Agentic Arena has no pages yet, so it links to the overview's
+# #agentic section and is marked "soon".
 def _navbar(active: str) -> str:
-    links = "".join(
-        f"<a class='nav{' active' if key == active else ''}' href='{href}'>{label}</a>"
-        for href, label, key in NAV_ITEMS)
+    def link(href, label, key):
+        cls = "nav active" if key == active else "nav"
+        return f"<a class='{cls}' href='{href}'>{label}</a>"
     return ("<nav class='navbar'>"
             "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
-            f"{links}</nav>")
+            + link("index.html", "Overview", "overview")
+            + "<a class='navgrp navarena' href='index.html#model'>Model Arena</a>"
+            + link("connect4_report.html", "🔴 Connect Four", "connect4")
+            + link("gomoku_report.html", "⚫ Gomoku", "gomoku")
+            + link("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn")
+            + "<span class='navclust'>🃏 Hold'em</span>"
+            + link("holdem_tournament_report.html", "1-Hand", "holdem")
+            + link("match_tournament_report.html", "Match", "match")
+            + link("table_tournament_report.html", "Table", "table")
+            + "<a class='navgrp navarena' href='index.html#agentic'>Agentic Arena"
+              "<span class='soon'>soon</span></a>"
+            + "</nav>")
 
 
 def _other(p):
@@ -446,7 +459,7 @@ def render_game(game: str, rep: dict) -> str:
 <style>
   {NAV_CSS}
   body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:1080px; margin:0 auto; padding:28px 22px 80px; }}
+  .wrap {{ max-width:1200px; margin:0 auto; padding:28px 28px 80px; }}
   h1 {{ font-size:25px; }} h2 {{ font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }}
   h3 {{ font-size:14px; color:#9aa3b5; }}
   .sub {{ color:#8b93a7; }}
@@ -563,34 +576,132 @@ new Chart(document.getElementById('len'), {{ type:'bar',
 </div></body></html>"""
 
 
-def _index_card(href, title, meta, champ_line):
+# Per-game taxonomy: which arena section, the information class (perfect vs
+# imperfect), and the descriptor badges shown on each card. The "group" key
+# drives the perfect/imperfect sub-grouping inside the Model Arena.
+GAME_TAXONOMY = {
+    "connect4":     {"group": "perfect",   "badges": ["Perfect info", "2P", "Deterministic"]},
+    "gomoku":       {"group": "perfect",   "badges": ["Perfect info", "2P", "Deterministic"]},
+    "holdem":       {"group": "imperfect", "badges": ["Imperfect info", "Heads-up", "Stochastic"]},
+    "match":        {"group": "imperfect", "badges": ["Imperfect info", "Heads-up", "Stochastic"]},
+    "table":        {"group": "imperfect", "badges": ["Imperfect info", "5-handed", "Stochastic"]},
+    "kuhn":         {"group": "imperfect", "badges": ["Imperfect info", "Heads-up", "Stochastic"]},
+}
+
+
+def _index_card(entry: dict) -> str:
+    badges = "".join(f"<span class='badge'>{b}</span>" for b in entry["badges"])
     return f"""
-        <a class="card" href="{href}">
-          <div class="ctitle">{title}</div>
-          <div class="cmeta">{meta}</div>
-          <div class="champ">{champ_line}</div>
+        <a class="card" href="{entry['href']}">
+          <div class="ctitle">{entry['title']}</div>
+          <div class="badges">{badges}</div>
+          <div class="cmeta">{entry['meta']}</div>
+          <div class="champ">{entry['champ_line']}</div>
           <div class="cgo">View analysis →</div>
         </a>"""
 
 
+def _arena_scores(entries: list) -> list:
+    """Cross-game normalized model ranking.
+
+    Each game contributes a per-model score in [0,1] from its finishing order:
+    best = 1.0, worst = 0.0, evenly spaced (``(N-1-rank)/(N-1)``). A model's
+    Arena Score is the mean of its per-game scores ×100, so it does not reward
+    breadth on its own — but we also surface coverage (games played) so a model
+    that has only entered one game reads as provisional.
+
+    Different games use different native metrics (Elo, bb/100, finishing rank),
+    which cannot be added directly; normalizing to within-game rank is the
+    apples-to-apples bridge.
+    """
+    agg = {}  # model -> [scores]
+    for e in entries:
+        ranking = e["ranking"]
+        n = len(ranking)
+        for rank, model in enumerate(ranking):
+            score = 1.0 if n == 1 else (n - 1 - rank) / (n - 1)
+            agg.setdefault(model, []).append((score, e["title"]))
+    rows = []
+    for model, scs in agg.items():
+        vals = [s for s, _ in scs]
+        best_title = max(scs, key=lambda x: x[0])[1]
+        rows.append({
+            "model": model,
+            "score": round(100 * sum(vals) / len(vals), 1),
+            "games": len(vals),
+            "best": best_title,
+        })
+    rows.sort(key=lambda r: (-r["score"], -r["games"]))
+    return rows
+
+
+def _arena_board(entries: list) -> str:
+    rows = _arena_scores(entries)
+    if not rows:
+        return ""
+    total = len(entries)
+    body = ""
+    for i, r in enumerate(rows, 1):
+        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
+        body += (
+            f"<tr><td class='rk'>{medal}</td>"
+            f"<td class='model'>{r['model']}</td>"
+            f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
+            f"<span class='sval'>{r['score']:.0f}</span></td>"
+            f"<td class='cov'>{r['games']}/{total}</td>"
+            f"<td class='best'>{r['best']}</td></tr>")
+    return f"""
+  <section class="board">
+    <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
+      <span class="arena-tag">normalized rank · all model-arena games</span></div>
+    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0)
+      across the games a model has entered. Coverage shows games played; treat low coverage as provisional.</div>
+    <table class="lb">
+      <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
+        <th>coverage</th><th>best game</th></tr>
+      {body}
+    </table>
+  </section>"""
+
+
 def render_index(reps: dict) -> str:
-    """Unified landing page over the board games plus the Hold'em tournament.
+    """Two-arena landing page: a fair Model Arena (one generic pipeline for every
+    model, grouped by perfect vs imperfect information) plus an open Agentic
+    Arena. A cross-game normalized leaderboard sits on top.
 
     Written to reports/, where every <name>_report.html lives, so the relative
-    links resolve. Hold'em stats are read from reports/holdem_tournament_analysis.json
-    if present (it has no Elo, so we rank by bb/100).
+    links resolve. Hold'em stats are read from reports/*_analysis.json.
     """
-    cards = ""
+    entries = []  # one dict per game; powers both the cards and the leaderboard
+
     for game in GAMES:
         rep = reps.get(game)
         if not rep:
             continue
-        champ = max(rep["models"], key=lambda m: _elo_key(rep["elo"], m))
-        cards += _index_card(
-            f"{game}_report.html", TITLE[game],
-            f"{rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}"
-            f" · first-mover {rep['first_player_win_rate']*100:.0f}%",
-            f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>")
+        ordered = sorted(rep["models"], key=lambda m: _elo_key(rep["elo"], m), reverse=True)
+        champ = ordered[0]
+        entries.append({
+            "key": game, "title": TITLE[game], "href": f"{game}_report.html",
+            "meta": (f"{rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}"
+                     f" · first-mover {rep['first_player_win_rate']*100:.0f}%"),
+            "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>",
+            "ranking": ordered, **GAME_TAXONOMY[game],
+        })
+
+    # Kuhn first inside the imperfect group: it is the simplest game (a solved,
+    # tiny-state game scored against GTO), so it reads as the natural entry point.
+    kuhn_path = os.path.join(REPORT_DIR, "kuhn_tournament_analysis.json")
+    if os.path.exists(kuhn_path):
+        k = json.load(open(kuhn_path))
+        lb = k["leaderboard"]
+        champ = lb[0]
+        entries.append({
+            "key": "kuhn", "title": "🃏 Kuhn Poker",
+            "href": "kuhn_tournament_report.html",
+            "meta": f"{k['episodes_per_pair']} hands/pair · solved game · GTO scoring",
+            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['net_per_hand']:+.3f} net/hand</span>",
+            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["kuhn"],
+        })
 
     # Three Hold'em formats, distinct enough to stand alone: 1-Hand (each hand
     # scored independently, bb/100), Match (heads-up, stacks carried, win the
@@ -599,67 +710,139 @@ def render_index(reps: dict) -> str:
     if os.path.exists(holdem_path):
         h = json.load(open(holdem_path))
         pm = h["per_model"]
-        champ = max(h["models"], key=lambda m: pm[m]["bb_per_100"])
-        cards += _index_card(
-            "holdem_tournament_report.html", "🃏 Hold'em 1-Hand",
-            f"heads-up · {h['num_games']} tables · {h['hands_per_game']} hands each"
-            f" · per-hand bb/100",
-            f"🏆 {champ} <span class='metric'>{pm[champ]['bb_per_100']:+.1f} bb/100</span>")
+        ordered = sorted(h["models"], key=lambda m: pm[m]["bb_per_100"], reverse=True)
+        champ = ordered[0]
+        entries.append({
+            "key": "holdem", "title": "🃏 Hold'em 1-Hand",
+            "href": "holdem_tournament_report.html",
+            "meta": (f"heads-up · {h['num_games']} tables · {h['hands_per_game']} hands each"
+                     f" · per-hand bb/100"),
+            "champ_line": f"🏆 {champ} <span class='metric'>{pm[champ]['bb_per_100']:+.1f} bb/100</span>",
+            "ranking": ordered, **GAME_TAXONOMY["holdem"],
+        })
 
     match_path = os.path.join(REPORT_DIR, "match_tournament_analysis.json")
     if os.path.exists(match_path):
         m = json.load(open(match_path))
-        champ = m["leaderboard"][0]
-        cards += _index_card(
-            "match_tournament_report.html", "🃏 Hold'em Match",
-            f"heads-up · {m['episodes_per_pair']} matches/pair · up to "
-            f"{m['max_hands']} hands · stacks carried",
-            f"🏆 {champ['model']} <span class='metric'>{champ['win_rate']*100:.0f}% match wins</span>")
+        lb = m["leaderboard"]
+        champ = lb[0]
+        entries.append({
+            "key": "match", "title": "🃏 Hold'em Match",
+            "href": "match_tournament_report.html",
+            "meta": (f"heads-up · {m['episodes_per_pair']} matches/pair · up to "
+                     f"{m['max_hands']} hands · stacks carried"),
+            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['win_rate']*100:.0f}% match wins</span>",
+            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["match"],
+        })
 
     table_path = os.path.join(REPORT_DIR, "table_tournament_analysis.json")
     if os.path.exists(table_path):
         t = json.load(open(table_path))
-        champ = max(t["leaderboard"], key=lambda r: (r["top1_rate"], -r["avg_rank"]))
-        cards += _index_card(
-            "table_tournament_report.html", "🃏 Hold'em Table",
-            f"{t['num_players']}-handed · {t['sessions']} sessions · up to "
-            f"{t['max_hands']} hands · top-1 rate",
-            f"🏆 {champ['model']} <span class='metric'>{champ['top1_rate']*100:.0f}% top-1</span>")
-
-    # Kuhn is a solved game scored against GTO; the leaderboard is pre-ranked, so
-    # the champion is simply the first entry. Net chips/hand is the headline.
-    kuhn_path = os.path.join(REPORT_DIR, "kuhn_tournament_analysis.json")
-    if os.path.exists(kuhn_path):
-        k = json.load(open(kuhn_path))
-        lb = k["leaderboard"]
+        lb = t["leaderboard"]  # pre-sorted by avg finishing rank (lower better)
         champ = lb[0]
-        cards += _index_card(
-            "kuhn_tournament_report.html", "🃏 Kuhn Poker",
-            f"{k['episodes_per_pair']} hands/pair · solved game · GTO scoring",
-            f"🏆 {champ['model']} <span class='metric'>{champ['net_per_hand']:+.3f} net/hand</span>")
+        entries.append({
+            "key": "table", "title": "🃏 Hold'em Table",
+            "href": "table_tournament_report.html",
+            "meta": (f"{t['num_players']}-handed · {t['sessions']} sessions · up to "
+                     f"{t['max_hands']} hands · avg finishing rank"),
+            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['avg_rank']} avg rank</span>",
+            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["table"],
+        })
+
+    def _group(name):
+        cards = "".join(_index_card(e) for e in entries if e["group"] == name)
+        return f"<div class='cards'>{cards}</div>" if cards else \
+            "<div class='empty'>No games yet.</div>"
+
+    board = _arena_board(entries)
 
     return f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>AI Battle Arena — Tournaments</title>
+<html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 {_favicon("🎲")}
 <style>
   {NAV_CSS}
   body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:880px; margin:0 auto; padding:40px 22px; }}
-  h1 {{ font-size:28px; }} .sub {{ color:#8b93a7; margin-bottom:32px; }}
-  .cards {{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }}
+  .wrap {{ max-width:1200px; margin:0 auto; padding:40px 28px; }}
+  h1 {{ font-size:28px; margin-bottom:6px; }} .sub {{ color:#8b93a7; margin-bottom:28px; }}
+  h2 {{ font-size:20px; color:#cdd6f4; margin:0; }}
+  .note {{ color:#8b93a7; font-size:12px; margin:6px 0 14px; }}
+
+  .arena {{ margin-top:36px; border:1px solid #232838; border-radius:16px;
+    padding:22px 22px 26px; background:linear-gradient(180deg,#141823,#10131b);
+    scroll-margin-top:64px; }}
+  .arena-head {{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }}
+  .arena-tag {{ font-size:11px; color:#9aa3b5; background:#1c2130; border:1px solid #2a3142;
+    padding:3px 9px; border-radius:999px; }}
+  .group-label {{ display:flex; align-items:center; gap:10px; font-size:16px;
+    font-weight:700; color:#e9edf7; margin:24px 0 13px; padding-left:12px;
+    border-left:3px solid #3b82f6; }}
+  .group-label.perfect {{ border-left-color:#4ade80; }}
+  .group-label.imperfect {{ border-left-color:#f59e0b; }}
+  .group-label .gl-sub {{ font-size:11px; font-weight:400; color:#8b93a7; }}
+
+  .cards {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }}
   .card {{ display:block; text-decoration:none; color:inherit; background:#171a23;
-    border:1px solid #232838; border-radius:14px; padding:24px; transition:.15s; }}
+    border:1px solid #232838; border-radius:14px; padding:20px; transition:.15s; }}
   .card:hover {{ border-color:#60a5fa; transform:translateY(-2px); }}
-  .ctitle {{ font-size:21px; font-weight:700; color:#cdd6f4; }}
-  .cmeta {{ font-size:12px; color:#8b93a7; margin:8px 0 16px; }}
+  .ctitle {{ font-size:19px; font-weight:700; color:#cdd6f4; }}
+  .badges {{ margin:8px 0; display:flex; gap:6px; flex-wrap:wrap; }}
+  .badge {{ font-size:10px; color:#aab2c5; background:#1c2130; border:1px solid #2a3142;
+    padding:2px 7px; border-radius:999px; }}
+  .cmeta {{ font-size:12px; color:#8b93a7; margin:0 0 14px; }}
   .champ {{ font-size:14px; color:#e6e6e6; }} .metric {{ color:#a78bfa; font-weight:600; }}
-  .cgo {{ margin-top:16px; font-size:13px; color:#60a5fa; }}
+  .cgo {{ margin-top:14px; font-size:13px; color:#60a5fa; }}
+
+  table.lb {{ border-collapse:collapse; width:100%; font-size:13px; }}
+  table.lb th, table.lb td {{ padding:7px 10px; border-bottom:1px solid #20242f; text-align:center; }}
+  table.lb th {{ color:#9aa3b5; font-weight:600; }}
+  table.lb td.model, table.lb th.model {{ text-align:left; font-weight:600; color:#cdd6f4; }}
+  table.lb td.rk, table.lb th.rk {{ width:34px; color:#8b93a7; }}
+  table.lb td.cov {{ color:#8b93a7; }} table.lb td.best {{ color:#aab2c5; }}
+  .scorecell {{ position:relative; min-width:140px; }}
+  .scorecell .bar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:18px; border-radius:4px; background:linear-gradient(90deg,#3b82f6,#a78bfa); opacity:.5; }}
+  .scorecell .sval {{ position:relative; font-weight:600; color:#f3f4f6; }}
+
+  .cta {{ display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; border:1px dashed #34405c; border-radius:14px; padding:22px;
+    background:#141a27; }}
+  .cta .ctatext b {{ color:#cdd6f4; font-size:15px; }}
+  .cta .ctatext div {{ color:#8b93a7; font-size:13px; margin-top:4px; }}
+  .cta .pill {{ font-size:13px; color:#0b1020; background:#60a5fa; font-weight:600;
+    padding:9px 16px; border-radius:999px; white-space:nowrap; }}
+  .empty {{ color:#8b93a7; font-size:13px; padding:8px 0; }}
   @media (max-width:640px) {{ .cards {{ grid-template-columns:1fr; }} }}
 </style></head>
 <body>{_navbar("overview")}<div class="wrap">
-  <h1>🎲 AI Battle Arena — Tournaments</h1>
-  <div class="sub">LLMs playing perfect-information board games &amp; Texas Hold'em · round-robin · skill analysis</div>
-  <div class="cards">{cards}</div>
+  <h1>🎲 AI Battle Arena</h1>
+  <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
+    identical pipeline; <b>Agentic Arena</b> is open to any model + any scaffolding.</div>
+  {board}
+
+  <section class="arena" id="model">
+    <div class="arena-head"><h2>🤖 Model Arena</h2>
+      <span class="arena-tag">fair · one identical generic pipeline</span></div>
+    <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
+      measures the model, not the scaffolding.</div>
+    <div class="group-label perfect">♟ Perfect information
+      <span class="gl-sub">full state visible · deterministic</span></div>
+    {_group("perfect")}
+    <div class="group-label imperfect">🎭 Imperfect information
+      <span class="gl-sub">hidden cards · stochastic</span></div>
+    {_group("imperfect")}
+  </section>
+
+  <section class="arena" id="agentic">
+    <div class="arena-head"><h2>🛠️ Agentic Arena</h2>
+      <span class="arena-tag">open · any model · any pipeline</span></div>
+    <div class="note">Bring your own scaffolding — tools, search, memory, self-play. Ranked
+      on the same games; uplift over the underlying model is the headline metric.</div>
+    <div class="cta">
+      <div class="ctatext"><b>Open for submissions →</b>
+        <div>No agents entered yet. Wire one up via the external-agent (HTTP) interface.</div></div>
+      <span class="pill">Coming soon</span>
+    </div>
+  </section>
 </div></body></html>"""
 
 
