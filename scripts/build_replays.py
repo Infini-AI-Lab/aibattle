@@ -50,7 +50,7 @@ except Exception:  # pragma: no cover - degrade gracefully
     make_game = None
 
 DATA_DIR = "runs/board_tournament"
-HOLDEM_DIR = "runs/tournament"
+HOLDEM_DIR = "runs/tournament"   # v2 lite-holdem run (base dir); _v1 is the archived snapshot
 GAMES = {"connect4": {"need": 4}, "gomoku": {"need": 5}}
 THINK_MARK = "===== thinking ====="
 ANSWER_MARK = "===== answer ====="
@@ -136,6 +136,28 @@ def _thinking_lookup(pair_dir: str) -> dict:
                 continue
             raw = (o.get("response") or {}).get("raw_output") or ""
             out[(o["episode"], o["step"])] = _split_thinking(raw)
+    return out
+
+
+def _prompt_lookup(pair_dir: str) -> dict:
+    """{(episode, step): prompt} for one match.
+
+    Like the chain-of-thought, the exact input prompt (``response.prompt``,
+    recorded only by v2 runs) is trimmed from the aggregate tournament JSON, so
+    read it back from the per-episode ``ep<NNN>.json`` files. Returns {} for v1
+    runs (no prompt field) or when the files are missing.
+    """
+    out = {}
+    for path in sorted(glob.glob(os.path.join(pair_dir, "ep*.json"))):
+        try:
+            o = json.load(open(path, encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        ep = o.get("episode")
+        for s in o.get("steps", []):
+            pr = (s.get("response") or {}).get("prompt")
+            if pr:
+                out[(ep, s["step"])] = pr
     return out
 
 
@@ -235,7 +257,7 @@ def _dealt_holes(game: str, seed) -> dict:
         return {}
 
 
-def _holdem_move(s: dict, thinking: str) -> dict:
+def _holdem_move(s: dict, thinking: str, prompt: str = "") -> dict:
     """One betting action with the table state the player saw when deciding."""
     pub = s["observation"]["public"]
     me = s["player"]
@@ -257,6 +279,10 @@ def _holdem_move(s: dict, thinking: str) -> dict:
         "latency_ms": (s.get("response") or {}).get("metadata", {}).get("latency_ms"),
         "tokens": (s.get("response") or {}).get("metadata", {}).get("completion_tokens"),
         "thinking": thinking,
+        # v2 runs record the exact prompt string sent to the model; v1 has none.
+        # The aggregate JSON trims it, so it is recovered from the ep files and
+        # passed in (see _prompt_lookup).
+        "prompt": prompt or None,
         "trunc": _truncated(thinking, invalid),
     }
 
@@ -279,7 +305,9 @@ def build_holdem():
     manifest_pairs = []
     for g in data["games"]:
         a, b, rep = g["a"], g["b"], g["rep"]
-        think = _thinking_lookup(os.path.join(HOLDEM_DIR, f"{a}__vs__{b}__r{rep}"))
+        pair_dir = os.path.join(HOLDEM_DIR, f"{a}__vs__{b}__r{rep}")
+        think = _thinking_lookup(pair_dir)
+        prompts = _prompt_lookup(pair_dir)
 
         hands, man_hands = [], []
         for e in g["episodes"]:
@@ -291,7 +319,8 @@ def build_holdem():
                 hole = s["observation"]["private"].get("hole")
                 if hole and s["player"] not in holes:
                     holes[s["player"]] = hole
-                moves.append(_holdem_move(s, think.get((e["episode"], s["step"]), "")))
+                key = (e["episode"], s["step"])
+                moves.append(_holdem_move(s, think.get(key, ""), prompts.get(key, "")))
             hands.append({
                 "episode": e["episode"],
                 "seat_assignment": e["seat_assignment"],

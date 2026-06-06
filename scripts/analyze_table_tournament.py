@@ -85,10 +85,11 @@ def analyze(data: dict) -> dict:
         m = row["model"]
         row["rank_distribution"] = {str(k): dist[m].get(k, 0) for k in range(1, n + 1)}
         row["bust_rate"] = round(busts[m] / sess, 3)
-    # Rank by top-1 rate (share of sessions finished 1st); break ties by the
-    # lower average finishing rank. The runner sorts data["summary"] by avg_rank,
-    # so re-sort here to make top-1 rate the primary ranking metric.
-    summary.sort(key=lambda r: (-r["top1_rate"], r["avg_rank"]))
+    # Rank by average finishing rank (lower is better); break ties by the higher
+    # top-1 share. Avg rank is the central-tendency metric and rewards consistent
+    # finishes, whereas top-1 rate over-rewards high-variance "boom-or-bust" play
+    # (a model can lead on top-1 while busting a third of its sessions).
+    summary.sort(key=lambda r: (r["avg_rank"], -r["top1_rate"]))
     return {"models": models, "num_players": n, "sessions": data["sessions"],
             "max_hands": data["max_hands"], "leaderboard": summary}
 
@@ -106,7 +107,7 @@ def render_html(rep: dict, beh: dict) -> str:
         rd = r["rank_distribution"]
         rc = "".join(f"<td>{rd.get(str(k),0)}</td>" for k in range(1, n + 1))
         trows += (f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
-                  f"<td>{r['top1_rate']*100:.0f}%</td><td>{r['avg_rank']}</td>"
+                  f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>{rc}</tr>")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
@@ -114,7 +115,7 @@ def render_html(rep: dict, beh: dict) -> str:
 <style>{NAV_CSS}{_STYLE}</style></head>
 <body>{_navbar("table")}<div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em Table Mode</h1>
-  <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by top-1 rate (share of sessions won; ties broken by avg finishing rank)</div>
+  <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   <a class="replaybtn" href="table_replay.html">▶ Watch table replays</a>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
@@ -122,7 +123,7 @@ def render_html(rep: dict, beh: dict) -> str:
   </div>
   <h2>Leaderboard <span class="note">(+ finishing-place distribution)</span></h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>top-1%</th><th>avg rank</th>
+    <tr><th>#</th><th class='model'>model</th><th>avg rank</th><th>top-1%</th>
         <th>avg final stack</th><th>bust%</th>{rankhdr}</tr>
     {trows}
   </table>

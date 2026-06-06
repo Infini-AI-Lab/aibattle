@@ -8,34 +8,34 @@
   ],
   "per_model": {
     "deepseek-v4-pro": {
-      "hands": 80,
-      "decisions": 129,
-      "chips": -43.0,
-      "bb_per_100": -26.88,
-      "win_rate": 0.45,
-      "wins": 36,
-      "losses": 44,
-      "ties": 0,
-      "showdown_wins": 2,
-      "fold_wins": 34,
-      "vpip": 0.425,
-      "pfr": 0.325,
-      "agg_freq": 0.4535,
-      "agg_factor": 2.714,
-      "fold_to_bet": 0.5584,
-      "allin_freq": 0.0078,
-      "avg_bet_xpot": 1.489,
-      "avg_latency_s": 27.9,
-      "avg_comp_tokens": 1413,
+      "hands": 200,
+      "decisions": 419,
+      "chips": 678.0,
+      "bb_per_100": 169.5,
+      "win_rate": 0.485,
+      "wins": 97,
+      "losses": 101,
+      "ties": 2,
+      "showdown_wins": 24,
+      "fold_wins": 73,
+      "vpip": 0.47,
+      "pfr": 0.345,
+      "agg_freq": 0.4636,
+      "agg_factor": 2.83,
+      "fold_to_bet": 0.4238,
+      "allin_freq": 0.0072,
+      "avg_bet_xpot": 1.209,
+      "avg_latency_s": 19.6,
+      "avg_comp_tokens": 1174,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 43,
-        "check": 33,
-        "call": 14,
-        "bet": 19,
-        "raise": 19,
-        "all_in": 1
+        "fold": 89,
+        "check": 124,
+        "call": 53,
+        "bet": 83,
+        "raise": 67,
+        "all_in": 3
       },
       "style": {
         "label": "Tight-Aggressive",
@@ -45,142 +45,142 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 74,
-          "agg_freq": 0.6047,
-          "fold_share": 0.4189,
+          "decisions": 190,
+          "agg_freq": 0.5948,
+          "fold_share": 0.3895,
           "mix": {
-            "fold": 31,
-            "check": 8,
-            "call": 9,
-            "bet": 7,
-            "raise": 18,
+            "fold": 74,
+            "check": 21,
+            "call": 26,
+            "bet": 10,
+            "raise": 58,
             "all_in": 1
           }
         },
         "flop": {
-          "decisions": 34,
-          "agg_freq": 0.3333,
-          "fold_share": 0.2059,
+          "decisions": 107,
+          "agg_freq": 0.43,
+          "fold_share": 0.0654,
           "mix": {
             "fold": 7,
-            "check": 15,
-            "call": 3,
-            "bet": 8,
-            "raise": 1,
+            "check": 43,
+            "call": 14,
+            "bet": 36,
+            "raise": 7,
             "all_in": 0
           }
         },
         "turn": {
-          "decisions": 15,
-          "agg_freq": 0.2727,
-          "fold_share": 0.2667,
+          "decisions": 73,
+          "agg_freq": 0.4412,
+          "fold_share": 0.0685,
           "mix": {
-            "fold": 4,
-            "check": 7,
-            "call": 1,
-            "bet": 3,
-            "raise": 0,
+            "fold": 5,
+            "check": 30,
+            "call": 8,
+            "bet": 28,
+            "raise": 2,
             "all_in": 0
           }
         },
         "river": {
-          "decisions": 6,
-          "agg_freq": 0.2,
-          "fold_share": 0.1667,
+          "decisions": 49,
+          "agg_freq": 0.2391,
+          "fold_share": 0.0612,
           "mix": {
-            "fold": 1,
-            "check": 3,
-            "call": 1,
-            "bet": 1,
+            "fold": 3,
+            "check": 30,
+            "call": 5,
+            "bet": 9,
             "raise": 0,
-            "all_in": 0
+            "all_in": 2
           }
         }
       },
-      "cbet_rate": 0.5,
-      "cbet_opps": 10,
+      "cbet_rate": 0.6923,
+      "cbet_opps": 39,
       "fold_to_cbet": 0.0,
-      "facing_cbet": 5,
-      "wtsd": 0.0375,
-      "wsd": 0.6667,
-      "saw_showdown": 3,
-      "won_showdown": 2,
+      "facing_cbet": 12,
+      "wtsd": 0.19,
+      "wsd": 0.6316,
+      "saw_showdown": 38,
+      "won_showdown": 24,
       "pf_bucket": {
         "premium": {
-          "hands": 3,
+          "hands": 15,
           "open_rate": 1.0,
           "call_rate": 0.0,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 6,
-          "open_rate": 1.0,
-          "call_rate": 0.0,
+          "hands": 17,
+          "open_rate": 0.7647,
+          "call_rate": 0.1765,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 18,
-          "open_rate": 0.6111,
-          "call_rate": 0.1667,
-          "fold_rate": 0.0556
+          "hands": 47,
+          "open_rate": 0.5745,
+          "call_rate": 0.3404,
+          "fold_rate": 0.0213
         },
         "marginal": {
-          "hands": 20,
-          "open_rate": 0.25,
-          "call_rate": 0.2,
-          "fold_rate": 0.45
+          "hands": 43,
+          "open_rate": 0.2558,
+          "call_rate": 0.1163,
+          "fold_rate": 0.4884
         },
         "trash": {
-          "hands": 23,
-          "open_rate": 0.0435,
-          "call_rate": 0.0435,
-          "fold_rate": 0.7826
+          "hands": 64,
+          "open_rate": 0.0469,
+          "call_rate": 0.0156,
+          "fold_rate": 0.7656
         }
       },
       "betsize_dist": {
-        "small": 0.0,
-        "medium": 0.3077,
-        "pot": 0.4103,
-        "over": 0.2821
+        "small": 0.0065,
+        "medium": 0.4771,
+        "pot": 0.1699,
+        "over": 0.3464
       },
       "showdown_cats": {
-        "high card": 0.0,
-        "pair": 0.6667,
-        "two pair": 0.3333,
-        "trips": 0.0,
-        "straight": 0.0,
+        "high card": 0.0526,
+        "pair": 0.4737,
+        "two pair": 0.3421,
+        "trips": 0.0526,
+        "straight": 0.0263,
         "flush": 0.0,
-        "full house": 0.0
+        "full house": 0.0526
       }
     },
     "gpt-oss-120b": {
-      "hands": 80,
-      "decisions": 147,
-      "chips": -28.0,
-      "bb_per_100": -17.5,
-      "win_rate": 0.5,
-      "wins": 40,
-      "losses": 40,
+      "hands": 200,
+      "decisions": 414,
+      "chips": -806.0,
+      "bb_per_100": -201.5,
+      "win_rate": 0.455,
+      "wins": 91,
+      "losses": 109,
       "ties": 0,
-      "showdown_wins": 5,
-      "fold_wins": 35,
-      "vpip": 0.5375,
-      "pfr": 0.4,
-      "agg_freq": 0.4386,
-      "agg_factor": 2.667,
-      "fold_to_bet": 0.4074,
-      "allin_freq": 0.0136,
-      "avg_bet_xpot": 1.279,
-      "avg_latency_s": 3.4,
-      "avg_comp_tokens": 613,
+      "showdown_wins": 16,
+      "fold_wins": 75,
+      "vpip": 0.575,
+      "pfr": 0.36,
+      "agg_freq": 0.4167,
+      "agg_factor": 1.985,
+      "fold_to_bet": 0.393,
+      "allin_freq": 0.0048,
+      "avg_bet_xpot": 1.046,
+      "avg_latency_s": 5.3,
+      "avg_comp_tokens": 708,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 33,
-        "check": 46,
-        "call": 18,
-        "bet": 18,
-        "raise": 30,
+        "fold": 90,
+        "check": 122,
+        "call": 67,
+        "bet": 62,
+        "raise": 71,
         "all_in": 2
       },
       "style": {
@@ -191,289 +191,143 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 76,
-          "agg_freq": 0.6538,
-          "fold_share": 0.3158,
+          "decisions": 187,
+          "agg_freq": 0.563,
+          "fold_share": 0.2781,
           "mix": {
-            "fold": 24,
-            "check": 6,
-            "call": 12,
-            "bet": 4,
-            "raise": 29,
-            "all_in": 1
+            "fold": 52,
+            "check": 11,
+            "call": 48,
+            "bet": 10,
+            "raise": 66,
+            "all_in": 0
           }
         },
         "flop": {
-          "decisions": 32,
-          "agg_freq": 0.3929,
-          "fold_share": 0.125,
+          "decisions": 111,
+          "agg_freq": 0.3626,
+          "fold_share": 0.1802,
           "mix": {
-            "fold": 4,
-            "check": 14,
-            "call": 3,
-            "bet": 10,
-            "raise": 1,
+            "fold": 20,
+            "check": 46,
+            "call": 12,
+            "bet": 30,
+            "raise": 3,
             "all_in": 0
           }
         },
         "turn": {
-          "decisions": 20,
-          "agg_freq": 0.1667,
-          "fold_share": 0.1,
+          "decisions": 68,
+          "agg_freq": 0.2857,
+          "fold_share": 0.1765,
           "mix": {
-            "fold": 2,
-            "check": 13,
-            "call": 2,
-            "bet": 3,
-            "raise": 0,
-            "all_in": 0
+            "fold": 12,
+            "check": 35,
+            "call": 5,
+            "bet": 13,
+            "raise": 2,
+            "all_in": 1
           }
         },
         "river": {
-          "decisions": 19,
-          "agg_freq": 0.125,
-          "fold_share": 0.1579,
+          "decisions": 48,
+          "agg_freq": 0.2381,
+          "fold_share": 0.125,
           "mix": {
-            "fold": 3,
-            "check": 13,
-            "call": 1,
-            "bet": 1,
+            "fold": 6,
+            "check": 30,
+            "call": 2,
+            "bet": 9,
             "raise": 0,
             "all_in": 1
           }
         }
       },
-      "cbet_rate": 0.3636,
-      "cbet_opps": 11,
-      "fold_to_cbet": 0.0,
-      "facing_cbet": 3,
-      "wtsd": 0.15,
-      "wsd": 0.4167,
-      "saw_showdown": 12,
-      "won_showdown": 5,
+      "cbet_rate": 0.4722,
+      "cbet_opps": 36,
+      "fold_to_cbet": 0.0625,
+      "facing_cbet": 16,
+      "wtsd": 0.175,
+      "wsd": 0.4571,
+      "saw_showdown": 35,
+      "won_showdown": 16,
       "pf_bucket": {
         "premium": {
-          "hands": 5,
+          "hands": 7,
           "open_rate": 1.0,
           "call_rate": 0.0,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 9,
-          "open_rate": 0.8889,
-          "call_rate": 0.1111,
+          "hands": 24,
+          "open_rate": 0.875,
+          "call_rate": 0.0833,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 15,
-          "open_rate": 0.7333,
-          "call_rate": 0.2,
-          "fold_rate": 0.0667
+          "hands": 37,
+          "open_rate": 0.7297,
+          "call_rate": 0.1892,
+          "fold_rate": 0.027
         },
         "marginal": {
-          "hands": 11,
-          "open_rate": 0.3636,
-          "call_rate": 0.3636,
-          "fold_rate": 0.0909
+          "hands": 38,
+          "open_rate": 0.2632,
+          "call_rate": 0.3947,
+          "fold_rate": 0.2632
         },
         "trash": {
-          "hands": 29,
-          "open_rate": 0.1379,
-          "call_rate": 0.1034,
-          "fold_rate": 0.6207
+          "hands": 64,
+          "open_rate": 0.1094,
+          "call_rate": 0.2969,
+          "fold_rate": 0.5156
         }
       },
       "betsize_dist": {
-        "small": 0.02,
-        "medium": 0.32,
-        "pot": 0.36,
-        "over": 0.3
+        "small": 0.0667,
+        "medium": 0.3556,
+        "pot": 0.2593,
+        "over": 0.3185
       },
       "showdown_cats": {
-        "high card": 0.25,
-        "pair": 0.4167,
-        "two pair": 0.0,
-        "trips": 0.1667,
-        "straight": 0.0833,
-        "flush": 0.0833,
-        "full house": 0.0
+        "high card": 0.2,
+        "pair": 0.5429,
+        "two pair": 0.1429,
+        "trips": 0.0286,
+        "straight": 0.0286,
+        "flush": 0.0,
+        "full house": 0.0571
       }
     },
     "kimi-k2p6": {
-      "hands": 80,
-      "decisions": 126,
-      "chips": 54.0,
-      "bb_per_100": 33.75,
-      "win_rate": 0.4875,
-      "wins": 39,
-      "losses": 39,
-      "ties": 2,
-      "showdown_wins": 7,
-      "fold_wins": 32,
-      "vpip": 0.4875,
-      "pfr": 0.35,
-      "agg_freq": 0.4176,
-      "agg_factor": 1.583,
-      "fold_to_bet": 0.4217,
-      "allin_freq": 0.0,
-      "avg_bet_xpot": 0.982,
-      "avg_latency_s": 117.2,
-      "avg_comp_tokens": 8299,
+      "hands": 200,
+      "decisions": 457,
+      "chips": 573.0,
+      "bb_per_100": 143.25,
+      "win_rate": 0.525,
+      "wins": 105,
+      "losses": 94,
+      "ties": 1,
+      "showdown_wins": 32,
+      "fold_wins": 73,
+      "vpip": 0.57,
+      "pfr": 0.405,
+      "agg_freq": 0.3579,
+      "agg_factor": 1.484,
+      "fold_to_bet": 0.3263,
+      "allin_freq": 0.0022,
+      "avg_bet_xpot": 0.98,
+      "avg_latency_s": 103.6,
+      "avg_comp_tokens": 7525,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 35,
-        "check": 29,
-        "call": 24,
-        "bet": 14,
-        "raise": 24,
-        "all_in": 0
-      },
-      "style": {
-        "label": "Tight-Passive",
-        "tags": [
-          "nit"
-        ]
-      },
-      "by_street": {
-        "preflop": {
-          "decisions": 73,
-          "agg_freq": 0.6512,
-          "fold_share": 0.411,
-          "mix": {
-            "fold": 30,
-            "check": 2,
-            "call": 13,
-            "bet": 5,
-            "raise": 23,
-            "all_in": 0
-          }
-        },
-        "flop": {
-          "decisions": 23,
-          "agg_freq": 0.25,
-          "fold_share": 0.1304,
-          "mix": {
-            "fold": 3,
-            "check": 9,
-            "call": 6,
-            "bet": 5,
-            "raise": 0,
-            "all_in": 0
-          }
-        },
-        "turn": {
-          "decisions": 17,
-          "agg_freq": 0.2667,
-          "fold_share": 0.1176,
-          "mix": {
-            "fold": 2,
-            "check": 7,
-            "call": 4,
-            "bet": 3,
-            "raise": 1,
-            "all_in": 0
-          }
-        },
-        "river": {
-          "decisions": 13,
-          "agg_freq": 0.0769,
-          "fold_share": 0.0,
-          "mix": {
-            "fold": 0,
-            "check": 11,
-            "call": 1,
-            "bet": 1,
-            "raise": 0,
-            "all_in": 0
-          }
-        }
-      },
-      "cbet_rate": 0.2857,
-      "cbet_opps": 7,
-      "fold_to_cbet": 0.3333,
-      "facing_cbet": 3,
-      "wtsd": 0.1625,
-      "wsd": 0.5385,
-      "saw_showdown": 13,
-      "won_showdown": 7,
-      "pf_bucket": {
-        "premium": {
-          "hands": 3,
-          "open_rate": 1.0,
-          "call_rate": 0.0,
-          "fold_rate": 0.0
-        },
-        "strong": {
-          "hands": 8,
-          "open_rate": 0.5,
-          "call_rate": 0.5,
-          "fold_rate": 0.0
-        },
-        "playable": {
-          "hands": 15,
-          "open_rate": 0.7333,
-          "call_rate": 0.2667,
-          "fold_rate": 0.0
-        },
-        "marginal": {
-          "hands": 17,
-          "open_rate": 0.4118,
-          "call_rate": 0.1176,
-          "fold_rate": 0.3529
-        },
-        "trash": {
-          "hands": 22,
-          "open_rate": 0.1364,
-          "call_rate": 0.0455,
-          "fold_rate": 0.8182
-        }
-      },
-      "betsize_dist": {
-        "small": 0.0,
-        "medium": 0.2632,
-        "pot": 0.6316,
-        "over": 0.1053
-      },
-      "showdown_cats": {
-        "high card": 0.1538,
-        "pair": 0.1538,
-        "two pair": 0.4615,
-        "trips": 0.2308,
-        "straight": 0.0,
-        "flush": 0.0,
-        "full house": 0.0
-      }
-    },
-    "glm-5p1": {
-      "hands": 80,
-      "decisions": 188,
-      "chips": 97.0,
-      "bb_per_100": 60.62,
-      "win_rate": 0.5125,
-      "wins": 41,
-      "losses": 37,
-      "ties": 2,
-      "showdown_wins": 10,
-      "fold_wins": 31,
-      "vpip": 0.625,
-      "pfr": 0.3,
-      "agg_freq": 0.3354,
-      "agg_factor": 1.042,
-      "fold_to_bet": 0.2941,
-      "allin_freq": 0.016,
-      "avg_bet_xpot": 1.279,
-      "avg_latency_s": 88.9,
-      "avg_comp_tokens": 3784,
-      "invalid_actions": 0,
-      "invalid_amounts": 0,
-      "action_mix": {
-        "fold": 30,
-        "check": 57,
-        "call": 48,
-        "bet": 27,
-        "raise": 23,
-        "all_in": 3
+        "fold": 77,
+        "check": 153,
+        "call": 91,
+        "bet": 67,
+        "raise": 68,
+        "all_in": 1
       },
       "style": {
         "label": "Loose-Passive",
@@ -483,143 +337,143 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 79,
-          "agg_freq": 0.3871,
-          "fold_share": 0.2152,
+          "decisions": 193,
+          "agg_freq": 0.5827,
+          "fold_share": 0.2798,
           "mix": {
-            "fold": 17,
-            "check": 9,
-            "call": 29,
-            "bet": 2,
-            "raise": 21,
-            "all_in": 1
+            "fold": 54,
+            "check": 18,
+            "call": 40,
+            "bet": 14,
+            "raise": 67,
+            "all_in": 0
           }
         },
         "flop": {
-          "decisions": 50,
-          "agg_freq": 0.2889,
-          "fold_share": 0.1,
+          "decisions": 115,
+          "agg_freq": 0.2673,
+          "fold_share": 0.1217,
           "mix": {
-            "fold": 5,
-            "check": 20,
-            "call": 12,
-            "bet": 11,
-            "raise": 1,
-            "all_in": 1
-          }
-        },
-        "turn": {
-          "decisions": 38,
-          "agg_freq": 0.375,
-          "fold_share": 0.1579,
-          "mix": {
-            "fold": 6,
-            "check": 14,
-            "call": 6,
-            "bet": 11,
+            "fold": 14,
+            "check": 51,
+            "call": 23,
+            "bet": 26,
             "raise": 1,
             "all_in": 0
           }
         },
-        "river": {
-          "decisions": 21,
-          "agg_freq": 0.2105,
-          "fold_share": 0.0952,
+        "turn": {
+          "decisions": 86,
+          "agg_freq": 0.1975,
+          "fold_share": 0.0581,
           "mix": {
-            "fold": 2,
-            "check": 14,
-            "call": 1,
-            "bet": 3,
+            "fold": 5,
+            "check": 44,
+            "call": 21,
+            "bet": 16,
+            "raise": 0,
+            "all_in": 0
+          }
+        },
+        "river": {
+          "decisions": 63,
+          "agg_freq": 0.2034,
+          "fold_share": 0.0635,
+          "mix": {
+            "fold": 4,
+            "check": 40,
+            "call": 7,
+            "bet": 11,
             "raise": 0,
             "all_in": 1
           }
         }
       },
-      "cbet_rate": 0.375,
-      "cbet_opps": 8,
-      "fold_to_cbet": 0.0,
-      "facing_cbet": 3,
-      "wtsd": 0.2375,
-      "wsd": 0.5263,
-      "saw_showdown": 19,
-      "won_showdown": 10,
+      "cbet_rate": 0.4722,
+      "cbet_opps": 36,
+      "fold_to_cbet": 0.0625,
+      "facing_cbet": 16,
+      "wtsd": 0.25,
+      "wsd": 0.64,
+      "saw_showdown": 50,
+      "won_showdown": 32,
       "pf_bucket": {
         "premium": {
-          "hands": 4,
-          "open_rate": 0.75,
-          "call_rate": 0.25,
+          "hands": 10,
+          "open_rate": 1.0,
+          "call_rate": 0.0,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 8,
+          "hands": 16,
           "open_rate": 0.875,
           "call_rate": 0.125,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 15,
-          "open_rate": 0.5333,
+          "hands": 42,
+          "open_rate": 0.6429,
           "call_rate": 0.3333,
           "fold_rate": 0.0
         },
         "marginal": {
-          "hands": 22,
-          "open_rate": 0.2273,
-          "call_rate": 0.5,
-          "fold_rate": 0.0909
+          "hands": 44,
+          "open_rate": 0.4545,
+          "call_rate": 0.1818,
+          "fold_rate": 0.1818
         },
         "trash": {
-          "hands": 21,
-          "open_rate": 0.0476,
-          "call_rate": 0.381,
-          "fold_rate": 0.4286
+          "hands": 70,
+          "open_rate": 0.1429,
+          "call_rate": 0.1286,
+          "fold_rate": 0.6
         }
       },
       "betsize_dist": {
-        "small": 0.0943,
-        "medium": 0.4151,
-        "pot": 0.1698,
-        "over": 0.3208
+        "small": 0.0074,
+        "medium": 0.3824,
+        "pot": 0.4191,
+        "over": 0.1912
       },
       "showdown_cats": {
-        "high card": 0.1053,
-        "pair": 0.3684,
-        "two pair": 0.3684,
-        "trips": 0.1579,
-        "straight": 0.0,
-        "flush": 0.0,
-        "full house": 0.0
+        "high card": 0.18,
+        "pair": 0.42,
+        "two pair": 0.24,
+        "trips": 0.04,
+        "straight": 0.02,
+        "flush": 0.02,
+        "full house": 0.08
       }
     },
-    "minimax-m2p7": {
-      "hands": 80,
-      "decisions": 154,
-      "chips": -80.0,
-      "bb_per_100": -50.0,
-      "win_rate": 0.525,
-      "wins": 42,
-      "losses": 38,
-      "ties": 0,
-      "showdown_wins": 4,
-      "fold_wins": 38,
-      "vpip": 0.55,
-      "pfr": 0.2,
-      "agg_freq": 0.408,
-      "agg_factor": 1.195,
-      "fold_to_bet": 0.3295,
-      "allin_freq": 0.013,
-      "avg_bet_xpot": 1.319,
-      "avg_latency_s": 42.2,
-      "avg_comp_tokens": 9366,
+    "glm-5p1": {
+      "hands": 200,
+      "decisions": 490,
+      "chips": -193.0,
+      "bb_per_100": -48.25,
+      "win_rate": 0.45,
+      "wins": 90,
+      "losses": 108,
+      "ties": 2,
+      "showdown_wins": 16,
+      "fold_wins": 74,
+      "vpip": 0.66,
+      "pfr": 0.315,
+      "agg_freq": 0.2871,
+      "agg_factor": 0.929,
+      "fold_to_bet": 0.2915,
+      "allin_freq": 0.002,
+      "avg_bet_xpot": 1.14,
+      "avg_latency_s": 43.9,
+      "avg_comp_tokens": 3062,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 29,
-        "check": 33,
-        "call": 41,
-        "bet": 32,
-        "raise": 17,
-        "all_in": 2
+        "fold": 79,
+        "check": 167,
+        "call": 126,
+        "bet": 52,
+        "raise": 65,
+        "all_in": 1
       },
       "style": {
         "label": "Loose-Passive",
@@ -629,147 +483,293 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 77,
-          "agg_freq": 0.3019,
-          "fold_share": 0.3117,
+          "decisions": 204,
+          "agg_freq": 0.3951,
+          "fold_share": 0.2059,
           "mix": {
-            "fold": 24,
-            "check": 4,
-            "call": 33,
+            "fold": 42,
+            "check": 15,
+            "call": 83,
             "bet": 3,
-            "raise": 12,
+            "raise": 60,
             "all_in": 1
           }
         },
         "flop": {
-          "decisions": 37,
-          "agg_freq": 0.5312,
-          "fold_share": 0.1351,
+          "decisions": 124,
+          "agg_freq": 0.2162,
+          "fold_share": 0.1048,
           "mix": {
-            "fold": 5,
-            "check": 11,
-            "call": 4,
-            "bet": 17,
-            "raise": 0,
+            "fold": 13,
+            "check": 64,
+            "call": 23,
+            "bet": 21,
+            "raise": 3,
             "all_in": 0
           }
         },
         "turn": {
-          "decisions": 24,
-          "agg_freq": 0.5833,
-          "fold_share": 0.0,
+          "decisions": 94,
+          "agg_freq": 0.2658,
+          "fold_share": 0.1596,
           "mix": {
-            "fold": 0,
-            "check": 7,
-            "call": 3,
-            "bet": 10,
-            "raise": 4,
+            "fold": 15,
+            "check": 45,
+            "call": 13,
+            "bet": 19,
+            "raise": 2,
             "all_in": 0
           }
         },
         "river": {
-          "decisions": 16,
-          "agg_freq": 0.25,
-          "fold_share": 0.0,
+          "decisions": 68,
+          "agg_freq": 0.1525,
+          "fold_share": 0.1324,
           "mix": {
-            "fold": 0,
-            "check": 11,
-            "call": 1,
-            "bet": 2,
-            "raise": 1,
-            "all_in": 1
+            "fold": 9,
+            "check": 43,
+            "call": 7,
+            "bet": 9,
+            "raise": 0,
+            "all_in": 0
           }
         }
       },
-      "cbet_rate": 0.75,
-      "cbet_opps": 8,
-      "fold_to_cbet": 0.3333,
-      "facing_cbet": 6,
-      "wtsd": 0.1625,
-      "wsd": 0.3077,
-      "saw_showdown": 13,
-      "won_showdown": 4,
+      "cbet_rate": 0.4286,
+      "cbet_opps": 28,
+      "fold_to_cbet": 0.0556,
+      "facing_cbet": 18,
+      "wtsd": 0.235,
+      "wsd": 0.3404,
+      "saw_showdown": 47,
+      "won_showdown": 16,
       "pf_bucket": {
         "premium": {
-          "hands": 2,
+          "hands": 8,
           "open_rate": 1.0,
           "call_rate": 0.0,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 4,
-          "open_rate": 0.5,
-          "call_rate": 0.25,
+          "hands": 17,
+          "open_rate": 0.8824,
+          "call_rate": 0.1176,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 15,
-          "open_rate": 0.5333,
-          "call_rate": 0.4667,
+          "hands": 50,
+          "open_rate": 0.52,
+          "call_rate": 0.3,
           "fold_rate": 0.0
         },
         "marginal": {
-          "hands": 22,
-          "open_rate": 0.1818,
-          "call_rate": 0.5,
-          "fold_rate": 0.2273
+          "hands": 44,
+          "open_rate": 0.25,
+          "call_rate": 0.5909,
+          "fold_rate": 0.1136
         },
         "trash": {
-          "hands": 21,
-          "open_rate": 0.0,
-          "call_rate": 0.4286,
-          "fold_rate": 0.5238
+          "hands": 53,
+          "open_rate": 0.0566,
+          "call_rate": 0.4906,
+          "fold_rate": 0.3774
         }
       },
       "betsize_dist": {
-        "small": 0.098,
-        "medium": 0.4902,
-        "pot": 0.2941,
-        "over": 0.1176
+        "small": 0.0424,
+        "medium": 0.3559,
+        "pot": 0.178,
+        "over": 0.4237
       },
       "showdown_cats": {
-        "high card": 0.0769,
-        "pair": 0.7692,
-        "two pair": 0.1538,
-        "trips": 0.0,
-        "straight": 0.0,
-        "flush": 0.0,
+        "high card": 0.1915,
+        "pair": 0.5745,
+        "two pair": 0.1489,
+        "trips": 0.0426,
+        "straight": 0.0213,
+        "flush": 0.0213,
+        "full house": 0.0
+      }
+    },
+    "minimax-m2p7": {
+      "hands": 200,
+      "decisions": 487,
+      "chips": -252.0,
+      "bb_per_100": -63.0,
+      "win_rate": 0.565,
+      "wins": 113,
+      "losses": 84,
+      "ties": 3,
+      "showdown_wins": 14,
+      "fold_wins": 99,
+      "vpip": 0.685,
+      "pfr": 0.33,
+      "agg_freq": 0.4159,
+      "agg_factor": 1.236,
+      "fold_to_bet": 0.2153,
+      "allin_freq": 0.0103,
+      "avg_bet_xpot": 1.654,
+      "avg_latency_s": 46.5,
+      "avg_comp_tokens": 8733,
+      "invalid_actions": 0,
+      "invalid_amounts": 0,
+      "action_mix": {
+        "fold": 59,
+        "check": 110,
+        "call": 140,
+        "bet": 100,
+        "raise": 73,
+        "all_in": 5
+      },
+      "style": {
+        "label": "Loose-Passive",
+        "tags": [
+          "calling station"
+        ]
+      },
+      "by_street": {
+        "preflop": {
+          "decisions": 201,
+          "agg_freq": 0.4012,
+          "fold_share": 0.1692,
+          "mix": {
+            "fold": 34,
+            "check": 10,
+            "call": 90,
+            "bet": 6,
+            "raise": 60,
+            "all_in": 1
+          }
+        },
+        "flop": {
+          "decisions": 131,
+          "agg_freq": 0.45,
+          "fold_share": 0.084,
+          "mix": {
+            "fold": 11,
+            "check": 41,
+            "call": 25,
+            "bet": 49,
+            "raise": 5,
+            "all_in": 0
+          }
+        },
+        "turn": {
+          "decisions": 91,
+          "agg_freq": 0.4756,
+          "fold_share": 0.0989,
+          "mix": {
+            "fold": 9,
+            "check": 28,
+            "call": 15,
+            "bet": 32,
+            "raise": 6,
+            "all_in": 1
+          }
+        },
+        "river": {
+          "decisions": 64,
+          "agg_freq": 0.3051,
+          "fold_share": 0.0781,
+          "mix": {
+            "fold": 5,
+            "check": 31,
+            "call": 10,
+            "bet": 13,
+            "raise": 2,
+            "all_in": 3
+          }
+        }
+      },
+      "cbet_rate": 0.6207,
+      "cbet_opps": 29,
+      "fold_to_cbet": 0.0345,
+      "facing_cbet": 29,
+      "wtsd": 0.21,
+      "wsd": 0.3333,
+      "saw_showdown": 42,
+      "won_showdown": 14,
+      "pf_bucket": {
+        "premium": {
+          "hands": 13,
+          "open_rate": 1.0,
+          "call_rate": 0.0,
+          "fold_rate": 0.0
+        },
+        "strong": {
+          "hands": 28,
+          "open_rate": 0.6786,
+          "call_rate": 0.3214,
+          "fold_rate": 0.0
+        },
+        "playable": {
+          "hands": 44,
+          "open_rate": 0.4545,
+          "call_rate": 0.4318,
+          "fold_rate": 0.0227
+        },
+        "marginal": {
+          "hands": 39,
+          "open_rate": 0.2564,
+          "call_rate": 0.5128,
+          "fold_rate": 0.1282
+        },
+        "trash": {
+          "hands": 49,
+          "open_rate": 0.0816,
+          "call_rate": 0.4694,
+          "fold_rate": 0.4082
+        }
+      },
+      "betsize_dist": {
+        "small": 0.0899,
+        "medium": 0.4494,
+        "pot": 0.2753,
+        "over": 0.1854
+      },
+      "showdown_cats": {
+        "high card": 0.119,
+        "pair": 0.5238,
+        "two pair": 0.1667,
+        "trips": 0.0476,
+        "straight": 0.0476,
+        "flush": 0.0952,
         "full house": 0.0
       }
     }
   },
   "h2h": {
     "deepseek-v4-pro": {
-      "gpt-oss-120b": -10.0,
-      "kimi-k2p6": -2.0,
-      "glm-5p1": -15.0,
-      "minimax-m2p7": -16.0
+      "gpt-oss-120b": 298.0,
+      "kimi-k2p6": -14.0,
+      "glm-5p1": 11.0,
+      "minimax-m2p7": 383.0
     },
     "gpt-oss-120b": {
-      "deepseek-v4-pro": 10.0,
-      "kimi-k2p6": -14.0,
-      "glm-5p1": -27.0,
-      "minimax-m2p7": 3.0
+      "deepseek-v4-pro": -298.0,
+      "kimi-k2p6": -36.0,
+      "glm-5p1": -2.0,
+      "minimax-m2p7": -470.0
     },
     "kimi-k2p6": {
-      "deepseek-v4-pro": 2.0,
-      "gpt-oss-120b": 14.0,
-      "glm-5p1": 45.0,
-      "minimax-m2p7": -7.0
+      "deepseek-v4-pro": 14.0,
+      "gpt-oss-120b": 36.0,
+      "glm-5p1": 101.0,
+      "minimax-m2p7": 422.0
     },
     "glm-5p1": {
-      "deepseek-v4-pro": 15.0,
-      "gpt-oss-120b": 27.0,
-      "kimi-k2p6": -45.0,
-      "minimax-m2p7": 100.0
+      "deepseek-v4-pro": -11.0,
+      "gpt-oss-120b": 2.0,
+      "kimi-k2p6": -101.0,
+      "minimax-m2p7": -83.0
     },
     "minimax-m2p7": {
-      "deepseek-v4-pro": 16.0,
-      "gpt-oss-120b": -3.0,
-      "kimi-k2p6": 7.0,
-      "glm-5p1": -100.0
+      "deepseek-v4-pro": -383.0,
+      "gpt-oss-120b": 470.0,
+      "kimi-k2p6": -422.0,
+      "glm-5p1": 83.0
     }
   },
-  "hands_per_game": 20,
+  "hands_per_game": 50,
   "num_games": 10
 }

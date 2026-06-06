@@ -66,6 +66,8 @@ _STYLE = """
   th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
   .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
   .note { color:#8b93a7; font-size:12px; margin:6px 0; }
+  td.hh { font-weight:600; color:#f3f4f6; }
+  td.hh .rec { display:block; font-weight:400; font-size:11px; color:#aab2c5; margin-top:1px; }
   canvas { max-height:300px; margin-top:10px; }
 """
 
@@ -134,8 +136,18 @@ def render_html(rep: dict, beh: dict) -> str:
         for b in models:
             if a == b:
                 cells += "<td class='diag'>—</td>"
-            else:
-                cells += f"<td>{rep['h2h_wins'][a][b]}/{rep['h2h_played'][a][b]}</td>"
+                continue
+            w = rep['h2h_wins'][a][b]; pl = rep['h2h_played'][a][b]
+            if not pl:
+                cells += "<td class='hh'>—</td>"
+                continue
+            pct = 100 * w / pl
+            # Diverging red→green heatmap centred on 50% (an even split shows no
+            # tint); alpha grows with the distance from even so lopsided cells pop.
+            alpha = round(0.6 * abs(pct - 50) / 50, 3)
+            rgb = "34,197,94" if pct >= 50 else "244,63,94"
+            cells += (f"<td class='hh' style='background:rgba({rgb},{alpha})'>"
+                      f"{pct:.0f}%<span class='rec'>{w}/{pl}</span></td>")
         grid += f"<tr><td class='model'>{a}</td>{cells}</tr>"
 
     return f"""<!DOCTYPE html>
@@ -154,7 +166,7 @@ def render_html(rep: dict, beh: dict) -> str:
         <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th></tr>
     {trows}
   </table>
-  <h2>Head-to-head <span class="note">(row's wins / matches vs column)</span></h2>
+  <h2>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h2>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
   {beh_html}
   <script>
