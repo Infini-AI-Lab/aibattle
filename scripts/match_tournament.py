@@ -29,24 +29,33 @@ import _heartbeat  # debug per-move heartbeat -> data-log/ (gitignored)
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = os.environ.get("MODELS",
     "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
+# Coaching: COACHED=1 coaches every model; "<name>#coached" coaches just that one.
+# A coached model is an independent participant named "<base>-coached".
+_COACH_ALL = os.environ.get("COACHED", "").lower() not in ("", "0", "false", "no")
+def _coach_label(spec):
+    base = spec.split("#", 1)[0].strip()
+    return f"{base}-coached" if (_COACH_ALL or spec.strip().endswith("#coached")) else base
+MODELS = [_coach_label(s) for s in MODELS]
 EPISODES = int(os.environ.get("EPISODES", "10"))  # matches per pair (independent deals);
                             # raise later to add more — per-episode resume reuses.
 MAX_HANDS = 30
 STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
-OUT = "runs/match_tournament"
+OUT = os.environ.get("OUT", "runs/match_tournament")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every match draws its own OS-entropy
 # deal seeds inside the runner (seed=None), saved per ep<NNN>.json. No run-level
 # seed to log or re-pass — a resumed run fills missing matches with fresh deals.
 
 
-def acfg(name: str) -> dict:
+def acfg(label: str) -> dict:
+    coached = label.endswith("-coached")
+    base = label[: -len("-coached")] if coached else label
     return {
-        "type": "model", "name": name,
+        "type": "model", "name": label, "coached": coached,
         "model": {
             "provider": "fireworks",
-            "model_id": f"accounts/fireworks/models/{name}",
+            "model_id": f"accounts/fireworks/models/{base}",
             "api_key_env": "FIREWORKS_API_KEY",
             "temperature": 0.6, "max_tokens": 131072,
             "timeout_s": int(os.environ.get("HOLDEM_TIMEOUT", "900")),

@@ -27,9 +27,16 @@ from aibattle.runner.runner import Runner
 
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
 MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
+# Coaching: COACHED=1 coaches every model; "<name>#coached" coaches just that one.
+# A coached model is an independent participant named "<base>-coached".
+_COACH_ALL = os.environ.get("COACHED", "").lower() not in ("", "0", "false", "no")
+def _coach_label(spec):
+    base = spec.split("#", 1)[0].strip()
+    return f"{base}-coached" if (_COACH_ALL or spec.strip().endswith("#coached")) else base
+MODELS = [_coach_label(s) for s in MODELS]
 EPISODES = 30               # hands per pair (seat-swapped); small smell test
 MAX_CONCURRENCY = 128
-OUT = "runs/kuhn_tournament"
+OUT = os.environ.get("OUT", "runs/kuhn_tournament")
 REPORT_DIR = "reports"
 os.makedirs(OUT, exist_ok=True)
 
@@ -43,12 +50,14 @@ _STYLE = """
 """
 
 
-def acfg(name: str) -> dict:
+def acfg(label: str) -> dict:
+    coached = label.endswith("-coached")
+    base = label[: -len("-coached")] if coached else label
     return {
-        "type": "model", "name": name,
+        "type": "model", "name": label, "coached": coached,
         "model": {
             "provider": "fireworks",
-            "model_id": f"accounts/fireworks/models/{name}",
+            "model_id": f"accounts/fireworks/models/{base}",
             "api_key_env": "FIREWORKS_API_KEY",
             "temperature": 0.0, "max_tokens": 131072, "timeout_s": 300,
         },

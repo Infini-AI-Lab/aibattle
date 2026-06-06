@@ -27,12 +27,25 @@ from aibattle.runner.runner import Runner
 import _heartbeat  # debug per-move heartbeat -> data-log/ (gitignored)
 
 # qwen3p6-plus excluded (restrictive per-model 429 limit on this account).
-MODELS = os.environ.get("MODELS",
+_RAW_MODELS = os.environ.get("MODELS",
     "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
+# Coaching: COACHED=1 coaches every model; a per-model "<name>#coached" suffix
+# coaches just that one. Coaching adds one line of process scaffolding to the
+# prompt. A coached model is an independent participant named "<base>-coached".
+_COACH_ALL = os.environ.get("COACHED", "").lower() not in ("", "0", "false", "no")
+
+
+def _label(spec: str) -> str:
+    base = spec.split("#", 1)[0].strip()
+    coached = _COACH_ALL or spec.strip().endswith("#coached")
+    return f"{base}-coached" if coached else base
+
+
+MODELS = [_label(s) for s in _RAW_MODELS]
 HANDS = int(os.environ.get("HANDS", "20"))   # hands per game (Hold'em Lite)
 REPS = 1
 MAX_CONCURRENCY = 128  # GLOBAL cap on concurrent hands across all games
-OUT = "runs/tournament"
+OUT = os.environ.get("OUT", "runs/tournament")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every hand draws its own OS-entropy
 # deal seed inside the runner (seed=None), and that seed is saved in each
@@ -40,12 +53,14 @@ os.makedirs(OUT, exist_ok=True)
 # fills missing hands with fresh independent deals.
 
 
-def acfg(name: str) -> dict:
+def acfg(label: str) -> dict:
+    coached = label.endswith("-coached")
+    base = label[: -len("-coached")] if coached else label
     return {
-        "type": "model", "name": name,
+        "type": "model", "name": label, "coached": coached,
         "model": {
             "provider": "fireworks",
-            "model_id": f"accounts/fireworks/models/{name}",
+            "model_id": f"accounts/fireworks/models/{base}",
             "api_key_env": "FIREWORKS_API_KEY",
             "temperature": 0.6, "max_tokens": 131072,
             "timeout_s": int(os.environ.get("HOLDEM_TIMEOUT", "900")),

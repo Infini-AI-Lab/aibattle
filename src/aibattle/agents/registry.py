@@ -37,7 +37,7 @@ def _build_model_agent(cfg: dict, game_name: str) -> Agent:
 
     model_cfg = cfg.get("model") or {}
     client = make_client(model_cfg)
-    template = make_template(game_name)
+    template = make_template(game_name, coached=bool(cfg.get("coached", False)))
     return ModelAgent(
         client=client,
         template=template,
