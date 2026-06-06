@@ -21,6 +21,9 @@ import eval_stats
 
 REPORT_DIR = "reports"
 
+# Shared client-side navbar (reports/nav.css + nav.js); injected by JS.
+NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+
 _STYLE = """
   body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;}
   .wrap{max-width:1080px;margin:0 auto;padding:28px 22px 80px;}
@@ -44,7 +47,7 @@ def render(name: str, rows: list) -> str:
                 f"<td>{r['tok_p50']}</td><td>{r['tok_p90']}</td><td>{r['tok_p99']}</td>"
                 f"<td>{r['tok_max']}</td></tr>")
     return f"""<!DOCTYPE html><html><head><meta charset="utf-8">
-<title>Token usage — {name}</title><style>{_STYLE}</style></head>
+<title>Token usage — {name}</title>{NAV_HEAD}<style>{_STYLE}</style></head>
 <body><div class="wrap">
 <h1>🪙 Token usage &amp; truncation — {name}</h1>
 <div class="sub">Output tokens per decision (reasoning + answer). Source: {src}.

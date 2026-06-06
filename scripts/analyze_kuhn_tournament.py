@@ -33,22 +33,12 @@ DATA = "runs/kuhn_tournament/kuhn_data.json"
 OUT_HTML = "runs/kuhn_tournament/kuhn_report.html"
 REPORT_DIR = "reports"
 
+# The site navbar is a shared client-side component (reports/nav.css + nav.js);
+# this page includes those two files in <head> via NAV_HEAD and the bar is
+# injected by JS, so the nav markup lives in one place.
+NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+
 _STYLE = """
-  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
-    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
-    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
-    border-bottom:1px solid #232838; }
-  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none; font-size:15px; margin-right:10px; }
-  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px; padding:16px 2px; border-bottom:2px solid transparent; }
-  .navbar a.nav:hover { color:#e6e6e6; }
-  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
-  .navbar .navgrp { font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-    color:#6b7280; align-self:center; padding-left:12px; margin-left:2px; border-left:1px solid #2a3142; }
-  .navbar .navclust { font-size:13px; color:#8b93a7; align-self:center; margin-left:4px; }
-  .navbar a.navarena { text-decoration:none; }
-  .navbar a.navarena:hover { color:#cbd5e1; }
-  .navbar .soon { font-size:9px; color:#0b1020; background:#6b7280; border-radius:999px;
-    padding:1px 6px; margin-left:6px; letter-spacing:.03em; }
   body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
   .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
   h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
@@ -251,27 +241,12 @@ def render_html(rep: dict) -> str:
                 cells += f"<td class='{cls}'>{v:+.2f}</td>"
         grid += f"<tr><td class='model'>{a}</td>{cells}</tr>"
 
-    # Top-level grouping by arena (Kuhn is the active page); the Agentic Arena
-    # has no page yet, so it links to the overview's #agentic section.
-    nav = ("<nav class='navbar'><a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
-           "<a class='nav' href='index.html'>Overview</a>"
-           "<a class='navgrp navarena' href='index.html#model'>Model Arena</a>"
-           "<a class='nav' href='connect4_report.html'>🔴 Connect Four</a>"
-           "<a class='nav' href='gomoku_report.html'>⚫ Gomoku</a>"
-           "<a class='nav active' href='kuhn_tournament_report.html'>🃏 Kuhn</a>"
-           "<span class='navclust'>🃏 Hold'em</span>"
-           "<a class='nav' href='holdem_tournament_report.html'>1-Hand</a>"
-           "<a class='nav' href='match_tournament_report.html'>Match</a>"
-           "<a class='nav' href='table_tournament_report.html'>Table</a>"
-           "<a class='navgrp navarena' href='index.html#agentic'>Agentic Arena"
-           "<span class='soon'>soon</span></a></nav>")
-
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Kuhn Poker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<style>{_STYLE}</style></head>
-<body>{nav}<div class="wrap">
+{NAV_HEAD}<style>{_STYLE}</style></head>
+<body><div class="wrap">
   <h1>🃏 AI Battle Arena — Kuhn Poker (poker light)</h1>
   <div class="sub">5 models · round-robin · {rep['episodes_per_pair']} seat-swapped hands/pair · deck {{J,Q,K}}, ~2 decisions/hand</div>
 

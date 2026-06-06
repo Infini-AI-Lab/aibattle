@@ -25,26 +25,26 @@
   },
   {
     "model": "deepseek-v4-pro",
-    "decisions": 613,
+    "decisions": 629,
     "truncated": 0,
     "trunc_rate": 0.0,
     "tok_p50": 9616,
-    "tok_p90": 40631,
+    "tok_p90": 40733,
     "tok_p99": 50599,
     "tok_max": 56682,
-    "tok_mean": 15025,
+    "tok_mean": 15107,
     "exact": true
   },
   {
     "model": "glm-5p1",
-    "decisions": 643,
+    "decisions": 656,
     "truncated": 0,
     "trunc_rate": 0.0,
-    "tok_p50": 7796,
-    "tok_p90": 23717,
+    "tok_p50": 7949,
+    "tok_p90": 23987,
     "tok_p99": 31539,
     "tok_max": 44783,
-    "tok_mean": 10710,
+    "tok_mean": 10805,
     "exact": true
   },
   {

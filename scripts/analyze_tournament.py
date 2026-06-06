@@ -28,52 +28,10 @@ BB = 2
 STREETS = ("preflop", "flop", "turn", "river")
 HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 
-# Shared top navigation, identical to the board reports so the pages feel like
-# one site. Targets are sibling files in reports/.
-NAV_CSS = """
-  .navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
-    flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
-    background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
-    border-bottom:1px solid #232838; }
-  .navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
-    font-size:15px; margin-right:10px; }
-  .navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
-    padding:16px 2px; border-bottom:2px solid transparent; }
-  .navbar a.nav:hover { color:#e6e6e6; }
-  .navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
-  .navbar .navgrp { font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-    color:#6b7280; align-self:center; padding-left:12px; margin-left:2px;
-    border-left:1px solid #2a3142; }
-  .navbar .navclust { font-size:13px; color:#8b93a7; align-self:center; margin-left:4px; }
-  .navbar a.navarena { text-decoration:none; }
-  .navbar a.navarena:hover { color:#cbd5e1; }
-  .navbar .soon { font-size:9px; color:#0b1020; background:#6b7280; border-radius:999px;
-    padding:1px 6px; margin-left:6px; letter-spacing:.03em; }
-"""
-
-
-# Top-level grouping mirrors the overview's primary axis — the two arenas. The
-# Model Arena lists its game report pages (Hold'em's three variants cluster under
-# one label); the Agentic Arena has no pages yet, so it links to the overview's
-# #agentic section and is marked "soon".
-def _navbar(active: str) -> str:
-    def link(href, label, key):
-        cls = "nav active" if key == active else "nav"
-        return f"<a class='{cls}' href='{href}'>{label}</a>"
-    return ("<nav class='navbar'>"
-            "<a class='brand' href='index.html'>🎲 AI Battle Arena</a>"
-            + link("index.html", "Overview", "overview")
-            + "<a class='navgrp navarena' href='index.html#model'>Model Arena</a>"
-            + link("connect4_report.html", "🔴 Connect Four", "connect4")
-            + link("gomoku_report.html", "⚫ Gomoku", "gomoku")
-            + link("kuhn_tournament_report.html", "🃏 Kuhn", "kuhn")
-            + "<span class='navclust'>🃏 Hold'em</span>"
-            + link("holdem_tournament_report.html", "1-Hand", "holdem")
-            + link("match_tournament_report.html", "Match", "match")
-            + link("table_tournament_report.html", "Table", "table")
-            + "<a class='navgrp navarena' href='index.html#agentic'>Agentic Arena"
-              "<span class='soon'>soon</span></a>"
-            + "</nav>")
+# The site navbar is a shared client-side component (reports/nav.css + nav.js);
+# pages include those two files in <head> via NAV_HEAD and the bar is injected
+# by JS, so the nav markup lives in one place.
+NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -519,9 +477,9 @@ def render_html(report: dict) -> str:
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+{NAV_HEAD}
 <style>
   :root {{ color-scheme: dark; }}
-  {NAV_CSS}
   body {{ font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
           background: #0f1117; color: #e6e6e6; }}
   .wrap {{ max-width: 1200px; margin: 0 auto; padding: 28px 28px 80px; }}
@@ -550,7 +508,7 @@ def render_html(report: dict) -> str:
   .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
   @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
-<body>{_navbar("holdem")}<div class="wrap">
+<body><div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode</h1>
   <div class="sub">heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   <a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>
