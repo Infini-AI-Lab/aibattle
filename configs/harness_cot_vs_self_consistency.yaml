@@ -1,0 +1,50 @@
+# Demo: two DIFFERENT harnesses head-to-head — structured CoT vs self-consistency
+# (majority vote). Both wrap the same model, so the difference is the scaffolding.
+# Needs a Fireworks key:  export FIREWORKS_API_KEY=$(cat .fireworks)
+game:
+  name: holdem
+  version: "1.0.0"
+  params: { starting_stack: 200 }
+
+players:
+  player_0:
+    agent:
+      type: local
+      harness: cot
+      name: gpt-oss-cot
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.3
+        max_tokens: 2048
+        timeout_s: 120
+      max_retries: 1
+  player_1:
+    agent:
+      type: local
+      harness: self_consistency
+      name: gpt-oss-vote
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.7           # vote needs temperature > 0 for diversity
+        max_tokens: 2048
+        timeout_s: 120
+      max_retries: 1
+      harness_args: { n: 5, temperature: 0.7 }   # 5 samples, majority vote
+
+run:
+  episodes: 10
+  seed: 11
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 6
+
+output:
+  dir: ./runs/harness_cot_vs_self_consistency
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

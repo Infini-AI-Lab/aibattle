@@ -1,9 +1,11 @@
 """Agent factory registry.
 
-Builds an ``Agent`` from a parsed config block. Three kinds:
+Builds an ``Agent`` from a parsed config block. Kinds:
   - builtin : random / kuhn_heuristic
   - model   : ModelClient + game template (default model-backed agent)
+  - local   : in-process reasoning harness (CoT / vote / two-stage / self-refine)
   - external: in-process import path or HTTP endpoint
+  - human   : interactive terminal player
 """
 
 from __future__ import annotations
@@ -46,6 +48,34 @@ def _build_model_agent(cfg: dict, game_name: str) -> Agent:
     )
 
 
+def _build_local_agent(cfg: dict, game_name: str) -> Agent:
+    """Build an in-process reasoning-harness agent (``type: local``).
+
+    Reuses the same ModelClient + GameTemplate as ModelAgent, but wraps them in a
+    multi-step harness selected by ``cfg["harness"]``. Harness-specific knobs
+    (n, temperature, rounds, custom prompts) come from ``cfg["harness_args"]``.
+    """
+    from ..models.registry import make_client
+    from .local import make_harness
+    from .templates.registry import make_template
+
+    harness = cfg.get("harness")
+    if not harness:
+        raise ValueError("local agent needs a 'harness' (e.g. cot, self_consistency, "
+                         "two_stage, self_refine)")
+    model_cfg = cfg.get("model") or {}
+    client = make_client(model_cfg)
+    template = make_template(game_name)
+    return make_harness(
+        harness,
+        client=client,
+        template=template,
+        name=cfg.get("name", model_cfg.get("model_id", harness)),
+        max_retries=int(cfg.get("max_retries", 2)),
+        harness_args=cfg.get("harness_args") or {},
+    )
+
+
 def _build_external_agent(cfg: dict) -> Agent:
     if "entrypoint" in cfg:
         module_path, _, cls_name = cfg["entrypoint"].partition(":")
@@ -82,8 +112,10 @@ def make_agent(cfg: dict, *, game_name: str, seed: int | None = None) -> Agent:
         return _BUILTINS[name](name=name, **kwargs)
     if atype == "model":
         return _build_model_agent(cfg, game_name)
+    if atype == "local":
+        return _build_local_agent(cfg, game_name)
     if atype == "external":
         return _build_external_agent(cfg)
     raise ValueError(
-        f"Unknown agent type {atype!r} (expected builtin|model|external|human)"
+        f"Unknown agent type {atype!r} (expected builtin|model|local|external|human)"
     )
