@@ -35,6 +35,14 @@ Other dependency groups (use instead of `dev` for a lighter footprint):
 uv pip install -e .             # core only (pyyaml)
 uv pip install -e ".[model]"    # + openai client (OpenAI / Fireworks / vLLM)
 uv pip install -e ".[anthropic]"  # + anthropic client
+uv pip install -e ".[bedrock]"  # + boto3 for AWS Bedrock Claude calls
+```
+
+The Bedrock OpenAI adapter uses the JavaScript OpenAI SDK's `BedrockOpenAI`
+client for GPT-on-Bedrock calls:
+
+```bash
+npm install
 ```
 
 **Step 4: Verify**
@@ -58,6 +66,18 @@ aibattle run configs/fireworks_vs_heuristic.yaml
 # Recompute the summary from an existing log (resolves the latest run)
 aibattle eval ./runs/random_vs_heuristic
 ```
+
+Run the coached Bedrock tournament for Opus 4.8, Sonnet 4.6, GPT 5.5, and GPT
+5.4:
+
+```bash
+PYTHONPATH=src python scripts/bedrock_coached_tournament.py --dry-run
+PYTHONPATH=src python scripts/bedrock_coached_tournament.py
+```
+
+By default this writes all run logs under
+`../aibattle-logs/bedrock_coached_tournament`. If Bedrock publishes Opus 4.8
+with a different date suffix, set `CLAUDE_OPUS_4_8_MODEL_ID` before running.
 
 Each run writes its outputs to a **unique per-run subdirectory** under the
 configured `output.dir` — `run_<timestamp>_<rand>/` — so repeated or concurrent

@@ -10,6 +10,7 @@ dist/
 *.egg
 .eggs/
 wheels/
+node_modules/
 
 # Virtual environments
 .venv/

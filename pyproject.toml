@@ -22,10 +22,12 @@ dependencies = [
 [project.optional-dependencies]
 model = ["openai>=1.40"]
 anthropic = ["anthropic>=0.40"]
+bedrock = ["boto3>=1.40"]
 http = ["requests>=2.31"]
 dev = [
     "openai>=1.40",
     "anthropic>=0.40",
+    "boto3>=1.40",
     "requests>=2.31",
     "pytest>=8.0",
 ]

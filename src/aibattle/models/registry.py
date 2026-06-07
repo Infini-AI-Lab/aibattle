@@ -65,4 +65,43 @@ def make_client(cfg: dict) -> ModelClient:
             system_prompt=cfg.get("system_prompt"),
         )
 
+    if provider == "bedrock_openai":
+        from .bedrock_openai_client import BedrockOpenAIClient
+
+        return BedrockOpenAIClient(
+            model_id=cfg["model_id"],
+            aws_region=cfg.get("aws_region", cfg.get("region", "us-east-2")),
+            temperature=(
+                float(cfg["temperature"])
+                if cfg.get("temperature") is not None
+                else None
+            ),
+            max_tokens=int(cfg.get("max_tokens", 4096)),
+            system_prompt=cfg.get("system_prompt"),
+            reasoning_effort=cfg.get("reasoning_effort"),
+            timeout=float(cfg.get("timeout_s", 900)),
+        )
+
+    if provider == "bedrock_anthropic":
+        from .bedrock_anthropic_client import BedrockAnthropicClient
+
+        return BedrockAnthropicClient(
+            model_id=cfg["model_id"],
+            aws_region=cfg.get("aws_region", cfg.get("region", "us-east-1")),
+            temperature=(
+                float(cfg["temperature"])
+                if cfg.get("temperature") is not None
+                else None
+            ),
+            max_tokens=int(cfg.get("max_tokens", 4096)),
+            system_prompt=cfg.get("system_prompt"),
+            reasoning_effort=cfg.get("reasoning_effort"),
+            thinking_budget_tokens=(
+                int(cfg["thinking_budget_tokens"])
+                if cfg.get("thinking_budget_tokens") is not None
+                else None
+            ),
+            timeout=float(cfg.get("timeout_s", 900)),
+        )
+
     raise ValueError(f"Unknown model provider {provider!r}")
