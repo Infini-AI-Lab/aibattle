@@ -21,6 +21,7 @@ from .board_agents import (
     RandomBoardAgent, Connect4HeuristicAgent, GomokuHeuristicAgent,
 )
 from .blackjack_agents import BlackjackDealerAgent, RandomBlackjackPlayerAgent
+from .leduc_agents import RandomLeducAgent
 
 _BUILTINS = {
     "random": RandomAgent,
@@ -32,6 +33,7 @@ _BUILTINS = {
     "gomoku_heuristic": GomokuHeuristicAgent,
     "blackjack_dealer": BlackjackDealerAgent,
     "blackjack_random": RandomBlackjackPlayerAgent,
+    "leduc_random": RandomLeducAgent,
 }
 
 

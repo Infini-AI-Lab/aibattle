@@ -133,19 +133,24 @@ class IndependentBlackjack(Game):
             return self._step_player(s, move)
         return self._step_dealer(s, move)
 
+    def _phase_after_player_finishes(self, dealer) -> str:
+        """The phase once the player has finished without busting: the dealer
+        only acts when its policy says to draw, otherwise the hand is done."""
+        return "dealer" if dealer_should_hit(dealer) else "done"
+
     def _step_player(self, s: BlackjackState, move: Move) -> BlackjackState:
         if move.type == "stand":
-            # Hand over to the dealer.
+            # Player is done; the dealer acts only if it must draw.
             return BlackjackState(deck=s.deck, player=s.player, dealer=s.dealer,
-                                  phase="dealer", doubled=s.doubled,
-                                  draw_index=s.draw_index)
+                                  phase=self._phase_after_player_finishes(s.dealer),
+                                  doubled=s.doubled, draw_index=s.draw_index)
         if move.type == "double":
             card, idx = self._draw(s)
             player = s.player + (card,)
-            busted = is_bust(player)
             # Double draws exactly one card then forcibly stands; a bust ends the
-            # hand immediately (dealer does not draw).
-            phase = "done" if busted else "dealer"
+            # hand immediately (dealer does not draw), otherwise the dealer acts
+            # only if its policy says to draw.
+            phase = "done" if is_bust(player) else self._phase_after_player_finishes(s.dealer)
             return BlackjackState(deck=s.deck, player=player, dealer=s.dealer,
                                   phase=phase, doubled=True, draw_index=idx)
         # hit

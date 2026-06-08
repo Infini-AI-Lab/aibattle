@@ -100,12 +100,40 @@ def test_players_and_initial_turn():
         assert "hit" in g.legal_actions(s, "player_0")
 
 
-def test_stand_hands_over_to_dealer():
+def test_stand_hands_over_to_dealer_when_dealer_must_draw():
     g = _game()
+    # Dealer 14 (<17) must draw, so stand hands over to the dealer.
     s = _state(["10", "7"], ["9", "5"], phase="player")
     ns = g.step(s, Move(type="stand"))
     assert ns.phase == "dealer"
     assert g.current_player(ns) == "player_1"
+
+
+def test_stand_terminal_when_dealer_already_17_plus():
+    g = _game()
+    # AC-3.1: the dealer acts only when it must draw. With the dealer already at
+    # a standing total, a player stand goes straight to terminal — no dealer step.
+    for dealer in (["10", "7"],        # hard 17 -> stand
+                   ["A", "6"],          # soft 17 -> stand
+                   ["10", "10"],        # 20 -> stand
+                   ["K", "9"]):         # 19 -> stand
+        s = _state(["10", "8"], dealer, phase="player")
+        ns = g.step(s, Move(type="stand"))
+        assert ns.phase == "done", f"dealer {dealer} should not act"
+        assert g.is_terminal(ns)
+
+
+def test_double_terminal_when_dealer_already_17_plus():
+    g = _game()
+    # Non-busting double with the dealer already standing -> terminal, no dealer step.
+    s = _state(["5", "6"], ["10", "7"], phase="player", deck=["7"], idx=0)  # dealer hard 17
+    ns = g.step(s, Move(type="double"))  # player -> 18, not bust
+    assert ns.doubled is True
+    assert not is_bust(ns.player)
+    assert ns.phase == "done"
+    assert g.is_terminal(ns)
+    # Player 18 vs dealer 17, doubled -> +2.
+    assert g.returns(ns) == {"player_0": 2.0, "player_1": -2.0}
 
 
 def test_player_bust_is_terminal_no_dealer_turn():
