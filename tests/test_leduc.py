@@ -66,8 +66,30 @@ def test_check_check_reveals_public_and_advances_round():
     s = _drive(g, s, ["check", "check"])
     assert s.round == 1
     assert s.public in ("J", "Q", "K")
+    assert s.public == s.pending_public  # revealed card == the one dealt at setup
     assert not s.done
     assert g.legal_actions(s, "player_0") == ["check", "bet"]
+
+
+def test_public_card_is_random_dealt_not_lowest_remaining():
+    g = _game()
+    # The public card must be the third dealt card (random), not a deterministic
+    # function of the two hole cards. Across seeds, all three ranks should appear
+    # as the revealed public card, including ranks higher than both hole cards.
+    seen = set()
+    saw_higher_than_holes = False
+    for seed in range(200):
+        s = g.initial_state(random.Random(seed))
+        s = _drive(g, s, ["check", "check"])
+        seen.add(s.public)
+        from aibattle.games.leduc import _RANK
+        holes = [s.cards["player_0"], s.cards["player_1"]]
+        if _RANK[s.public] > max(_RANK[h] for h in holes):
+            saw_higher_than_holes = True
+    assert seen == {"J", "Q", "K"}
+    # The buggy "lowest remaining" rule could never reveal a card higher than
+    # both holes; a correct random deal does.
+    assert saw_higher_than_holes
 
 
 def test_bet_amount_is_total_commitment_and_one_raise_cap():
@@ -108,7 +130,8 @@ def test_check_then_bet_is_legal_and_round_closes_on_call():
 
 def _showdown_state(c0, c1, public, locked):
     return LeducState(
-        cards={"player_0": c0, "player_1": c1}, public=public, round=1,
+        cards={"player_0": c0, "player_1": c1}, public=public,
+        pending_public=public, round=1,
         street_commit={"player_0": 0, "player_1": 0}, locked=dict(locked),
         to_act="player_0", raises_this_round=0, acted=("player_0", "player_1"),
         folded=None, done=True,
@@ -184,8 +207,8 @@ def test_split_odd_chip_to_player_0():
     # (Unequal contributions only arise from a fold normally, but we test the
     # odd-chip rule directly here.)
     s = LeducState(
-        cards={"player_0": "Q", "player_1": "Q"}, public="K", round=1,
-        street_commit={"player_0": 0, "player_1": 0},
+        cards={"player_0": "Q", "player_1": "Q"}, public="K", pending_public="K",
+        round=1, street_commit={"player_0": 0, "player_1": 0},
         locked={"player_0": 3, "player_1": 2}, to_act="player_0",
         raises_this_round=0, acted=("player_0", "player_1"), folded=None, done=True,
     )

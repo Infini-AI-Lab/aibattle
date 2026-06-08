@@ -64,13 +64,11 @@ class LeducTemplate(GameTemplate):
         if not raw:
             return None
         legal = list(request.observation.legal_actions)
-        lines = [ln for ln in raw.splitlines() if ln.strip()]
-        for chunk in ([lines[-1]] if lines else []) + [raw]:
-            low = chunk.lower()
-            # Order matters: 'raise' before 'call'/'bet' is not required, but we
-            # check the more specific actions consistently against the legal set.
+        text = raw.lower()
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        for chunk in ([lines[-1]] if lines else []) + [text]:
             for atype in ("raise", "bet", "call", "check", "fold"):
-                if atype in legal and re.search(_ALIASES[atype], low):
+                if atype in legal and re.search(_ALIASES[atype], chunk):
                     if atype in ("bet", "raise"):
                         return Move(type=atype, amount=self._amount_for(atype, request))
                     return Move(type=atype)

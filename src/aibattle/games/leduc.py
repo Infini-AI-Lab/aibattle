@@ -31,6 +31,7 @@ from .base import Game
 
 _RANK = {"J": 0, "Q": 1, "K": 2}
 _PLAYERS = ["player_0", "player_1"]
+_DECK = ["J", "J", "Q", "Q", "K", "K"]
 _ANTE = 1
 _BET_SIZE = {0: 2, 1: 4}   # round index -> fixed bet/raise increment
 
@@ -43,6 +44,7 @@ def _other(p: PlayerId) -> PlayerId:
 class LeducState:
     cards: dict                 # {"player_0": "K", "player_1": "Q"}
     public: Optional[str]       # the revealed public card, or None pre-reveal
+    pending_public: str         # the public card dealt at setup, revealed at round 2
     round: int                  # 0 = first betting round, 1 = second
     # Chips committed THIS round, keyed by player (resets to 0 at round 2 start).
     street_commit: dict
@@ -63,13 +65,14 @@ class LeducPoker(Game):
 
     # -- setup --------------------------------------------------------------
     def initial_state(self, rng: random.Random) -> LeducState:
-        deck = ["J", "J", "Q", "Q", "K", "K"]
+        deck = list(_DECK)
         rng.shuffle(deck)
         cards = {"player_0": deck[0], "player_1": deck[1]}
-        # deck[2] is reserved as the public card revealed after round 1.
+        # deck[2] is the public card, dealt now and revealed after round 1.
         return LeducState(
             cards=cards,
             public=None,
+            pending_public=deck[2],
             round=0,
             street_commit={"player_0": 0, "player_1": 0},
             locked={"player_0": _ANTE, "player_1": _ANTE},
@@ -130,16 +133,6 @@ class LeducPoker(Game):
         return s.done
 
     # -- transition ---------------------------------------------------------
-    def _public_card_for(self, s: LeducState) -> str:
-        """The public card is the lowest-ranked remaining card not held by a
-        player, chosen deterministically so reveal is reproducible."""
-        used = [s.cards["player_0"], s.cards["player_1"]]
-        pool = ["J", "J", "Q", "Q", "K", "K"]
-        for c in used:
-            pool.remove(c)
-        # Deterministic pick: first remaining in canonical order.
-        return pool[0]
-
     def _round_closed(self, sc: dict, acted: tuple) -> bool:
         """A betting round closes when commits are equal and both have acted."""
         return sc["player_0"] == sc["player_1"] and set(acted) == set(_PLAYERS)
@@ -155,8 +148,8 @@ class LeducPoker(Game):
 
         if move.type == "fold":
             return LeducState(
-                cards=s.cards, public=s.public, round=s.round,
-                street_commit=sc, locked=locked, to_act=opp,
+                cards=s.cards, public=s.public, pending_public=s.pending_public,
+                round=s.round, street_commit=sc, locked=locked, to_act=opp,
                 raises_this_round=raises, acted=tuple(sorted(acted | {p})),
                 folded=p, done=True,
             )
@@ -180,8 +173,8 @@ class LeducPoker(Game):
         closed = self._round_closed(sc, tuple(acted))
         if not closed:
             return LeducState(
-                cards=s.cards, public=s.public, round=s.round,
-                street_commit=sc, locked=locked, to_act=opp,
+                cards=s.cards, public=s.public, pending_public=s.pending_public,
+                round=s.round, street_commit=sc, locked=locked, to_act=opp,
                 raises_this_round=raises, acted=tuple(sorted(acted)),
                 folded=None, done=False,
             )
@@ -190,17 +183,18 @@ class LeducPoker(Game):
         for q in _PLAYERS:
             locked[q] += sc[q]
         if s.round == 0:
-            # Reveal the public card and start round 2 (player_0 acts first).
+            # Reveal the public card (dealt at setup) and start round 2.
             return LeducState(
-                cards=s.cards, public=self._public_card_for(s), round=1,
+                cards=s.cards, public=s.pending_public,
+                pending_public=s.pending_public, round=1,
                 street_commit={"player_0": 0, "player_1": 0}, locked=locked,
                 to_act="player_0", raises_this_round=0, acted=(),
                 folded=None, done=False,
             )
         # Second round closed -> showdown.
         return LeducState(
-            cards=s.cards, public=s.public, round=1,
-            street_commit={"player_0": 0, "player_1": 0}, locked=locked,
+            cards=s.cards, public=s.public, pending_public=s.pending_public,
+            round=1, street_commit={"player_0": 0, "player_1": 0}, locked=locked,
             to_act="player_0", raises_this_round=0, acted=(),
             folded=None, done=True,
         )
