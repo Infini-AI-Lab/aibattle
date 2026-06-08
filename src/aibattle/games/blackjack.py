@@ -112,7 +112,11 @@ class IndependentBlackjack(Game):
                 return ["hit", "stand", "double"]
             return ["hit", "stand"]
         if s.phase == "dealer":
-            return ["hit", "stand"]
+            # The dealer phase only exists while the dealer must draw, so the
+            # only legal (and forced) dealer action is to hit. Keeping this
+            # policy-tight means a validated action can never contradict the
+            # house policy.
+            return ["hit"]
         return []
 
     def is_terminal(self, s: BlackjackState) -> bool:
@@ -267,11 +271,22 @@ class IndependentBlackjack(Game):
         )
 
     def render(self, s: BlackjackState, *, perspective: Optional[PlayerId] = None) -> str:
+        # A perspective render must not reveal more than that seat may see; the
+        # player must not see the dealer's hole card during its own turn.
+        if perspective is not None:
+            return self.observation(s, perspective).rendered
         pt = hand_total(s.player)[0]
-        dt = hand_total(s.dealer)[0]
+        # Full-information render (no perspective): only safe to reveal the whole
+        # dealer hand once the dealer's turn has begun or the hand is over.
+        if s.phase == "player":
+            dealer_str = f"{s.dealer[0]}, [hidden]"
+            dt = "?"
+        else:
+            dealer_str = ", ".join(s.dealer)
+            dt = hand_total(s.dealer)[0]
         tag = ""
         if s.phase == "done":
             profit = self._player_profit(s)
             tag = f"  [player profit: {profit:+g}]"
         return (f"Player: {', '.join(s.player)} = {pt}  |  "
-                f"Dealer: {', '.join(s.dealer)} = {dt}{tag}")
+                f"Dealer: {dealer_str} = {dt}{tag}")

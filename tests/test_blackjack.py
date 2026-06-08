@@ -224,6 +224,29 @@ def test_returns_always_zero_sum():
 
 # --- AC-3.1: observation hides the hole card during player's turn ----------
 
+def test_dealer_legal_actions_are_policy_tight():
+    g = _game()
+    # The dealer phase only exists while the dealer must draw, so the only legal
+    # dealer action is hit (never an advisory 'stand' that could still cause a hit).
+    s = _state(["10", "7"], ["9", "5"], phase="dealer")  # dealer 14 must hit
+    assert g.legal_actions(s, "player_1") == ["hit"]
+
+
+def test_render_perspective_hides_hole_card():
+    g = _game()
+    s = _state(["10", "7"], ["9", "5"], phase="player")  # hole card is "5"
+    # Perspective render must not reveal the dealer hole card during player turn.
+    pr = g.render(s, perspective="player_0")
+    assert "Dealer shows: 9" in pr
+    assert "5" not in pr.split("Dealer shows:")[1]
+    # Full-information render (no perspective) also hides the hole during player turn.
+    full = g.render(s)
+    assert "[hidden]" in full
+    # Once the dealer's turn begins, the full render reveals the hand.
+    sd = _state(["10", "7"], ["9", "5"], phase="dealer")
+    assert "[hidden]" not in g.render(sd)
+
+
 def test_player_observation_hides_hole_card():
     g = _game()
     s = _state(["10", "7"], ["9", "5"], phase="player")
