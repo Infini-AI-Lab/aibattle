@@ -59,7 +59,7 @@ def acfg(label: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{label}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 8192, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 16384, "timeout_s": 300,
         },
         "max_retries": 2,
     }
@@ -153,7 +153,15 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
             traceback.print_exc()
 
     specs = [(a, b, 9000 + i) for i, (a, b) in enumerate(pairs)]
-    await asyncio.gather(*(play(a, b, s) for a, b, s in specs))
+    if os.environ.get("SERIAL_PAIRS", "").lower() in ("1", "true", "yes"):
+        # True serial: one model pair at a time. Concentrates throughput on a
+        # single match (fewer concurrent slow reasoning calls) so progress is
+        # visible and one stalled model can't block the whole batch.
+        for a, b, s in specs:
+            await play(a, b, s)
+            save()
+    else:
+        await asyncio.gather(*(play(a, b, s) for a, b, s in specs))
     save()
     rows = _aggregate_versus(data["pairs"])
     data["leaderboard"] = rows
