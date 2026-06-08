@@ -21,14 +21,16 @@ export PYTHONPATH=/home/haizhonz/letianr/src
 export MODEL_TIMEOUT_S=900     # long games: allow slow reasoning steps
 export MAX_CONCURRENCY=1       # episode-level concurrency within a match
 export SERIAL_PAIRS=1          # one model pair at a time (round-robin path)
-export EPISODES=2              # short games: a couple hands per pair/model
-export OTHELLO_EPISODES=1      # long board game: one game per pair
 # BASELINE_MODE is intentionally UNSET so the long games use the AC-8
 # model-vs-model round-robin (run_versus_game), not the diagnostic baseline.
 
-# Short games first (fast), then the long round-robins (slow, serial).
-python scripts/new_games_experiment.py --episodes 2 \
-  --games independent_blackjack,leduc_poker,repeated_colonel_blotto,othello_lite_6x6
+# 1) Short games (fast): a couple hands per pair/model.
+EPISODES=2 python scripts/new_games_experiment.py --episodes 2 \
+  --games independent_blackjack,leduc_poker
+
+# 2) Long games (slow): EXACTLY ONE episode per pair, serial, high timeout.
+EPISODES=1 OTHELLO_EPISODES=1 python scripts/new_games_experiment.py --episodes 1 \
+  --games repeated_colonel_blotto,othello_lite_6x6
 
 echo "OVERNIGHT AC-8 EXPERIMENT DONE"
 echo "Diagnostic-only model-vs-baseline mode (NOT AC-8) can be run separately with:"

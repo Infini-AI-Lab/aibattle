@@ -131,10 +131,17 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
     os.makedirs(out, exist_ok=True)
     pairs = list(itertools.combinations(MODELS, 2))
     data = {"game": game, "models": MODELS, "episodes_per_pair": episodes,
-            "structure": "round_robin_seat_swap", "pairs": []}
+            "structure": "round_robin_seat_swap", "pairs": [], "leaderboard": []}
 
     def save():
+        # Refresh the leaderboard from whatever pairs have completed so far, so an
+        # interruption still leaves a truthful partial state on disk.
+        data["leaderboard"] = _aggregate_versus(data["pairs"])
         json.dump(data, open(os.path.join(out, "data.json"), "w"))
+
+    # Write the skeleton BEFORE any pair runs, so a game that is interrupted
+    # before its first completion still has a visible 0/6 PARTIAL data.json.
+    save()
 
     async def play(a, b, seed):
         gdir = os.path.join(out, f"{a}__vs__{b}")
@@ -157,6 +164,12 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
             traceback.print_exc()
 
     specs = [(a, b, 9000 + i) for i, (a, b) in enumerate(pairs)]
+    # Optionally run pairs involving a fast model first (e.g. gpt-oss-120b), so a
+    # serial run stores at least one completed round-robin episode quickly even
+    # when the other models are slow. Pure ordering — every pair still runs.
+    fast = os.environ.get("FAST_FIRST_MODEL", "")
+    if fast:
+        specs.sort(key=lambda t: 0 if fast in (t[0], t[1]) else 1)
     if os.environ.get("SERIAL_PAIRS", "").lower() in ("1", "true", "yes"):
         # True serial: one model pair at a time. Concentrates throughput on a
         # single match (fewer concurrent slow reasoning calls) so progress is
@@ -166,10 +179,7 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
             save()
     else:
         await asyncio.gather(*(play(a, b, s) for a, b, s in specs))
-    save()
-    rows = _aggregate_versus(data["pairs"])
-    data["leaderboard"] = rows
-    save()
+    save()  # save() refreshes the leaderboard from completed pairs
     return data
 
 
@@ -304,49 +314,79 @@ def _load_all_stored() -> dict:
     return stored
 
 
+# The AC-8 expected structure per game (so missing games are reported, not hidden).
+EXPECTED_STRUCTURE = {
+    "othello_lite_6x6": "round_robin_seat_swap",
+    "leduc_poker": "round_robin_seat_swap",
+    "repeated_colonel_blotto": "round_robin_seat_swap",
+    "independent_blackjack": "independent_vs_dealer",
+}
+
+
+def _coverage(game: str, data: dict) -> dict:
+    """Expected-vs-actual coverage for a game, so PARTIAL/missing != COMPLETE."""
+    n_pairs = len(list(itertools.combinations(MODELS, 2)))  # 6 for four models
+    n_models = len(MODELS)
+    structure = data.get("structure") or EXPECTED_STRUCTURE.get(game, "")
+    models_present = len(data.get("leaderboard", []))
+    if EXPECTED_STRUCTURE.get(game) == "round_robin_seat_swap":
+        pairs_done = len(data.get("pairs", []))
+        complete = pairs_done >= n_pairs and models_present >= n_models
+        text = (f"{pairs_done}/{n_pairs} model pairs, "
+                f"{models_present}/{n_models} models")
+        cov = {"expected_pairs": n_pairs, "pairs_done": pairs_done}
+    else:  # model-vs-dealer (one run per model)
+        runs_done = len(data.get("model_runs", {})) or models_present
+        complete = runs_done >= n_models
+        text = f"{runs_done}/{n_models} models"
+        cov = {"expected_models": n_models, "models_done": runs_done}
+    cov.update({"structure": structure, "status": "COMPLETE" if complete else "PARTIAL",
+                "text": text})
+    return cov
+
+
 def write_report(all_data: dict):
-    # Merge in any games stored on disk from prior runs, then de-dupe by game.
+    # Merge in any games stored on disk from prior runs.
     merged = dict(_load_all_stored())
     merged.update(all_data)
+    # Seed EVERY expected game so a game with no data still appears as PARTIAL
+    # (rather than vanishing from the report and looking complete).
+    for game in VERSUS_GAMES + ENV_GAMES:
+        merged.setdefault(game, {"game": game, "structure": EXPECTED_STRUCTURE.get(game),
+                                 "leaderboard": [], "pairs": [], "model_runs": {}})
     all_data = merged
     os.makedirs(REPORT_DIR, exist_ok=True)
+
     lines = ["# AI Battle Arena — New Games Four-Model Experiment", ""]
     lines.append(f"Models: {', '.join(MODELS)}  ")
     lines.append("Unavailable ids (minimax-m2p7, deepseek-flash) are out of scope.")
     lines.append("")
-    n_pairs = len(list(itertools.combinations(MODELS, 2)))  # 6 for four models
-    for game, data in all_data.items():
-        lines.append(f"## {game}")
+    json_out = {}
+    # Report games in a stable, plan-aligned order.
+    for game in ("independent_blackjack", "leduc_poker",
+                 "repeated_colonel_blotto", "othello_lite_6x6"):
+        data = all_data[game]
+        cov = _coverage(game, data)
         lb = data.get("leaderboard", [])
-        # Completeness guard: state expected-vs-actual coverage so a partially
-        # populated game is not mistaken for a complete four-model comparison.
-        structure = data.get("structure", "")
-        models_present = len(lb)
-        if structure == "round_robin_seat_swap":
-            pairs_done = len(data.get("pairs", []))
-            complete = pairs_done >= n_pairs and models_present >= len(MODELS)
-            cov = (f"coverage: {pairs_done}/{n_pairs} model pairs, "
-                   f"{models_present}/{len(MODELS)} models")
-        else:  # model-vs-dealer / model-vs-baseline (one run per model)
-            runs_done = len(data.get("model_runs", {}))
-            complete = runs_done >= len(MODELS)
-            cov = f"coverage: {runs_done}/{len(MODELS)} models"
-        lines.append(f"_{cov} — {'COMPLETE' if complete else 'PARTIAL'} "
-                     f"(structure: {structure or 'n/a'})_")
+        lines.append(f"## {game}")
+        lines.append(f"_coverage: {cov['text']} — {cov['status']} "
+                     f"(structure: {cov['structure'] or 'n/a'})_")
         if not lb:
             lines.append("_(no results yet)_\n")
-            continue
-        cols = list(lb[0].keys())
-        lines.append("| " + " | ".join(cols) + " |")
-        lines.append("|" + "|".join("---" for _ in cols) + "|")
-        for r in lb:
-            lines.append("| " + " | ".join(str(r[c]) for c in cols) + " |")
-        lines.append("")
+        else:
+            cols = list(lb[0].keys())
+            lines.append("| " + " | ".join(cols) + " |")
+            lines.append("|" + "|".join("---" for _ in cols) + "|")
+            for r in lb:
+                lines.append("| " + " | ".join(str(r[c]) for c in cols) + " |")
+            lines.append("")
+        json_out[game] = {"coverage": cov, "leaderboard": lb}
+
     md = "\n".join(lines)
     for p in (os.path.join(OUT, "report.md"),
               os.path.join(REPORT_DIR, "new_games_experiment_report.md")):
         open(p, "w", encoding="utf-8").write(md)
-    json.dump({g: d.get("leaderboard", []) for g, d in all_data.items()},
+    json.dump(json_out,
               open(os.path.join(REPORT_DIR, "new_games_experiment.json"), "w"),
               indent=2)
     print(f"\nReport written to {REPORT_DIR}/new_games_experiment_report.md")
