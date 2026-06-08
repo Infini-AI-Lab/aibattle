@@ -362,7 +362,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--max-concurrency", type=int,
                    default=_env_int("MAX_CONCURRENCY", 16))
     p.add_argument("--anthropic-max-tokens", type=int,
-                   default=_env_int("ANTHROPIC_MAX_TOKENS", 4096))
+                   default=_env_int("ANTHROPIC_MAX_TOKENS", 8192))
     p.add_argument("--openai-max-tokens", type=int,
                    default=_env_int("OPENAI_MAX_TOKENS", 8192))
     p.add_argument("--thinking-budget-tokens", type=int,
