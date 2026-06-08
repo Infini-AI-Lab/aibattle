@@ -385,16 +385,15 @@ async def main():
     for game in fast_first:
         if want and game not in want:
             continue
+        n = othello_episodes if game == "othello_lite_6x6" else episodes
         if game in ENV_GAMES:
             print(f"== {game} (independent vs dealer, {episodes} hands/model) ==",
                   flush=True)
             all_data[game] = await run_blackjack(episodes, sem)
         elif baseline_mode and game in baseline_games:
-            n = othello_episodes if game == "othello_lite_6x6" else episodes
             print(f"== {game} (model vs baseline, {n} games/model) ==", flush=True)
             all_data[game] = await run_versus_baseline(game, n, sem)
         else:
-            n = othello_episodes if game == "othello_lite_6x6" else episodes
             print(f"== {game} (round-robin, {n} hands/pair) ==", flush=True)
             all_data[game] = await run_versus_game(game, n, sem)
         write_report(all_data)   # incremental report so partial progress is saved
