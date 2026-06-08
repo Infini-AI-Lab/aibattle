@@ -52,6 +52,10 @@ class LeducState:
     locked: dict
     to_act: PlayerId
     raises_this_round: int      # number of raises so far this round (cap 1)
+    # Public betting history: a tuple of dict records, e.g.
+    # {"player": "player_0", "action": "bet", "to": 2} or a street-transition
+    # record {"event": "public_card", "card": "Q", "round": 2}.
+    history: tuple = field(default_factory=tuple)
     # Players who have acted since the last aggressive action this round.
     acted: tuple = field(default_factory=tuple)
     folded: Optional[PlayerId] = None
@@ -146,12 +150,18 @@ class LeducPoker(Game):
         raises = s.raises_this_round
         acted = set(s.acted)
 
+        # Record this public action in the betting history.
+        rec = {"player": p, "action": move.type}
+        if move.type in ("bet", "raise", "call"):
+            rec["to"] = move.amount if move.amount is not None else self._max_commit(s)
+        history = s.history + (rec,)
+
         if move.type == "fold":
             return LeducState(
                 cards=s.cards, public=s.public, pending_public=s.pending_public,
                 round=s.round, street_commit=sc, locked=locked, to_act=opp,
-                raises_this_round=raises, acted=tuple(sorted(acted | {p})),
-                folded=p, done=True,
+                raises_this_round=raises, history=history,
+                acted=tuple(sorted(acted | {p})), folded=p, done=True,
             )
 
         if move.type == "check":
@@ -175,8 +185,8 @@ class LeducPoker(Game):
             return LeducState(
                 cards=s.cards, public=s.public, pending_public=s.pending_public,
                 round=s.round, street_commit=sc, locked=locked, to_act=opp,
-                raises_this_round=raises, acted=tuple(sorted(acted)),
-                folded=None, done=False,
+                raises_this_round=raises, history=history,
+                acted=tuple(sorted(acted)), folded=None, done=False,
             )
 
         # Round closed: fold contributions into the locked pot.
@@ -184,19 +194,21 @@ class LeducPoker(Game):
             locked[q] += sc[q]
         if s.round == 0:
             # Reveal the public card (dealt at setup) and start round 2.
+            history = history + ({"event": "public_card",
+                                  "card": s.pending_public, "round": 2},)
             return LeducState(
                 cards=s.cards, public=s.pending_public,
                 pending_public=s.pending_public, round=1,
                 street_commit={"player_0": 0, "player_1": 0}, locked=locked,
-                to_act="player_0", raises_this_round=0, acted=(),
-                folded=None, done=False,
+                to_act="player_0", raises_this_round=0, history=history,
+                acted=(), folded=None, done=False,
             )
         # Second round closed -> showdown.
         return LeducState(
             cards=s.cards, public=s.public, pending_public=s.pending_public,
             round=1, street_commit={"player_0": 0, "player_1": 0}, locked=locked,
-            to_act="player_0", raises_this_round=0, acted=(),
-            folded=None, done=True,
+            to_act="player_0", raises_this_round=0, history=history,
+            acted=(), folded=None, done=True,
         )
 
     # -- showdown / payoffs -------------------------------------------------
@@ -206,9 +218,15 @@ class LeducPoker(Game):
         pairs = 1 if (public is not None and card == public) else 0
         return (pairs, _RANK[card])
 
+    def _contrib(self, s: LeducState) -> dict:
+        """Total chips each player has committed to the pot: chips locked from
+        completed rounds plus any live commitment on the current street. On a
+        fold the folder's live street commitment is part of what they lose."""
+        return {p: s.locked[p] + s.street_commit[p] for p in _PLAYERS}
+
     def returns(self, s: LeducState) -> dict:
         assert s.done, "returns() called on non-terminal state"
-        contrib = dict(s.locked)   # total chips each player committed to the pot
+        contrib = self._contrib(s)   # total chips each player committed to the pot
         pot = contrib["player_0"] + contrib["player_1"]
 
         if s.folded is not None:
@@ -238,17 +256,34 @@ class LeducPoker(Game):
 
     def episode_metadata(self, s: LeducState) -> dict:
         reason = "fold" if s.folded is not None else "showdown"
+        contrib = self._contrib(s)
         return {
             "reason": reason,
             "public_card": s.public,
             "cards": dict(s.cards),
-            "pot": s.locked["player_0"] + s.locked["player_1"],
+            "pot": contrib["player_0"] + contrib["player_1"],
         }
 
     # -- observation / render ----------------------------------------------
     def _pot(self, s: LeducState) -> int:
-        return (s.locked["player_0"] + s.locked["player_1"]
-                + s.street_commit["player_0"] + s.street_commit["player_1"])
+        contrib = self._contrib(s)
+        return contrib["player_0"] + contrib["player_1"]
+
+    def _history_list(self, s: LeducState) -> list:
+        """Public betting history as a list of plain dicts (all players see it)."""
+        return [dict(rec) for rec in s.history]
+
+    def _history_str(self, s: LeducState) -> str:
+        if not s.history:
+            return "(no actions yet)"
+        parts = []
+        for rec in s.history:
+            if rec.get("event") == "public_card":
+                parts.append(f"[public card {rec['card']}]")
+            else:
+                amt = f" to {rec['to']}" if "to" in rec else ""
+                parts.append(f"{rec['player']} {rec['action']}{amt}")
+        return ", ".join(parts)
 
     def observation(self, s: LeducState, player: PlayerId) -> Observation:
         legal = self.legal_actions(s, player)
@@ -264,7 +299,7 @@ class LeducPoker(Game):
                 "bet_size": _BET_SIZE[s.round],
                 "your_commit": s.street_commit[player],
             },
-            history=[],
+            history=self._history_list(s),
             legal_actions=legal,
             rendered=self._render_for(s, player, legal, to_call),
         )
@@ -276,6 +311,7 @@ class LeducPoker(Game):
             f"{s.cards[player]} (ranks J<Q<K). Public card: {pub}. "
             f"Betting round {s.round + 1} of 2. Pot: {self._pot(s)} chips. "
             f"To call: {to_call}. Fixed bet size this round: {_BET_SIZE[s.round]}. "
+            f"Betting so far: {self._history_str(s)}. "
             f"Legal actions: {', '.join(legal)}."
         )
 

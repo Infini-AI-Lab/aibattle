@@ -22,6 +22,7 @@ from .board_agents import (
 )
 from .blackjack_agents import BlackjackDealerAgent, RandomBlackjackPlayerAgent
 from .leduc_agents import RandomLeducAgent
+from .blotto_agents import RandomBlottoAgent
 
 _BUILTINS = {
     "random": RandomAgent,
@@ -34,6 +35,7 @@ _BUILTINS = {
     "blackjack_dealer": BlackjackDealerAgent,
     "blackjack_random": RandomBlackjackPlayerAgent,
     "leduc_random": RandomLeducAgent,
+    "blotto_random": RandomBlottoAgent,
 }
 
 

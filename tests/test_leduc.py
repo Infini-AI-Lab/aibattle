@@ -174,6 +174,54 @@ def test_fold_payoff_zero_sum():
     assert r["player_0"] > 0 and r["player_1"] < 0
 
 
+def test_fold_after_raise_pays_full_contribution_round1():
+    g = _game()
+    s = g.initial_state(random.Random(3))
+    s = g.step(s, Move(type="bet", amount=2))    # p0: ante 1 + bet 2 = 3 committed
+    s = g.step(s, Move(type="raise", amount=4))  # p1: ante 1 + raise-to 4 = 5
+    s = g.step(s, Move(type="fold"))             # p0 folds
+    assert s.done and s.folded == "player_0"
+    r = g.returns(s)
+    # Folder (p0) loses its full contribution 3; raiser (p1) nets +3.
+    assert r == {"player_0": -3.0, "player_1": 3.0}
+    assert sum(r.values()) == 0.0
+
+
+def test_fold_after_raise_round2_includes_locked_and_live():
+    g = _game()
+    s = g.initial_state(random.Random(3))
+    s = _drive(g, s, ["check", "check"])         # round 1 closes (each locked 1)
+    assert s.round == 1
+    s = g.step(s, Move(type="bet", amount=4))    # p0 bets to 4 (round2 size 4)
+    s = g.step(s, Move(type="raise", amount=8))  # p1 raises to 8
+    s = g.step(s, Move(type="fold"))             # p0 folds
+    assert s.done and s.folded == "player_0"
+    r = g.returns(s)
+    # p0 contribution = locked 1 + live 4 = 5; p1 = locked 1 + live 8 = 9.
+    # Folder loses its 5; opponent nets +5.
+    assert r == {"player_0": -5.0, "player_1": 5.0}
+    assert sum(r.values()) == 0.0
+
+
+def test_betting_history_visible_to_next_player():
+    g = _game()
+    s = g.initial_state(random.Random(3))
+    # Before any action, history is empty.
+    assert g.observation(s, "player_0").history == []
+    s = g.step(s, Move(type="bet", amount=2))    # p0 bets
+    # player_1 (next to act) sees player_0's bet in the public history.
+    o1 = g.observation(s, "player_1")
+    assert o1.history == [{"player": "player_0", "action": "bet", "to": 2}]
+    assert "bet" in o1.rendered
+    s = g.step(s, Move(type="raise", amount=4))  # p1 raises
+    s = g.step(s, Move(type="call"))             # p0 calls -> round closes, reveal
+    o = g.observation(s, "player_0")
+    # History now includes both bets and the public-card reveal event.
+    actions = [r.get("action") for r in o.history if "action" in r]
+    assert actions == ["bet", "raise", "call"]
+    assert any(r.get("event") == "public_card" for r in o.history)
+
+
 def test_returns_always_zero_sum_random_play():
     g = _game()
     rng = random.Random(0)
