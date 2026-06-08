@@ -200,7 +200,25 @@ async def run_blackjack(episodes: int, sem) -> dict:
     return data
 
 
+def _load_all_stored() -> dict:
+    """Read every per-game data.json under OUT so the report reflects all games
+    completed across runs (per-episode resume keeps partial progress)."""
+    stored = {}
+    for game in VERSUS_GAMES + ENV_GAMES:
+        f = os.path.join(OUT, game, "data.json")
+        if os.path.exists(f):
+            try:
+                stored[game] = json.load(open(f))
+            except Exception:
+                pass
+    return stored
+
+
 def write_report(all_data: dict):
+    # Merge in any games stored on disk from prior runs, then de-dupe by game.
+    merged = dict(_load_all_stored())
+    merged.update(all_data)
+    all_data = merged
     os.makedirs(REPORT_DIR, exist_ok=True)
     lines = ["# AI Battle Arena — New Games Four-Model Experiment", ""]
     lines.append(f"Models: {', '.join(MODELS)}  ")
