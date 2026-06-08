@@ -1,0 +1,31 @@
+# Minimal Othello gpt-oss parse-rate check (model as player_0 only, 2 episodes).
+game:
+  name: othello_lite_6x6
+  version: "1.0.0"
+  params: {}
+players:
+  player_0:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 4096
+      max_retries: 2
+  player_1:
+    agent: { type: builtin, name: board_random }
+run:
+  episodes: 2
+  seed: 7
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 2
+output:
+  dir: ./runs/othello_gptoss_smoke
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true
