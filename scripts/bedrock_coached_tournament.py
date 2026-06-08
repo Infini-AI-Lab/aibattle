@@ -349,9 +349,9 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--models", default=os.environ.get("MODELS", ""))
     p.add_argument("--max-concurrency", type=int,
                    default=_env_int("MAX_CONCURRENCY", 16))
-    p.add_argument("--max-tokens", type=int, default=_env_int("MAX_TOKENS", 4096))
+    p.add_argument("--max-tokens", type=int, default=_env_int("MAX_TOKENS", 1024))
     p.add_argument("--thinking-budget-tokens", type=int,
-                   default=_env_int("THINKING_BUDGET_TOKENS", 4096))
+                   default=_env_int("THINKING_BUDGET_TOKENS", 1024))
     p.add_argument("--temperature", type=float,
                    default=(float(default_temperature)
                             if default_temperature is not None else None))
