@@ -127,13 +127,10 @@ class Gomoku(Game):
         return {"reason": "win" if s.winner else "draw"}
 
     def fallback_action(self, s: GomokuState, player: PlayerId, legal: list) -> Move:
-        center = SIZE // 2
-        empties = [coord_to_rc(x) for x in legal]
-        empties = [rc for rc in empties if rc is not None]
-        if not empties:
-            return Move(type="__invalid__")
-        r, c = min(empties, key=lambda rc: abs(rc[0] - center) + abs(rc[1] - center))
-        return Move(type=rc_to_coord(r, c))
+        # On an unparseable/invalid action, pick a RANDOM legal cell rather than
+        # the center, so the penalty for failing to answer is unbiased (a fixed
+        # center pick would both help the failing model and skew results).
+        return Move(type=str(random.choice(list(legal)))) if legal else Move(type="__invalid__")
 
     # -- observation / render ----------------------------------------------
     def observation(self, s: GomokuState, player: PlayerId) -> Observation:

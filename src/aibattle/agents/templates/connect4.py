@@ -32,12 +32,18 @@ class Connect4Template(GameTemplate):
         if not raw:
             return None
         legal = set(request.observation.legal_actions)
-        lines = [ln for ln in raw.splitlines() if ln.strip()]
-        # Prefer the last line (the conclusion), then the whole text.
-        for chunk in ([lines[-1]] if lines else []) + [raw]:
-            for tok in re.findall(r"\d+", chunk):
-                if tok in legal:
-                    return Move(type=tok)
+        # The answer is the conclusion, so scan lines bottom-up and return the
+        # first line that names exactly ONE distinct legal column. This:
+        #   * ignores the echoed board's "0 1 2 3 4 5 6" header (many distinct
+        #     legal digits -> never a single answer), fenced or not;
+        #   * accepts a clean answer or a repetition loop ("4", "4 4 4");
+        #   * rejects an ambiguous line ("4, not 2") -> None -> repair, then the
+        #     runner's random fallback.
+        # (Board rows render as dots/X/O, so they contribute no digits.)
+        for ln in reversed([l for l in raw.splitlines() if l.strip()]):
+            cols = {t for t in re.findall(r"\d+", ln) if t in legal}
+            if len(cols) == 1:
+                return Move(type=next(iter(cols)))
         return None
 
     def repair_hint(self, request: AgentRequest, bad_output: str) -> str:

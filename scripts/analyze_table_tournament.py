@@ -5,6 +5,9 @@ top1_rate, avg_final_stack) and builds a finishing-place distribution. Writes a
 Chart.js HTML report to runs/table_tournament/table_report.html and
 reports/table_tournament_report.html plus reports/table_tournament_analysis.json.
 Styling matches the board-game tournament report.
+
+Set AIBATTLE_VARIANT="_coached" and AIBATTLE_REPORT_DIR="reports/coached" to
+render the coached mirror instead of touching the base report.
 """
 
 from __future__ import annotations
@@ -15,10 +18,13 @@ from collections import defaultdict
 
 import poker_behavior as pb
 
-DATA = "runs/table_tournament/table_data.json"
-EP_GLOB = "runs/table_tournament/table/ep*.json"
-OUT_HTML = "runs/table_tournament/table_report.html"
-REPORT_DIR = "reports"
+# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
+# parallel coached mirror; unset, paths default to the base run.
+_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
+DATA = f"runs/table_tournament{_VARIANT}/table_data.json"
+EP_GLOB = f"runs/table_tournament{_VARIANT}/table/ep*.json"
+OUT_HTML = f"runs/table_tournament{_VARIANT}/table_report.html"
+REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
@@ -78,6 +84,9 @@ def render_html(rep: dict, beh: dict) -> str:
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
     cols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
+    # Coached variant has no replay viewer built; omit the button so it never 404s.
+    replay_btn = ("" if _VARIANT else
+                  '<a class="replaybtn" href="table_replay.html">▶ Watch table replays</a>')
     rankhdr = "".join(f"<th>#{k}</th>" for k in range(1, n + 1))
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -93,7 +102,7 @@ def render_html(rep: dict, beh: dict) -> str:
 <body><div class="wrap">
   <h1>🃏 AI Battle Arena — Hold'em Table Mode</h1>
   <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
-  <a class="replaybtn" href="table_replay.html">▶ Watch table replays</a>
+  {replay_btn}
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>
