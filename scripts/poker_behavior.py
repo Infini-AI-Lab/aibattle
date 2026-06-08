@@ -31,7 +31,11 @@ VOLUNTARY = {"call", "bet", "raise", "all_in"}
 
 
 def color_for(model: str) -> str:
-    return MODEL_COLORS.get(model, DEFAULT_COLOR)
+    # Coached models (e.g. "deepseek-v4-pro-coached") inherit their base
+    # model's colour so the two arenas stay visually consistent; without this
+    # every coached model collapses to the same grey DEFAULT_COLOR.
+    base = model[:-len("-coached")] if model.endswith("-coached") else model
+    return MODEL_COLORS.get(base, DEFAULT_COLOR)
 
 
 def colors_for(models) -> list:
