@@ -36,12 +36,18 @@ class GomokuTemplate(GameTemplate):
         if not raw:
             return None
         legal = set(request.observation.legal_actions)
-        lines = [ln for ln in raw.splitlines() if ln.strip()]
-        for chunk in ([lines[-1]] if lines else []) + [raw]:
-            for m in _COORD.finditer(chunk):
-                coord = f"{m.group(1).upper()}{m.group(2)}"
-                if coord in legal:
-                    return Move(type=coord)
+        # The answer is the conclusion: scan lines bottom-up and return the first
+        # line that names exactly ONE distinct legal coordinate. A line listing
+        # several different cells is ambiguous -> skip it -> None -> repair, then
+        # the runner's random fallback. (The rendered board uses space-separated
+        # column letters and X/O/. cells, so it yields no "E5"-style matches.)
+        for ln in reversed([l for l in raw.splitlines() if l.strip()]):
+            coords = {
+                f"{m.group(1).upper()}{m.group(2)}"
+                for m in _COORD.finditer(ln)
+            } & legal
+            if len(coords) == 1:
+                return Move(type=next(iter(coords)))
         return None
 
     def repair_hint(self, request: AgentRequest, bad_output: str) -> str:

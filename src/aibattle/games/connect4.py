@@ -109,9 +109,11 @@ class ConnectFour(Game):
 
     # -- invalid-move fallback: center column, else nearest legal to center --
     def fallback_action(self, s: Connect4State, player: PlayerId, legal: list) -> Move:
-        center = COLS // 2
-        cols = sorted((int(c) for c in legal), key=lambda c: abs(c - center))
-        return Move(type=str(cols[0])) if cols else Move(type="__invalid__")
+        # On an unparseable/invalid action, pick a RANDOM legal column rather
+        # than the center: a model that can't produce a usable move shouldn't be
+        # handed a strong one, and a fixed choice would bias results toward one
+        # column. Random keeps the penalty unbiased.
+        return Move(type=str(random.choice(list(legal)))) if legal else Move(type="__invalid__")
 
     # -- observation / render ----------------------------------------------
     def observation(self, s: Connect4State, player: PlayerId) -> Observation:
