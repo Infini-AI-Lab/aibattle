@@ -29,6 +29,16 @@
       "invalid_rate": 0.0
     }
   ],
+  "repeated_colonel_blotto": [
+    {
+      "model": "gpt-oss-120b",
+      "games": 1,
+      "win_rate": 1.0,
+      "loss_rate": 0.0,
+      "net_per_game": 1.0,
+      "invalid_rate": 0.0
+    }
+  ],
   "independent_blackjack": [
     {
       "model": "gpt-oss-120b",
