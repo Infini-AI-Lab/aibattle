@@ -175,11 +175,16 @@ class Heartbeat:
 
 
 def _agent_cfg(model: dict, args: argparse.Namespace) -> dict:
+    max_tokens = (
+        args.openai_max_tokens
+        if model["provider"] == "bedrock_openai"
+        else args.anthropic_max_tokens
+    )
     model_block = {
         "provider": model["provider"],
         "model_id": model["model_id"],
         "aws_region": model["aws_region"],
-        "max_tokens": args.max_tokens,
+        "max_tokens": max_tokens,
         "timeout_s": args.timeout_s,
         "reasoning_effort": REASONING_EFFORT,
     }
@@ -349,7 +354,10 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--models", default=os.environ.get("MODELS", ""))
     p.add_argument("--max-concurrency", type=int,
                    default=_env_int("MAX_CONCURRENCY", 16))
-    p.add_argument("--max-tokens", type=int, default=_env_int("MAX_TOKENS", 1024))
+    p.add_argument("--anthropic-max-tokens", type=int,
+                   default=_env_int("ANTHROPIC_MAX_TOKENS", 1024))
+    p.add_argument("--openai-max-tokens", type=int,
+                   default=_env_int("OPENAI_MAX_TOKENS", 4096))
     p.add_argument("--thinking-budget-tokens", type=int,
                    default=_env_int("THINKING_BUDGET_TOKENS", 1024))
     p.add_argument("--temperature", type=float,
@@ -396,7 +404,8 @@ async def main_async() -> None:
         "coached": True,
         "reasoning_effort": REASONING_EFFORT,
         "max_concurrency": args.max_concurrency,
-        "max_tokens": args.max_tokens,
+        "anthropic_max_tokens": args.anthropic_max_tokens,
+        "openai_max_tokens": args.openai_max_tokens,
         "thinking_budget_tokens": args.thinking_budget_tokens,
         "temperature": args.temperature,
         "models": models,
