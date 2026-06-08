@@ -10,7 +10,7 @@ import pytest
 from aibattle.games.registry import make_game, available_games
 from aibattle.games.blotto import (
     RepeatedColonelBlotto, BlottoState,
-    encode_alloc, parse_alloc, _score_round,
+    encode_alloc, parse_alloc, _score_round, _battlefield_outcomes,
     ROUNDS, RESOURCES, VALUES, N_FIELDS,
 )
 from aibattle.agents.templates.registry import make_template
@@ -118,6 +118,52 @@ def test_full_game_terminates_after_20_rounds():
     assert len(s.history) == ROUNDS
     # all-equal allocations every round -> every field ties -> 0-0 -> draw.
     assert g.returns(s) == {"player_0": 0.0, "player_1": 0.0}
+
+
+def test_battlefield_outcomes_detail():
+    outs = _battlefield_outcomes([30, 0, 30, 0, 40], [0, 30, 0, 30, 0])
+    assert len(outs) == N_FIELDS
+    assert outs[0] == {"battlefield": 0, "value": 1, "alloc_0": 30, "alloc_1": 0,
+                       "winner": "player_0"}
+    assert outs[1]["winner"] == "player_1"
+    # a tie battlefield scores for nobody
+    tied = _battlefield_outcomes([20, 20, 20, 20, 20], [20, 20, 20, 20, 20])
+    assert all(o["winner"] == "tie" for o in tied)
+
+
+def test_resolved_record_has_outcomes_and_cumulative():
+    g = _game()
+    s = g.initial_state(random.Random(0))
+    s = g.step(s, Move(type=encode_alloc([100, 0, 0, 0, 0])))   # p0
+    s = g.step(s, Move(type=encode_alloc([0, 25, 25, 25, 25])))  # p1 resolves
+    rec = s.history[0]
+    # per-battlefield outcomes present and consistent with points
+    assert "battlefields" in rec and len(rec["battlefields"]) == N_FIELDS
+    assert rec["battlefields"][0]["winner"] == "player_0"   # 100 > 0 on field value 1
+    assert rec["points_0"] == 1 and rec["points_1"] == 2 + 3 + 4 + 5
+    # cumulative scores after the round are recorded
+    assert rec["cumulative"] == {"player_0": 1, "player_1": 14}
+
+
+def test_terminal_metadata_has_full_round_history():
+    g = _game()
+    s = g.initial_state(random.Random(5))
+    rng = random.Random(5)
+    while not g.is_terminal(s):
+        # vary allocations a little so battlefields aren't all ties
+        a = [20, 20, 20, 20, 20]
+        i = rng.randrange(N_FIELDS); j = (i + 1) % N_FIELDS
+        a[i] += 1; a[j] -= 1
+        s = g.step(s, Move(type=encode_alloc(a)))
+    meta = g.episode_metadata(s)
+    assert meta["rounds_played"] == ROUNDS
+    assert len(meta["round_history"]) == ROUNDS          # all 20 rounds, incl. round 20
+    assert meta["round_history"][-1]["round"] == ROUNDS  # final round present
+    assert "battlefields" in meta["round_history"][-1]
+    assert "cumulative" in meta["round_history"][-1]
+    assert meta["battlefield_values"] == list(VALUES)
+    # cumulative of the last record matches final scores
+    assert meta["round_history"][-1]["cumulative"] == meta["final_scores"]
 
 
 def test_cumulative_winner_returns():

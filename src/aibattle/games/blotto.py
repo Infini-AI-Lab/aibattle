@@ -73,15 +73,31 @@ def parse_alloc(text: str):
     return out
 
 
-def _score_round(a0, a1) -> tuple:
-    """Return (p0_points, p1_points) for one round's allocations."""
-    s0 = s1 = 0
+def _battlefield_outcomes(a0, a1) -> list:
+    """Per-battlefield outcome records for one round's allocations: each is
+    {battlefield, value, alloc_0, alloc_1, winner} where winner is "player_0",
+    "player_1", or "tie"."""
+    out = []
     for i, val in enumerate(VALUES):
         if a0[i] > a1[i]:
-            s0 += val
+            winner = "player_0"
         elif a1[i] > a0[i]:
-            s1 += val
-        # tie -> no score
+            winner = "player_1"
+        else:
+            winner = "tie"
+        out.append({"battlefield": i, "value": val,
+                    "alloc_0": a0[i], "alloc_1": a1[i], "winner": winner})
+    return out
+
+
+def _score_round(a0, a1) -> tuple:
+    """Return (p0_points, p1_points) for one round's allocations (ties score 0)."""
+    s0 = s1 = 0
+    for rec in _battlefield_outcomes(a0, a1):
+        if rec["winner"] == "player_0":
+            s0 += rec["value"]
+        elif rec["winner"] == "player_1":
+            s1 += rec["value"]
     return s0, s1
 
 
@@ -140,12 +156,21 @@ class RepeatedColonelBlotto(Game):
                                done=False)
         # player_1 submits: resolve the round.
         a0 = list(s.pending)
-        p0, p1 = _score_round(a0, alloc)
+        outcomes = _battlefield_outcomes(a0, alloc)
+        p0 = sum(o["value"] for o in outcomes if o["winner"] == "player_0")
+        p1 = sum(o["value"] for o in outcomes if o["winner"] == "player_1")
         scores = dict(s.scores)
         scores["player_0"] += p0
         scores["player_1"] += p1
-        record = {"round": s.round + 1, "alloc_0": a0, "alloc_1": alloc,
-                  "points_0": p0, "points_1": p1}
+        record = {
+            "round": s.round + 1,
+            "alloc_0": a0,
+            "alloc_1": alloc,
+            "battlefields": outcomes,        # per-battlefield outcome detail
+            "points_0": p0,
+            "points_1": p1,
+            "cumulative": dict(scores),      # cumulative scores AFTER this round
+        }
         history = s.history + (record,)
         nxt = s.round + 1
         done = nxt >= ROUNDS
@@ -168,6 +193,12 @@ class RepeatedColonelBlotto(Game):
             "reason": reason,
             "final_scores": dict(s.scores),
             "rounds_played": len(s.history),
+            "battlefield_values": list(VALUES),
+            # The full resolved history (all rounds, incl. the final one) is
+            # stamped here because the runner records only pre-action
+            # observations, so the last round's resolution would otherwise not
+            # appear in any step. This carries every AC-6 field per round.
+            "round_history": [dict(rec) for rec in s.history],
         }
 
     # -- observation / render ----------------------------------------------
