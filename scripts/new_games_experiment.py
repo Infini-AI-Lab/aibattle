@@ -50,6 +50,10 @@ ENV_GAMES = ["independent_blackjack"]
 OUT = os.environ.get("OUT", "runs/new_games_experiment")
 REPORT_DIR = "reports"
 MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", "8"))
+# Model call timeout. Long games (Blotto/Othello) with slow reasoning models can
+# legitimately take a while per step, so this defaults high and is env-tunable.
+# (A previous hard-coded 120s could fail expected-slow long-game decisions.)
+MODEL_TIMEOUT_S = float(os.environ.get("MODEL_TIMEOUT_S", "300"))
 
 
 def acfg(label: str) -> dict:
@@ -59,7 +63,7 @@ def acfg(label: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{label}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 16384, "timeout_s": 120,
+            "temperature": 0.0, "max_tokens": 16384, "timeout_s": MODEL_TIMEOUT_S,
         },
         "max_retries": 2,
     }
@@ -310,11 +314,27 @@ def write_report(all_data: dict):
     lines.append(f"Models: {', '.join(MODELS)}  ")
     lines.append("Unavailable ids (minimax-m2p7, deepseek-flash) are out of scope.")
     lines.append("")
+    n_pairs = len(list(itertools.combinations(MODELS, 2)))  # 6 for four models
     for game, data in all_data.items():
         lines.append(f"## {game}")
         lb = data.get("leaderboard", [])
+        # Completeness guard: state expected-vs-actual coverage so a partially
+        # populated game is not mistaken for a complete four-model comparison.
+        structure = data.get("structure", "")
+        models_present = len(lb)
+        if structure == "round_robin_seat_swap":
+            pairs_done = len(data.get("pairs", []))
+            complete = pairs_done >= n_pairs and models_present >= len(MODELS)
+            cov = (f"coverage: {pairs_done}/{n_pairs} model pairs, "
+                   f"{models_present}/{len(MODELS)} models")
+        else:  # model-vs-dealer / model-vs-baseline (one run per model)
+            runs_done = len(data.get("model_runs", {}))
+            complete = runs_done >= len(MODELS)
+            cov = f"coverage: {runs_done}/{len(MODELS)} models"
+        lines.append(f"_{cov} — {'COMPLETE' if complete else 'PARTIAL'} "
+                     f"(structure: {structure or 'n/a'})_")
         if not lb:
-            lines.append("_(no results)_\n")
+            lines.append("_(no results yet)_\n")
             continue
         cols = list(lb[0].keys())
         lines.append("| " + " | ".join(cols) + " |")

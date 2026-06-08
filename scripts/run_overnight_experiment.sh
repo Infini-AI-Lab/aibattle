@@ -1,25 +1,36 @@
 #!/usr/bin/env bash
-# Overnight four-model experiment for the new games.
+# Overnight AC-8 four-model experiment for the new games (ORIGINAL design).
 #
-# Verified facts (Round 5): the path/API/code are all correct — gpt-oss runs
-# Blotto end-to-end in ~117s and Othello in ~231s with 0 invalid; deepseek-v4-pro
-# and glm-5p1 return a valid allocation in 7-12s per single call. The only issue
-# is aggregate throughput on the long games (Blotto 20 rounds, Othello ~30 plies)
-# across four models, which is fine to run overnight.
+# AC-8 requires the multi-model Fireworks comparison across all four new games:
+#   - round-robin (model-vs-model, seat-swap) for othello/leduc/blotto
+#   - independent model-vs-dealer for blackjack
 #
-# This wrapper runs everything with generous settings and per-episode resume, so
-# it can be re-run any time to continue. Blotto/Othello use model-vs-baseline
-# (BASELINE_MODE=1) so only one seat calls the API per step.
+# The long games (Blotto 20 rounds, Othello ~30 plies) with model-vs-model are
+# throughput-bound (both seats on slow reasoning models), so this runs them
+# SERIAL across model pairs with low concurrency, ONE episode per pair, and a
+# HIGH per-call timeout — intended to run overnight. Per-episode resume means it
+# can be (re-)run any time to continue.
+#
+# Verified (Round 5): a single decision is fast (7-12s) for every model and the
+# path/API/code are correct; the constraint is aggregate wall-clock, not bugs.
 #
 # Usage:  nohup bash scripts/run_overnight_experiment.sh > /tmp/overnight.log 2>&1 &
 set -u
 cd "$(dirname "$0")/.."
 export PYTHONPATH=/home/haizhonz/letianr/src
-export BASELINE_MODE=1
-export MAX_CONCURRENCY=4      # modest concurrency; long games are throughput-bound
-export EPISODES=10            # hands per model for the short games
-export OTHELLO_EPISODES=3     # Othello games are long; fewer per model
-# Short games first (fast, all four models), then the long games.
-python scripts/new_games_experiment.py --episodes 10 \
+export MODEL_TIMEOUT_S=900     # long games: allow slow reasoning steps
+export MAX_CONCURRENCY=1       # episode-level concurrency within a match
+export SERIAL_PAIRS=1          # one model pair at a time (round-robin path)
+export EPISODES=2              # short games: a couple hands per pair/model
+export OTHELLO_EPISODES=1      # long board game: one game per pair
+# BASELINE_MODE is intentionally UNSET so the long games use the AC-8
+# model-vs-model round-robin (run_versus_game), not the diagnostic baseline.
+
+# Short games first (fast), then the long round-robins (slow, serial).
+python scripts/new_games_experiment.py --episodes 2 \
   --games independent_blackjack,leduc_poker,repeated_colonel_blotto,othello_lite_6x6
-echo "OVERNIGHT EXPERIMENT DONE"
+
+echo "OVERNIGHT AC-8 EXPERIMENT DONE"
+echo "Diagnostic-only model-vs-baseline mode (NOT AC-8) can be run separately with:"
+echo "  BASELINE_MODE=1 PYTHONPATH=src python scripts/new_games_experiment.py \\"
+echo "    --games repeated_colonel_blotto,othello_lite_6x6"
