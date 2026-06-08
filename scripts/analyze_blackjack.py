@@ -31,6 +31,13 @@ DEALER_SEAT = "player_1"
 PLAYER_SEAT = "player_0"
 
 
+def _new_stats():
+    return {
+        "hands": 0, "profit": 0.0, "wins": 0, "losses": 0, "pushes": 0,
+        "busts": 0, "doubles": 0, "naturals": 0, "invalid": 0,
+    }
+
+
 def _latest_run(run_root: str):
     """Return the newest run_* subdir of ``run_root`` (or run_root itself)."""
     subs = sorted(glob.glob(os.path.join(run_root, "run_*")))
@@ -41,22 +48,23 @@ def _load_episodes(run_dir: str):
     """Yield episode dicts from trajectories.json or match.jsonl."""
     traj = os.path.join(run_dir, "trajectories.json")
     if os.path.exists(traj):
-        data = json.load(open(traj, encoding="utf-8"))
-        eps = data.get("episodes", data) if isinstance(data, dict) else data
-        if data.get("game") if isinstance(data, dict) else None:
-            return data["game"], eps
-        return None, eps
+        with open(traj, encoding="utf-8") as fh:
+            data = json.load(fh)
+        if isinstance(data, dict):
+            return data.get("game"), data.get("episodes", [])
+        return None, data
     # Fall back to the JSONL log.
     mj = os.path.join(run_dir, "match.jsonl")
     game = None
     eps = []
     if os.path.exists(mj):
-        for line in open(mj, encoding="utf-8"):
-            rec = json.loads(line)
-            if rec.get("record_type") == "match":
-                game = rec.get("game")
-            elif rec.get("record_type") == "episode":
-                eps.append(rec)
+        with open(mj, encoding="utf-8") as fh:
+            for line in fh:
+                rec = json.loads(line)
+                if rec.get("record_type") == "match":
+                    game = rec.get("game")
+                elif rec.get("record_type") == "episode":
+                    eps.append(rec)
     return game, eps
 
 
@@ -64,16 +72,12 @@ def analyze_run(run_dir: str):
     game, eps = _load_episodes(run_dir)
     if game and game != "independent_blackjack":
         return None
-    # Per player-seat agent name, accumulate stats. The dealer seat is skipped.
-    stats = defaultdict(lambda: {
-        "hands": 0, "profit": 0.0, "wins": 0, "losses": 0, "pushes": 0,
-        "busts": 0, "doubles": 0, "naturals": 0, "invalid": 0,
-    })
+    # Per player-seat agent name, accumulate stats. Only the player seat
+    # (player_0) is tracked; the dealer seat (player_1) is never reported.
+    stats = defaultdict(_new_stats)
     for ep in eps:
         seats = ep.get("seat_assignment", {})
         name = seats.get(PLAYER_SEAT, PLAYER_SEAT)
-        if name == seats.get(DEALER_SEAT):  # degenerate; still skip dealer rows
-            pass
         ret = ep.get("returns", {})
         profit = float(ret.get(PLAYER_SEAT, 0.0))
         s = stats[name]
@@ -118,10 +122,7 @@ def main(argv):
     roots = argv[1:]
     if not roots:
         roots = [d for d in glob.glob("runs/*") if os.path.isdir(d)]
-    combined = defaultdict(lambda: {
-        "hands": 0, "profit": 0.0, "wins": 0, "losses": 0, "pushes": 0,
-        "busts": 0, "doubles": 0, "naturals": 0, "invalid": 0,
-    })
+    combined = defaultdict(_new_stats)
     found = False
     for root in roots:
         run_dir = _latest_run(root)

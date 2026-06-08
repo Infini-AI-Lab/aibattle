@@ -26,7 +26,7 @@ Scoring (player_0 perspective; ``player_1`` is the negation, zero-sum):
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from ..types import Move, Observation, PlayerId
@@ -157,8 +157,9 @@ class IndependentBlackjack(Game):
                               phase=phase, doubled=s.doubled, draw_index=idx)
 
     def _step_dealer(self, s: BlackjackState, move: Move) -> BlackjackState:
-        # The dealer's move is dictated by policy; ``move`` is advisory.
-        if move.type == "stand" or not dealer_should_hit(s.dealer):
+        # The dealer follows the fixed house policy regardless of the advisory
+        # ``move`` — the dealer seat never deviates from hit-until-17.
+        if not dealer_should_hit(s.dealer):
             return BlackjackState(deck=s.deck, player=s.player, dealer=s.dealer,
                                   phase="done", doubled=s.doubled,
                                   draw_index=s.draw_index)

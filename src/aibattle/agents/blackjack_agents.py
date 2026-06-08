@@ -10,11 +10,10 @@
 
 from __future__ import annotations
 
-import random
-
 from ..games.blackjack import hand_total, dealer_should_hit
 from ..types import AgentRequest, AgentResponse
 from .base import Agent
+from .board_agents import _rng_for
 
 
 class BlackjackDealerAgent(Agent):
@@ -48,14 +47,8 @@ class RandomBlackjackPlayerAgent(Agent):
         self.name = name
         self._seed = seed or 0
 
-    def _rng_for(self, request: AgentRequest) -> random.Random:
-        ds = request.decision_seed
-        if ds is not None:
-            return random.Random((self._seed * 2654435761 ^ ds) & 0x7FFFFFFF)
-        return random.Random(self._seed)
-
     async def act(self, request: AgentRequest) -> AgentResponse:
         legal = request.observation.legal_actions
-        action = self._rng_for(request).choice(legal)
+        action = _rng_for(self._seed, request).choice(legal)
         return AgentResponse(action=action, message="random",
                              metadata={"policy": "blackjack_random"})
