@@ -3,7 +3,7 @@
 Requested default matrix:
   * Models: opus 4.8, sonnet 4.6, gpt 5.5, gpt 5.4
   * Prompting: coached templates for every model
-  * Reasoning: max effort
+  * Reasoning: medium effort
   * Games/counts per model pair:
       - Connect Four: 50
       - Gomoku-Lite: 50
@@ -34,7 +34,7 @@ from aibattle.runner.runner import Runner
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = REPO_ROOT.parent / "aibattle-logs" / "bedrock_coached_tournament"
-REASONING_EFFORT = "max"
+REASONING_EFFORT = "medium"
 
 
 MODEL_SPECS = [
@@ -42,7 +42,7 @@ MODEL_SPECS = [
         "name": "claude-opus-4.8",
         "provider": "bedrock_anthropic",
         "model_id_env": "CLAUDE_OPUS_4_8_MODEL_ID",
-        "default_model_id": "us.anthropic.claude-opus-4-8-20260607-v1:0",
+        "default_model_id": "us.anthropic.claude-opus-4-8",
         "region_env": "CLAUDE_OPUS_4_8_REGION",
         "default_region": "us-west-2",
     },
@@ -279,7 +279,7 @@ async def _run_game(
     total = len(pairs)
     print(
         f"{game_spec['title']}: {total} pairs x {episodes} episodes, "
-        f"coached=True, reasoning_effort=max",
+        f"coached=True, reasoning_effort={REASONING_EFFORT}",
         flush=True,
     )
 
@@ -349,7 +349,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--models", default=os.environ.get("MODELS", ""))
     p.add_argument("--max-concurrency", type=int,
                    default=_env_int("MAX_CONCURRENCY", 16))
-    p.add_argument("--max-tokens", type=int, default=_env_int("MAX_TOKENS", 8192))
+    p.add_argument("--max-tokens", type=int, default=_env_int("MAX_TOKENS", 4096))
     p.add_argument("--thinking-budget-tokens", type=int,
                    default=_env_int("THINKING_BUDGET_TOKENS", 4096))
     p.add_argument("--temperature", type=float,

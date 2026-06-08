@@ -22,7 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 model = ["openai>=1.40"]
 anthropic = ["anthropic>=0.40"]
-bedrock = ["boto3>=1.40"]
+bedrock = ["boto3>=1.40", "requests>=2.31"]
 http = ["requests>=2.31"]
 dev = [
     "openai>=1.40",

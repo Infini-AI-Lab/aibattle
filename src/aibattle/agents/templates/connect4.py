@@ -24,8 +24,7 @@ class Connect4Template(GameTemplate):
         legal = ", ".join(request.observation.legal_actions)
         return (
             f"Choose one legal column from: {legal}.\n"
-            "Respond with ONLY the column number (put it on the last line if you "
-            "reason first)."
+            "Think privately, then respond with ONLY the column number."
         )
 
     def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:

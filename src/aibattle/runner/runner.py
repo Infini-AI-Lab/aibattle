@@ -181,11 +181,28 @@ class Runner:
             except Exception as e:  # noqa: BLE001
                 # Isolate a single episode's failure (e.g. an exhausted-retry API
                 # error) so it neither aborts the match nor orphans its siblings.
+                if epath:
+                    failure_path = f"{epath}.error.json"
+                    self._persist_episode(failure_path, {
+                        "episode": ep_i,
+                        "pair_id": pair,
+                        "seed": deal_seed,
+                        "seat_assignment": {
+                            "player_0": p0.name,
+                            "player_1": p1.name,
+                        },
+                        "error_type": type(e).__name__,
+                        "error": str(e),
+                    })
                 failures += 1
                 results[idx] = None
                 return
             if epath:
                 self._persist_episode(epath, res)
+                try:
+                    os.remove(f"{epath}.error.json")
+                except FileNotFoundError:
+                    pass
             results[idx] = res
             completed += 1
             if progress is not None:
@@ -289,12 +306,26 @@ class Runner:
                         standing=standing, total_episodes=len(specs),
                         expose_standing=False, on_step=on_step,
                     )
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
+                if epath:
+                    self._persist_episode(f"{epath}.error.json", {
+                        "episode": ep_i,
+                        "seed": deal_seed,
+                        "seat_assignment": {
+                            p: by_player[p].name for p in by_player
+                        },
+                        "error_type": type(e).__name__,
+                        "error": str(e),
+                    })
                 failures += 1
                 results[idx] = None
                 return
             if epath:
                 self._persist_episode(epath, res)
+                try:
+                    os.remove(f"{epath}.error.json")
+                except FileNotFoundError:
+                    pass
             results[idx] = res
             completed += 1
             if progress is not None:

@@ -83,7 +83,7 @@ class HoldemTemplate(GameTemplate):
             f"Choose exactly one legal action: {legal}.\n"
             "Respond with ONLY the action (and an integer amount for bet/raise), "
             "e.g. `call`, `check`, `fold`, `all_in`, `bet 6`, or `raise 12`. "
-            "Put the action on the last line if you reason first."
+            "Think privately before you answer."
         )
 
     def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:

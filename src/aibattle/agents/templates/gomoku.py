@@ -28,8 +28,7 @@ class GomokuTemplate(GameTemplate):
     def instruction(self, request: AgentRequest) -> str:
         return (
             "Respond with ONLY a coordinate for an empty cell, e.g. E5 "
-            "(column letter A-I, row number 1-9). Put it on the last line if you "
-            "reason first."
+            "(column letter A-I, row number 1-9). Think privately before you answer."
         )
 
     def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:

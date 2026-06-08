@@ -57,13 +57,18 @@ class BedrockAnthropicClient(ModelClient):
             kwargs["system"] = [{"text": self._system_prompt}]
 
         extra = {}
-        if self._reasoning_effort == "max" or self._thinking_budget_tokens:
-            # Claude exposes extended thinking as a token budget rather than an
-            # effort enum. The tournament config sets this when it wants "max".
-            budget = self._thinking_budget_tokens or max(1024, out_tokens // 2)
+        if self._reasoning_effort:
+            # Claude 4.6/4.8 on Bedrock use adaptive thinking with an effort
+            # knob instead of the older explicit thinking-token budget shape.
+            extra["thinking"] = {"type": "adaptive"}
+            extra["output_config"] = {"effort": self._reasoning_effort}
+        elif self._thinking_budget_tokens:
             extra["thinking"] = {
                 "type": "enabled",
-                "budget_tokens": min(budget, max(1024, out_tokens - 1)),
+                "budget_tokens": min(
+                    self._thinking_budget_tokens,
+                    max(1024, out_tokens - 1),
+                ),
             }
         if extra:
             kwargs["additionalModelRequestFields"] = extra
