@@ -59,7 +59,7 @@ def acfg(label: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{label}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 16384, "timeout_s": 300,
+            "temperature": 0.0, "max_tokens": 16384, "timeout_s": 120,
         },
         "max_retries": 2,
     }
@@ -208,6 +208,84 @@ async def run_blackjack(episodes: int, sem) -> dict:
     return data
 
 
+# A fast local baseline per game, used for the model-vs-baseline mode (only the
+# model seat calls the API, so long games like Blotto/Othello can actually
+# finish). These are the game's uniform-random builtins.
+_BASELINE = {
+    "othello_lite_6x6": "board_random",
+    "repeated_colonel_blotto": "blotto_random",
+    "leduc_poker": "leduc_random",
+}
+
+
+def _aggregate_vs_baseline(model_runs: dict) -> list:
+    """model -> list of episodes (player_0 == the model, player_1 == baseline)."""
+    rows = []
+    for m, eps in model_runs.items():
+        n = len(eps) or 1
+        net = sum(e["returns"]["player_0"] for e in eps)
+        wins = sum(1 for e in eps if e["returns"]["player_0"] > 0)
+        losses = sum(1 for e in eps if e["returns"]["player_0"] < 0)
+        decisions = sum(1 for e in eps for s in e.get("steps", [])
+                        if s.get("player") == "player_0")
+        invalid = sum(1 for e in eps for s in e.get("steps", [])
+                      if s.get("player") == "player_0" and s.get("invalid"))
+        rows.append({"model": m, "games": len(eps),
+                     "win_rate": round(wins / n, 3),
+                     "loss_rate": round(losses / n, 3),
+                     "net_per_game": round(net / n, 3),
+                     "invalid_rate": round(invalid / max(1, decisions), 4)})
+    rows.sort(key=lambda r: r["net_per_game"], reverse=True)
+    return rows
+
+
+async def run_versus_baseline(game: str, episodes: int, sem) -> dict:
+    """Each model plays as player_0 against the game's fast local baseline
+    (player_1). Only the model seat calls the API, so long games complete."""
+    out = os.path.join(OUT, game)
+    os.makedirs(out, exist_ok=True)
+    baseline = _BASELINE[game]
+    data = {"game": game, "models": MODELS, "episodes_per_model": episodes,
+            "structure": f"model_vs_{baseline}", "model_runs": {}}
+    model_runs = {}
+
+    def save():
+        json.dump(data, open(os.path.join(out, "data.json"), "w"))
+
+    async def play(m, seed):
+        gdir = os.path.join(out, f"{m}__vs__{baseline}")
+        os.makedirs(gdir, exist_ok=True)
+        runner = Runner(lambda: make_game(game), on_invalid_action="fallback")
+        try:
+            with MatchLogger(None) as lg:
+                res = await runner.run_match(
+                    make_agent(acfg(m), game_name=game),               # player_0 = model
+                    make_agent({"type": "builtin", "name": baseline},
+                               game_name=game),                        # player_1 = baseline
+                    episodes=episodes, seed=seed, seat_swap=False,
+                    logger=lg, semaphore=sem, episode_dir=gdir)
+            model_runs[m] = res.episodes
+            data["model_runs"][m] = {"games": len(res.episodes)}
+            # Update the leaderboard incrementally as each model finishes, so a
+            # slow model never prevents the already-finished ones from being
+            # stored and reported.
+            data["leaderboard"] = _aggregate_vs_baseline(model_runs)
+            save()
+            print(f"  [{game}] {m} vs {baseline}: {len(res.episodes)}/{episodes}",
+                  flush=True)
+        except Exception as ex:
+            print(f"  [{game}] {m} FAILED: {ex}", flush=True)
+            traceback.print_exc()
+
+    # Concurrent across models: each model plays only against the LOCAL baseline
+    # (seconds per step), so the four runs are independent — a slow model
+    # (e.g. kimi-k2p6) does not block the fast ones from finishing and storing.
+    await asyncio.gather(*(play(m, 9200 + i) for i, m in enumerate(MODELS)))
+    data["leaderboard"] = _aggregate_vs_baseline(model_runs)
+    save()
+    return data
+
+
 def _load_all_stored() -> dict:
     """Read every per-game data.json under OUT so the report reflects all games
     completed across runs (per-episode resume keeps partial progress)."""
@@ -275,6 +353,14 @@ async def main():
     fast_first = ENV_GAMES + ["leduc_poker", "repeated_colonel_blotto",
                               "othello_lite_6x6"]
     othello_episodes = int(os.environ.get("OTHELLO_EPISODES", str(episodes)))
+    # BASELINE_MODE=1 evaluates the long games (Blotto/Othello) as model-vs-local-
+    # baseline instead of model-vs-model, so only one seat calls the API and the
+    # games actually finish. Optionally restrict to specific games via a CSV in
+    # BASELINE_GAMES (default: both long games).
+    baseline_mode = os.environ.get("BASELINE_MODE", "").lower() in ("1", "true", "yes")
+    baseline_games = set(
+        os.environ.get("BASELINE_GAMES",
+                       "repeated_colonel_blotto,othello_lite_6x6").split(","))
 
     for game in fast_first:
         if want and game not in want:
@@ -283,6 +369,10 @@ async def main():
             print(f"== {game} (independent vs dealer, {episodes} hands/model) ==",
                   flush=True)
             all_data[game] = await run_blackjack(episodes, sem)
+        elif baseline_mode and game in baseline_games:
+            n = othello_episodes if game == "othello_lite_6x6" else episodes
+            print(f"== {game} (model vs baseline, {n} games/model) ==", flush=True)
+            all_data[game] = await run_versus_baseline(game, n, sem)
         else:
             n = othello_episodes if game == "othello_lite_6x6" else episodes
             print(f"== {game} (round-robin, {n} hands/pair) ==", flush=True)
