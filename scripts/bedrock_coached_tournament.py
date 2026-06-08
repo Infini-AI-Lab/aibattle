@@ -35,6 +35,12 @@ from aibattle.runner.runner import Runner
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = REPO_ROOT.parent / "aibattle-logs" / "bedrock_coached_tournament"
 REASONING_EFFORT = "medium"
+ACTION_ONLY_SYSTEM_PROMPT = (
+    "You are a game-playing agent. Use the rules, state, and coaching in the "
+    "user prompt privately, but your entire response must be exactly one legal "
+    "action token requested by the prompt. Do not include explanation, markdown, "
+    "analysis, or extra text."
+)
 
 
 MODEL_SPECS = [
@@ -187,6 +193,7 @@ def _agent_cfg(model: dict, args: argparse.Namespace) -> dict:
         "max_tokens": max_tokens,
         "timeout_s": args.timeout_s,
         "reasoning_effort": REASONING_EFFORT,
+        "system_prompt": ACTION_ONLY_SYSTEM_PROMPT,
     }
     if args.temperature is not None:
         model_block["temperature"] = args.temperature
@@ -355,7 +362,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--max-concurrency", type=int,
                    default=_env_int("MAX_CONCURRENCY", 16))
     p.add_argument("--anthropic-max-tokens", type=int,
-                   default=_env_int("ANTHROPIC_MAX_TOKENS", 2048))
+                   default=_env_int("ANTHROPIC_MAX_TOKENS", 4096))
     p.add_argument("--openai-max-tokens", type=int,
                    default=_env_int("OPENAI_MAX_TOKENS", 4096))
     p.add_argument("--thinking-budget-tokens", type=int,
@@ -407,6 +414,7 @@ async def main_async() -> None:
         "anthropic_max_tokens": args.anthropic_max_tokens,
         "openai_max_tokens": args.openai_max_tokens,
         "thinking_budget_tokens": args.thinking_budget_tokens,
+        "system_prompt": ACTION_ONLY_SYSTEM_PROMPT,
         "temperature": args.temperature,
         "models": models,
         "games": games,
