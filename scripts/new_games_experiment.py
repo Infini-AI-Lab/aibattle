@@ -242,20 +242,26 @@ async def main():
     t0 = time.perf_counter()
     all_data = {}
 
-    for game in VERSUS_GAMES:
-        if want and game not in want:
-            continue
-        print(f"== {game} (round-robin, {episodes} hands/pair) ==", flush=True)
-        all_data[game] = await run_versus_game(game, episodes, sem)
-        write_report(all_data)   # incremental report so partial progress is saved
+    # Blackjack and Leduc finish quickest (short hands); Blotto is medium; Othello
+    # games are long (~30 plies) with slow reasoning models, so run it LAST. Every
+    # game uses per-episode resume, so a later re-run continues where it left off.
+    # OTHELLO_EPISODES lets Othello use a smaller count so the run completes.
+    fast_first = ENV_GAMES + ["leduc_poker", "repeated_colonel_blotto",
+                              "othello_lite_6x6"]
+    othello_episodes = int(os.environ.get("OTHELLO_EPISODES", str(episodes)))
 
-    for game in ENV_GAMES:
+    for game in fast_first:
         if want and game not in want:
             continue
-        print(f"== {game} (independent vs dealer, {episodes} hands/model) ==",
-              flush=True)
-        all_data[game] = await run_blackjack(episodes, sem)
-        write_report(all_data)
+        if game in ENV_GAMES:
+            print(f"== {game} (independent vs dealer, {episodes} hands/model) ==",
+                  flush=True)
+            all_data[game] = await run_blackjack(episodes, sem)
+        else:
+            n = othello_episodes if game == "othello_lite_6x6" else episodes
+            print(f"== {game} (round-robin, {n} hands/pair) ==", flush=True)
+            all_data[game] = await run_versus_game(game, n, sem)
+        write_report(all_data)   # incremental report so partial progress is saved
 
     print(f"\nEXPERIMENT DONE in {time.perf_counter()-t0:.0f}s")
 
