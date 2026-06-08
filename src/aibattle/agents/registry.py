@@ -20,6 +20,7 @@ from .holdem_agents import RandomHoldemAgent, HoldemHeuristicAgent
 from .board_agents import (
     RandomBoardAgent, Connect4HeuristicAgent, GomokuHeuristicAgent,
 )
+from .blackjack_agents import BlackjackDealerAgent, RandomBlackjackPlayerAgent
 
 _BUILTINS = {
     "random": RandomAgent,
@@ -29,6 +30,8 @@ _BUILTINS = {
     "board_random": RandomBoardAgent,
     "connect4_heuristic": Connect4HeuristicAgent,
     "gomoku_heuristic": GomokuHeuristicAgent,
+    "blackjack_dealer": BlackjackDealerAgent,
+    "blackjack_random": RandomBlackjackPlayerAgent,
 }
 
 

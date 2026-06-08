@@ -10,6 +10,7 @@ from .holdem_table import HoldemTableTemplate
 from .connect4 import Connect4Template
 from .gomoku import GomokuTemplate
 from .othello_lite import OthelloLiteTemplate
+from .blackjack import BlackjackTemplate
 
 _TEMPLATES = {
     "kuhn_poker": KuhnTemplate,
@@ -19,6 +20,7 @@ _TEMPLATES = {
     "connect4": Connect4Template,
     "gomoku": GomokuTemplate,
     "othello_lite_6x6": OthelloLiteTemplate,
+    "independent_blackjack": BlackjackTemplate,
 }
 
 # The canned coaching line per game: one sentence of process scaffolding (which
@@ -36,6 +38,9 @@ _COACHING = {
     "othello_lite_6x6": ("Before you move, consider how many pieces each move "
                          "flips, whether it gives you a corner or a stable edge, "
                          "and how it affects your future mobility."),
+    "independent_blackjack": ("Before you act, weigh your current total and "
+                              "whether it is soft, the dealer's upcard, and the "
+                              "chance of busting against the chance of improving."),
 }
 # Match/Table reuse the Hold'em coaching line.
 _COACHING["holdem_match"] = _COACHING["holdem"]
