@@ -364,7 +364,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--anthropic-max-tokens", type=int,
                    default=_env_int("ANTHROPIC_MAX_TOKENS", 4096))
     p.add_argument("--openai-max-tokens", type=int,
-                   default=_env_int("OPENAI_MAX_TOKENS", 4096))
+                   default=_env_int("OPENAI_MAX_TOKENS", 8192))
     p.add_argument("--thinking-budget-tokens", type=int,
                    default=_env_int("THINKING_BUDGET_TOKENS", 1024))
     p.add_argument("--temperature", type=float,
