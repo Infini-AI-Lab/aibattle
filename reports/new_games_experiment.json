@@ -92,25 +92,39 @@
   "repeated_colonel_blotto": {
     "coverage": {
       "expected_pairs": 6,
-      "pairs_done": 1,
+      "pairs_done": 6,
       "structure": "round_robin_seat_swap",
-      "status": "PARTIAL",
-      "text": "1/6 model pairs, 2/4 models"
+      "status": "COMPLETE",
+      "text": "6/6 model pairs, 4/4 models"
     },
     "leaderboard": [
       {
-        "model": "kimi-k2p6",
-        "games": 1,
-        "win_rate": 1.0,
-        "net_per_game": 1.0,
-        "invalid_rate": 0.05
+        "model": "gpt-oss-120b",
+        "games": 3,
+        "win_rate": 0.667,
+        "net_per_game": 0.333,
+        "invalid_rate": 0.0
       },
       {
-        "model": "gpt-oss-120b",
-        "games": 1,
-        "win_rate": 0.0,
-        "net_per_game": -1.0,
-        "invalid_rate": 0.0
+        "model": "kimi-k2p6",
+        "games": 3,
+        "win_rate": 0.667,
+        "net_per_game": 0.333,
+        "invalid_rate": 0.0667
+      },
+      {
+        "model": "glm-5p1",
+        "games": 3,
+        "win_rate": 0.333,
+        "net_per_game": -0.333,
+        "invalid_rate": 0.4
+      },
+      {
+        "model": "deepseek-v4-pro",
+        "games": 3,
+        "win_rate": 0.333,
+        "net_per_game": -0.333,
+        "invalid_rate": 0.0833
       }
     ]
   },
