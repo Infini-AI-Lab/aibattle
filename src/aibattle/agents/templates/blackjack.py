@@ -17,7 +17,10 @@ _RULES = (
     "(end your turn), or 'double' (only on your first two cards: double the "
     "stake, take exactly one more card, then stand). After you stand, the dealer "
     "reveals its hand and hits until reaching 17 (standing on all 17s). A two-"
-    "card 21 is a blackjack. Going over 21 is a bust and an immediate loss."
+    "card 21 is a blackjack. Going over 21 is a bust and an immediate loss. "
+    "Scoring: normal wins pay +1, normal losses pay -1, pushes pay 0, double "
+    "wins/losses pay +/-2, your blackjack pays +1.5, dealer blackjack pays -1, "
+    "and both blackjack is a push."
 )
 
 _ALIASES = {

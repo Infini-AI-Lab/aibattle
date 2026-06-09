@@ -33,7 +33,9 @@ import time
 import traceback
 from collections import defaultdict
 
-os.environ.setdefault("FIREWORKS_API_KEY", open(".fireworks").read().strip())
+if "FIREWORKS_API_KEY" not in os.environ and os.path.exists(".fireworks"):
+    with open(".fireworks", encoding="utf-8") as fh:
+        os.environ["FIREWORKS_API_KEY"] = fh.read().strip()
 
 from aibattle.agents.registry import make_agent
 from aibattle.games.registry import make_game
@@ -323,18 +325,45 @@ EXPECTED_STRUCTURE = {
 }
 
 
+def _seat_directions(pair: dict) -> set:
+    """Return which model seat directions appear in a pair result."""
+    a = pair.get("a")
+    b = pair.get("b")
+    dirs = set()
+    for ep in pair.get("episodes", []):
+        seat = ep.get("seat_assignment", {})
+        if seat.get("player_0") == a and seat.get("player_1") == b:
+            dirs.add("a_as_player_0")
+        if seat.get("player_0") == b and seat.get("player_1") == a:
+            dirs.add("b_as_player_0")
+    return dirs
+
+
 def _coverage(game: str, data: dict) -> dict:
-    """Expected-vs-actual coverage for a game, so PARTIAL/missing != COMPLETE."""
+    """Expected-vs-actual coverage for a game, so PARTIAL/missing != COMPLETE.
+
+    For round-robin games, COMPLETE requires every model pair to have both seat
+    directions represented. A single episode with seat_swap=True is still only
+    one direction because Runner interprets episodes as the total episode budget.
+    """
     n_pairs = len(list(itertools.combinations(MODELS, 2)))  # 6 for four models
     n_models = len(MODELS)
     structure = data.get("structure") or EXPECTED_STRUCTURE.get(game, "")
     models_present = len(data.get("leaderboard", []))
     if EXPECTED_STRUCTURE.get(game) == "round_robin_seat_swap":
-        pairs_done = len(data.get("pairs", []))
-        complete = pairs_done >= n_pairs and models_present >= n_models
+        pairs = data.get("pairs", [])
+        pairs_done = len(pairs)
+        seat_swapped = sum(1 for pair in pairs if len(_seat_directions(pair)) >= 2)
+        complete = (pairs_done >= n_pairs and seat_swapped >= n_pairs
+                    and models_present >= n_models)
         text = (f"{pairs_done}/{n_pairs} model pairs, "
+                f"{seat_swapped}/{n_pairs} seat-swapped pairs, "
                 f"{models_present}/{n_models} models")
-        cov = {"expected_pairs": n_pairs, "pairs_done": pairs_done}
+        cov = {
+            "expected_pairs": n_pairs,
+            "pairs_done": pairs_done,
+            "seat_swapped_pairs": seat_swapped,
+        }
     else:  # model-vs-dealer (one run per model)
         runs_done = len(data.get("model_runs", {})) or models_present
         complete = runs_done >= n_models

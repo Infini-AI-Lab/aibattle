@@ -1,4 +1,4 @@
-# Leduc Poker correctness check: gpt-oss-120b (Fireworks) self-play.
+# Leduc Poker correctness check: gpt-oss-120b (Fireworks) vs leduc_random.
 game:
   name: leduc_poker
   version: "1.0.0"
