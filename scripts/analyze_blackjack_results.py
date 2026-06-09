@@ -14,7 +14,7 @@ For one or more run directories it reports, per player-seat agent name:
   - invalid-action rate
 
 Usage:
-  python scripts/analyze_blackjack.py runs/blackjack_gptoss [more_run_dirs...]
+  python scripts/analyze_blackjack_results.py runs/blackjack_gptoss [more_run_dirs...]
 If no directory is given, every immediate subdirectory of runs/ whose game is
 independent_blackjack is scanned.
 """

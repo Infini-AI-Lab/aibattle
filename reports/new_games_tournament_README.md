@@ -22,7 +22,7 @@ enough because Runner treats `episodes` as the total episode budget.
 Run:
 
 ```bash
-nohup bash scripts/run_long_experiment.sh > /tmp/overnight.log 2>&1 &
+nohup bash scripts/run_new_games_tournament.sh > /tmp/overnight.log 2>&1 &
 ```
 
 The overnight script uses `MAX_CONCURRENCY=512`. For each model-vs-model pair it
@@ -30,8 +30,8 @@ runs 10 seat-swapped deals, encoded as 20 total episodes per pair. Per-episode
 resume is enabled, so reruns continue from completed episode files.
 
 Results stream into `runs/new_games_experiment/<game>/data.json`, and the
-aggregated report refreshes at `reports/new_games_experiment_report.md` and
-`reports/new_games_experiment.json`.
+aggregated report refreshes at `reports/new_games_leaderboard.md` and
+`reports/new_games_leaderboard.json`.
 
 To refresh the report from whatever is stored so far:
 

@@ -14,7 +14,7 @@
 # Verified (Round 5): a single decision is fast (7-12s) for every model and the
 # path/API/code are correct; the constraint is aggregate wall-clock, not bugs.
 #
-# Usage:  nohup bash scripts/run_long_experiment.sh > /tmp/overnight.log 2>&1 &
+# Usage:  nohup bash scripts/run_new_games_tournament.sh > /tmp/overnight.log 2>&1 &
 set -u
 cd "$(dirname "$0")/.."
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
@@ -26,16 +26,16 @@ export SERIAL_PAIRS=0          # run model pairs concurrently under MAX_CONCURRE
 
 # 1) Short games: blackjack gets 10 hands/model; Leduc gets 10 seat-swapped
 # deals per pair (20 total episodes per pair).
-EPISODES=10 python scripts/new_games_experiment.py --episodes 10 \
+EPISODES=10 python scripts/new_games_tournament.py --episodes 10 \
   --games independent_blackjack
-EPISODES=20 python scripts/new_games_experiment.py --episodes 20 \
+EPISODES=20 python scripts/new_games_tournament.py --episodes 20 \
   --games leduc_poker
 
 # 2) Long games: 10 seat-swapped deals per pair (20 total episodes per pair).
-EPISODES=20 OTHELLO_EPISODES=20 python scripts/new_games_experiment.py --episodes 20 \
+EPISODES=20 OTHELLO_EPISODES=20 python scripts/new_games_tournament.py --episodes 20 \
   --games repeated_colonel_blotto,othello_lite_6x6
 
 echo "OVERNIGHT AC-8 EXPERIMENT DONE"
 echo "Diagnostic-only model-vs-baseline mode (NOT AC-8) can be run separately with:"
-echo "  BASELINE_MODE=1 PYTHONPATH=src python scripts/new_games_experiment.py \\"
+echo "  BASELINE_MODE=1 PYTHONPATH=src python scripts/new_games_tournament.py \\"
 echo "    --games repeated_colonel_blotto,othello_lite_6x6"

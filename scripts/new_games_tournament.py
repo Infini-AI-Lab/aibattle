@@ -16,7 +16,7 @@ continue after an interruption. Results are stored under ``runs/<exp>/`` and an
 aggregated report is written under ``reports/``.
 
 Usage:
-  PYTHONPATH=src python scripts/new_games_experiment.py [--episodes N] [--games g1,g2]
+  PYTHONPATH=src python scripts/new_games_tournament.py [--episodes N] [--games g1,g2]
 Environment:
   EPISODES   override episodes per pair / per model (default small for cost)
   OUT        output root (default runs/new_games_experiment)
@@ -413,12 +413,12 @@ def write_report(all_data: dict):
 
     md = "\n".join(lines)
     for p in (os.path.join(OUT, "report.md"),
-              os.path.join(REPORT_DIR, "new_games_experiment_report.md")):
+              os.path.join(REPORT_DIR, "new_games_leaderboard.md")):
         open(p, "w", encoding="utf-8").write(md)
     json.dump(json_out,
-              open(os.path.join(REPORT_DIR, "new_games_experiment.json"), "w"),
+              open(os.path.join(REPORT_DIR, "new_games_leaderboard.json"), "w"),
               indent=2)
-    print(f"\nReport written to {REPORT_DIR}/new_games_experiment_report.md")
+    print(f"\nReport written to {REPORT_DIR}/new_games_leaderboard.md")
 
 
 async def main():
