@@ -1,60 +1,45 @@
-# New-Games Four-Model Experiment — Correctness Verification & Run Notes
+# New-Games Four-Model Experiment — Run Notes
 
-## Status of AC-8 (four-model Fireworks comparison)
+## Current AC-8 structure
 
-| Game | Length | Four-model results stored | Notes |
-|------|--------|---------------------------|-------|
-| independent_blackjack | ~2 plies | ✅ all 4 models | model vs built-in dealer, 0% invalid |
-| leduc_poker | ~4 plies | ✅ all 4 models | round-robin, 0% invalid |
-| repeated_colonel_blotto | 20 rounds | ⏳ gpt-oss done; others accumulate | model vs `blotto_random` (baseline mode) |
-| othello_lite_6x6 | ~30 plies | ⏳ runs after Blotto | model vs `board_random` (baseline mode) |
+The experiment compares the four verified Fireworks models:
+`kimi-k2p6`, `deepseek-v4-pro`, `glm-5p1`, and `gpt-oss-120b`.
+Unavailable ids (`minimax-m2p7`, `deepseek-flash`) are intentionally out of scope.
 
-Models (the four verified-available on this Fireworks account):
-`kimi-k2p6`, `deepseek-v4-pro`, `glm-5p1`, `gpt-oss-120b`.
-Unavailable ids (`minimax-m2p7`, `deepseek-flash`) are intentionally absent.
+| Game | Structure | Completion rule |
+|------|-----------|-----------------|
+| independent_blackjack | model vs built-in dealer | all 4 models have player-seat hands |
+| leduc_poker | model-vs-model round-robin, seat-swapped | all 6 model pairs have both seat directions |
+| repeated_colonel_blotto | model-vs-model round-robin, seat-swapped | all 6 model pairs have both seat directions |
+| othello_lite_6x6 | model-vs-model round-robin, seat-swapped | all 6 model pairs have both seat directions |
 
-## Correctness verification (Round 5)
+The report now marks a round-robin game COMPLETE only when each model pair has
+both seat directions represented. A single episode with `seat_swap=True` is not
+enough because Runner treats `episodes` as the total episode budget.
 
-The path, API, and code are all verified correct — the only constraint is
-aggregate throughput on the long games. Evidence:
+## Overnight run
 
-1. **End-to-end path (gpt-oss, baseline mode):**
-   - `repeated_colonel_blotto`: one game in **117s**, 40 steps, **0 invalid**,
-     correct zero-sum return.
-   - `othello_lite_6x6`: one game in **231s**, 33 steps, **0 invalid**,
-     correct zero-sum return.
+Run:
 
-2. **API + client correct for the "slow" models** (single call, real Blotto prompt):
-   - `deepseek-v4-pro`: HTTP 200, **7-10s**, `content="alloc:7,13,20,27,33"`,
-     `finish_reason=stop` — parses to a legal allocation.
-   - `glm-5p1`: HTTP 200, **12s**, valid allocation, `finish_reason=stop`.
-   - Both via raw `curl` and via the framework's `OpenAIClient.generate` give
-     the same fast, valid result.
-
-3. **Conclusion:** no bug in the game rules, the template parsing, the model
-   client, or the request format. A single decision is fast (7-12s) for every
-   model. The long games (Blotto 20 rounds, Othello ~30 plies) are
-   **throughput-bound** when many decisions run across four models — they
-   accumulate, so the full round-robin/sweep is best run over a long window
-   (e.g. overnight). gpt-oss is fast enough to complete interactively; the other
-   three reasoning models are slower in aggregate but correct.
-
-## How to run the full experiment (overnight)
-
-Per-episode resume is on, so this can be (re-)run any time and it continues:
-
-```
+```bash
 nohup bash scripts/run_overnight_experiment.sh > /tmp/overnight.log 2>&1 &
 ```
 
-This runs all four games over the four verified models with model-vs-baseline
-for the two long games (only one seat calls the API per step), modest
-concurrency, and generous episode counts. Results stream into
-`runs/new_games_experiment/<game>/data.json` and the report refreshes
-incrementally at `reports/new_games_experiment_report.md` (+ `.json`).
+The overnight script uses `MAX_CONCURRENCY=512`. For each model-vs-model pair it
+runs 10 seat-swapped deals, encoded as 20 total episodes per pair. Per-episode
+resume is enabled, so reruns continue from completed episode files.
 
-To refresh the aggregated report from whatever is stored so far:
+Results stream into `runs/new_games_experiment/<game>/data.json`, and the
+aggregated report refreshes at `reports/new_games_experiment_report.md` and
+`reports/new_games_experiment.json`.
 
-```
+To refresh the report from whatever is stored so far:
+
+```bash
 PYTHONPATH=src python -c "import scripts.new_games_experiment as e; e.write_report({})"
 ```
+
+## Diagnostic baseline mode
+
+`BASELINE_MODE=1` is still available for quick model-vs-local-baseline diagnosis
+on long games, but it is not the AC-8 round-robin benchmark.

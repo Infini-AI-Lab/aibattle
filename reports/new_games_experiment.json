@@ -54,9 +54,10 @@
     "coverage": {
       "expected_pairs": 6,
       "pairs_done": 6,
+      "seat_swapped_pairs": 6,
       "structure": "round_robin_seat_swap",
       "status": "COMPLETE",
-      "text": "6/6 model pairs, 4/4 models"
+      "text": "6/6 model pairs, 6/6 seat-swapped pairs, 4/4 models"
     },
     "leaderboard": [
       {
@@ -93,9 +94,10 @@
     "coverage": {
       "expected_pairs": 6,
       "pairs_done": 6,
+      "seat_swapped_pairs": 0,
       "structure": "round_robin_seat_swap",
-      "status": "COMPLETE",
-      "text": "6/6 model pairs, 4/4 models"
+      "status": "PARTIAL",
+      "text": "6/6 model pairs, 0/6 seat-swapped pairs, 4/4 models"
     },
     "leaderboard": [
       {
@@ -131,11 +133,41 @@
   "othello_lite_6x6": {
     "coverage": {
       "expected_pairs": 6,
-      "pairs_done": 0,
+      "pairs_done": 3,
+      "seat_swapped_pairs": 0,
       "structure": "round_robin_seat_swap",
       "status": "PARTIAL",
-      "text": "0/6 model pairs, 0/4 models"
+      "text": "3/6 model pairs, 0/6 seat-swapped pairs, 4/4 models"
     },
-    "leaderboard": []
+    "leaderboard": [
+      {
+        "model": "deepseek-v4-pro",
+        "games": 1,
+        "win_rate": 1.0,
+        "net_per_game": 1.0,
+        "invalid_rate": 0.0
+      },
+      {
+        "model": "gpt-oss-120b",
+        "games": 3,
+        "win_rate": 0.667,
+        "net_per_game": 0.333,
+        "invalid_rate": 0.0
+      },
+      {
+        "model": "kimi-k2p6",
+        "games": 1,
+        "win_rate": 0.0,
+        "net_per_game": -1.0,
+        "invalid_rate": 0.0
+      },
+      {
+        "model": "glm-5p1",
+        "games": 1,
+        "win_rate": 0.0,
+        "net_per_game": -1.0,
+        "invalid_rate": 0.0
+      }
+    ]
   }
 }
