@@ -22,8 +22,11 @@ _coverage: 6/6 model pairs, 4/4 models — COMPLETE (structure: round_robin_seat
 | kimi-k2p6 | 6 | 0.5 | -2.333 | 0.0 |
 
 ## repeated_colonel_blotto
-_coverage: 0/6 model pairs, 0/4 models — PARTIAL (structure: round_robin_seat_swap)_
-_(no results yet)_
+_coverage: 1/6 model pairs, 2/4 models — PARTIAL (structure: round_robin_seat_swap)_
+| model | games | win_rate | net_per_game | invalid_rate |
+|---|---|---|---|---|
+| kimi-k2p6 | 1 | 1.0 | 1.0 | 0.05 |
+| gpt-oss-120b | 1 | 0.0 | -1.0 | 0.0 |
 
 ## othello_lite_6x6
 _coverage: 0/6 model pairs, 0/4 models — PARTIAL (structure: round_robin_seat_swap)_

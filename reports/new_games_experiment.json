@@ -92,12 +92,27 @@
   "repeated_colonel_blotto": {
     "coverage": {
       "expected_pairs": 6,
-      "pairs_done": 0,
+      "pairs_done": 1,
       "structure": "round_robin_seat_swap",
       "status": "PARTIAL",
-      "text": "0/6 model pairs, 0/4 models"
+      "text": "1/6 model pairs, 2/4 models"
     },
-    "leaderboard": []
+    "leaderboard": [
+      {
+        "model": "kimi-k2p6",
+        "games": 1,
+        "win_rate": 1.0,
+        "net_per_game": 1.0,
+        "invalid_rate": 0.05
+      },
+      {
+        "model": "gpt-oss-120b",
+        "games": 1,
+        "win_rate": 0.0,
+        "net_per_game": -1.0,
+        "invalid_rate": 0.0
+      }
+    ]
   },
   "othello_lite_6x6": {
     "coverage": {
