@@ -14,7 +14,7 @@
 # Verified (Round 5): a single decision is fast (7-12s) for every model and the
 # path/API/code are correct; the constraint is aggregate wall-clock, not bugs.
 #
-# Usage:  nohup bash scripts/run_overnight_experiment.sh > /tmp/overnight.log 2>&1 &
+# Usage:  nohup bash scripts/run_long_experiment.sh > /tmp/overnight.log 2>&1 &
 set -u
 cd "$(dirname "$0")/.."
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"

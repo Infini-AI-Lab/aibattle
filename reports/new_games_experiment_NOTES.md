@@ -22,7 +22,7 @@ enough because Runner treats `episodes` as the total episode budget.
 Run:
 
 ```bash
-nohup bash scripts/run_overnight_experiment.sh > /tmp/overnight.log 2>&1 &
+nohup bash scripts/run_long_experiment.sh > /tmp/overnight.log 2>&1 &
 ```
 
 The overnight script uses `MAX_CONCURRENCY=512`. For each model-vs-model pair it
