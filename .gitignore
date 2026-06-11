@@ -56,3 +56,6 @@ data-log/
 
 # Humanize RLCR loop local state
 .humanize*
+
+# Humanize RLCR plan file (loop-local; not part of the implementation diff)
+claude-doc/new-games-implementation-plan.md
