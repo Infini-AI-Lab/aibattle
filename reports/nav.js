@@ -1,9 +1,6 @@
-// Single source of truth for the site navbar. Every page includes this script
-// (with nav.css); it injects the arena-grouped bar and highlights the active
-// item from the current filename. To change the nav anywhere, edit this file.
+// Site navbar (left sidebar). Links resolve within reports/. Replay items
+// are omitted (no replay viewers are built).
 (function () {
-  // current file -> the report href that should be highlighted. Replay pages map
-  // to their parent report so the right game stays lit while you watch a replay.
   var ACTIVE = {
     "index.html": "index.html",
     "connect4_report.html": "connect4_report.html",
@@ -15,30 +12,30 @@
     "holdem_replay.html": "holdem_tournament_report.html",
     "match_tournament_report.html": "match_tournament_report.html",
     "match_replay.html": "match_tournament_report.html",
-    "table_tournament_report.html": "table_tournament_report.html",
-    "table_replay.html": "table_tournament_report.html"
+    "table_tournament_report.html": "table_tournament_report.html"
   };
   var file = location.pathname.split("/").pop() || "index.html";
   var active = ACTIVE[file] || "";
 
+  // V busts the browser's heuristic cache of the page HTML (the dev server
+  // sends no Cache-Control). Bump it when pages are restyled. ACTIVE matching
+  // uses the bare filename, so the query string never affects highlighting.
+  var V = "?v=6";
   function a(href, label, cls) {
     var on = href === active ? " active" : "";
-    return '<a class="' + cls + on + '" href="' + href + '">' + label + "</a>";
+    return '<a class="' + cls + on + '" href="' + href + V + '">' + label + "</a>";
   }
 
   var html =
-    '<a class="brand" href="index.html">🎲 AI Battle Arena</a>' +
-    a("index.html", "Overview", "nav") +
-    '<a class="navgrp navarena" href="index.html#model">Model Arena</a>' +
-    a("connect4_report.html", "🔴 Connect Four", "nav") +
-    a("gomoku_report.html", "⚫ Gomoku", "nav") +
-    a("kuhn_tournament_report.html", "🃏 Kuhn", "nav") +
-    "<span class=\"navclust\">🃏 Hold'em</span>" +
-    a("holdem_tournament_report.html", "1-Hand", "nav") +
-    a("match_tournament_report.html", "Match", "nav") +
-    a("table_tournament_report.html", "Table", "nav") +
-    '<a class="navgrp navarena" href="index.html#agentic">Agentic Arena<span class="soon">soon</span></a>' +
-    '<a class="navgrp" href="coached/index.html">🎓 Coached Arena</a>';
+    '<a class="brand" href="index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
+    a("index.html", "overview", "nav") +
+    a("connect4_report.html", "connect4", "nav") +
+    a("gomoku_report.html", "gomoku", "nav") +
+    a("kuhn_tournament_report.html", "kuhn", "nav") +
+    '<span class="navclust">holdem/</span>' +
+    a("holdem_tournament_report.html", "1hand", "nav navsub") +
+    a("match_tournament_report.html", "match", "nav navsub") +
+    a("table_tournament_report.html", "table", "nav navsub");
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

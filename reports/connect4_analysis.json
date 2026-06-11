@@ -5,620 +5,620 @@
     7
   ],
   "models": [
-    "deepseek-v4-pro",
-    "gpt-oss-120b",
-    "kimi-k2p6",
-    "glm-5p1",
-    "minimax-m2p7"
+    "deepseek-v4-pro-coached",
+    "gpt-oss-120b-coached",
+    "kimi-k2p6-coached",
+    "glm-5p1-coached",
+    "minimax-m2p7-coached"
   ],
   "per_model": {
-    "deepseek-v4-pro": {
+    "deepseek-v4-pro-coached": {
       "games": 40,
-      "wins": 32,
-      "losses": 8,
-      "draws": 0,
-      "win_rate": 0.8,
-      "draw_rate": 0.0,
-      "net_per_game": 0.6,
-      "first_move_win_rate": 0.9,
-      "win_take_rate": 0.9697,
-      "win_opps": 33,
-      "block_rate": 0.9231,
-      "block_opps": 39,
-      "missed_wins": 1,
-      "allowed_losses": 3,
-      "invalid_rate": 0.0,
-      "decisions": 320,
-      "avg_len": 15.7,
-      "avg_latency_s": 781.4,
-      "heat": [
-        [
-          1,
-          0,
-          0,
-          4,
-          2,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
-          6,
-          7,
-          6,
-          3,
-          0
-        ],
-        [
-          3,
-          7,
-          7,
-          17,
-          13,
-          6,
-          3
-        ],
-        [
-          0,
-          2,
-          17,
-          23,
-          19,
-          8,
-          3
-        ],
-        [
-          5,
-          10,
-          8,
-          22,
-          16,
-          12,
-          8
-        ],
-        [
-          6,
-          8,
-          16,
-          16,
-          17,
-          6,
-          9
-        ]
-      ],
-      "phase_blunder_rate": {
-        "early": 0.0,
-        "mid": 0.0556,
-        "late": 0.0612
-      },
-      "phase_opps": {
-        "early": 5,
-        "mid": 18,
-        "late": 49
-      },
-      "len_hist": [
-        3,
-        1,
-        12,
-        8,
-        8,
-        4,
-        1,
-        2,
-        0,
-        1,
-        0,
-        0
-      ]
-    },
-    "gpt-oss-120b": {
-      "games": 40,
-      "wins": 12,
-      "losses": 28,
-      "draws": 0,
-      "win_rate": 0.3,
-      "draw_rate": 0.0,
-      "net_per_game": -0.4,
-      "first_move_win_rate": 0.45,
-      "win_take_rate": 0.8,
-      "win_opps": 15,
-      "block_rate": 0.6875,
-      "block_opps": 64,
-      "missed_wins": 3,
-      "allowed_losses": 20,
-      "invalid_rate": 0.0,
-      "decisions": 330,
-      "avg_len": 16.7,
-      "avg_latency_s": 14.9,
-      "heat": [
-        [
-          0,
-          0,
-          1,
-          4,
-          3,
-          3,
-          0
-        ],
-        [
-          0,
-          0,
-          2,
-          7,
-          8,
-          3,
-          0
-        ],
-        [
-          3,
-          3,
-          7,
-          11,
-          8,
-          6,
-          3
-        ],
-        [
-          5,
-          8,
-          15,
-          19,
-          15,
-          13,
-          7
-        ],
-        [
-          6,
-          10,
-          13,
-          19,
-          10,
-          13,
-          11
-        ],
-        [
-          15,
-          15,
-          13,
-          16,
-          7,
-          16,
-          12
-        ]
-      ],
-      "phase_blunder_rate": {
-        "early": 0.0,
-        "mid": 0.1154,
-        "late": 0.4444
-      },
-      "phase_opps": {
-        "early": 8,
-        "mid": 26,
-        "late": 45
-      },
-      "len_hist": [
-        3,
-        6,
-        5,
-        7,
-        5,
-        5,
-        4,
-        3,
-        1,
-        1,
-        0,
-        0
-      ]
-    },
-    "kimi-k2p6": {
-      "games": 40,
-      "wins": 28,
-      "losses": 11,
+      "wins": 26,
+      "losses": 13,
       "draws": 1,
-      "win_rate": 0.7,
+      "win_rate": 0.65,
       "draw_rate": 0.025,
-      "net_per_game": 0.425,
-      "first_move_win_rate": 0.8,
-      "win_take_rate": 1.0,
-      "win_opps": 28,
-      "block_rate": 0.8814,
-      "block_opps": 59,
-      "missed_wins": 0,
-      "allowed_losses": 7,
-      "invalid_rate": 0.0,
-      "decisions": 360,
-      "avg_len": 17.8,
-      "avg_latency_s": 340.9,
-      "heat": [
-        [
-          0,
-          2,
-          3,
-          2,
-          2,
-          2,
-          0
-        ],
-        [
-          3,
-          3,
-          6,
-          7,
-          7,
-          1,
-          1
-        ],
-        [
-          2,
-          3,
-          12,
-          12,
-          19,
-          11,
-          6
-        ],
-        [
-          7,
-          7,
-          16,
-          18,
-          13,
-          6,
-          4
-        ],
-        [
-          8,
-          8,
-          22,
-          12,
-          14,
-          16,
-          6
-        ],
-        [
-          5,
-          13,
-          18,
-          18,
-          19,
-          18,
-          8
-        ]
-      ],
-      "phase_blunder_rate": {
-        "early": 0.0,
-        "mid": 0.0,
-        "late": 0.1273
-      },
-      "phase_opps": {
-        "early": 9,
-        "mid": 23,
-        "late": 55
-      },
-      "len_hist": [
-        5,
-        2,
-        5,
-        4,
-        10,
-        4,
-        5,
-        2,
-        0,
-        2,
-        0,
-        1
-      ]
-    },
-    "glm-5p1": {
-      "games": 40,
-      "wins": 20,
-      "losses": 19,
-      "draws": 1,
-      "win_rate": 0.5,
-      "draw_rate": 0.025,
-      "net_per_game": 0.025,
+      "net_per_game": 0.325,
       "first_move_win_rate": 0.65,
-      "win_take_rate": 0.9524,
-      "win_opps": 21,
-      "block_rate": 0.7451,
-      "block_opps": 51,
+      "win_take_rate": 0.963,
+      "win_opps": 27,
+      "block_rate": 0.7778,
+      "block_opps": 45,
       "missed_wins": 1,
-      "allowed_losses": 13,
+      "allowed_losses": 10,
       "invalid_rate": 0.0,
-      "decisions": 350,
-      "avg_len": 17.48,
-      "avg_latency_s": 640.9,
+      "decisions": 314,
+      "avg_len": 15.55,
+      "avg_latency_s": 581.3,
       "heat": [
         [
-          1,
-          1,
-          2,
-          2,
-          5,
           0,
-          1
+          1,
+          2,
+          2,
+          2,
+          4,
+          0
+        ],
+        [
+          0,
+          3,
+          9,
+          9,
+          6,
+          1,
+          2
         ],
         [
           1,
-          3,
           4,
           6,
-          5,
-          5,
-          4
-        ],
-        [
-          2,
-          6,
-          11,
-          8,
-          8,
-          13,
-          5
-        ],
-        [
-          3,
-          7,
-          13,
-          19,
-          17,
-          19,
-          8
-        ],
-        [
-          2,
-          6,
-          13,
-          22,
-          28,
-          19,
-          7
-        ],
-        [
-          3,
-          7,
           15,
-          16,
-          14,
-          12,
-          7
-        ]
-      ],
-      "phase_blunder_rate": {
-        "early": 0.0,
-        "mid": 0.1429,
-        "late": 0.2553
-      },
-      "phase_opps": {
-        "early": 11,
-        "mid": 14,
-        "late": 47
-      },
-      "len_hist": [
-        4,
-        2,
-        7,
-        5,
-        7,
-        7,
-        3,
-        2,
-        1,
-        1,
-        0,
-        1
-      ]
-    },
-    "minimax-m2p7": {
-      "games": 40,
-      "wins": 7,
-      "losses": 33,
-      "draws": 0,
-      "win_rate": 0.175,
-      "draw_rate": 0.0,
-      "net_per_game": -0.65,
-      "first_move_win_rate": 0.35,
-      "win_take_rate": 0.875,
-      "win_opps": 8,
-      "block_rate": 0.641,
-      "block_opps": 78,
-      "missed_wins": 1,
-      "allowed_losses": 28,
-      "invalid_rate": 0.0,
-      "decisions": 297,
-      "avg_len": 15.18,
-      "avg_latency_s": 80.4,
-      "heat": [
-        [
-          0,
-          0,
-          2,
-          3,
-          4,
-          1,
-          0
-        ],
-        [
-          1,
-          1,
-          5,
           11,
-          9,
-          4,
+          8,
           1
         ],
         [
-          2,
-          2,
-          7,
-          13,
-          12,
           4,
-          0
-        ],
-        [
-          2,
-          5,
-          10,
-          12,
-          12,
-          9,
-          3
-        ],
-        [
-          2,
           7,
-          22,
-          20,
-          12,
-          13,
+          17,
+          17,
+          15,
+          7,
           5
         ],
         [
+          3,
+          13,
+          18,
+          22,
+          9,
+          9,
+          2
+        ],
+        [
           5,
-          6,
-          16,
-          16,
-          7,
-          23,
-          8
+          12,
+          17,
+          17,
+          12,
+          10,
+          6
         ]
       ],
       "phase_blunder_rate": {
         "early": 0.0,
         "mid": 0.1875,
-        "late": 0.5349
+        "late": 0.1818
       },
       "phase_opps": {
-        "early": 11,
-        "mid": 32,
-        "late": 43
+        "early": 12,
+        "mid": 16,
+        "late": 44
+      },
+      "len_hist": [
+        6,
+        1,
+        10,
+        9,
+        4,
+        4,
+        2,
+        2,
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    "gpt-oss-120b-coached": {
+      "games": 40,
+      "wins": 6,
+      "losses": 33,
+      "draws": 1,
+      "win_rate": 0.15,
+      "draw_rate": 0.025,
+      "net_per_game": -0.675,
+      "first_move_win_rate": 0.25,
+      "win_take_rate": 0.75,
+      "win_opps": 8,
+      "block_rate": 0.6875,
+      "block_opps": 64,
+      "missed_wins": 2,
+      "allowed_losses": 20,
+      "invalid_rate": 0.0,
+      "decisions": 294,
+      "avg_len": 15.05,
+      "avg_latency_s": 16.5,
+      "heat": [
+        [
+          1,
+          2,
+          1,
+          6,
+          1,
+          3,
+          0
+        ],
+        [
+          1,
+          1,
+          4,
+          5,
+          5,
+          5,
+          3
+        ],
+        [
+          1,
+          4,
+          8,
+          12,
+          7,
+          3,
+          1
+        ],
+        [
+          1,
+          7,
+          7,
+          18,
+          13,
+          12,
+          4
+        ],
+        [
+          5,
+          7,
+          15,
+          18,
+          14,
+          13,
+          8
+        ],
+        [
+          13,
+          15,
+          16,
+          13,
+          4,
+          12,
+          5
+        ]
+      ],
+      "phase_blunder_rate": {
+        "early": 0.0,
+        "mid": 0.1724,
+        "late": 0.5
+      },
+      "phase_opps": {
+        "early": 9,
+        "mid": 29,
+        "late": 34
+      },
+      "len_hist": [
+        8,
+        4,
+        7,
+        7,
+        3,
+        3,
+        6,
+        0,
+        0,
+        0,
+        0,
+        2
+      ]
+    },
+    "kimi-k2p6-coached": {
+      "games": 40,
+      "wins": 30,
+      "losses": 9,
+      "draws": 1,
+      "win_rate": 0.75,
+      "draw_rate": 0.025,
+      "net_per_game": 0.525,
+      "first_move_win_rate": 0.75,
+      "win_take_rate": 1.0,
+      "win_opps": 30,
+      "block_rate": 0.8667,
+      "block_opps": 60,
+      "missed_wins": 0,
+      "allowed_losses": 8,
+      "invalid_rate": 0.0,
+      "decisions": 334,
+      "avg_len": 16.45,
+      "avg_latency_s": 194.1,
+      "heat": [
+        [
+          0,
+          3,
+          0,
+          4,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          4,
+          6,
+          4,
+          3,
+          4,
+          3
+        ],
+        [
+          4,
+          7,
+          14,
+          7,
+          7,
+          10,
+          3
+        ],
+        [
+          4,
+          11,
+          15,
+          20,
+          17,
+          7,
+          3
+        ],
+        [
+          6,
+          12,
+          13,
+          21,
+          14,
+          13,
+          4
+        ],
+        [
+          6,
+          10,
+          13,
+          17,
+          17,
+          17,
+          6
+        ]
+      ],
+      "phase_blunder_rate": {
+        "early": 0.0,
+        "mid": 0.0,
+        "late": 0.1569
+      },
+      "phase_opps": {
+        "early": 19,
+        "mid": 20,
+        "late": 51
       },
       "len_hist": [
         5,
-        1,
-        11,
-        6,
+        3,
         8,
+        10,
+        3,
+        1,
+        5,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "glm-5p1-coached": {
+      "games": 40,
+      "wins": 27,
+      "losses": 10,
+      "draws": 3,
+      "win_rate": 0.675,
+      "draw_rate": 0.075,
+      "net_per_game": 0.425,
+      "first_move_win_rate": 0.7,
+      "win_take_rate": 1.0,
+      "win_opps": 27,
+      "block_rate": 0.9462,
+      "block_opps": 93,
+      "missed_wins": 0,
+      "allowed_losses": 5,
+      "invalid_rate": 0.0,
+      "decisions": 434,
+      "avg_len": 21.45,
+      "avg_latency_s": 229.9,
+      "heat": [
+        [
+          4,
+          2,
+          7,
+          9,
+          7,
+          5,
+          4
+        ],
+        [
+          4,
+          5,
+          5,
+          8,
+          14,
+          12,
+          2
+        ],
+        [
+          6,
+          9,
+          12,
+          11,
+          14,
+          13,
+          7
+        ],
+        [
+          3,
+          7,
+          17,
+          16,
+          16,
+          15,
+          6
+        ],
+        [
+          6,
+          11,
+          18,
+          22,
+          19,
+          15,
+          12
+        ],
+        [
+          7,
+          9,
+          19,
+          16,
+          18,
+          15,
+          7
+        ]
+      ],
+      "phase_blunder_rate": {
+        "early": 0.0,
+        "mid": 0.0,
+        "late": 0.0794
+      },
+      "phase_opps": {
+        "early": 20,
+        "mid": 37,
+        "late": 63
+      },
+      "len_hist": [
+        1,
+        4,
+        5,
+        8,
+        2,
+        2,
+        5,
+        2,
+        4,
+        1,
+        2,
+        4
+      ]
+    },
+    "minimax-m2p7-coached": {
+      "games": 40,
+      "wins": 8,
+      "losses": 32,
+      "draws": 0,
+      "win_rate": 0.2,
+      "draw_rate": 0.0,
+      "net_per_game": -0.6,
+      "first_move_win_rate": 0.3,
+      "win_take_rate": 1.0,
+      "win_opps": 8,
+      "block_rate": 0.6494,
+      "block_opps": 77,
+      "missed_wins": 0,
+      "allowed_losses": 27,
+      "invalid_rate": 0.0,
+      "decisions": 321,
+      "avg_len": 16.35,
+      "avg_latency_s": 69.4,
+      "heat": [
+        [
+          0,
+          1,
+          3,
+          2,
+          6,
+          2,
+          1
+        ],
+        [
+          1,
+          2,
+          4,
+          10,
+          12,
+          4,
+          1
+        ],
+        [
+          0,
+          3,
+          8,
+          14,
+          18,
+          7,
+          4
+        ],
+        [
+          2,
+          9,
+          9,
+          12,
+          13,
+          7,
+          2
+        ],
+        [
+          3,
+          10,
+          15,
+          12,
+          22,
+          10,
+          8
+        ],
+        [
+          4,
+          8,
+          14,
+          19,
+          11,
+          19,
+          9
+        ]
+      ],
+      "phase_blunder_rate": {
+        "early": 0.0,
+        "mid": 0.1,
+        "late": 0.5208
+      },
+      "phase_opps": {
+        "early": 17,
+        "mid": 20,
+        "late": 48
+      },
+      "len_hist": [
+        4,
+        2,
+        8,
+        10,
         6,
+        2,
+        4,
         1,
-        1,
+        2,
         0,
         1,
-        0,
         0
       ]
     }
   },
   "h2h": {
-    "deepseek-v4-pro": {
-      "gpt-oss-120b": [
+    "deepseek-v4-pro-coached": {
+      "gpt-oss-120b-coached": [
         9,
         1,
         0
       ],
-      "kimi-k2p6": [
-        5,
-        5,
-        0
-      ],
-      "glm-5p1": [
-        9,
-        1,
-        0
-      ],
-      "minimax-m2p7": [
-        9,
-        1,
-        0
-      ]
-    },
-    "gpt-oss-120b": {
-      "deepseek-v4-pro": [
-        1,
-        9,
-        0
-      ],
-      "kimi-k2p6": [
-        3,
-        7,
-        0
-      ],
-      "glm-5p1": [
-        1,
-        9,
-        0
-      ],
-      "minimax-m2p7": [
-        7,
-        3,
-        0
-      ]
-    },
-    "kimi-k2p6": {
-      "deepseek-v4-pro": [
-        5,
-        5,
-        0
-      ],
-      "gpt-oss-120b": [
-        7,
-        3,
-        0
-      ],
-      "glm-5p1": [
-        7,
+      "kimi-k2p6-coached": [
         2,
+        8,
+        0
+      ],
+      "glm-5p1-coached": [
+        5,
+        4,
         1
       ],
-      "minimax-m2p7": [
+      "minimax-m2p7-coached": [
+        10,
+        0,
+        0
+      ]
+    },
+    "gpt-oss-120b-coached": {
+      "deepseek-v4-pro-coached": [
+        1,
+        9,
+        0
+      ],
+      "kimi-k2p6-coached": [
+        0,
+        10,
+        0
+      ],
+      "glm-5p1-coached": [
+        0,
+        9,
+        1
+      ],
+      "minimax-m2p7-coached": [
+        5,
+        5,
+        0
+      ]
+    },
+    "kimi-k2p6-coached": {
+      "deepseek-v4-pro-coached": [
+        8,
+        2,
+        0
+      ],
+      "gpt-oss-120b-coached": [
+        10,
+        0,
+        0
+      ],
+      "glm-5p1-coached": [
+        3,
+        6,
+        1
+      ],
+      "minimax-m2p7-coached": [
         9,
         1,
         0
       ]
     },
-    "glm-5p1": {
-      "deepseek-v4-pro": [
-        1,
-        9,
-        0
-      ],
-      "gpt-oss-120b": [
-        9,
-        1,
-        0
-      ],
-      "kimi-k2p6": [
-        2,
-        7,
+    "glm-5p1-coached": {
+      "deepseek-v4-pro-coached": [
+        4,
+        5,
         1
       ],
-      "minimax-m2p7": [
+      "gpt-oss-120b-coached": [
+        9,
+        0,
+        1
+      ],
+      "kimi-k2p6-coached": [
+        6,
+        3,
+        1
+      ],
+      "minimax-m2p7-coached": [
         8,
         2,
         0
       ]
     },
-    "minimax-m2p7": {
-      "deepseek-v4-pro": [
+    "minimax-m2p7-coached": {
+      "deepseek-v4-pro-coached": [
+        0,
+        10,
+        0
+      ],
+      "gpt-oss-120b-coached": [
+        5,
+        5,
+        0
+      ],
+      "kimi-k2p6-coached": [
         1,
         9,
         0
       ],
-      "gpt-oss-120b": [
-        3,
-        7,
-        0
-      ],
-      "kimi-k2p6": [
-        1,
-        9,
-        0
-      ],
-      "glm-5p1": [
+      "glm-5p1-coached": [
         2,
         8,
         0
@@ -626,11 +626,11 @@
     }
   },
   "elo": {
-    "deepseek-v4-pro": 1723,
-    "gpt-oss-120b": 1358,
-    "kimi-k2p6": 1653,
-    "glm-5p1": 1510,
-    "minimax-m2p7": 1256
+    "deepseek-v4-pro-coached": 1637,
+    "gpt-oss-120b-coached": 1218,
+    "kimi-k2p6-coached": 1716,
+    "glm-5p1-coached": 1676,
+    "minimax-m2p7-coached": 1255
   },
   "len_bins": [
     "5\u20138",
@@ -646,6 +646,6 @@
     "34\u201337",
     "37\u201340"
   ],
-  "first_player_win_rate": 0.63,
+  "first_player_win_rate": 0.53,
   "num_games": 100
 }

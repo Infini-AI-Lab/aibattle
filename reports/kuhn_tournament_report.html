@@ -1,35 +1,56 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Kuhn Poker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script><style>
-  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script><script>Chart.defaults.font.family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";Chart.defaults.color="#6b6b6b";</script>
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=9"></script><style>
+  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; margin:0; background:#fbfbf8; color:#1c1c1c; }
   .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
-  h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
-  .sub { color:#8b93a7; }
+  h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #ddd8cf; padding-bottom:6px; }
+  .sub { color:#6b6b6b; }
   table { border-collapse:collapse; width:100%; font-size:13px; margin-top:10px; }
-  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
-  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
-  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
-  .good { color:#4ade80; } .warn { color:#fbbf24; } .bad { color:#f87171; }
-  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
-  .callout { background:#171a23; border:1px solid #232838; border-left:3px solid #60a5fa;
-    border-radius:8px; padding:12px 16px; margin:14px 0; font-size:13px; color:#c7cedd; }
-  a { color:#60a5fa; text-decoration:none; } a:hover { text-decoration:underline; }
-  .rules { background:#141821; border:1px solid #232838; border-radius:12px;
-    padding:18px 20px; margin:18px 0; font-size:13.5px; color:#c7cedd; line-height:1.55; }
-  .rules h3 { margin:0 0 8px; font-size:15px; color:#cdd6f4; }
+  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #ddd8cf; }
+  th { color:#6b6b6b; } td.model,th.model { text-align:left; font-weight:600; color:#1c1c1c; }
+  .pos { color:#1a7f37; } .neg { color:#b91c1c; } .diag { color:#c9c2b6; }
+  .good { color:#1a7f37; } .warn { color:#b45309; } .bad { color:#b91c1c; }
+  .note { color:#6b6b6b; font-size:12px; margin:6px 0; }
+  .callout { background:#f4f1ea; border:1px solid #ddd8cf; border-left:3px solid #8f1d1d;
+    border-radius:0; padding:12px 16px; margin:14px 0; font-size:13px; color:#3a3a3a; }
+  a { color:#8f1d1d; text-decoration:none; } a:hover { text-decoration:underline; }
+  .rules { background:#f4f1ea; border:1px solid #ddd8cf; border-radius:0;
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:#3a3a3a; line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; color:#1c1c1c; }
   .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
   .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
-    border-radius:4px; background:#e6e6e6; color:#0f1117; font-weight:700; font-size:12px;
+    border-radius:0; background:#1c1c1c; color:#fbfbf8; font-weight:700; font-size:12px;
     text-align:center; vertical-align:middle; line-height:1.4; }
-  .rules code { background:#1e2430; padding:1px 6px; border-radius:4px; color:#9fc7ff; font-size:12px; }
-  .rules .seq { color:#8b93a7; font-size:12.5px; margin-top:10px; }
+  .rules code { background:#efe9df; padding:1px 6px; border-radius:0; color:#8f1d1d; font-size:12px; }
+  .rules .seq { color:#6b6b6b; font-size:12.5px; margin-top:10px; }
   canvas { max-height:320px; margin-top:10px; }
+  /* Terminal heading conventions (match the overview page):
+     h1 = "$ <page addr>" with blinking cursor, h2 = "## ", h3 = "### ". */
+  h1 { color:#8f1d1d; font-size:22px; }
+  h1 .cursor { display:inline-block; width:11px; height:1em; background:#8f1d1d;
+    vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  h2::before { content:"## "; color:#8f1d1d; }
+  h3::before { content:"### "; color:#8f1d1d; }
+  /* Sync sizing/spacing with the overview page:
+     wrap 1100px / 36-24px padding, sub 13px, h2 15px (no underline),
+     h3 14px, table rows 7px 10px. */
+  .wrap { max-width:1100px; padding:36px 24px 80px; }
+  .sub { font-size:13px; }
+  h2 { font-size:15px; margin:36px 0 10px; border-bottom:none; padding-bottom:0; }
+  h3 { font-size:14px; }
+  table { font-size:13px; }
+  th, td { padding:7px 10px; }
+  /* Consistency pass 2: h1/subtitle margins and h3 color as on the overview. */
+  h1 { margin:0 0 4px; }
+  h1 + .sub { margin-bottom:30px; }
+  h3 { color:#1c1c1c; }
 </style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Kuhn Poker (poker light)</h1>
-  <div class="sub">5 models · round-robin · 30 seat-swapped hands/pair · deck {J,Q,K}, ~2 decisions/hand</div>
+  <h1>$ ~/aibattle/kuhn<span class="cursor"></span></h1>
+  <div class="sub">🃏 Kuhn Poker · 5 models · round-robin · 30 seat-swapped hands/pair · deck {J,Q,K}, ~2 decisions/hand</div>
 
   <div class="rules">
     <h3>How Kuhn Poker works</h3>
@@ -63,39 +84,39 @@
   <table>
     <tr><th>#</th><th class='model'>model</th><th>fold K vs bet</th>
         <th>call J vs bet</th><th>total blunders</th></tr>
-    <tr><td>1</td><td class='model'>glm-5p1</td><td>0/0</td><td>0/16</td><td class='good'>0/16 (0%)</td></tr><tr><td>2</td><td class='model'>deepseek-v4-pro</td><td>0/2</td><td>0/18</td><td class='good'>0/20 (0%)</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td>0/1</td><td>0/19</td><td class='good'>0/20 (0%)</td></tr><tr><td>4</td><td class='model'>minimax-m2p7</td><td>0/2</td><td>0/18</td><td class='good'>0/20 (0%)</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td>0/1</td><td>0/12</td><td class='good'>0/13 (0%)</td></tr>
+    <tr><td>1</td><td class='model'>glm-5p1</td><td>0/1</td><td>0/18</td><td class='good'>0/19 (0%)</td></tr><tr><td>2</td><td class='model'>minimax-m2p7</td><td>0/0</td><td>0/17</td><td class='good'>0/17 (0%)</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td>0/1</td><td>0/20</td><td class='good'>0/21 (0%)</td></tr><tr><td>4</td><td class='model'>deepseek-v4-pro</td><td>0/1</td><td>0/19</td><td class='good'>0/20 (0%)</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td>0/0</td><td>0/14</td><td class='good'>0/14 (0%)</td></tr>
   </table>
 
   <h2>Betting style <span class="note">(bet % by card, first to act · GTO: K 100% / Q 0% / J ~33%)</span></h2>
   <table>
     <tr><th class='model'>model</th><th>bet K (value)</th><th>bet Q (trap)</th><th>bet J (bluff)</th></tr>
-    <tr><td class='model'>glm-5p1</td><td class='good'>88%</td><td class='good'>0%</td><td class='good'>30%</td></tr><tr><td class='model'>deepseek-v4-pro</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>3%</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='good'>87%</td><td class='warn'>18%</td><td class='bad'>0%</td></tr><tr><td class='model'>minimax-m2p7</td><td class='good'>90%</td><td class='warn'>16%</td><td class='bad'>0%</td></tr><tr><td class='model'>kimi-k2p6</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>62%</td></tr>
+    <tr><td class='model'>glm-5p1</td><td class='good'>82%</td><td class='warn'>3%</td><td class='good'>22%</td></tr><tr><td class='model'>minimax-m2p7</td><td class='good'>100%</td><td class='warn'>24%</td><td class='bad'>4%</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='good'>97%</td><td class='warn'>11%</td><td class='bad'>3%</td></tr><tr><td class='model'>deepseek-v4-pro</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>4%</td></tr><tr><td class='model'>kimi-k2p6</td><td class='good'>100%</td><td class='good'>0%</td><td class='good'>38%</td></tr>
   </table>
 
   <h2>Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>net/hand</th><th>win%</th>
         <th>hands</th><th>decisions</th><th>invalid%</th><th>trunc%</th><th>avg tokens/dec</th></tr>
-    <tr><td>1</td><td class='model'>glm-5p1</td><td class='pos'>+0.050</td><td>53%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>2,580</td></tr><tr><td>2</td><td class='model'>deepseek-v4-pro</td><td class='pos'>+0.025</td><td>48%</td><td>120</td><td>148</td><td>0.0%</td><td>0.0%</td><td>3,095</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td class='pos'>+0.008</td><td>46%</td><td>120</td><td>143</td><td>0.0%</td><td>0.0%</td><td>823</td></tr><tr><td>4</td><td class='model'>minimax-m2p7</td><td class='neg'>-0.025</td><td>48%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>13,697</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td class='neg'>-0.058</td><td>54%</td><td>120</td><td>140</td><td>0.0%</td><td>0.0%</td><td>14,229</td></tr>
+    <tr><td>1</td><td class='model'>glm-5p1</td><td class='pos'>+0.067</td><td>52%</td><td>120</td><td>147</td><td>0.0%</td><td>0.0%</td><td>2,451</td></tr><tr><td>2</td><td class='model'>minimax-m2p7</td><td class='pos'>+0.042</td><td>50%</td><td>120</td><td>141</td><td>0.0%</td><td>0.0%</td><td>11,859</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td class='neg'>-0.017</td><td>47%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>719</td></tr><tr><td>4</td><td class='model'>deepseek-v4-pro</td><td class='neg'>-0.025</td><td>50%</td><td>120</td><td>146</td><td>0.0%</td><td>0.0%</td><td>2,378</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td class='neg'>-0.067</td><td>51%</td><td>120</td><td>143</td><td>0.0%</td><td>0.0%</td><td>13,647</td></tr>
   </table>
 
   <h2>Head-to-head <span class="note">(row's net chips/hand vs column)</span></h2>
-  <table><tr><th class='model'></th><th>deepseek</th><th>gpt</th><th>kimi</th><th>glm</th><th>minimax</th></tr><tr><td class='model'>deepseek-v4-pro</td><td class='diag'>—</td><td class='pos'>+0.00</td><td class='pos'>+0.13</td><td class='neg'>-0.13</td><td class='pos'>+0.10</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='pos'>+0.00</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='pos'>+0.03</td><td class='pos'>+0.10</td></tr><tr><td class='model'>kimi-k2p6</td><td class='neg'>-0.13</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='neg'>-0.03</td><td class='neg'>-0.17</td></tr><tr><td class='model'>glm-5p1</td><td class='pos'>+0.13</td><td class='neg'>-0.03</td><td class='pos'>+0.03</td><td class='diag'>—</td><td class='pos'>+0.07</td></tr><tr><td class='model'>minimax-m2p7</td><td class='neg'>-0.10</td><td class='neg'>-0.10</td><td class='pos'>+0.17</td><td class='neg'>-0.07</td><td class='diag'>—</td></tr></table>
+  <table><tr><th class='model'></th><th>deepseek</th><th>gpt</th><th>kimi</th><th>glm</th><th>minimax</th></tr><tr><td class='model'>deepseek-v4-pro</td><td class='diag'>—</td><td class='neg'>-0.03</td><td class='pos'>+0.07</td><td class='neg'>-0.10</td><td class='neg'>-0.03</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='pos'>+0.03</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='neg'>-0.07</td><td class='pos'>+0.07</td></tr><tr><td class='model'>kimi-k2p6</td><td class='neg'>-0.07</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='neg'>-0.20</td></tr><tr><td class='model'>glm-5p1</td><td class='pos'>+0.10</td><td class='pos'>+0.07</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='pos'>+0.00</td></tr><tr><td class='model'>minimax-m2p7</td><td class='pos'>+0.03</td><td class='neg'>-0.07</td><td class='pos'>+0.20</td><td class='pos'>+0.00</td><td class='diag'>—</td></tr></table>
 
   <script>
-  const labels = ["glm-5p1", "deepseek-v4-pro", "gpt-oss-120b", "minimax-m2p7", "kimi-k2p6"];
+  const labels = ["glm-5p1", "minimax-m2p7", "gpt-oss-120b", "deepseek-v4-pro", "kimi-k2p6"];
   const gto = {K:100.0, Q:0.0, J:33.3};
   new Chart(document.getElementById('bet'), {
     type:'bar',
     data:{labels:labels,datasets:[
-      {label:'bet K %',data:[87.8, 100.0, 87.2, 90.5, 100.0],backgroundColor:'#4ade80'},
-      {label:'bet Q %',data:[0, 0, 18.5, 15.6, 0],backgroundColor:'#f87171'},
-      {label:'bet J %',data:[29.6, 3.4, 0, 0, 61.5],backgroundColor:'#60a5fa'}
+      {label:'bet K %',data:[82.5, 100.0, 97.4, 100.0, 100.0],backgroundColor:'#1a7f37'},
+      {label:'bet Q %',data:[3.0, 24.2, 10.7, 0, 0],backgroundColor:'#b91c1c'},
+      {label:'bet J %',data:[22.2, 4.3, 2.9, 3.6, 37.5],backgroundColor:'#8f1d1d'}
     ]},
-    options:{plugins:{legend:{labels:{color:'#9aa3b5'}}},
-      scales:{y:{beginAtZero:true,max:100,grid:{color:'#20242e'},
-        ticks:{color:'#9aa3b5',callback:v=>v+'%'}},
-        x:{grid:{color:'#20242e'},ticks:{color:'#9aa3b5'}}}}
+    options:{plugins:{legend:{labels:{color:'#6b6b6b'}}},
+      scales:{y:{beginAtZero:true,max:100,grid:{color:'#ddd8cf'},
+        ticks:{color:'#6b6b6b',callback:v=>v+'%'}},
+        x:{grid:{color:'#ddd8cf'},ticks:{color:'#6b6b6b'}}}}
   });
   </script>
 </div></body></html>

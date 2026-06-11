@@ -1,10 +1,10 @@
 {
   "models": [
-    "deepseek-v4-pro",
-    "gpt-oss-120b",
-    "kimi-k2p6",
-    "glm-5p1",
-    "minimax-m2p7"
+    "deepseek-v4-pro-coached",
+    "gpt-oss-120b-coached",
+    "kimi-k2p6-coached",
+    "glm-5p1-coached",
+    "minimax-m2p7-coached"
   ],
   "episodes_per_pair": 30,
   "gto_bet": {
@@ -14,54 +14,74 @@
   },
   "leaderboard": [
     {
-      "model": "glm-5p1",
+      "model": "glm-5p1-coached",
       "hands": 120,
-      "decisions": 144,
-      "win_rate": 0.533,
-      "net_per_hand": 0.05,
+      "decisions": 147,
+      "win_rate": 0.525,
+      "net_per_hand": 0.067,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 2580,
+      "avg_tokens": 2451,
       "k_folds": 0,
-      "k_fold_chances": 0,
-      "j_calls": 0,
-      "j_call_chances": 16,
-      "blunders": 0,
-      "blunder_spots": 16,
-      "blunder_rate": 0.0,
-      "bet_K": 0.878,
-      "bet_Q": 0.0,
-      "bet_J": 0.296
-    },
-    {
-      "model": "deepseek-v4-pro",
-      "hands": 120,
-      "decisions": 148,
-      "win_rate": 0.483,
-      "net_per_hand": 0.025,
-      "invalid_rate": 0.0,
-      "truncated_rate": 0.0,
-      "avg_tokens": 3095,
-      "k_folds": 0,
-      "k_fold_chances": 2,
+      "k_fold_chances": 1,
       "j_calls": 0,
       "j_call_chances": 18,
       "blunders": 0,
-      "blunder_spots": 20,
+      "blunder_spots": 19,
       "blunder_rate": 0.0,
-      "bet_K": 1.0,
-      "bet_Q": 0.0,
-      "bet_J": 0.034
+      "bet_K": 0.825,
+      "bet_Q": 0.03,
+      "bet_J": 0.222
     },
     {
-      "model": "gpt-oss-120b",
+      "model": "minimax-m2p7-coached",
       "hands": 120,
-      "decisions": 143,
-      "win_rate": 0.458,
-      "net_per_hand": 0.008,
+      "decisions": 141,
+      "win_rate": 0.5,
+      "net_per_hand": 0.042,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 823,
+      "avg_tokens": 11859,
+      "k_folds": 0,
+      "k_fold_chances": 0,
+      "j_calls": 0,
+      "j_call_chances": 17,
+      "blunders": 0,
+      "blunder_spots": 17,
+      "blunder_rate": 0.0,
+      "bet_K": 1.0,
+      "bet_Q": 0.242,
+      "bet_J": 0.043
+    },
+    {
+      "model": "gpt-oss-120b-coached",
+      "hands": 120,
+      "decisions": 144,
+      "win_rate": 0.467,
+      "net_per_hand": -0.017,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 719,
+      "k_folds": 0,
+      "k_fold_chances": 1,
+      "j_calls": 0,
+      "j_call_chances": 20,
+      "blunders": 0,
+      "blunder_spots": 21,
+      "blunder_rate": 0.0,
+      "bet_K": 0.974,
+      "bet_Q": 0.107,
+      "bet_J": 0.029
+    },
+    {
+      "model": "deepseek-v4-pro-coached",
+      "hands": 120,
+      "decisions": 146,
+      "win_rate": 0.5,
+      "net_per_hand": -0.025,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 2378,
       "k_folds": 0,
       "k_fold_chances": 1,
       "j_calls": 0,
@@ -69,123 +89,103 @@
       "blunders": 0,
       "blunder_spots": 20,
       "blunder_rate": 0.0,
-      "bet_K": 0.872,
-      "bet_Q": 0.185,
-      "bet_J": 0.0
+      "bet_K": 1.0,
+      "bet_Q": 0.0,
+      "bet_J": 0.036
     },
     {
-      "model": "minimax-m2p7",
+      "model": "kimi-k2p6-coached",
       "hands": 120,
-      "decisions": 144,
-      "win_rate": 0.483,
-      "net_per_hand": -0.025,
+      "decisions": 143,
+      "win_rate": 0.508,
+      "net_per_hand": -0.067,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 13697,
+      "avg_tokens": 13647,
       "k_folds": 0,
-      "k_fold_chances": 2,
+      "k_fold_chances": 0,
       "j_calls": 0,
-      "j_call_chances": 18,
+      "j_call_chances": 14,
       "blunders": 0,
-      "blunder_spots": 20,
-      "blunder_rate": 0.0,
-      "bet_K": 0.905,
-      "bet_Q": 0.156,
-      "bet_J": 0.0
-    },
-    {
-      "model": "kimi-k2p6",
-      "hands": 120,
-      "decisions": 140,
-      "win_rate": 0.542,
-      "net_per_hand": -0.058,
-      "invalid_rate": 0.0,
-      "truncated_rate": 0.0,
-      "avg_tokens": 14229,
-      "k_folds": 0,
-      "k_fold_chances": 1,
-      "j_calls": 0,
-      "j_call_chances": 12,
-      "blunders": 0,
-      "blunder_spots": 13,
+      "blunder_spots": 14,
       "blunder_rate": 0.0,
       "bet_K": 1.0,
       "bet_Q": 0.0,
-      "bet_J": 0.615
+      "bet_J": 0.375
     }
   ],
   "h2h_net": {
-    "deepseek-v4-pro": {
-      "deepseek-v4-pro": 0.0,
-      "gpt-oss-120b": 0.0,
-      "kimi-k2p6": 4.0,
-      "glm-5p1": -4.0,
-      "minimax-m2p7": 3.0
+    "deepseek-v4-pro-coached": {
+      "deepseek-v4-pro-coached": 0.0,
+      "gpt-oss-120b-coached": -1.0,
+      "kimi-k2p6-coached": 2.0,
+      "glm-5p1-coached": -3.0,
+      "minimax-m2p7-coached": -1.0
     },
-    "gpt-oss-120b": {
-      "deepseek-v4-pro": 0.0,
-      "gpt-oss-120b": 0.0,
-      "kimi-k2p6": -3.0,
-      "glm-5p1": 1.0,
-      "minimax-m2p7": 3.0
+    "gpt-oss-120b-coached": {
+      "deepseek-v4-pro-coached": 1.0,
+      "gpt-oss-120b-coached": 0.0,
+      "kimi-k2p6-coached": -3.0,
+      "glm-5p1-coached": -2.0,
+      "minimax-m2p7-coached": 2.0
     },
-    "kimi-k2p6": {
-      "deepseek-v4-pro": -4.0,
-      "gpt-oss-120b": 3.0,
-      "kimi-k2p6": 0.0,
-      "glm-5p1": -1.0,
-      "minimax-m2p7": -5.0
+    "kimi-k2p6-coached": {
+      "deepseek-v4-pro-coached": -2.0,
+      "gpt-oss-120b-coached": 3.0,
+      "kimi-k2p6-coached": 0.0,
+      "glm-5p1-coached": -3.0,
+      "minimax-m2p7-coached": -6.0
     },
-    "glm-5p1": {
-      "deepseek-v4-pro": 4.0,
-      "gpt-oss-120b": -1.0,
-      "kimi-k2p6": 1.0,
-      "glm-5p1": 0.0,
-      "minimax-m2p7": 2.0
+    "glm-5p1-coached": {
+      "deepseek-v4-pro-coached": 3.0,
+      "gpt-oss-120b-coached": 2.0,
+      "kimi-k2p6-coached": 3.0,
+      "glm-5p1-coached": 0.0,
+      "minimax-m2p7-coached": 0.0
     },
-    "minimax-m2p7": {
-      "deepseek-v4-pro": -3.0,
-      "gpt-oss-120b": -3.0,
-      "kimi-k2p6": 5.0,
-      "glm-5p1": -2.0,
-      "minimax-m2p7": 0.0
+    "minimax-m2p7-coached": {
+      "deepseek-v4-pro-coached": 1.0,
+      "gpt-oss-120b-coached": -2.0,
+      "kimi-k2p6-coached": 6.0,
+      "glm-5p1-coached": 0.0,
+      "minimax-m2p7-coached": 0.0
     }
   },
   "h2h_hands": {
-    "deepseek-v4-pro": {
-      "deepseek-v4-pro": 0,
-      "gpt-oss-120b": 30,
-      "kimi-k2p6": 30,
-      "glm-5p1": 30,
-      "minimax-m2p7": 30
+    "deepseek-v4-pro-coached": {
+      "deepseek-v4-pro-coached": 0,
+      "gpt-oss-120b-coached": 30,
+      "kimi-k2p6-coached": 30,
+      "glm-5p1-coached": 30,
+      "minimax-m2p7-coached": 30
     },
-    "gpt-oss-120b": {
-      "deepseek-v4-pro": 30,
-      "gpt-oss-120b": 0,
-      "kimi-k2p6": 30,
-      "glm-5p1": 30,
-      "minimax-m2p7": 30
+    "gpt-oss-120b-coached": {
+      "deepseek-v4-pro-coached": 30,
+      "gpt-oss-120b-coached": 0,
+      "kimi-k2p6-coached": 30,
+      "glm-5p1-coached": 30,
+      "minimax-m2p7-coached": 30
     },
-    "kimi-k2p6": {
-      "deepseek-v4-pro": 30,
-      "gpt-oss-120b": 30,
-      "kimi-k2p6": 0,
-      "glm-5p1": 30,
-      "minimax-m2p7": 30
+    "kimi-k2p6-coached": {
+      "deepseek-v4-pro-coached": 30,
+      "gpt-oss-120b-coached": 30,
+      "kimi-k2p6-coached": 0,
+      "glm-5p1-coached": 30,
+      "minimax-m2p7-coached": 30
     },
-    "glm-5p1": {
-      "deepseek-v4-pro": 30,
-      "gpt-oss-120b": 30,
-      "kimi-k2p6": 30,
-      "glm-5p1": 0,
-      "minimax-m2p7": 30
+    "glm-5p1-coached": {
+      "deepseek-v4-pro-coached": 30,
+      "gpt-oss-120b-coached": 30,
+      "kimi-k2p6-coached": 30,
+      "glm-5p1-coached": 0,
+      "minimax-m2p7-coached": 30
     },
-    "minimax-m2p7": {
-      "deepseek-v4-pro": 30,
-      "gpt-oss-120b": 30,
-      "kimi-k2p6": 30,
-      "glm-5p1": 30,
-      "minimax-m2p7": 0
+    "minimax-m2p7-coached": {
+      "deepseek-v4-pro-coached": 30,
+      "gpt-oss-120b-coached": 30,
+      "kimi-k2p6-coached": 30,
+      "glm-5p1-coached": 30,
+      "minimax-m2p7-coached": 0
     }
   }
 }
