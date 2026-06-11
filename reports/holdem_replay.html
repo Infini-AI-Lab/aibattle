@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — 🃏 Hold'em Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=9"></script>
+<link rel="stylesheet" href="replay.css?v=3">
+<style>
+  .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
+  @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
+
+  /* poker table */
+  .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
+    background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+    padding:10px 14px; min-width:320px; position:relative;}
+  .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
+  .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:15px; background:var(--faint); border:1px solid var(--line);}
+  .seat .meta{flex:1; min-width:0; margin:0;}
+  .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
+  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:#fff; background:#6b6b6b; padding:1px 6px; margin-left:6px;}
+  .pos.btn{background:var(--amber);}
+  .holes{display:flex; gap:6px;}
+  .ret{font-weight:700; font-size:14px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
+  .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
+    padding:3px 10px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+  .bubble.fold{border-color:var(--dim); color:var(--dim);}
+
+  .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
+  .board{display:flex; gap:7px;}
+
+  .seatdot.player_0{background:#60a5fa;} .seatdot.player_1{background:#f472b6;}
+  .mv .d.player_0{background:#60a5fa;} .mv .d.player_1{background:#f472b6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>$ ~/aibattle/holdem/1hand/replay<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em 1-Hand · heads-up, hand by hand · <b>both hole cards are shown</b> for analysis —
+    <b>show reasoning</b> reveals what the model was thinking for each action.</div>
+
+  <div class="selectors">
+    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+  </div>
+
+  <div class="stage">
+    <div>
+      <div class="felt">
+        <div id="seatTop"></div>
+        <div class="middle">
+          <div class="potline">Pot <b id="pot">0</b> · <span id="street">preflop</span></div>
+          <div class="board" id="cboard"></div>
+        </div>
+        <div id="seatBot"></div>
+      </div>
+      <div class="deck">
+        <div class="deckrow">
+          <button class="btn" id="first" title="Back to start">⏮</button>
+          <button class="btn step" id="prev" title="Previous action (←)">◀ Prev</button>
+          <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
+          <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
+          <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+        </div>
+        <div class="scrub">
+          <input type="range" id="slider" min="0" value="0">
+          <span class="movecount" id="movecount"></span>
+        </div>
+        <div class="tip">← / → step · space play/pause</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="arena-head"><h2>action analysis</h2></div>
+      <div class="pbody" id="panel"></div>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="arena-head"><h2>action summary</h2><span class="arena-tag">click to jump</span></div>
+    <div class="movelist" id="movelist"></div>
+  </div>
+</div>
+
+<script>
+const BASE = "runs/tournament/replays/holdem/";
+const PLAY_MS = 950;
+const SPEEDS = [1, 2, 4];
+const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
+let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, showPrompt=false, speedIdx=0;
+const $ = id => document.getElementById(id);
+
+async function init(){
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  catch(e){
+    $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
+      "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
+      "<code>python3 scripts/build_replays.py</code> and serve the repo root.</div>";
+    return;
+  }
+  $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
+    `<option value="${i}">${p.a} vs ${p.b} · rep ${p.rep}</option>`).join("");
+  $("pairSel").onchange = () => loadPair(+$("pairSel").value);
+  $("epSel").onchange = () => selectEp(+$("epSel").value);
+  $("first").onclick = () => { stop(); cursor=0; render(); };
+  $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
+  $("next").onclick  = () => { stop(); step(1); };
+  $("play").onclick  = togglePlay;
+  $("speed").onclick = cycleSpeed;
+  $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
+  document.addEventListener("keydown", e => {
+    if (!ep) return;
+    if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
+    if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
+    if (e.key===" "){ togglePlay(); e.preventDefault(); }
+  });
+  await loadPair(0);
+}
+
+async function loadPair(i){
+  const p = manifest.pairs[i];
+  pairData = await (await fetch(BASE + p.file)).json();
+  $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
+    const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
+    const n = e.moves.length;
+    return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
+  }).join("");
+  selectEp(0);
+}
+
+function fmt(n){ return (n>0?"+":"") + n; }
+function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
+
+function selectEp(idx){
+  stop();
+  ep = pairData.episodes[idx];
+  cursor = 0;
+  // dealer/button is whoever's observation says "button"
+  btnSeat = null;
+  for (const m of ep.moves){ if (m.pos && /button/i.test(m.pos)){ btnSeat = m.player; break; } }
+  $("slider").max = ep.moves.length;
+  render();
+}
+
+// table state shown at `cursor`: pre-action state of move[cursor-1]; at the end
+// reveal the full board and the result.
+function stateAt(k){
+  if (!ep.moves.length) return {board:ep.final_board||[], pot:0, stacks:{}, acting:null, last:null, result:true};
+  if (k===0){ const m=ep.moves[0]; return {board:m.board, pot:m.pot, stacks:m.stacks, acting:m.player, last:null, result:false}; }
+  const m = ep.moves[k-1];
+  const result = (k===ep.moves.length);
+  const board = (result && (ep.final_board||[]).length > (m.board||[]).length) ? ep.final_board : m.board;
+  return {board, pot:m.pot, stacks:m.stacks, acting: result ? null : m.player, last:m, result};
+}
+
+function cardHTML(card, faceUp){
+  if (!faceUp) return `<div class="card back"></div>`;
+  if (!card) return `<div class="card back"></div>`;
+  const r = card.slice(0,-1), s = card.slice(-1).toLowerCase();
+  const red = (s==="d"||s==="h");
+  return `<div class="card${red?" red":""}"><span class="r">${r}</span><span class="s">${SUIT[s]||s}</span></div>`;
+}
+
+function actLabel(m){
+  const a=(m.action||"").toLowerCase();
+  if (a==="raise") return "RAISE " + (m.amount!=null?m.amount:"");
+  if (a==="all_in") return "ALL-IN";
+  if (a==="bet") return "BET " + (m.amount!=null?m.amount:"");
+  return a.toUpperCase();
+}
+
+function seatHTML(seat, st){
+  const agent = ep.seat_assignment[seat] || seat;
+  const stack = st.stacks[seat];
+  const holes = ep.holes[seat];
+  const faceUp = !!holes;
+  const isBtn = seat===btnSeat;
+  const posBadge = `<span class="pos${isBtn?" btn":""}">${isBtn?"BTN/SB":"BB"}</span>`;
+  const acting = st.acting===seat;
+  const isWinner = st.result && ep.winner===seat;
+  const bubble = (st.last && st.last.player===seat)
+    ? `<div class="bubble${/fold/i.test(st.last.action)?" fold":""}">${actLabel(st.last)}</div>` : "";
+  const ret = st.result
+    ? `<span class="ret ${ep.returns[seat]>=0?"pos":"neg"}">${fmt(ep.returns[seat])}</span>` : "";
+  const cards = (holes && holes.length ? holes : [null,null]).map(c => cardHTML(c, faceUp)).join("");
+  const cls = "seat" + (acting?" acting":"") + (isWinner?" winner":"");
+  return `<div class="${cls}">${bubble}
+    <div class="ava">${(agent[0]||"?").toUpperCase()}</div>
+    <div class="meta"><div class="nm">${agent}${posBadge}</div>
+      <div class="sub">stack ${stack!=null?stack:"—"}${ret?" · "+ret:""}</div></div>
+    <div class="holes">${cards}</div></div>`;
+}
+
+function render(){
+  const st = stateAt(cursor);
+  $("seatTop").innerHTML = seatHTML("player_0", st);
+  $("seatBot").innerHTML = seatHTML("player_1", st);
+  $("pot").textContent = st.pot!=null ? st.pot : "—";
+  $("street").textContent = (st.last ? st.last.street : (ep.moves[0]?ep.moves[0].street:"preflop")) || "preflop";
+  // community board: 5 slots
+  const board = st.board || [];
+  let cb = "";
+  for (let i=0;i<5;i++) cb += board[i] ? cardHTML(board[i], true) : `<div class="card empty"></div>`;
+  $("cboard").innerHTML = cb;
+  $("slider").value = cursor;
+  $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
+  $("prev").disabled = cursor===0;
+  $("next").disabled = cursor===ep.moves.length;
+  renderPanel(st);
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  let html="", lastStreet=null;
+  ep.moves.forEach((m,i)=>{
+    if (m.street!==lastStreet){ html += `<div class="streetsep">${m.street}</div>`; lastStreet=m.street; }
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    html += `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d ${m.player}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
+  });
+  ml.innerHTML = html;
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
+}
+
+function renderPanel(st){
+  const p = $("panel");
+  let html = "";
+  if (cursor===0){
+    html += `<div class="movenum">Hand start</div>` +
+      `<div class="meta">Blinds posted (BB ${ep.big_blind}). Button/SB acts first preflop.<br>` +
+      `Both hole cards are shown for analysis.</div>` +
+      `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`;
+    p.innerHTML = html; return;
+  }
+  const m = ep.moves[cursor-1];
+  const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
+  const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
+  const tid = "think-"+cursor;
+  if (st.result) html += resultBlock();
+  html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot ${m.player}"></span>${m.agent}</span>` +
+    `<span class="act${/fold/i.test(m.action)?" fold":""}">${actLabel(m)}</span></div>` +
+    `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
+  if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
+    `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  // Keep both toggles together in one row, then stack their panels below so
+  // opening one never displaces the other button. Input first, then reasoning.
+  const pid = "prompt-"+cursor;
+  let btns = "";
+  if (m.prompt) btns += `<button class="thinkbtn" onclick="togglePrompt(this,'${pid}')">${showPrompt?"🙈 Hide":"📥 Show"} input prompt</button>`;
+  if (m.thinking){
+    btns += `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>`;
+    if (m.tokens!=null) btns += `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>`;
+  }
+  if (btns) html += `<div class="btnrow">${btns}</div>`;
+  if (m.prompt) html += `<pre class="think ${showPrompt?"":"hidden"}" id="${pid}">${escapeHtml(m.prompt)}</pre>`;
+  html += m.thinking
+    ? `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
+    : `<div class="hint">No reasoning recorded for this action.</div>`;
+  p.innerHTML = html;
+}
+
+function resultBlock(){
+  const w = ep.winner_name;
+  let cats = "";
+  if (ep.reason==="showdown" && ep.hand_categories){
+    cats = " · " + Object.keys(ep.seat_assignment).map(s =>
+      `${ep.seat_assignment[s]}: ${ep.hand_categories[s]}`).join(" vs ");
+  }
+  return `<div class="result"><div class="rt">🏆 ${w} wins ${fmt(ep.returns[ep.winner])}</div>` +
+    `<div class="rs">by ${ep.reason}${cats}</div></div>`;
+}
+
+function toggleThink(btn, id){
+  showThink = !showThink;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function togglePrompt(btn, id){
+  showPrompt = !showPrompt;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showPrompt?"🙈 Hide":"📥 Show") + " input prompt";
+}
+
+function step(d){
+  const n=ep.moves.length;
+  if (cursor+d<0 || cursor+d>n) return;
+  cursor+=d; render();
+  if (cursor===n) stop();
+}
+function togglePlay(){ playing ? stop() : start(); }
+function start(){
+  if (cursor>=ep.moves.length) cursor=0;
+  playing=true; $("play").textContent="⏸ Pause";
+  timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
+}
+function stop(){ playing=false; $("play").textContent="▶ Play"; if(timer){clearInterval(timer); timer=null;} }
+function cycleSpeed(){
+  speedIdx=(speedIdx+1)%SPEEDS.length;
+  $("speed").textContent="⏩ " + SPEEDS[speedIdx] + "×";
+  if (playing){ clearInterval(timer); timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]); }
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+init();
+</script>
+</body></html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — 🃏 Hold'em Table Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=9"></script>
+<link rel="stylesheet" href="replay.css?v=3">
+<style>
+  .stage{grid-template-columns:minmax(420px,1fr) minmax(300px,380px);}
+  @media (max-width:980px){ .stage{grid-template-columns:1fr;} }
+
+  /* session standings strip */
+  .standings{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .stand{display:flex; align-items:center; gap:8px; padding:7px 12px; background:var(--panel);
+    border:1px solid var(--line); font-size:13px;}
+  .stand .rk{font-weight:700; font-size:13px; color:var(--dim); min-width:18px;}
+  .stand .rk.gold{color:var(--amber);}
+  .stand .nm{font-weight:700; color:var(--fg);}
+  .stand .fs{font-size:12px; color:var(--dim);}
+  .stand.bust{opacity:.55;}
+
+  /* 5-seat table */
+  .felt5{position:relative; display:grid; gap:10px; align-items:center;
+    grid-template-columns:1fr 1.5fr 1fr;
+    grid-template-areas:"s2 top s3" "s1 mid s4" "bl s0 br";
+    background:#e7eee2; border:1px solid #b5c2a8; border-radius:88px/68px; padding:34px 30px;}
+  .slot0{grid-area:s0;} .slot1{grid-area:s1;} .slot2{grid-area:s2;}
+  .slot3{grid-area:s3;} .slot4{grid-area:s4;}
+  .center{grid-area:mid; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;}
+
+  .seat{display:flex; flex-direction:column; gap:7px; background:#fff; border:1px solid var(--line);
+    padding:9px 11px; position:relative;}
+  .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
+  .seat.folded{opacity:.45;}
+  .seat .top{display:flex; align-items:center; gap:9px;}
+  .seat .ava{width:28px; height:28px; border-radius:50%; flex:none; display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:12px; color:#fff;}
+  .seat .nm{font-weight:700; font-size:13px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:10.5px; color:var(--dim);}
+  .seat .stk{color:var(--fg); font-weight:700;}
+  .seat .row2{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .holes{display:flex; gap:4px;}
+  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:#fff; background:var(--amber); padding:1px 5px;}
+  .tag{font-weight:600; font-size:9px; letter-spacing:.05em; padding:1px 5px;}
+  .tag.allin{color:var(--amber); border:1px solid var(--amber);}
+  .tag.fold{color:var(--dim); border:1px solid var(--dim);}
+  .commit{font-size:11px; color:var(--red);}
+  .ret{font-weight:700; font-size:13px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
+  .bubble{position:absolute; right:10px; top:-11px; font-weight:700; font-size:10px;
+    padding:2px 8px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap; z-index:2;}
+  .bubble.fold{border-color:var(--dim); color:var(--dim);}
+
+  .board{display:flex; gap:6px;}
+  .card{width:36px; height:50px;}
+  .card .r{font-size:16px;} .card .s{font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>$ ~/aibattle/holdem/table/replay<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em Table · all five models at one 5-handed table. Pick a <b>session</b>, then step through any <b>hand</b>.
+    Each seat shows its live stack and status; <b>all hole cards</b> are revealed. The strip above tracks the session standings.</div>
+
+  <div class="selectors">
+    <div><label class="sel">Session</label><select id="sessSel"></select></div>
+    <div><label class="sel">Hand</label><select id="handSel"></select></div>
+  </div>
+
+  <div class="standings" id="standings"></div>
+
+  <div class="stage">
+    <div>
+      <div class="felt5">
+        <div class="slot2" id="slot2"></div>
+        <div class="slot3" id="slot3"></div>
+        <div class="slot1" id="slot1"></div>
+        <div class="center">
+          <div class="potline">Pot <b id="pot">0</b> · <span id="street">preflop</span></div>
+          <div class="board" id="cboard"></div>
+        </div>
+        <div class="slot4" id="slot4"></div>
+        <div class="slot0" id="slot0"></div>
+      </div>
+      <div class="deck">
+        <div class="deckrow">
+          <button class="btn" id="first" title="Back to start">⏮</button>
+          <button class="btn step" id="prev" title="Previous action (←)">◀ Prev</button>
+          <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
+          <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
+          <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+          <button class="btn" id="prevhand" title="Previous hand">◀◀ Hand</button>
+          <button class="btn" id="nexthand" title="Next hand">Hand ▶▶</button>
+        </div>
+        <div class="scrub">
+          <input type="range" id="slider" min="0" value="0">
+          <span class="movecount" id="movecount"></span>
+        </div>
+        <div class="tip">← / → step · space play/pause</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="arena-head"><h2>action analysis</h2></div>
+      <div class="pbody" id="panel"></div>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="arena-head"><h2>action summary</h2><span class="arena-tag">click to jump</span></div>
+    <div class="movelist" id="movelist"></div>
+  </div>
+</div>
+
+<script>
+const BASE = "runs/table_tournament/replays/table/";
+const PLAY_MS = 950;
+const SPEEDS = [1, 2, 4];
+const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
+// one colour per MODEL (kept in sync with scripts/poker_behavior.py), so a
+// model is the same colour everywhere even though seats rotate across sessions.
+const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
+                  "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
+function scol(seat){ return MODELCOL[session && session.seat_assignment[seat]] || "#94a3b8"; }
+const SLOTS = ["player_0","player_1","player_2","player_3","player_4"];
+let manifest=null, session=null, hand=null, btnSeat=null,
+    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+const $ = id => document.getElementById(id);
+
+async function init(){
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  catch(e){
+    $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
+      "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
+      "<code>python3 scripts/build_replays.py</code> and serve the repo root.</div>";
+    return;
+  }
+  $("sessSel").innerHTML = manifest.sessions.map((s,i) => {
+    const win = (s.ranking && s.ranking[0]) || "—";
+    return `<option value="${i}">Session #${s.i+1} · ${s.hands} hands · 🏆 ${win}</option>`;
+  }).join("");
+  $("sessSel").onchange = () => loadSession(+$("sessSel").value);
+  $("handSel").onchange = () => selectHand(+$("handSel").value);
+  $("first").onclick = () => { stop(); cursor=0; render(); };
+  $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
+  $("next").onclick  = () => { stop(); step(1); };
+  $("play").onclick  = togglePlay;
+  $("speed").onclick = cycleSpeed;
+  $("prevhand").onclick = prevHand;
+  $("nexthand").onclick = nextHand;
+  $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
+  document.addEventListener("keydown", e => {
+    if (!hand) return;
+    if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
+    if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
+    if (e.key===" "){ togglePlay(); e.preventDefault(); }
+  });
+  await loadSession(0);
+}
+
+async function loadSession(i){
+  const meta = manifest.sessions[i];
+  session = await (await fetch(BASE + meta.file)).json();
+  $("handSel").innerHTML = session.hands.map((h,hidx) => {
+    const wn = winnerNames(h).join(", ") || "—";
+    return `<option value="${hidx}">Hand ${h.hand}/${session.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
+  }).join("");
+  selectHand(0);
+}
+
+function fmt(n){ return (n>0?"+":"") + n; }
+
+// Table hand_summaries don't record a winner, so derive it: whoever gained
+// chips that hand won (the pot). Returns a list of seat ids (split → >1).
+function handWinners(h){
+  const d = h.deltas || {};
+  return Object.keys(d).filter(s => (d[s]||0) > 0);
+}
+function winnerNames(h){
+  return handWinners(h).map(s => session.seat_assignment[s]||s);
+}
+
+// Live leaderboard for the strip above the table: rank seats by their stack at
+// the CURRENT view, so it tracks the standings hand-by-hand (and action-by-
+// action) instead of freezing on the session's final result.
+function renderStandings(st){
+  const stackOf = seat => {
+    if (st && st.result && hand && hand.stacks_after && hand.stacks_after[seat]!=null)
+      return hand.stacks_after[seat];
+    const info = (st && st.seats && st.seats[seat]) || {};
+    return info.stack!=null ? info.stack : (session.final_stacks||{})[seat];
+  };
+  const order = Object.keys(session.seat_assignment)
+    .sort((a,b) => (stackOf(b)||0) - (stackOf(a)||0));
+  $("standings").innerHTML = order.map((seat,i) => {
+    const stk = stackOf(seat);
+    const bust = (stk||0) <= 0;
+    return `<div class="stand${bust?" bust":""}">` +
+      `<span class="rk${i===0?" gold":""}">#${i+1}</span>` +
+      `<span class="seatdot" style="background:${scol(seat)}"></span>` +
+      `<span class="nm">${session.seat_assignment[seat]}</span>` +
+      `<span class="fs">${stk!=null?stk:"—"}</span></div>`;
+  }).join("");
+}
+
+function selectHand(hidx){
+  stop();
+  hand = session.hands[hidx];
+  $("handSel").value = hidx;
+  cursor = 0;
+  btnSeat = hand.button;
+  $("slider").max = hand.moves.length;
+  render();
+}
+
+function nextHand(){
+  const hidx = +$("handSel").value;
+  if (hidx < session.hands.length - 1) selectHand(hidx + 1);
+}
+
+function prevHand(){
+  const hidx = +$("handSel").value;
+  if (hidx > 0) selectHand(hidx - 1);
+}
+
+// state at cursor k: k=0 is pre-first-action; k>0 reflects after move[k-1]; the
+// seats snapshot stored on each move is what that actor saw (pre-action).
+function stateAt(k){
+  const moves = hand.moves;
+  if (!moves.length) return {seats:{}, board:hand.final_board||[], pot:0, acting:null, last:null, result:true};
+  if (k===0){ const m=moves[0]; return {seats:m.seats||{}, board:m.board, pot:m.pot, acting:m.player, last:null, result:false}; }
+  const m = moves[k-1];
+  const result = (k===moves.length);
+  const board = (result && (hand.final_board||[]).length > (m.board||[]).length) ? hand.final_board : m.board;
+  return {seats:m.seats||{}, board, pot:m.pot, acting: result ? null : m.player, last:m, result};
+}
+
+function cardHTML(card, faceUp, sm){
+  const c = sm ? "card sm" : "card";
+  if (!faceUp || !card) return `<div class="${c} back"></div>`;
+  const r = card.slice(0,-1), s = card.slice(-1).toLowerCase();
+  const red = (s==="d"||s==="h");
+  return `<div class="${c}${red?" red":""}"><span class="r">${r}</span><span class="s">${SUIT[s]||s}</span></div>`;
+}
+
+function actLabel(m){
+  const a=(m.action||"").toLowerCase();
+  if (a==="raise") return "RAISE " + (m.amount!=null?m.amount:"");
+  if (a==="all_in") return "ALL-IN";
+  if (a==="bet") return "BET " + (m.amount!=null?m.amount:"");
+  return a.toUpperCase();
+}
+
+function seatHTML(seat, st){
+  const agent = session.seat_assignment[seat] || seat;
+  const info = (st.seats && st.seats[seat]) || {};
+  let stack = info.stack;
+  let status = info.status || "active";
+  if (st.result){
+    if (hand.stacks_after && hand.stacks_after[seat]!=null) stack = hand.stacks_after[seat];
+  }
+  const holes = hand.holes[seat];
+  const faceUp = !!holes;
+  const isBtn = seat===btnSeat;
+  const busted = status==="busted";
+  const folded = status==="folded";
+  const allin = status==="all_in" || status==="allin";
+  const acting = st.acting===seat;
+  const delta = hand.deltas ? hand.deltas[seat] : null;
+  const isWinner = st.result && delta!=null && delta>0;
+  const bubble = (st.last && st.last.player===seat)
+    ? `<div class="bubble${/fold/i.test(st.last.action)?" fold":""}">${actLabel(st.last)}</div>` : "";
+  const ret = (st.result && delta!=null && delta!==0)
+    ? `<span class="ret ${delta>=0?"pos":"neg"}">${fmt(delta)}</span>` : "";
+  const tags = (isBtn?`<span class="pos">BTN</span>`:"") +
+    (allin?`<span class="tag allin">ALL-IN</span>`:"") +
+    (busted?`<span class="tag fold">OUT</span>`:(folded?`<span class="tag fold">FOLD</span>`:""));
+  const commit = (!st.result && info.committed) ? `<span class="commit">bet ${info.committed}</span>` : "";
+  // A busted player is out of the session — not in the hand, so show no cards.
+  const cards = busted ? "" : (holes && holes.length ? holes : [null,null]).map(c => cardHTML(c, faceUp, true)).join("");
+  const cls = "seat" + (acting?" acting":"") + (isWinner?" winner":"") + ((folded||busted)&&!st.result?" folded":"");
+  return `<div class="${cls}">${bubble}
+    <div class="top"><div class="ava" style="background:${scol(seat)}">${(agent[0]||"?").toUpperCase()}</div>
+      <div style="min-width:0"><div class="nm">${agent}</div>
+        <div class="sub"><span class="stk">🪙 ${stack!=null?stack:"—"}</span> ${tags}</div></div></div>
+    <div class="row2"><div class="holes">${cards}</div><div>${ret||commit}</div></div></div>`;
+}
+
+function render(){
+  const st = stateAt(cursor);
+  renderStandings(st);
+  for (const seat of SLOTS){
+    const slotEl = $("slot" + seat.split("_")[1]);
+    if (slotEl) slotEl.innerHTML = seatHTML(seat, st);
+  }
+  $("pot").textContent = st.pot!=null ? st.pot : "—";
+  $("street").textContent = (st.last ? st.last.street : (hand.moves[0]?hand.moves[0].street:"preflop")) || "preflop";
+  const board = st.board || [];
+  // A showdown always uses 5 community cards, but all-in runouts are dealt with
+  // no further decisions, so they're never logged. Mark missing slots unknown.
+  const unknown = st.result && hand.reason==="showdown" && board.length<5;
+  let cb = "";
+  for (let i=0;i<5;i++) cb += board[i] ? cardHTML(board[i], true, false)
+    : `<div class="card ${unknown?"unknown":"empty"}"></div>`;
+  $("cboard").innerHTML = cb;
+  $("slider").value = cursor;
+  $("movecount").textContent = `action ${cursor} / ${hand.moves.length}`;
+  $("prev").disabled = cursor===0;
+  $("next").disabled = cursor===hand.moves.length && (+$("handSel").value) >= session.hands.length-1;
+  $("prevhand").disabled = (+$("handSel").value) <= 0;
+  $("nexthand").disabled = (+$("handSel").value) >= session.hands.length-1;
+  renderPanel(st);
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  let html="", lastStreet=null;
+  hand.moves.forEach((m,i)=>{
+    if (m.street!==lastStreet){ html += `<div class="streetsep">${m.street}</div>`; lastStreet=m.street; }
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    html += `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d" style="background:${scol(m.player)}"></span>${actLabel(m)}${m.trunc?" ⚠":""}</button>`;
+  });
+  ml.innerHTML = html;
+  const c=ml.querySelector(".cur");
+  if(c){ const cr=c.getBoundingClientRect(), mr=ml.getBoundingClientRect();
+    if(cr.top<mr.top) ml.scrollTop-=mr.top-cr.top;
+    else if(cr.bottom>mr.bottom) ml.scrollTop+=cr.bottom-mr.bottom; }
+}
+
+function renderPanel(st){
+  const p = $("panel");
+  let html = "";
+  if (cursor===0){
+    const btn = session.seat_assignment[hand.button] || "—";
+    html += `<div class="movenum">Hand ${hand.hand} start</div>` +
+      `<div class="meta">Button: ${btn}. ${SLOTS.filter(s=>hand.holes[s]).length} of ${session.num_players} hole pairs known.<br>` +
+      `All revealed hole cards are shown for analysis.</div>` +
+      `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`;
+    p.innerHTML = html; return;
+  }
+  const m = hand.moves[cursor-1];
+  const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
+  const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
+  const tid = "think-"+cursor;
+  if (st.result) html += resultBlock();
+  html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
+    `<span class="act${/fold/i.test(m.action)?" fold":""}">${actLabel(m)}</span></div>` +
+    `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
+  if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
+    `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += m.thinking
+    ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+      (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
+      `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
+    : `<div class="hint">No reasoning recorded for this action.</div>`;
+  p.innerHTML = html;
+}
+
+function resultBlock(){
+  const w = winnerNames(hand);
+  const d = hand.deltas || {};
+  const title = w.length ? `🏆 ${w.join(", ")} win${w.length>1?"":"s"} the hand` : "🤝 Uncontested";
+  const line = SLOTS.filter(s=>d[s]).map(s =>
+    `${session.seat_assignment[s]} ${fmt(d[s])}`).join(" · ") || "no chip movement";
+  const runout = (hand.reason==="showdown" && (hand.final_board||[]).length<5)
+    ? `<div class="rs" style="color:#6d28d9">⚠ turn/river not recorded — players were all-in; the board runout isn't logged.</div>` : "";
+  return `<div class="result"><div class="rt">${title}</div>` +
+    `<div class="rs">by ${hand.reason} · ${line}</div>${runout}</div>`;
+}
+
+function toggleThink(btn, id){
+  showThink = !showThink;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function step(d){
+  const n=hand.moves.length;
+  if (cursor+d<0) return;
+  if (cursor+d>n){
+    // past the end of this hand: roll into the next hand (resume autoplay if it was playing)
+    const hidx = +$("handSel").value;
+    if (hidx < session.hands.length-1){ const go=playing; selectHand(hidx+1); if(go) start(); }
+    else stop();
+    return;
+  }
+  cursor+=d; render();
+}
+function togglePlay(){ playing ? stop() : start(); }
+function start(){
+  if (cursor>=hand.moves.length) cursor=0;
+  playing=true; $("play").textContent="⏸ Pause";
+  timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
+}
+function stop(){ playing=false; $("play").textContent="▶ Play"; if(timer){clearInterval(timer); timer=null;} }
+function cycleSpeed(){
+  speedIdx=(speedIdx+1)%SPEEDS.length;
+  $("speed").textContent="⏩ " + SPEEDS[speedIdx] + "×";
+  if (playing){ clearInterval(timer); timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]); }
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+init();
+</script>
+</body></html>

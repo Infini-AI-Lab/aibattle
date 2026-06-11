@@ -1,5 +1,6 @@
-// Site navbar (left sidebar). Links resolve within reports/. Replay items
-// are omitted (no replay viewers are built).
+// Site navbar (left sidebar). Links resolve within reports/. Replay viewers
+// aren't listed here — each report links to its own replay page, and ACTIVE
+// maps replay pages back to their parent report so the right item stays lit.
 (function () {
   var ACTIVE = {
     "index.html": "index.html",
@@ -20,7 +21,7 @@
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when pages are restyled. ACTIVE matching
   // uses the bare filename, so the query string never affects highlighting.
-  var V = "?v=6";
+  var V = "?v=7";
   function a(href, label, cls) {
     var on = href === active ? " active" : "";
     return '<a class="' + cls + on + '" href="' + href + V + '">' + label + "</a>";
