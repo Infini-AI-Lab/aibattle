@@ -41,7 +41,7 @@ EPISODES = int(os.environ.get("EPISODES", "10"))  # matches per pair (independen
 MAX_HANDS = 30
 STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
-OUT = os.environ.get("OUT", "runs/match_tournament")
+OUT = os.environ.get("OUT", "runs/holdem_match")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every match draws its own OS-entropy
 # deal seeds inside the runner (seed=None), saved per ep<NNN>.json. No run-level

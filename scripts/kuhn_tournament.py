@@ -4,7 +4,7 @@ Each of C(5,2)=10 model pairs plays EPISODES seat-swapped hands. Kuhn is a tiny
 1-card game (~2 decisions/hand) and very high variance, so treat results as a
 directional smell test. Each hand is one episode (per-episode resume on).
 Reports win rate, net chips/hand, invalid rate, and truncated rate per model;
-writes runs/kuhn_tournament/kuhn_data.json and a board-style HTML report.
+writes runs/kuhn_poker/kuhn_data.json and a board-style HTML report.
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ def _coach_label(spec):
 MODELS = [_coach_label(s) for s in MODELS]
 EPISODES = 30               # hands per pair (seat-swapped); small smell test
 MAX_CONCURRENCY = 128
-OUT = os.environ.get("OUT", "runs/kuhn_tournament")
+OUT = os.environ.get("OUT", "runs/kuhn_poker")
 REPORT_DIR = "reports"
 os.makedirs(OUT, exist_ok=True)
 

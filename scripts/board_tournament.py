@@ -2,8 +2,8 @@
 
 For each game: 10 unique model pairs x EPISODES games each, all run in parallel
 under one global semaphore. Per-game aggregate saved incrementally to
-runs/board_tournament/<game>_data.json; full per-match logs under
-runs/board_tournament/<game>__<a>__vs__<b>/match.jsonl.
+runs/<game>/<game>_data.json (per-game coached folders); full per-match logs
+under runs/<game>/<game>__<a>__vs__<b>/match.jsonl.
 """
 
 from __future__ import annotations
@@ -38,8 +38,8 @@ MODELS = [_coach_label(s) for s in MODELS]
 EPISODES = 10               # small "smell test"; raise later to add more (resume reuses)
 MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
-OUT = os.environ.get("OUT", "runs/board_tournament")
-os.makedirs(OUT, exist_ok=True)
+# Each game writes to its own per-game folder: <RUNS_DIR>/<game>/.
+RUNS_BASE = os.environ.get("RUNS_DIR", "runs")
 # BOARD_VERBOSE=1 prints a timestamped line per move (via the runner's on_step
 # hook) so a long-running game is observable mid-episode — which step it's on,
 # who moved, and how big the generation was. Off by default to keep normal runs
@@ -97,7 +97,9 @@ async def main():
         # overwriting. A BOARD_PAIRS-filtered run only holds its own pairs in
         # memory; a blind overwrite would wipe the other pairs' summaries from a
         # previous full run. Keep on-disk pairs, overlay this run's pairs.
-        path = os.path.join(OUT, f"{game}_data.json")
+        game_dir = os.path.join(RUNS_BASE, game)
+        os.makedirs(game_dir, exist_ok=True)
+        path = os.path.join(game_dir, f"{game}_data.json")
         merged = {g["a"] + "\x00" + g["b"]: g for g in data[game]["games"]}
         if os.path.exists(path):
             try:
@@ -114,7 +116,7 @@ async def main():
 
     async def play(game, a, b, seed):
         nonlocal done
-        gdir = os.path.join(OUT, f"{game}__{a}__vs__{b}")
+        gdir = os.path.join(RUNS_BASE, game, f"{game}__{a}__vs__{b}")
         os.makedirs(gdir, exist_ok=True)
         runner = Runner(lambda g=game: make_game(g, {"random_open": RANDOM_OPEN}),
                         on_invalid_action="fallback")

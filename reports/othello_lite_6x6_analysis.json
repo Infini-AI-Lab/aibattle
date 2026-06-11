@@ -1,0 +1,277 @@
+{
+  "game": "othello_lite_6x6",
+  "kind": "versus",
+  "models": [
+    "kimi-k2p6",
+    "deepseek-v4-pro",
+    "glm-5p1",
+    "minimax-m2p7",
+    "gpt-oss-120b"
+  ],
+  "per_model": {
+    "kimi-k2p6": {
+      "games": 80,
+      "wins": 56,
+      "losses": 21,
+      "draws": 3,
+      "win_rate": 0.7,
+      "draw_rate": 0.0375,
+      "net_per_game": 0.4375,
+      "first_move_win_rate": 0.65,
+      "invalid_rate": 0.0,
+      "decisions": 1335,
+      "avg_len": 33.29,
+      "avg_latency_s": 821.5,
+      "len_hist": [
+        0,
+        0,
+        4,
+        23,
+        24,
+        11,
+        13,
+        3,
+        2,
+        0
+      ]
+    },
+    "deepseek-v4-pro": {
+      "games": 80,
+      "wins": 52,
+      "losses": 26,
+      "draws": 2,
+      "win_rate": 0.65,
+      "draw_rate": 0.025,
+      "net_per_game": 0.325,
+      "first_move_win_rate": 0.625,
+      "invalid_rate": 0.0,
+      "decisions": 1329,
+      "avg_len": 33.15,
+      "avg_latency_s": 417.8,
+      "len_hist": [
+        0,
+        0,
+        2,
+        31,
+        23,
+        10,
+        9,
+        2,
+        2,
+        1
+      ]
+    },
+    "glm-5p1": {
+      "games": 80,
+      "wins": 37,
+      "losses": 37,
+      "draws": 6,
+      "win_rate": 0.4625,
+      "draw_rate": 0.075,
+      "net_per_game": 0.0,
+      "first_move_win_rate": 0.55,
+      "invalid_rate": 0.0,
+      "decisions": 1315,
+      "avg_len": 32.88,
+      "avg_latency_s": 297.5,
+      "len_hist": [
+        1,
+        0,
+        2,
+        32,
+        29,
+        7,
+        6,
+        1,
+        2,
+        0
+      ]
+    },
+    "minimax-m2p7": {
+      "games": 80,
+      "wins": 19,
+      "losses": 56,
+      "draws": 5,
+      "win_rate": 0.2375,
+      "draw_rate": 0.0625,
+      "net_per_game": -0.4625,
+      "first_move_win_rate": 0.225,
+      "invalid_rate": 0.0,
+      "decisions": 1319,
+      "avg_len": 33.01,
+      "avg_latency_s": 133.1,
+      "len_hist": [
+        1,
+        1,
+        2,
+        31,
+        22,
+        9,
+        11,
+        1,
+        1,
+        1
+      ]
+    },
+    "gpt-oss-120b": {
+      "games": 80,
+      "wins": 27,
+      "losses": 51,
+      "draws": 2,
+      "win_rate": 0.3375,
+      "draw_rate": 0.025,
+      "net_per_game": -0.3,
+      "first_move_win_rate": 0.325,
+      "invalid_rate": 0.0,
+      "decisions": 1309,
+      "avg_len": 32.85,
+      "avg_latency_s": 36.9,
+      "len_hist": [
+        0,
+        1,
+        2,
+        41,
+        16,
+        7,
+        11,
+        1,
+        1,
+        0
+      ]
+    }
+  },
+  "h2h": {
+    "kimi-k2p6": {
+      "deepseek-v4-pro": [
+        11,
+        9,
+        0
+      ],
+      "glm-5p1": [
+        11,
+        8,
+        1
+      ],
+      "minimax-m2p7": [
+        17,
+        1,
+        2
+      ],
+      "gpt-oss-120b": [
+        17,
+        3,
+        0
+      ]
+    },
+    "deepseek-v4-pro": {
+      "kimi-k2p6": [
+        9,
+        11,
+        0
+      ],
+      "glm-5p1": [
+        12,
+        7,
+        1
+      ],
+      "minimax-m2p7": [
+        14,
+        5,
+        1
+      ],
+      "gpt-oss-120b": [
+        17,
+        3,
+        0
+      ]
+    },
+    "glm-5p1": {
+      "kimi-k2p6": [
+        8,
+        11,
+        1
+      ],
+      "deepseek-v4-pro": [
+        7,
+        12,
+        1
+      ],
+      "minimax-m2p7": [
+        14,
+        4,
+        2
+      ],
+      "gpt-oss-120b": [
+        8,
+        10,
+        2
+      ]
+    },
+    "minimax-m2p7": {
+      "kimi-k2p6": [
+        1,
+        17,
+        2
+      ],
+      "deepseek-v4-pro": [
+        5,
+        14,
+        1
+      ],
+      "glm-5p1": [
+        4,
+        14,
+        2
+      ],
+      "gpt-oss-120b": [
+        9,
+        11,
+        0
+      ]
+    },
+    "gpt-oss-120b": {
+      "kimi-k2p6": [
+        3,
+        17,
+        0
+      ],
+      "deepseek-v4-pro": [
+        3,
+        17,
+        0
+      ],
+      "glm-5p1": [
+        10,
+        8,
+        2
+      ],
+      "minimax-m2p7": [
+        11,
+        9,
+        0
+      ]
+    }
+  },
+  "elo": {
+    "kimi-k2p6": 1639,
+    "deepseek-v4-pro": 1602,
+    "glm-5p1": 1500,
+    "minimax-m2p7": 1352,
+    "gpt-oss-120b": 1407
+  },
+  "len_bins": [
+    "29\u201330",
+    "30\u201331",
+    "31\u201332",
+    "32\u201333",
+    "33\u201334",
+    "34\u201335",
+    "35\u201336",
+    "36\u201337",
+    "37\u201338",
+    "38\u201338"
+  ],
+  "first_player_win_rate": 0.475,
+  "num_games": 200,
+  "episodes_per_pair": 20
+}

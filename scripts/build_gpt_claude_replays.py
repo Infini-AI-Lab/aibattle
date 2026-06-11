@@ -1,8 +1,8 @@
 """Build replay data for the GPT-vs-Claude coached run.
 
-The base build_replays.py targets the canonical tournament dirs (board_tournament,
-tournament, match_tournament) whose layout differs from this run:
-``runs/gpt_claude_coached_tournament`` keeps each game in its own subdir with the
+The base build_replays.py targets the canonical per-game run dirs (runs/connect4,
+runs/gomoku, runs/holdem_1hand, ...) whose layout differs from this run:
+``runs/gpt_vs_claude`` keeps each game in its own subdir with the
 aggregate in ``<label>/<label>_data.json`` (keyed by ``pairs``, not ``games``)
 and per-episode logs in ``<label>/<a>__vs__<b>/ep*.json``.
 
@@ -10,7 +10,7 @@ So we reuse the pure encoders from build_replays (move/thinking/hole helpers) bu
 drive them off this run's layout. Output mirrors the base format exactly so the
 existing viewers work unchanged (only their fetch BASE differs):
 
-  runs/gpt_claude_coached_tournament/replays/<label>/
+  runs/gpt_vs_claude/replays/<label>/
     manifest.json
     <pair>.json
 
@@ -27,7 +27,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_replays as br  # noqa: E402  (pure encoder helpers)
 
-RUN = "runs/gpt_claude_coached_tournament"
+RUN = "runs/gpt_vs_claude"
 BOARD = {"connect4": 4, "gomoku": 5}
 
 

@@ -1,5 +1,5 @@
 """Render a dedicated GPT-vs-Claude analysis mini-site from the coached
-head-to-head run (runs/gpt_claude_coached_tournament).
+head-to-head run (runs/gpt_vs_claude).
 
 That run pits two GPT models (gpt-5.5, gpt-5.4) against two Claude models
 (claude-opus-4.8, claude-sonnet-4.6) across four games, all with one-line
@@ -33,7 +33,7 @@ import analyze_board_tournament as bt          # noqa: E402
 import analyze_tournament as ht                # noqa: E402  (Hold'em 1-hand)
 import analyze_match_tournament as mt          # noqa: E402
 
-RUN = "runs/gpt_claude_coached_tournament"
+RUN = "runs/gpt_vs_claude"
 OUT = "reports/gpt_vs_claude"
 
 # Family membership keyed by name prefix — the whole point of this mini-site.

@@ -71,7 +71,7 @@
     <span style="font-size:13px;color:#0b1020;background:#60a5fa;font-weight:600;
       padding:9px 16px;border-radius:999px;white-space:nowrap">View →</span>
   </a>
-
+  
   <section class="board">
     <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
       <span class="arena-tag">normalized rank · all model-arena games</span></div>
@@ -80,7 +80,7 @@
     <table class="lb">
       <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
         <th>coverage</th><th>best game</th></tr>
-      <tr><td class='rk'>🥇</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:83.3%'></span><span class='sval'>83</span></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥈</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:62.5%'></span><span class='sval'>62</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Table</td></tr><tr><td class='rk'>🥉</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:62.5%'></span><span class='sval'>62</span></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr><td class='rk'>4</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:25.0%'></span><span class='sval'>25</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Table</td></tr><tr><td class='rk'>5</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:16.7%'></span><span class='sval'>17</span></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr>
+      <tr><td class='rk'>🥇</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:72.5%'></span><span class='sval'>72</span></td><td class='cov'>10/10</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥈</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:72.5%'></span><span class='sval'>72</span></td><td class='cov'>10/10</td><td class='best'>🃏 Kuhn Poker</td></tr><tr><td class='rk'>🥉</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:52.5%'></span><span class='sval'>52</span></td><td class='cov'>10/10</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr><td class='rk'>4</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:35.0%'></span><span class='sval'>35</span></td><td class='cov'>10/10</td><td class='best'>🃏 Blackjack</td></tr><tr><td class='rk'>5</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:17.5%'></span><span class='sval'>18</span></td><td class='cov'>10/10</td><td class='best'>🃏 Kuhn Poker</td></tr>
     </table>
   </section>
 
@@ -95,15 +95,22 @@
         <a class="card" href="connect4_report.html">
           <div class="ctitle">🔴 Connect Four</div>
           <div class="badges"><span class='badge'>Perfect info</span><span class='badge'>2P</span><span class='badge'>Deterministic</span></div>
-          <div class="cmeta">100 games · board 6×7 · first-mover 63%</div>
-          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>Elo 1723</span></div>
+          <div class="cmeta">100 games · board 6×7 · first-mover 53%</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>Elo 1716</span></div>
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="gomoku_report.html">
           <div class="ctitle">⚫ Gomoku-Lite</div>
           <div class="badges"><span class='badge'>Perfect info</span><span class='badge'>2P</span><span class='badge'>Deterministic</span></div>
-          <div class="cmeta">100 games · board 9×9 · first-mover 49%</div>
-          <div class="champ">🏆 glm-5p1 <span class='metric'>Elo 1624</span></div>
+          <div class="cmeta">100 games · board 9×9 · first-mover 54%</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>Elo 1712</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="othello_report.html">
+          <div class="ctitle">⚫ Othello 6×6</div>
+          <div class="badges"><span class='badge'>Perfect info</span><span class='badge'>2P</span><span class='badge'>Deterministic</span></div>
+          <div class="cmeta">200 games · 10 deals/pair · first-mover 48%</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>Elo 1639</span></div>
           <div class="cgo">View analysis →</div>
         </a></div>
     <div class="group-label imperfect">🎭 Imperfect information
@@ -113,28 +120,49 @@
           <div class="ctitle">🃏 Kuhn Poker</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Stochastic</span></div>
           <div class="cmeta">30 hands/pair · solved game · GTO scoring</div>
-          <div class="champ">🏆 glm-5p1 <span class='metric'>+0.050 net/hand</span></div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>+0.067 net/hand</span></div>
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="holdem_tournament_report.html">
           <div class="ctitle">🃏 Hold'em 1-Hand</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Stochastic</span></div>
           <div class="cmeta">heads-up · 10 tables · 50 hands each · per-hand bb/100</div>
-          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>+169.5 bb/100</span></div>
+          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>+109.8 bb/100</span></div>
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="match_tournament_report.html">
           <div class="ctitle">🃏 Hold'em Match</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Stochastic</span></div>
           <div class="cmeta">heads-up · 40 matches/pair · up to 30 hands · stacks carried</div>
-          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>59% match wins</span></div>
+          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>57% match wins</span></div>
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="table_tournament_report.html">
           <div class="ctitle">🃏 Hold'em Table</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>5-handed</span><span class='badge'>Stochastic</span></div>
-          <div class="cmeta">5-handed · 50 sessions · up to 40 hands · avg finishing rank</div>
-          <div class="champ">🏆 kimi-k2p6 <span class='metric'>2.72 avg rank</span></div>
+          <div class="cmeta">5-handed · 100 sessions · up to 40 hands · avg finishing rank</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>2.68 avg rank</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="blackjack_report.html">
+          <div class="ctitle">🃏 Blackjack</div>
+          <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>vs Dealer</span><span class='badge'>Stochastic</span></div>
+          <div class="cmeta">vs dealer · 20 hands/model · chip profit</div>
+          <div class="champ">🏆 gpt-oss-120b <span class='metric'>+8.5 profit</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="leduc_report.html">
+          <div class="ctitle">🃏 Leduc Poker</div>
+          <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Stochastic</span></div>
+          <div class="cmeta">200 games · 10 deals/pair · first-mover 38%</div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>Elo 1514</span></div>
+          <div class="cgo">View analysis →</div>
+        </a>
+        <a class="card" href="blotto_report.html">
+          <div class="ctitle">⚔️ Colonel Blotto</div>
+          <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Simultaneous</span></div>
+          <div class="cmeta">200 games · 10 deals/pair · first-mover 50%</div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>Elo 2222</span></div>
           <div class="cgo">View analysis →</div>
         </a></div>
   </section>

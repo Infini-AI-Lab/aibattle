@@ -1,9 +1,9 @@
 """Token-usage + truncation report for a tournament run (any game).
 
 Usage:
-    python scripts/analyze_tokens.py runs/board_tournament
-    python scripts/analyze_tokens.py runs/tournament
-    python scripts/analyze_tokens.py runs/kuhn_tournament
+    python scripts/analyze_tokens.py runs/connect4
+    python scripts/analyze_tokens.py runs/holdem_1hand
+    python scripts/analyze_tokens.py runs/kuhn_poker
 
 Reads per-episode files and writes a board-style HTML report
 (<run_dir>/token_report.html and reports/<name>_tokens.html) plus a console
@@ -58,7 +58,7 @@ Truncation = finish_reason "length".</div>
 
 
 def main():
-    run_dir = sys.argv[1] if len(sys.argv) > 1 else "runs/board_tournament"
+    run_dir = sys.argv[1] if len(sys.argv) > 1 else "runs/connect4"
     name = os.path.basename(run_dir.rstrip("/"))
     per = eval_stats.collect(run_dir)
     rows = eval_stats.rows(per)

@@ -16,7 +16,10 @@
     "match_tournament_report.html": "match_tournament_report.html",
     "match_replay.html": "match_tournament_report.html",
     "table_tournament_report.html": "table_tournament_report.html",
-    "table_replay.html": "table_tournament_report.html"
+    "blackjack_report.html": "blackjack_report.html",
+    "leduc_report.html": "leduc_report.html",
+    "blotto_report.html": "blotto_report.html",
+    "othello_report.html": "othello_report.html"
   };
   var file = location.pathname.split("/").pop() || "index.html";
   var active = ACTIVE[file] || "";
@@ -37,8 +40,12 @@
     a("holdem_tournament_report.html", "1-Hand", "nav") +
     a("match_tournament_report.html", "Match", "nav") +
     a("table_tournament_report.html", "Table", "nav") +
+    '<span class="navclust">🆕 New games</span>' +
+    a("blackjack_report.html", "🃏 Blackjack", "nav") +
+    a("leduc_report.html", "🃏 Leduc", "nav") +
+    a("blotto_report.html", "⚔️ Blotto", "nav") +
+    a("othello_report.html", "⚫ Othello", "nav") +
     '<a class="navgrp navarena" href="index.html#agentic">Agentic Arena<span class="soon">soon</span></a>' +
-    '<a class="navgrp" href="coached/index.html">🎓 Coached Arena</a>' +
     '<a class="navgrp" href="gpt_vs_claude/index.html">🥊 GPT vs Claude</a>';
 
   function mount() {

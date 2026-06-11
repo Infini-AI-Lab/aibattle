@@ -16,6 +16,8 @@ import glob
 import json
 from collections import defaultdict
 
+from model_names import strip_coached
+
 # One colour per model, used across ALL charts and replay viewers.
 MODEL_COLORS = {
     "deepseek-v4-pro": "#60a5fa",  # blue
@@ -169,7 +171,7 @@ def behavior(ep_glob: str, hand_key: str, models: list) -> dict:
     stats = {m: _blank() for m in models}
     for path in sorted(glob.glob(ep_glob)):
         try:
-            ep = json.load(open(path, encoding="utf-8"))
+            ep = strip_coached(json.load(open(path, encoding="utf-8")))
         except (OSError, json.JSONDecodeError):
             continue
         accumulate(stats, ep, hand_key)
@@ -283,9 +285,9 @@ if __name__ == "__main__":  # quick self-test
     mode = sys.argv[1] if len(sys.argv) > 1 else "match"
     models = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
     if mode == "match":
-        b = behavior("runs/match_tournament/*__vs__*/ep*.json", "match_hand", models)
+        b = behavior("runs/holdem_match/*__vs__*/ep*.json", "match_hand", models)
     else:
-        b = behavior("runs/table_tournament/table/ep*.json", "table_hand", models)
+        b = behavior("runs/holdem_table/table/ep*.json", "table_hand", models)
     print(f"=== {mode} behavior ===")
     hdr = f"{'model':<17}{'VPIP':>6}{'PFR':>6}{'aggr':>6}{'f2b':>6}{'bet×':>6}{'AI%':>6}{'WTSD':>6}{'W@SD':>6}{'tok':>7}"
     print(hdr)

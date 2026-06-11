@@ -19,8 +19,9 @@ rate, average game length, latency, a head-to-head win matrix, and:
     game-length distribution
   - a rendered move-location heatmap per model (center-control / opening bias)
 
-Reads runs/board_tournament/<game>_data.json; writes <game>_report.html to
-runs/board_tournament/ and a tracked copy under reports/.
+Reads runs/<game>/<game>_data.json (per-game coached folders) for each of
+connect4, gomoku; writes <game>_report.html to runs/<game>/ and a tracked copy
+under reports/. Also regenerates the unified reports/index.html.
 """
 
 from __future__ import annotations
@@ -32,14 +33,13 @@ from collections import defaultdict
 
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
+from model_names import strip_coached
 
 GAMES = ["connect4", "gomoku"]
 NEED = {"connect4": 4, "gomoku": 5}
-# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
-# parallel coached mirror; unset, paths default to the base run. Filenames are
-# unchanged, so the coached index/nav cross-links resolve within the subdir.
-_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
-DATA_DIR = f"runs/board_tournament{_VARIANT}"
+# Coached is now the canonical (and only) run set. connect4 and gomoku each live
+# in their own per-game folder (runs/connect4, runs/gomoku) holding
+# <game>_data.json + the per-pair match dirs.
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 PLAYERS = ["player_0", "player_1"]
 PHASES = ["early", "mid", "late"]
@@ -411,9 +411,8 @@ def render_game(game: str, rep: dict) -> str:
     fpw = rep["first_player_win_rate"] * 100
     # Per-move replay viewer exists for both board games. The coached variant
     # has no replay viewers built (they fetch run data at runtime), so omit it.
-    replay_btn = (
-        f"<a class='replaybtn' href='{game}_replay.html'>▶ Watch game replays</a>"
-        if game in ("connect4", "gomoku") and not _VARIANT else "")
+    # Coached runs have no replay viewer built; omit the button so it never 404s.
+    replay_btn = ""
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>AI Battle Arena — {TITLE[game]}</title>
@@ -712,6 +711,14 @@ def render_index(reps: dict) -> str:
             "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["table"],
         })
 
+    # New-games tournament (independent_blackjack, leduc, blotto, othello). Its
+    # analyzer (analyze_new_games.py) writes a compact entry list that already
+    # carries title/href/group/badges/ranking/meta/champ_line, so each row drops
+    # straight into both the cards and the cross-game Arena Score.
+    newgames_path = os.path.join(REPORT_DIR, "new_games_index.json")
+    if os.path.exists(newgames_path):
+        entries.extend(json.load(open(newgames_path)))
+
     def _group(name):
         cards = "".join(_index_card(e) for e in entries if e["group"] == name)
         return f"<div class='cards'>{cards}</div>" if cards else \
@@ -823,14 +830,14 @@ def render_index(reps: dict) -> str:
 
 def main():
     os.makedirs(REPORT_DIR, exist_ok=True)
-    os.makedirs(DATA_DIR, exist_ok=True)
     reps = {}
     for game in GAMES:
-        path = os.path.join(DATA_DIR, f"{game}_data.json")
+        data_dir = f"runs/{game}"
+        path = os.path.join(data_dir, f"{game}_data.json")
         if not os.path.exists(path):
             print(f"skip {game}: no data at {path}")
             continue
-        data = json.load(open(path))
+        data = strip_coached(json.load(open(path)))
         if not data.get("games"):
             print(f"skip {game}: no completed games yet")
             continue
@@ -839,7 +846,7 @@ def main():
         reps[game] = rep
         html = render_game(game, rep)
 
-        out = os.path.join(DATA_DIR, f"{game}_report.html")
+        out = os.path.join(data_dir, f"{game}_report.html")
         repo_html = os.path.join(REPORT_DIR, f"{game}_report.html")
         with open(out, "w", encoding="utf-8") as f:
             f.write(html)

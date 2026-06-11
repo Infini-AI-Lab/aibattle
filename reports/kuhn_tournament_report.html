@@ -63,34 +63,34 @@
   <table>
     <tr><th>#</th><th class='model'>model</th><th>fold K vs bet</th>
         <th>call J vs bet</th><th>total blunders</th></tr>
-    <tr><td>1</td><td class='model'>glm-5p1</td><td>0/0</td><td>0/16</td><td class='good'>0/16 (0%)</td></tr><tr><td>2</td><td class='model'>deepseek-v4-pro</td><td>0/2</td><td>0/18</td><td class='good'>0/20 (0%)</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td>0/1</td><td>0/19</td><td class='good'>0/20 (0%)</td></tr><tr><td>4</td><td class='model'>minimax-m2p7</td><td>0/2</td><td>0/18</td><td class='good'>0/20 (0%)</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td>0/1</td><td>0/12</td><td class='good'>0/13 (0%)</td></tr>
+    <tr><td>1</td><td class='model'>glm-5p1</td><td>0/1</td><td>0/18</td><td class='good'>0/19 (0%)</td></tr><tr><td>2</td><td class='model'>minimax-m2p7</td><td>0/0</td><td>0/17</td><td class='good'>0/17 (0%)</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td>0/1</td><td>0/20</td><td class='good'>0/21 (0%)</td></tr><tr><td>4</td><td class='model'>deepseek-v4-pro</td><td>0/1</td><td>0/19</td><td class='good'>0/20 (0%)</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td>0/0</td><td>0/14</td><td class='good'>0/14 (0%)</td></tr>
   </table>
 
   <h2>Betting style <span class="note">(bet % by card, first to act · GTO: K 100% / Q 0% / J ~33%)</span></h2>
   <table>
     <tr><th class='model'>model</th><th>bet K (value)</th><th>bet Q (trap)</th><th>bet J (bluff)</th></tr>
-    <tr><td class='model'>glm-5p1</td><td class='good'>88%</td><td class='good'>0%</td><td class='good'>30%</td></tr><tr><td class='model'>deepseek-v4-pro</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>3%</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='good'>87%</td><td class='warn'>18%</td><td class='bad'>0%</td></tr><tr><td class='model'>minimax-m2p7</td><td class='good'>90%</td><td class='warn'>16%</td><td class='bad'>0%</td></tr><tr><td class='model'>kimi-k2p6</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>62%</td></tr>
+    <tr><td class='model'>glm-5p1</td><td class='good'>82%</td><td class='warn'>3%</td><td class='good'>22%</td></tr><tr><td class='model'>minimax-m2p7</td><td class='good'>100%</td><td class='warn'>24%</td><td class='bad'>4%</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='good'>97%</td><td class='warn'>11%</td><td class='bad'>3%</td></tr><tr><td class='model'>deepseek-v4-pro</td><td class='good'>100%</td><td class='good'>0%</td><td class='bad'>4%</td></tr><tr><td class='model'>kimi-k2p6</td><td class='good'>100%</td><td class='good'>0%</td><td class='good'>38%</td></tr>
   </table>
 
   <h2>Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>net/hand</th><th>win%</th>
         <th>hands</th><th>decisions</th><th>invalid%</th><th>trunc%</th><th>avg tokens/dec</th></tr>
-    <tr><td>1</td><td class='model'>glm-5p1</td><td class='pos'>+0.050</td><td>53%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>2,580</td></tr><tr><td>2</td><td class='model'>deepseek-v4-pro</td><td class='pos'>+0.025</td><td>48%</td><td>120</td><td>148</td><td>0.0%</td><td>0.0%</td><td>3,095</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td class='pos'>+0.008</td><td>46%</td><td>120</td><td>143</td><td>0.0%</td><td>0.0%</td><td>823</td></tr><tr><td>4</td><td class='model'>minimax-m2p7</td><td class='neg'>-0.025</td><td>48%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>13,697</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td class='neg'>-0.058</td><td>54%</td><td>120</td><td>140</td><td>0.0%</td><td>0.0%</td><td>14,229</td></tr>
+    <tr><td>1</td><td class='model'>glm-5p1</td><td class='pos'>+0.067</td><td>52%</td><td>120</td><td>147</td><td>0.0%</td><td>0.0%</td><td>2,451</td></tr><tr><td>2</td><td class='model'>minimax-m2p7</td><td class='pos'>+0.042</td><td>50%</td><td>120</td><td>141</td><td>0.0%</td><td>0.0%</td><td>11,859</td></tr><tr><td>3</td><td class='model'>gpt-oss-120b</td><td class='neg'>-0.017</td><td>47%</td><td>120</td><td>144</td><td>0.0%</td><td>0.0%</td><td>719</td></tr><tr><td>4</td><td class='model'>deepseek-v4-pro</td><td class='neg'>-0.025</td><td>50%</td><td>120</td><td>146</td><td>0.0%</td><td>0.0%</td><td>2,378</td></tr><tr><td>5</td><td class='model'>kimi-k2p6</td><td class='neg'>-0.067</td><td>51%</td><td>120</td><td>143</td><td>0.0%</td><td>0.0%</td><td>13,647</td></tr>
   </table>
 
   <h2>Head-to-head <span class="note">(row's net chips/hand vs column)</span></h2>
-  <table><tr><th class='model'></th><th>deepseek</th><th>gpt</th><th>kimi</th><th>glm</th><th>minimax</th></tr><tr><td class='model'>deepseek-v4-pro</td><td class='diag'>—</td><td class='pos'>+0.00</td><td class='pos'>+0.13</td><td class='neg'>-0.13</td><td class='pos'>+0.10</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='pos'>+0.00</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='pos'>+0.03</td><td class='pos'>+0.10</td></tr><tr><td class='model'>kimi-k2p6</td><td class='neg'>-0.13</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='neg'>-0.03</td><td class='neg'>-0.17</td></tr><tr><td class='model'>glm-5p1</td><td class='pos'>+0.13</td><td class='neg'>-0.03</td><td class='pos'>+0.03</td><td class='diag'>—</td><td class='pos'>+0.07</td></tr><tr><td class='model'>minimax-m2p7</td><td class='neg'>-0.10</td><td class='neg'>-0.10</td><td class='pos'>+0.17</td><td class='neg'>-0.07</td><td class='diag'>—</td></tr></table>
+  <table><tr><th class='model'></th><th>deepseek</th><th>gpt</th><th>kimi</th><th>glm</th><th>minimax</th></tr><tr><td class='model'>deepseek-v4-pro</td><td class='diag'>—</td><td class='neg'>-0.03</td><td class='pos'>+0.07</td><td class='neg'>-0.10</td><td class='neg'>-0.03</td></tr><tr><td class='model'>gpt-oss-120b</td><td class='pos'>+0.03</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='neg'>-0.07</td><td class='pos'>+0.07</td></tr><tr><td class='model'>kimi-k2p6</td><td class='neg'>-0.07</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='neg'>-0.10</td><td class='neg'>-0.20</td></tr><tr><td class='model'>glm-5p1</td><td class='pos'>+0.10</td><td class='pos'>+0.07</td><td class='pos'>+0.10</td><td class='diag'>—</td><td class='pos'>+0.00</td></tr><tr><td class='model'>minimax-m2p7</td><td class='pos'>+0.03</td><td class='neg'>-0.07</td><td class='pos'>+0.20</td><td class='pos'>+0.00</td><td class='diag'>—</td></tr></table>
 
   <script>
-  const labels = ["glm-5p1", "deepseek-v4-pro", "gpt-oss-120b", "minimax-m2p7", "kimi-k2p6"];
+  const labels = ["glm-5p1", "minimax-m2p7", "gpt-oss-120b", "deepseek-v4-pro", "kimi-k2p6"];
   const gto = {K:100.0, Q:0.0, J:33.3};
   new Chart(document.getElementById('bet'), {
     type:'bar',
     data:{labels:labels,datasets:[
-      {label:'bet K %',data:[87.8, 100.0, 87.2, 90.5, 100.0],backgroundColor:'#4ade80'},
-      {label:'bet Q %',data:[0, 0, 18.5, 15.6, 0],backgroundColor:'#f87171'},
-      {label:'bet J %',data:[29.6, 3.4, 0, 0, 61.5],backgroundColor:'#60a5fa'}
+      {label:'bet K %',data:[82.5, 100.0, 97.4, 100.0, 100.0],backgroundColor:'#4ade80'},
+      {label:'bet Q %',data:[3.0, 24.2, 10.7, 0, 0],backgroundColor:'#f87171'},
+      {label:'bet J %',data:[22.2, 4.3, 2.9, 3.6, 37.5],backgroundColor:'#60a5fa'}
     ]},
     options:{plugins:{legend:{labels:{color:'#9aa3b5'}}},
       scales:{y:{beginAtZero:true,max:100,grid:{color:'#20242e'},

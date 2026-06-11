@@ -6,7 +6,7 @@ incrementally as it plays. When only the per-pair ep*.json files are available
 analyze_match_tournament.py expects.
 
 Usage:
-    python3 scripts/aggregate_match_data.py runs/match_tournament_coached
+    python3 scripts/aggregate_match_data.py runs/holdem_match
 """
 
 from __future__ import annotations
@@ -75,4 +75,4 @@ def main(data_dir: str) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "runs/match_tournament")
+    main(sys.argv[1] if len(sys.argv) > 1 else "runs/holdem_match")
