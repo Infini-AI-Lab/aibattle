@@ -38,7 +38,8 @@
     a("match_tournament_report.html", "Match", "nav") +
     a("table_tournament_report.html", "Table", "nav") +
     '<a class="navgrp navarena" href="index.html#agentic">Agentic Arena<span class="soon">soon</span></a>' +
-    '<a class="navgrp" href="coached/index.html">🎓 Coached Arena</a>';
+    '<a class="navgrp" href="coached/index.html">🎓 Coached Arena</a>' +
+    '<a class="navgrp" href="gpt_vs_claude/index.html">🥊 GPT vs Claude</a>';
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>AI Battle Arena — 🔴 Connect Four</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<style>
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
+  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
+  h1 { font-size:25px; } h2 { font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
+  h3 { font-size:14px; color:#9aa3b5; }
+  .sub { color:#8b93a7; }
+  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .kpi { background:#171a23; border:1px solid #232838; border-radius:10px; padding:12px 16px; }
+  .kpi .v { font-size:22px; font-weight:700; color:#cdd6f4; }
+  .kpi .l { font-size:11px; color:#8b93a7; text-transform:uppercase; letter-spacing:.04em; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
+  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
+  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
+  .small { font-size:10px; color:#8b93a7; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
+  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
+  canvas { max-height:300px; }
+  .heatwrap { display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; }
+  .heatcard { text-align:center; }
+  .hlabel { font-size:11px; color:#9aa3b5; margin-bottom:6px; }
+  .board { display:grid; gap:1px; background:#232838; padding:1px; border-radius:4px; }
+  .cell { width:14px; height:14px; }
+  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px;
+    text-decoration:none; }
+  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
+  @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
+</style></head>
+<body><div class="wrap">
+  <h1>🎲 AI Battle Arena — 🔴 Connect Four</h1>
+  <div class="sub">Perfect-information game · round-robin · 300 games · board 6×7</div>
+  <a class='replaybtn' href='connect4_replay.html'>▶ Watch game replays</a>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">1583</div><div class="l">top Elo · claude-opus-4.8</div></div>
+    <div class="kpi"><div class="v">51%</div><div class="l">first-mover win rate</div></div>
+    <div class="kpi"><div class="v">300</div><div class="l">games played</div></div>
+  </div>
+
+  <h2>Leaderboard &amp; tactical accuracy</h2>
+  <table>
+    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
+        <th>draw%</th><th>1st-move win%</th><th>win-take</th><th>block</th>
+        <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+    <tr>
+          <td>1</td><td class='model'>claude-opus-4.8</td>
+          <td>1583</td>
+          <td class='pos'>+0.30</td>
+          <td>62%</td><td>6%</td>
+          <td>61%</td>
+          <td>99%<div class='small'>n=94</div></td>
+          <td>89%<div class='small'>n=311</div></td>
+          <td>1/33</td>
+          <td>2.4%</td>
+          <td>19.1</td><td>269.1s</td>
+        </tr><tr>
+          <td>2</td><td class='model'>gpt-5.4</td>
+          <td>1531</td>
+          <td class='pos'>+0.11</td>
+          <td>54%</td><td>3%</td>
+          <td>61%</td>
+          <td>99%<div class='small'>n=82</div></td>
+          <td>81%<div class='small'>n=283</div></td>
+          <td>1/53</td>
+          <td>2.4%</td>
+          <td>18.1</td><td>240.7s</td>
+        </tr><tr>
+          <td>3</td><td class='model'>gpt-5.5</td>
+          <td>1491</td>
+          <td class='neg'>-0.03</td>
+          <td>46%</td><td>5%</td>
+          <td>49%</td>
+          <td>100%<div class='small'>n=69</div></td>
+          <td>78%<div class='small'>n=263</div></td>
+          <td>0/58</td>
+          <td>0.1%</td>
+          <td>18.0</td><td>219.0s</td>
+        </tr><tr>
+          <td>4</td><td class='model'>claude-sonnet-4.6</td>
+          <td>1395</td>
+          <td class='neg'>-0.38</td>
+          <td>29%</td><td>5%</td>
+          <td>32%</td>
+          <td>100%<div class='small'>n=43</div></td>
+          <td>80%<div class='small'>n=315</div></td>
+          <td>0/63</td>
+          <td>4.6%</td>
+          <td>16.4</td><td>281.5s</td>
+        </tr>
+  </table>
+  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
+    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
+    win-take = took an immediate win when one existed; block = removed an opponent's immediate
+    winning threat; miss/allow = missed wins / allowed losses (blunders). These are objective
+    tactical-accuracy measures read from the board.</div>
+
+  <div class="grid2">
+    <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
+    <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
+  </div>
+  <div class="grid2">
+    <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
+    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
+  </div>
+  <div class="grid2">
+    <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
+    <div></div>
+  </div>
+
+  <h2>Head-to-head (row wins–losses vs column)</h2>
+  <table class='h2h'><tr><th></th><th>claude-opus-4.8</th><th>claude-sonnet-4.6</th><th>gpt-5.5</th><th>gpt-5.4</th></tr><tr><th class='model'>claude-opus-4.8</th><td class='diag'>—</td><td class='pos'>34-12<div class='small'>4d</div></td><td class='pos'>31-16<div class='small'>3d</div></td><td class='pos'>28-20<div class='small'>2d</div></td></tr><tr><th class='model'>claude-sonnet-4.6</th><td class='neg'>12-34<div class='small'>4d</div></td><td class='diag'>—</td><td class='neg'>14-34<div class='small'>2d</div></td><td class='neg'>17-32<div class='small'>1d</div></td></tr><tr><th class='model'>gpt-5.5</th><td class='neg'>16-31<div class='small'>3d</div></td><td class='pos'>34-14<div class='small'>2d</div></td><td class='diag'>—</td><td class='neg'>19-29<div class='small'>2d</div></td></tr><tr><th class='model'>gpt-5.4</th><td class='neg'>20-28<div class='small'>2d</div></td><td class='pos'>32-17<div class='small'>1d</div></td><td class='pos'>29-19<div class='small'>2d</div></td><td class='diag'>—</td></tr></table>
+
+  <h2>Move-location heatmap</h2>
+  <div class="note">Where each model places pieces (brighter = more frequent). Reveals
+    center-control bias and opening preferences.</div>
+  <div class="heatwrap"><div class='heatcard'><div class='hlabel'>claude-opus-4.8</div><div class='board' style='grid-template-columns:repeat(7,14px)'><div class='cell' style='background:rgba(96,165,250,0.078)' title='7'></div><div class='cell' style='background:rgba(96,165,250,0.189)' title='17'></div><div class='cell' style='background:rgba(96,165,250,0.111)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.356)' title='32'></div><div class='cell' style='background:rgba(96,165,250,0.222)' title='20'></div><div class='cell' style='background:rgba(96,165,250,0.156)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.056)' title='5'></div><div class='cell' style='background:rgba(96,165,250,0.111)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.133)' title='12'></div><div class='cell' style='background:rgba(96,165,250,0.233)' title='21'></div><div class='cell' style='background:rgba(96,165,250,0.311)' title='28'></div><div class='cell' style='background:rgba(96,165,250,0.300)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.178)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.144)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.078)' title='7'></div><div class='cell' style='background:rgba(96,165,250,0.289)' title='26'></div><div class='cell' style='background:rgba(96,165,250,0.500)' title='45'></div><div class='cell' style='background:rgba(96,165,250,0.500)' title='45'></div><div class='cell' style='background:rgba(96,165,250,0.578)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.411)' title='37'></div><div class='cell' style='background:rgba(96,165,250,0.122)' title='11'></div><div class='cell' style='background:rgba(96,165,250,0.178)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.389)' title='35'></div><div class='cell' style='background:rgba(96,165,250,0.656)' title='59'></div><div class='cell' style='background:rgba(96,165,250,0.667)' title='60'></div><div class='cell' style='background:rgba(96,165,250,0.733)' title='66'></div><div class='cell' style='background:rgba(96,165,250,0.478)' title='43'></div><div class='cell' style='background:rgba(96,165,250,0.189)' title='17'></div><div class='cell' style='background:rgba(96,165,250,0.300)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.556)' title='50'></div><div class='cell' style='background:rgba(96,165,250,0.578)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.689)' title='62'></div><div class='cell' style='background:rgba(96,165,250,1.000)' title='90'></div><div class='cell' style='background:rgba(96,165,250,0.622)' title='56'></div><div class='cell' style='background:rgba(96,165,250,0.344)' title='31'></div><div class='cell' style='background:rgba(96,165,250,0.356)' title='32'></div><div class='cell' style='background:rgba(96,165,250,0.467)' title='42'></div><div class='cell' style='background:rgba(96,165,250,0.578)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.589)' title='53'></div><div class='cell' style='background:rgba(96,165,250,0.767)' title='69'></div><div class='cell' style='background:rgba(96,165,250,0.689)' title='62'></div><div class='cell' style='background:rgba(96,165,250,0.178)' title='16'></div></div></div><div class='heatcard'><div class='hlabel'>claude-sonnet-4.6</div><div class='board' style='grid-template-columns:repeat(7,14px)'><div class='cell' style='background:rgba(96,165,250,0.037)' title='3'></div><div class='cell' style='background:rgba(96,165,250,0.037)' title='3'></div><div class='cell' style='background:rgba(96,165,250,0.134)' title='11'></div><div class='cell' style='background:rgba(96,165,250,0.329)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.037)' title='3'></div><div class='cell' style='background:rgba(96,165,250,0.024)' title='2'></div><div class='cell' style='background:rgba(96,165,250,0.073)' title='6'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.232)' title='19'></div><div class='cell' style='background:rgba(96,165,250,0.585)' title='48'></div><div class='cell' style='background:rgba(96,165,250,0.293)' title='24'></div><div class='cell' style='background:rgba(96,165,250,0.232)' title='19'></div><div class='cell' style='background:rgba(96,165,250,0.061)' title='5'></div><div class='cell' style='background:rgba(96,165,250,0.146)' title='12'></div><div class='cell' style='background:rgba(96,165,250,0.195)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.378)' title='31'></div><div class='cell' style='background:rgba(96,165,250,0.720)' title='59'></div><div class='cell' style='background:rgba(96,165,250,0.537)' title='44'></div><div class='cell' style='background:rgba(96,165,250,0.329)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.159)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.134)' title='11'></div><div class='cell' style='background:rgba(96,165,250,0.317)' title='26'></div><div class='cell' style='background:rgba(96,165,250,0.427)' title='35'></div><div class='cell' style='background:rgba(96,165,250,0.878)' title='72'></div><div class='cell' style='background:rgba(96,165,250,0.463)' title='38'></div><div class='cell' style='background:rgba(96,165,250,0.378)' title='31'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.195)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.488)' title='40'></div><div class='cell' style='background:rgba(96,165,250,0.573)' title='47'></div><div class='cell' style='background:rgba(96,165,250,1.000)' title='82'></div><div class='cell' style='background:rgba(96,165,250,0.646)' title='53'></div><div class='cell' style='background:rgba(96,165,250,0.671)' title='55'></div><div class='cell' style='background:rgba(96,165,250,0.183)' title='15'></div><div class='cell' style='background:rgba(96,165,250,0.390)' title='32'></div><div class='cell' style='background:rgba(96,165,250,0.463)' title='38'></div><div class='cell' style='background:rgba(96,165,250,0.329)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.634)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.512)' title='42'></div><div class='cell' style='background:rgba(96,165,250,0.659)' title='54'></div><div class='cell' style='background:rgba(96,165,250,0.427)' title='35'></div></div></div><div class='heatcard'><div class='hlabel'>gpt-5.5</div><div class='board' style='grid-template-columns:repeat(7,14px)'><div class='cell' style='background:rgba(96,165,250,0.053)' title='4'></div><div class='cell' style='background:rgba(96,165,250,0.080)' title='6'></div><div class='cell' style='background:rgba(96,165,250,0.173)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.200)' title='15'></div><div class='cell' style='background:rgba(96,165,250,0.213)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.133)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.080)' title='6'></div><div class='cell' style='background:rgba(96,165,250,0.080)' title='6'></div><div class='cell' style='background:rgba(96,165,250,0.160)' title='12'></div><div class='cell' style='background:rgba(96,165,250,0.240)' title='18'></div><div class='cell' style='background:rgba(96,165,250,0.373)' title='28'></div><div class='cell' style='background:rgba(96,165,250,0.387)' title='29'></div><div class='cell' style='background:rgba(96,165,250,0.160)' title='12'></div><div class='cell' style='background:rgba(96,165,250,0.120)' title='9'></div><div class='cell' style='background:rgba(96,165,250,0.133)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.320)' title='24'></div><div class='cell' style='background:rgba(96,165,250,0.533)' title='40'></div><div class='cell' style='background:rgba(96,165,250,0.640)' title='48'></div><div class='cell' style='background:rgba(96,165,250,0.613)' title='46'></div><div class='cell' style='background:rgba(96,165,250,0.400)' title='30'></div><div class='cell' style='background:rgba(96,165,250,0.173)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.213)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.387)' title='29'></div><div class='cell' style='background:rgba(96,165,250,0.720)' title='54'></div><div class='cell' style='background:rgba(96,165,250,0.920)' title='69'></div><div class='cell' style='background:rgba(96,165,250,0.973)' title='73'></div><div class='cell' style='background:rgba(96,165,250,0.453)' title='34'></div><div class='cell' style='background:rgba(96,165,250,0.147)' title='11'></div><div class='cell' style='background:rgba(96,165,250,0.320)' title='24'></div><div class='cell' style='background:rgba(96,165,250,0.520)' title='39'></div><div class='cell' style='background:rgba(96,165,250,0.813)' title='61'></div><div class='cell' style='background:rgba(96,165,250,0.880)' title='66'></div><div class='cell' style='background:rgba(96,165,250,0.733)' title='55'></div><div class='cell' style='background:rgba(96,165,250,0.707)' title='53'></div><div class='cell' style='background:rgba(96,165,250,0.453)' title='34'></div><div class='cell' style='background:rgba(96,165,250,0.320)' title='24'></div><div class='cell' style='background:rgba(96,165,250,0.693)' title='52'></div><div class='cell' style='background:rgba(96,165,250,1.000)' title='75'></div><div class='cell' style='background:rgba(96,165,250,0.680)' title='51'></div><div class='cell' style='background:rgba(96,165,250,0.640)' title='48'></div><div class='cell' style='background:rgba(96,165,250,0.640)' title='48'></div><div class='cell' style='background:rgba(96,165,250,0.480)' title='36'></div></div></div><div class='heatcard'><div class='hlabel'>gpt-5.4</div><div class='board' style='grid-template-columns:repeat(7,14px)'><div class='cell' style='background:rgba(96,165,250,0.098)' title='8'></div><div class='cell' style='background:rgba(96,165,250,0.122)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.244)' title='20'></div><div class='cell' style='background:rgba(96,165,250,0.341)' title='28'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.098)' title='8'></div><div class='cell' style='background:rgba(96,165,250,0.122)' title='10'></div><div class='cell' style='background:rgba(96,165,250,0.073)' title='6'></div><div class='cell' style='background:rgba(96,165,250,0.159)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.329)' title='27'></div><div class='cell' style='background:rgba(96,165,250,0.585)' title='48'></div><div class='cell' style='background:rgba(96,165,250,0.256)' title='21'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.061)' title='5'></div><div class='cell' style='background:rgba(96,165,250,0.159)' title='13'></div><div class='cell' style='background:rgba(96,165,250,0.305)' title='25'></div><div class='cell' style='background:rgba(96,165,250,0.439)' title='36'></div><div class='cell' style='background:rgba(96,165,250,0.890)' title='73'></div><div class='cell' style='background:rgba(96,165,250,0.476)' title='39'></div><div class='cell' style='background:rgba(96,165,250,0.232)' title='19'></div><div class='cell' style='background:rgba(96,165,250,0.146)' title='12'></div><div class='cell' style='background:rgba(96,165,250,0.134)' title='11'></div><div class='cell' style='background:rgba(96,165,250,0.402)' title='33'></div><div class='cell' style='background:rgba(96,165,250,0.634)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.829)' title='68'></div><div class='cell' style='background:rgba(96,165,250,0.634)' title='52'></div><div class='cell' style='background:rgba(96,165,250,0.427)' title='35'></div><div class='cell' style='background:rgba(96,165,250,0.195)' title='16'></div><div class='cell' style='background:rgba(96,165,250,0.183)' title='15'></div><div class='cell' style='background:rgba(96,165,250,0.598)' title='49'></div><div class='cell' style='background:rgba(96,165,250,0.927)' title='76'></div><div class='cell' style='background:rgba(96,165,250,1.000)' title='82'></div><div class='cell' style='background:rgba(96,165,250,0.646)' title='53'></div><div class='cell' style='background:rgba(96,165,250,0.451)' title='37'></div><div class='cell' style='background:rgba(96,165,250,0.171)' title='14'></div><div class='cell' style='background:rgba(96,165,250,0.390)' title='32'></div><div class='cell' style='background:rgba(96,165,250,0.659)' title='54'></div><div class='cell' style='background:rgba(96,165,250,0.854)' title='70'></div><div class='cell' style='background:rgba(96,165,250,0.732)' title='60'></div><div class='cell' style='background:rgba(96,165,250,0.573)' title='47'></div><div class='cell' style='background:rgba(96,165,250,0.451)' title='37'></div><div class='cell' style='background:rgba(96,165,250,0.293)' title='24'></div></div></div></div>
+
+<script>
+const R = {"game": "connect4", "size": [6, 7], "models": ["claude-opus-4.8", "claude-sonnet-4.6", "gpt-5.5", "gpt-5.4"], "per_model": {"claude-opus-4.8": {"games": 150, "wins": 93, "losses": 48, "draws": 9, "win_rate": 0.62, "draw_rate": 0.06, "net_per_game": 0.3, "first_move_win_rate": 0.6133, "win_take_rate": 0.9894, "win_opps": 94, "block_rate": 0.8939, "block_opps": 311, "missed_wins": 1, "allowed_losses": 33, "invalid_rate": 0.0235, "decisions": 1445, "avg_len": 19.11, "avg_latency_s": 269.1, "heat": [[7, 17, 10, 32, 20, 14, 5], [10, 12, 21, 28, 27, 16, 13], [7, 26, 45, 45, 52, 37, 11], [16, 35, 59, 60, 66, 43, 17], [27, 50, 52, 62, 90, 56, 31], [32, 42, 52, 53, 69, 62, 16]], "phase_blunder_rate": {"early": 0.0, "mid": 0.0081, "late": 0.15}, "phase_opps": {"early": 62, "mid": 123, "late": 220}, "len_hist": [10, 9, 18, 32, 27, 13, 10, 6, 7, 5, 2, 11]}, "claude-sonnet-4.6": {"games": 150, "wins": 43, "losses": 100, "draws": 7, "win_rate": 0.2867, "draw_rate": 0.0467, "net_per_game": -0.38, "first_move_win_rate": 0.32, "win_take_rate": 1.0, "win_opps": 43, "block_rate": 0.8, "block_opps": 315, "missed_wins": 0, "allowed_losses": 63, "invalid_rate": 0.0461, "decisions": 1215, "avg_len": 16.41, "avg_latency_s": 281.5, "heat": [[3, 3, 11, 27, 14, 3, 2], [6, 14, 19, 48, 24, 19, 5], [12, 16, 31, 59, 44, 27, 13], [11, 26, 35, 72, 38, 31, 14], [16, 40, 47, 82, 53, 55, 15], [32, 38, 27, 52, 42, 54, 35]], "phase_blunder_rate": {"early": 0.0, "mid": 0.1259, "late": 0.2795}, "phase_opps": {"early": 54, "mid": 143, "late": 161}, "len_hist": [27, 9, 21, 30, 24, 12, 8, 3, 2, 4, 1, 9]}, "gpt-5.5": {"games": 150, "wins": 69, "losses": 74, "draws": 7, "win_rate": 0.46, "draw_rate": 0.0467, "net_per_game": -0.0333, "first_move_win_rate": 0.4933, "win_take_rate": 1.0, "win_opps": 69, "block_rate": 0.7795, "block_opps": 263, "missed_wins": 0, "allowed_losses": 58, "invalid_rate": 0.0015, "decisions": 1347, "avg_len": 17.97, "avg_latency_s": 219.0, "heat": [[4, 6, 13, 15, 16, 10, 6], [6, 12, 18, 28, 29, 12, 9], [10, 24, 40, 48, 46, 30, 13], [16, 29, 54, 69, 73, 34, 11], [24, 39, 61, 66, 55, 53, 34], [24, 52, 75, 51, 48, 48, 36]], "phase_blunder_rate": {"early": 0.0, "mid": 0.0099, "late": 0.3}, "phase_opps": {"early": 41, "mid": 101, "late": 190}, "len_hist": [20, 5, 27, 27, 23, 10, 9, 6, 7, 4, 2, 10]}, "gpt-5.4": {"games": 150, "wins": 81, "losses": 64, "draws": 5, "win_rate": 0.54, "draw_rate": 0.0333, "net_per_game": 0.1133, "first_move_win_rate": 0.6133, "win_take_rate": 0.9878, "win_opps": 82, "block_rate": 0.8127, "block_opps": 283, "missed_wins": 1, "allowed_losses": 53, "invalid_rate": 0.0242, "decisions": 1366, "avg_len": 18.15, "avg_latency_s": 240.7, "heat": [[8, 10, 20, 28, 14, 8, 10], [6, 13, 27, 48, 21, 14, 5], [13, 25, 36, 73, 39, 19, 12], [11, 33, 52, 68, 52, 35, 16], [15, 49, 76, 82, 53, 37, 14], [32, 54, 70, 60, 47, 37, 24]], "phase_blunder_rate": {"early": 0.0, "mid": 0.0588, "late": 0.235}, "phase_opps": {"early": 46, "mid": 119, "late": 200}, "len_hist": [21, 7, 26, 25, 18, 13, 5, 9, 10, 3, 3, 10]}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": [34, 12, 4], "gpt-5.5": [31, 16, 3], "gpt-5.4": [28, 20, 2]}, "claude-sonnet-4.6": {"claude-opus-4.8": [12, 34, 4], "gpt-5.5": [14, 34, 2], "gpt-5.4": [17, 32, 1]}, "gpt-5.5": {"claude-opus-4.8": [16, 31, 3], "claude-sonnet-4.6": [34, 14, 2], "gpt-5.4": [19, 29, 2]}, "gpt-5.4": {"claude-opus-4.8": [20, 28, 2], "claude-sonnet-4.6": [32, 17, 1], "gpt-5.5": [29, 19, 2]}}, "elo": {"claude-opus-4.8": 1583, "claude-sonnet-4.6": 1395, "gpt-5.5": 1491, "gpt-5.4": 1531}, "len_bins": ["5\u20138", "8\u201311", "11\u201314", "14\u201317", "17\u201320", "20\u201322", "22\u201325", "25\u201328", "28\u201331", "31\u201334", "34\u201337", "37\u201340"], "first_player_win_rate": 0.51, "num_games": 300};
+const pm=R.per_model, M=R.models, COLORS=['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa'];
+Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
+const ranked=[...M].sort((a,b)=>R.elo[b]-R.elo[a]);
+const eloRanked=ranked.filter(m=>R.elo[m]!=null);  // unrated (—) models omitted from the chart
+
+new Chart(document.getElementById('elo'), { type:'bar',
+  data:{ labels:eloRanked, datasets:[{label:'Elo', backgroundColor:'#a78bfa',
+    data:eloRanked.map(m=>R.elo[m])}]},
+  options:{ indexAxis:'y', scales:{x:{min:Math.min(...eloRanked.map(m=>R.elo[m]))-40}},
+    plugins:{legend:{display:false}} } });
+
+new Chart(document.getElementById('wdl'), { type:'bar',
+  data:{ labels:M, datasets:[
+    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
+    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
+    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+  ]},
+  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });
+
+new Chart(document.getElementById('tac'), { type:'bar',
+  data:{ labels:M, datasets:[
+    {label:'win-take %', backgroundColor:'#4ade80', data:M.map(m=>pm[m].win_take_rate*100)},
+    {label:'block %', backgroundColor:'#60a5fa', data:M.map(m=>pm[m].block_rate*100)},
+  ]},
+  options:{ scales:{y:{min:0,max:100}}, plugins:{legend:{position:'bottom'}} } });
+
+const PH=['early','mid','late'];
+new Chart(document.getElementById('phase'), { type:'line',
+  data:{ labels:PH, datasets:M.map((m,i)=>({label:m, borderColor:COLORS[i%COLORS.length],
+    backgroundColor:COLORS[i%COLORS.length], tension:.2,
+    data:PH.map(ph=>pm[m].phase_blunder_rate[ph]*100)}))},
+  options:{ scales:{y:{min:0, title:{display:true,text:'blunder %'}}},
+    plugins:{legend:{position:'bottom'}} } });
+
+new Chart(document.getElementById('len'), { type:'bar',
+  data:{ labels:R.len_bins, datasets:M.map((m,i)=>({label:m,
+    backgroundColor:COLORS[i%COLORS.length], data:pm[m].len_hist}))},
+  options:{ scales:{y:{title:{display:true,text:'games'}}},
+    plugins:{legend:{position:'bottom'}} } });
+</script>
+</div></body></html>
