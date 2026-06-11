@@ -42,30 +42,36 @@ from aibattle.games.registry import make_game
 from aibattle.logging.logger import MatchLogger
 from aibattle.runner.runner import Runner
 
-# The four verified-available Fireworks models (DEC-1). Do NOT add minimax-m2p7
-# or deepseek-flash — they are not in this account.
-MODELS = ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "gpt-oss-120b"]
+# Default Fireworks models (DEC-1 era). Override with a comma-separated MODELS
+# env var; verify availability first (e.g. minimax-m2p7 became available later,
+# deepseek-flash is still not in this account).
+MODELS = [m for m in os.environ.get(
+    "MODELS", "kimi-k2p6,deepseek-v4-pro,glm-5p1,gpt-oss-120b").split(",") if m]
 
 VERSUS_GAMES = ["othello_lite_6x6", "leduc_poker", "repeated_colonel_blotto"]
 ENV_GAMES = ["independent_blackjack"]
 
 OUT = os.environ.get("OUT", "runs/new_games_experiment")
-REPORT_DIR = "reports"
-MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", "8"))
+REPORT_DIR = os.environ.get("REPORT_DIR", "reports")
+MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", "128"))
 # Model call timeout. Long games (Blotto/Othello) with slow reasoning models can
 # legitimately take a while per step, so this defaults high and is env-tunable.
 # (A previous hard-coded 120s could fail expected-slow long-game decisions.)
-MODEL_TIMEOUT_S = float(os.environ.get("MODEL_TIMEOUT_S", "300"))
+MODEL_TIMEOUT_S = float(os.environ.get("MODEL_TIMEOUT_S", "900"))
+# Per-call output token cap (128k default so long reasoning is never truncated).
+MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "131072"))
+# Inject the per-game coaching line into the prompt template (COACHED=0 disables).
+COACHED = os.environ.get("COACHED", "1").lower() in ("1", "true", "yes")
 
 
 def acfg(label: str) -> dict:
     return {
-        "type": "model", "name": label,
+        "type": "model", "name": label, "coached": COACHED,
         "model": {
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{label}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.0, "max_tokens": 16384, "timeout_s": MODEL_TIMEOUT_S,
+            "temperature": 0.6, "max_tokens": MAX_TOKENS, "timeout_s": MODEL_TIMEOUT_S,
         },
         "max_retries": 2,
     }
@@ -388,7 +394,9 @@ def write_report(all_data: dict):
 
     lines = ["# AI Battle Arena — New Games Four-Model Experiment", ""]
     lines.append(f"Models: {', '.join(MODELS)}  ")
-    lines.append("Unavailable ids (minimax-m2p7, deepseek-flash) are out of scope.")
+    absent = [m for m in ("minimax-m2p7", "deepseek-flash") if m not in MODELS]
+    if absent:
+        lines.append(f"Unavailable ids ({', '.join(absent)}) are out of scope.")
     lines.append("")
     json_out = {}
     # Report games in a stable, plan-aligned order.
@@ -424,7 +432,7 @@ def write_report(all_data: dict):
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--episodes", type=int,
-                    default=int(os.environ.get("EPISODES", "6")))
+                    default=int(os.environ.get("EPISODES", "20")))
     ap.add_argument("--games", type=str, default="")
     args = ap.parse_args()
     episodes = args.episodes
