@@ -1,0 +1,25 @@
+# Leduc Poker smoke: random vs random. No API needed.
+game:
+  name: leduc_poker
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent: { type: builtin, name: leduc_random }
+  player_1:
+    agent: { type: builtin, name: leduc_random }
+
+run:
+  episodes: 50
+  seed: 12345
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 16
+
+output:
+  dir: ./runs/leduc_random
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

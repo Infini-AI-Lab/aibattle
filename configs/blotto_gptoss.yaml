@@ -1,0 +1,34 @@
+# Repeated Colonel Blotto correctness check: gpt-oss-120b vs blotto_random.
+game:
+  name: repeated_colonel_blotto
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 4096
+      max_retries: 2
+  player_1:
+    agent: { type: builtin, name: blotto_random }
+
+run:
+  episodes: 4
+  seed: 7
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 4
+
+output:
+  dir: ./runs/blotto_gptoss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

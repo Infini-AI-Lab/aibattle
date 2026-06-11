@@ -1,0 +1,35 @@
+# Othello-lite 6x6 correctness check: gpt-oss-120b (Fireworks) vs board_random.
+# Small run to confirm the model's outputs parse into legal moves at a high rate.
+game:
+  name: othello_lite_6x6
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 8192
+      max_retries: 2
+  player_1:
+    agent: { type: builtin, name: board_random }
+
+run:
+  episodes: 10
+  seed: 7
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 8
+
+output:
+  dir: ./runs/othello_gptoss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

@@ -1,0 +1,36 @@
+# Independent Blackjack correctness check: gpt-oss-120b player vs fixed dealer.
+# seat_swap MUST be false. Use the dedicated blackjack analysis script (not plain
+# `aibattle eval`) for standings, since the dealer seat must not be ranked.
+game:
+  name: independent_blackjack
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: gpt-oss-120b
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/gpt-oss-120b
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.0
+        max_tokens: 4096
+      max_retries: 2
+  player_1:
+    agent: { type: builtin, name: blackjack_dealer }
+
+run:
+  episodes: 10
+  seed: 7
+  seat_swap: false
+  on_invalid_action: fallback
+  max_concurrency: 4
+
+output:
+  dir: ./runs/blackjack_gptoss
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true
