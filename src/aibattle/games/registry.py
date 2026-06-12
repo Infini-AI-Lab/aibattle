@@ -9,6 +9,10 @@ from .holdem_match import HoldemMatch
 from .holdem_table import HoldemTable
 from .connect4 import ConnectFour
 from .gomoku import Gomoku
+from .othello_lite import OthelloLite6x6
+from .blackjack import IndependentBlackjack
+from .leduc import LeducPoker
+from .blotto import RepeatedColonelBlotto
 
 _GAMES = {
     KuhnPoker.name: KuhnPoker,
@@ -17,6 +21,10 @@ _GAMES = {
     HoldemTable.name: HoldemTable,
     ConnectFour.name: ConnectFour,
     Gomoku.name: Gomoku,
+    OthelloLite6x6.name: OthelloLite6x6,
+    IndependentBlackjack.name: IndependentBlackjack,
+    LeducPoker.name: LeducPoker,
+    RepeatedColonelBlotto.name: RepeatedColonelBlotto,
 }
 
 

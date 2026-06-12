@@ -29,9 +29,9 @@ from collections import defaultdict
 
 # (label, path-to-data-json)
 SOURCES = [
-    ("connect4", "runs/board_tournament/connect4_data.json"),
-    ("gomoku", "runs/board_tournament/gomoku_data.json"),
-    ("holdem", "runs/tournament/tournament_data.json"),
+    ("connect4", "runs/connect4/connect4_data.json"),
+    ("gomoku", "runs/gomoku/gomoku_data.json"),
+    ("holdem", "runs/holdem_1hand/tournament_data.json"),
 ]
 REPORT_DIR = "reports"
 

@@ -1,0 +1,27 @@
+# Independent Blackjack smoke: random player vs fixed dealer. No API needed.
+# Agent-vs-environment: player_0 is the player seat, player_1 is the scripted
+# dealer. seat_swap MUST be false (the seats are asymmetric).
+game:
+  name: independent_blackjack
+  version: "1.0.0"
+  params: {}
+
+players:
+  player_0:
+    agent: { type: builtin, name: blackjack_random }
+  player_1:
+    agent: { type: builtin, name: blackjack_dealer }
+
+run:
+  episodes: 50
+  seed: 12345
+  seat_swap: false        # asymmetric game: the dealer seat must stay player_1
+  on_invalid_action: fallback
+  max_concurrency: 16
+
+output:
+  dir: ./runs/blackjack_random
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

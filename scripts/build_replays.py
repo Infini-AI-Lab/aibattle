@@ -11,7 +11,7 @@ chain-of-thought. The full thinking lives in each match's match.jsonl as
     <final answer>
 
 So we drive off the data JSON and splice the thinking in from the jsonl, keyed
-by (episode, step). Output goes under runs/board_tournament/replays/<game>/:
+by (episode, step). Output goes under runs/<game>/replays/<game>/:
 
   manifest.json                 -- light index for the dropdowns
   <a>__vs__<b>.json             -- one file per pairing, loaded on demand
@@ -49,8 +49,9 @@ try:
 except Exception:  # pragma: no cover - degrade gracefully
     make_game = None
 
-DATA_DIR = "runs/board_tournament"
-HOLDEM_DIR = "runs/tournament"   # v2 lite-holdem run (base dir); _v1 is the archived snapshot
+# Coached per-game folders. Board games each have their own folder, so the
+# board data dir is derived per-game (runs/<game>) inside build_game().
+HOLDEM_DIR = "runs/holdem_1hand"
 GAMES = {"connect4": {"need": 4}, "gomoku": {"need": 5}}
 THINK_MARK = "===== thinking ====="
 ANSWER_MARK = "===== answer ====="
@@ -185,17 +186,18 @@ def _encode_move(game: str, s: dict, thinking: str) -> dict:
 
 
 def build_game(game: str, need: int):
-    data = json.load(open(os.path.join(DATA_DIR, f"{game}_data.json")))
+    data_dir = os.path.join("runs", game)
+    data = json.load(open(os.path.join(data_dir, f"{game}_data.json")))
     sample = data["games"][0]["episodes"][0]["steps"][0]["observation"]["public"]["board"]
     rows, cols = len(sample), len(sample[0])
 
-    out_dir = os.path.join(DATA_DIR, "replays", game)
+    out_dir = os.path.join(data_dir, "replays", game)
     os.makedirs(out_dir, exist_ok=True)
 
     manifest_pairs = []
     for g in data["games"]:
         a, b = g["a"], g["b"]
-        think = _thinking_lookup(os.path.join(DATA_DIR, f"{game}__{a}__vs__{b}"))
+        think = _thinking_lookup(os.path.join(data_dir, f"{game}__{a}__vs__{b}"))
 
         episodes, man_eps = [], []
         for e in g["episodes"]:
@@ -355,8 +357,8 @@ def build_holdem():
           f"({total/1e6:.1f} MB total · largest {largest/1e6:.1f} MB)")
 
 
-MATCH_DIR = "runs/match_tournament"
-TABLE_DIR = "runs/table_tournament"
+MATCH_DIR = "runs/holdem_match"
+TABLE_DIR = "runs/holdem_table"
 
 
 def _think_of(s: dict) -> str:
@@ -497,7 +499,7 @@ def _table_move(s: dict) -> dict:
 def build_table():
     """Multi-agent TABLE mode: one file per session (a session = up to N hands
     among all 5 models, scored by finishing rank). Steps come from the
-    per-episode ep*.json files under runs/table_tournament/table/."""
+    per-episode ep*.json files under runs/holdem_table/table/."""
     ep_files = sorted(glob.glob(os.path.join(TABLE_DIR, "table", "ep*.json")))
     if not ep_files:
         print(f"skip table: no ep files under {TABLE_DIR}/table")
@@ -549,7 +551,7 @@ def build_table():
 
 def main():
     for game, cfg in GAMES.items():
-        path = os.path.join(DATA_DIR, f"{game}_data.json")
+        path = os.path.join("runs", game, f"{game}_data.json")
         if not os.path.exists(path):
             print(f"skip {game}: no data at {path}")
             continue

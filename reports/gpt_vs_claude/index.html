@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>GPT vs Claude — AI Battle Arena</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥊</text></svg>">
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<style>
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 28px 70px; }
+  h1 { font-size:27px; margin-bottom:6px; } .sub { color:#8b93a7; margin-bottom:26px; }
+  h2 { font-size:19px; color:#cdd6f4; margin:0; }
+  .note { color:#8b93a7; font-size:12px; margin:6px 0 14px; }
+  section { margin-top:30px; border:1px solid #232838; border-radius:16px;
+    padding:22px; background:linear-gradient(180deg,#141823,#10131b); }
+
+  /* family scoreboard */
+  .vs { display:flex; align-items:stretch; gap:0; margin:18px 0 6px; border-radius:14px; overflow:hidden;
+    border:1px solid #232838; }
+  .vs .side { flex:1; padding:18px 22px; }
+  .vs .gptside { background:linear-gradient(180deg,#0f2a22,#0c1f1a); }
+  .vs .claside { background:linear-gradient(180deg,#241c33,#160f22); text-align:right; }
+  .vs .fname { font-size:13px; letter-spacing:.05em; text-transform:uppercase; color:#9aa3b5; }
+  .vs .fwins { font-size:40px; font-weight:800; line-height:1; margin-top:4px; }
+  .vs .gptside .fwins { color:#4ade80; } .vs .claside .fwins { color:#c4b5fd; }
+  .vs .fpct { font-size:12px; color:#8b93a7; margin-top:4px; }
+  .vs .mid { display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:0 16px; background:#0d1017; color:#8b93a7; font-size:12px; }
+  .vs .mid b { font-size:18px; color:#e6e6e6; }
+
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { padding:7px 9px; text-align:center; border-bottom:1px solid #20242f; }
+  th { color:#9aa3b5; font-weight:600; }
+  td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
+  td.rk,th.rk { width:34px; color:#8b93a7; } td.cov { color:#8b93a7; } td.best { color:#aab2c5; text-align:left; }
+  .barcell { width:160px; }
+  .hbar { display:inline-flex; width:150px; height:14px; border-radius:4px; overflow:hidden; background:#3a2330; }
+  .hbar .hg { background:#4ade80; } .hbar .hc { background:#a78bfa; }
+  .scorecell { position:relative; min-width:120px; }
+  .scorecell .bar { position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:18px; border-radius:4px; background:linear-gradient(90deg,#3b82f6,#a78bfa); opacity:.5; }
+  .scorecell .sval { position:relative; font-weight:600; color:#f3f4f6; }
+  .fam { font-size:10px; padding:1px 6px; border-radius:999px; font-weight:600; }
+  .fam.gpt { background:#10322a; color:#4ade80; }
+  .fam.claude { background:#2a2138; color:#c4b5fd; }
+
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px; }
+  .card { display:block; text-decoration:none; color:inherit; background:#171a23;
+    border:1px solid #232838; border-radius:14px; padding:18px; transition:.15s; }
+  .card:hover { border-color:#60a5fa; transform:translateY(-2px); }
+  .ctitle { font-size:18px; font-weight:700; color:#cdd6f4; }
+  .badges { margin:8px 0; display:flex; gap:6px; flex-wrap:wrap; }
+  .badge { font-size:10px; color:#aab2c5; background:#1c2130; border:1px solid #2a3142;
+    padding:2px 7px; border-radius:999px; }
+  .champ { font-size:13px; color:#e6e6e6; } .metric { color:#a78bfa; font-weight:600; }
+  .cgo { margin-top:12px; font-size:13px; color:#60a5fa; }
+  @media (max-width:640px) { .cards { grid-template-columns:1fr; } }
+</style></head>
+<body><div class="wrap">
+  <h1>🥊 GPT vs Claude — Coached Head-to-Head</h1>
+  <div class="sub">Two GPT models (gpt-5.5, gpt-5.4) vs two Claude models (claude-opus-4.8, claude-sonnet-4.6)
+    across four games, every move prompted with one-line coaching · reasoning effort medium.</div>
+
+  <section>
+    <div class="arena-head"><h2>🏆 Family scoreboard</h2></div>
+    <div class="note">Aggregated over the inter-family games only (GPT-vs-Claude pairings;
+      intra-family games excluded). Each episode is one win/loss/draw by winner.</div>
+    <div class="vs">
+      <div class="side gptside">
+        <div class="fname">GPT family</div>
+        <div class="fwins">523</div>
+        <div class="fpct">59% of decided · +383 net chips in poker</div>
+      </div>
+      <div class="mid"><div>wins</div><b>vs</b><div>21 draws</div></div>
+      <div class="side claside">
+        <div class="fname">Claude family</div>
+        <div class="fwins">336</div>
+        <div class="fpct">38% of decided</div>
+      </div>
+    </div>
+    <div class="note" style="text-align:center">GPT leads across 880 inter-family games.</div>
+
+    <table style="margin-top:14px">
+      <tr><th class='model'>game</th><th>GPT W–L–D</th><th>GPT win%</th>
+          <th class='barcell'>GPT ◄ ► Claude</th><th class='best'>poker margin</th></tr>
+      <tr><td class='model'>🔴 Connect Four</td><td>102–90–8</td><td>51%</td><td class='barcell'><span class='hbar'><span class='hg' style='width:51.0%'></span><span class='hc' style='width:45.0%'></span></span></td><td class='best'></td></tr><tr><td class='model'>⚫ Gomoku-Lite</td><td>119–73–8</td><td>60%</td><td class='barcell'><span class='hbar'><span class='hg' style='width:59.5%'></span><span class='hc' style='width:36.5%'></span></span></td><td class='best'></td></tr><tr><td class='model'>🃏 Hold'em 1-Hand</td><td>250–145–5</td><td>62%</td><td class='barcell'><span class='hbar'><span class='hg' style='width:62.5%'></span><span class='hc' style='width:36.2%'></span></span></td><td class='best'><span class='small'>GPT +359 chips</span></td></tr><tr><td class='model'>🃏 Hold'em Match</td><td>52–28–0</td><td>65%</td><td class='barcell'><span class='hbar'><span class='hg' style='width:65.0%'></span><span class='hc' style='width:35.0%'></span></span></td><td class='best'><span class='small'>GPT +24 chips</span></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="arena-head"><h2>🏅 Cross-game leaderboard</h2></div>
+    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0)
+      across all four games. Invalid% is illegal-move rate pooled over every decision.</div>
+    <table>
+      <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
+          <th>coverage</th><th>invalid%</th><th class='best'>best game</th></tr>
+      <tr><td class='rk'>🥇</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.5</td><td class='scorecell'><span class='bar' style='width:83.3%'></span><span class='sval'>83</span></td><td class='cov'>4/4</td><td>0.20%</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr><td class='rk'>🥈</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.4</td><td class='scorecell'><span class='bar' style='width:66.7%'></span><span class='sval'>67</span></td><td class='cov'>4/4</td><td>0.52%</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥉</td><td class='model'><span class='fam claude'>Claude</span> claude-opus-4.8</td><td class='scorecell'><span class='bar' style='width:33.3%'></span><span class='sval'>33</span></td><td class='cov'>4/4</td><td>0.54%</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>4</td><td class='model'><span class='fam claude'>Claude</span> claude-sonnet-4.6</td><td class='scorecell'><span class='bar' style='width:16.7%'></span><span class='sval'>17</span></td><td class='cov'>4/4</td><td>2.57%</td><td class='best'>🃏 Hold'em 1-Hand</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="arena-head"><h2>🎮 Per-game analysis</h2></div>
+    <div class="note">Full per-game breakdowns — tactical accuracy for the board games,
+      poker behavior and results for Hold'em.</div>
+    <div class="cards"><a class='card' href='connect4_report.html'><div class='ctitle'>🔴 Connect Four</div><div class='badges'><span class='badge'>Perfect info</span><span class='badge'>2P</span><span class='badge'>50 eps/pair</span></div><div class='champ'>🏆 claude-opus-4.8 <span class='metric'>Elo 1583</span></div><div class='cgo'>View analysis →</div></a><a class='card' href='gomoku_report.html'><div class='ctitle'>⚫ Gomoku-Lite</div><div class='badges'><span class='badge'>Perfect info</span><span class='badge'>2P</span><span class='badge'>50 eps/pair</span></div><div class='champ'>🏆 gpt-5.5 <span class='metric'>Elo 1600</span></div><div class='cgo'>View analysis →</div></a><a class='card' href='holdem_1hand_report.html'><div class='ctitle'>🃏 Hold'em 1-Hand</div><div class='badges'><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>100 hands/pair</span></div><div class='champ'>🏆 gpt-5.5 <span class='metric'>+62.3 bb/100</span></div><div class='cgo'>View analysis →</div></a><a class='card' href='holdem_match_report.html'><div class='ctitle'>🃏 Hold'em Match</div><div class='badges'><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>20 matches/pair</span></div><div class='champ'>🏆 gpt-5.5 <span class='metric'>63% match wins</span></div><div class='cgo'>View analysis →</div></a></div>
+  </section>
+</div></body></html>

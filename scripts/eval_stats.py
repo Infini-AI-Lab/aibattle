@@ -20,7 +20,7 @@ _CHARS_PER_TOKEN = 4.0
 
 
 def collect(run_dir: str) -> dict:
-    """run_dir e.g. 'runs/board_tournament' -> {model: stats dict}."""
+    """run_dir e.g. 'runs/connect4' -> {model: stats dict}."""
     per = defaultdict(lambda: {"decisions": 0, "truncated": 0, "toks": [], "exact": 0})
     for f in glob.glob(os.path.join(run_dir, "*", "ep*.json")):
         try:

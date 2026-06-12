@@ -1,16 +1,16 @@
 {
   "models": [
-    "deepseek-v4-pro-coached",
-    "gpt-oss-120b-coached",
-    "kimi-k2p6-coached",
-    "glm-5p1-coached",
-    "minimax-m2p7-coached"
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
   ],
   "max_hands": 30,
   "episodes_per_pair": 40,
   "leaderboard": [
     {
-      "model": "deepseek-v4-pro-coached",
+      "model": "deepseek-v4-pro",
       "matches": 160,
       "win_rate": 0.575,
       "wins": 92,
@@ -20,7 +20,7 @@
       "avg_win_margin": 108.9
     },
     {
-      "model": "kimi-k2p6-coached",
+      "model": "kimi-k2p6",
       "matches": 160,
       "win_rate": 0.575,
       "wins": 92,
@@ -30,7 +30,7 @@
       "avg_win_margin": 143.9
     },
     {
-      "model": "glm-5p1-coached",
+      "model": "glm-5p1",
       "matches": 160,
       "win_rate": 0.544,
       "wins": 87,
@@ -40,7 +40,7 @@
       "avg_win_margin": 115.4
     },
     {
-      "model": "gpt-oss-120b-coached",
+      "model": "gpt-oss-120b",
       "matches": 160,
       "win_rate": 0.45,
       "wins": 72,
@@ -50,7 +50,7 @@
       "avg_win_margin": 189.9
     },
     {
-      "model": "minimax-m2p7-coached",
+      "model": "minimax-m2p7",
       "matches": 160,
       "win_rate": 0.356,
       "wins": 57,
@@ -61,81 +61,81 @@
     }
   ],
   "h2h_wins": {
-    "deepseek-v4-pro-coached": {
-      "deepseek-v4-pro-coached": 0,
-      "gpt-oss-120b-coached": 22,
-      "kimi-k2p6-coached": 15,
-      "glm-5p1-coached": 26,
-      "minimax-m2p7-coached": 29
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0,
+      "gpt-oss-120b": 22,
+      "kimi-k2p6": 15,
+      "glm-5p1": 26,
+      "minimax-m2p7": 29
     },
-    "gpt-oss-120b-coached": {
-      "deepseek-v4-pro-coached": 18,
-      "gpt-oss-120b-coached": 0,
-      "kimi-k2p6-coached": 19,
-      "glm-5p1-coached": 13,
-      "minimax-m2p7-coached": 22
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 18,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 19,
+      "glm-5p1": 13,
+      "minimax-m2p7": 22
     },
-    "kimi-k2p6-coached": {
-      "deepseek-v4-pro-coached": 25,
-      "gpt-oss-120b-coached": 21,
-      "kimi-k2p6-coached": 0,
-      "glm-5p1-coached": 21,
-      "minimax-m2p7-coached": 25
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 25,
+      "gpt-oss-120b": 21,
+      "kimi-k2p6": 0,
+      "glm-5p1": 21,
+      "minimax-m2p7": 25
     },
-    "glm-5p1-coached": {
-      "deepseek-v4-pro-coached": 14,
-      "gpt-oss-120b-coached": 27,
-      "kimi-k2p6-coached": 19,
-      "glm-5p1-coached": 0,
-      "minimax-m2p7-coached": 27
+    "glm-5p1": {
+      "deepseek-v4-pro": 14,
+      "gpt-oss-120b": 27,
+      "kimi-k2p6": 19,
+      "glm-5p1": 0,
+      "minimax-m2p7": 27
     },
-    "minimax-m2p7-coached": {
-      "deepseek-v4-pro-coached": 11,
-      "gpt-oss-120b-coached": 18,
-      "kimi-k2p6-coached": 15,
-      "glm-5p1-coached": 13,
-      "minimax-m2p7-coached": 0
+    "minimax-m2p7": {
+      "deepseek-v4-pro": 11,
+      "gpt-oss-120b": 18,
+      "kimi-k2p6": 15,
+      "glm-5p1": 13,
+      "minimax-m2p7": 0
     }
   },
   "h2h_played": {
-    "deepseek-v4-pro-coached": {
-      "deepseek-v4-pro-coached": 0,
-      "gpt-oss-120b-coached": 40,
-      "kimi-k2p6-coached": 40,
-      "glm-5p1-coached": 40,
-      "minimax-m2p7-coached": 40
+    "deepseek-v4-pro": {
+      "deepseek-v4-pro": 0,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 40,
+      "glm-5p1": 40,
+      "minimax-m2p7": 40
     },
-    "gpt-oss-120b-coached": {
-      "deepseek-v4-pro-coached": 40,
-      "gpt-oss-120b-coached": 0,
-      "kimi-k2p6-coached": 40,
-      "glm-5p1-coached": 40,
-      "minimax-m2p7-coached": 40
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": 40,
+      "gpt-oss-120b": 0,
+      "kimi-k2p6": 40,
+      "glm-5p1": 40,
+      "minimax-m2p7": 40
     },
-    "kimi-k2p6-coached": {
-      "deepseek-v4-pro-coached": 40,
-      "gpt-oss-120b-coached": 40,
-      "kimi-k2p6-coached": 0,
-      "glm-5p1-coached": 40,
-      "minimax-m2p7-coached": 40
+    "kimi-k2p6": {
+      "deepseek-v4-pro": 40,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 0,
+      "glm-5p1": 40,
+      "minimax-m2p7": 40
     },
-    "glm-5p1-coached": {
-      "deepseek-v4-pro-coached": 40,
-      "gpt-oss-120b-coached": 40,
-      "kimi-k2p6-coached": 40,
-      "glm-5p1-coached": 0,
-      "minimax-m2p7-coached": 40
+    "glm-5p1": {
+      "deepseek-v4-pro": 40,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 40,
+      "glm-5p1": 0,
+      "minimax-m2p7": 40
     },
-    "minimax-m2p7-coached": {
-      "deepseek-v4-pro-coached": 40,
-      "gpt-oss-120b-coached": 40,
-      "kimi-k2p6-coached": 40,
-      "glm-5p1-coached": 40,
-      "minimax-m2p7-coached": 0
+    "minimax-m2p7": {
+      "deepseek-v4-pro": 40,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 40,
+      "glm-5p1": 40,
+      "minimax-m2p7": 0
     }
   },
   "behavior": {
-    "deepseek-v4-pro-coached": {
+    "deepseek-v4-pro": {
       "decisions": 9404,
       "hands": 4018,
       "vpip": 0.526,
@@ -164,7 +164,7 @@
         "river": 0.134
       }
     },
-    "gpt-oss-120b-coached": {
+    "gpt-oss-120b": {
       "decisions": 8557,
       "hands": 3864,
       "vpip": 0.605,
@@ -193,7 +193,7 @@
         "river": 0.356
       }
     },
-    "kimi-k2p6-coached": {
+    "kimi-k2p6": {
       "decisions": 9439,
       "hands": 3838,
       "vpip": 0.614,
@@ -222,7 +222,7 @@
         "river": 0.122
       }
     },
-    "glm-5p1-coached": {
+    "glm-5p1": {
       "decisions": 10269,
       "hands": 3979,
       "vpip": 0.633,
@@ -251,7 +251,7 @@
         "river": 0.183
       }
     },
-    "minimax-m2p7-coached": {
+    "minimax-m2p7": {
       "decisions": 10571,
       "hands": 3861,
       "vpip": 0.692,

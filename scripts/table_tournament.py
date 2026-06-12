@@ -41,7 +41,7 @@ SESSIONS = int(os.environ.get("TABLE_SESSIONS", "50"))  # seat-rotated; raise
 MAX_HANDS = 40
 STARTING_STACK = 200            # 100bb (blinds 1/2)
 MAX_CONCURRENCY = 128
-OUT = os.environ.get("OUT", "runs/table_tournament")
+OUT = os.environ.get("OUT", "runs/holdem_table")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every session draws its own OS-entropy
 # deal seed inside the runner (seed=None), and seats are a random permutation

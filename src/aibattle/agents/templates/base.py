@@ -24,6 +24,13 @@ from typing import Optional
 from ...types import AgentRequest, Move
 
 
+def clean_answer_line(line: str) -> str:
+    """A candidate final-answer line with markdown/punctuation decoration
+    stripped (e.g. '**C5.**' or '- call:' -> 'C5' / 'call'), so a parser can
+    test it for an EXACT action match before falling back to fuzzy scanning."""
+    return line.strip().strip("*_`'\"()[]{}.:;,!->#= ").strip()
+
+
 class GameTemplate(ABC):
     def __init__(self, *, coaching: str = "") -> None:
         # Coaching is just text: an optional line of process scaffolding to

@@ -2,9 +2,9 @@
 
 10 unique pairs x 2 reps = 20 games, 30 hands each. Every hand is an
 independent deal (no seat-swap duplicate): each episode draws its own cards. Full
-per-game logs go to runs/tournament/<a>__vs__<b>__rN/match.jsonl; a trimmed
+per-game logs go to runs/holdem_1hand/<a>__vs__<b>__rN/match.jsonl; a trimmed
 aggregate (no raw chain-of-thought, to stay loadable) is saved incrementally to
-runs/tournament/tournament_data.json for analysis.
+runs/holdem_1hand/tournament_data.json for analysis.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ MODELS = [_label(s) for s in _RAW_MODELS]
 HANDS = int(os.environ.get("HANDS", "20"))   # hands per game (Hold'em Lite)
 REPS = 1
 MAX_CONCURRENCY = 128  # GLOBAL cap on concurrent hands across all games
-OUT = os.environ.get("OUT", "runs/tournament")
+OUT = os.environ.get("OUT", "runs/holdem_1hand")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every hand draws its own OS-entropy
 # deal seed inside the runner (seed=None), and that seed is saved in each

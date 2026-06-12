@@ -1,13 +1,10 @@
 """Analyze the Multi-Agent Table-mode tournament.
 
-Reads runs/table_tournament/table_data.json (per-model summary: avg_rank,
+Reads runs/holdem_table/table_data.json (per-model summary: avg_rank,
 top1_rate, avg_final_stack) and builds a finishing-place distribution. Writes a
-Chart.js HTML report to runs/table_tournament/table_report.html and
+Chart.js HTML report to runs/holdem_table/table_report.html and
 reports/table_tournament_report.html plus reports/table_tournament_analysis.json.
 Styling matches the board-game tournament report.
-
-Set AIBATTLE_VARIANT="_coached" and AIBATTLE_REPORT_DIR="reports/coached" to
-render the coached mirror instead of touching the base report.
 """
 
 from __future__ import annotations
@@ -17,13 +14,12 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
+from model_names import strip_coached
 
-# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
-# parallel coached mirror; unset, paths default to the base run.
-_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
-DATA = f"runs/table_tournament{_VARIANT}/table_data.json"
-EP_GLOB = f"runs/table_tournament{_VARIANT}/table/ep*.json"
-OUT_HTML = f"runs/table_tournament{_VARIANT}/table_report.html"
+# Coached is now the canonical (and only) run set; data lives in per-game folders.
+DATA = "runs/holdem_table/table_data.json"
+EP_GLOB = "runs/holdem_table/table/ep*.json"
+OUT_HTML = "runs/holdem_table/table_report.html"
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
@@ -84,9 +80,8 @@ def render_html(rep: dict, beh: dict) -> str:
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
     cols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    # Coached variant has no replay viewer built; omit the button so it never 404s.
-    replay_btn = ("" if _VARIANT else
-                  '<a class="replaybtn" href="table_replay.html">▶ Watch table replays</a>')
+    # Coached runs have no replay viewer built; omit the button so it never 404s.
+    replay_btn = ""
     rankhdr = "".join(f"<th>#{k}</th>" for k in range(1, n + 1))
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -127,7 +122,7 @@ def render_html(rep: dict, beh: dict) -> str:
 
 
 def main():
-    data = json.load(open(DATA))
+    data = strip_coached(json.load(open(DATA)))
     rep = analyze(data)
     beh = pb.behavior(EP_GLOB, "table_hand", rep["models"])
     rep["behavior"] = beh

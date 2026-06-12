@@ -1,0 +1,80 @@
+{
+  "game": "independent_blackjack",
+  "kind": "dealer",
+  "models": [
+    "kimi-k2p6",
+    "deepseek-v4-pro",
+    "glm-5p1",
+    "minimax-m2p7",
+    "gpt-oss-120b"
+  ],
+  "per_model": {
+    "kimi-k2p6": {
+      "hands": 20,
+      "profit": 1.5,
+      "mean_per_hand": 0.075,
+      "win_rate": 0.45,
+      "loss_rate": 0.4,
+      "push_rate": 0.15,
+      "bust_rate": 0.05,
+      "double_rate": 0.1,
+      "natural_rate": 0.05,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 67.3
+    },
+    "deepseek-v4-pro": {
+      "hands": 20,
+      "profit": -9.0,
+      "mean_per_hand": -0.45,
+      "win_rate": 0.3,
+      "loss_rate": 0.6,
+      "push_rate": 0.1,
+      "bust_rate": 0.2,
+      "double_rate": 0.15,
+      "natural_rate": 0.0,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 5.6
+    },
+    "glm-5p1": {
+      "hands": 20,
+      "profit": 0.0,
+      "mean_per_hand": 0.0,
+      "win_rate": 0.35,
+      "loss_rate": 0.55,
+      "push_rate": 0.1,
+      "bust_rate": 0.2,
+      "double_rate": 0.1,
+      "natural_rate": 0.2,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 33.4
+    },
+    "minimax-m2p7": {
+      "hands": 20,
+      "profit": 1.0,
+      "mean_per_hand": 0.05,
+      "win_rate": 0.45,
+      "loss_rate": 0.45,
+      "push_rate": 0.1,
+      "bust_rate": 0.1,
+      "double_rate": 0.2,
+      "natural_rate": 0.1,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 47.4
+    },
+    "gpt-oss-120b": {
+      "hands": 20,
+      "profit": 8.5,
+      "mean_per_hand": 0.425,
+      "win_rate": 0.65,
+      "loss_rate": 0.3,
+      "push_rate": 0.05,
+      "bust_rate": 0.1,
+      "double_rate": 0.05,
+      "natural_rate": 0.25,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 2.4
+    }
+  },
+  "total_hands": 100,
+  "field_profit": 2.0
+}

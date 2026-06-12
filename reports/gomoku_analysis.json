@@ -5,14 +5,14 @@
     9
   ],
   "models": [
-    "deepseek-v4-pro-coached",
-    "gpt-oss-120b-coached",
-    "kimi-k2p6-coached",
-    "glm-5p1-coached",
-    "minimax-m2p7-coached"
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
   ],
   "per_model": {
-    "deepseek-v4-pro-coached": {
+    "deepseek-v4-pro": {
       "games": 40,
       "wins": 22,
       "losses": 18,
@@ -157,7 +157,7 @@
         1
       ]
     },
-    "gpt-oss-120b-coached": {
+    "gpt-oss-120b": {
       "games": 40,
       "wins": 11,
       "losses": 29,
@@ -302,7 +302,7 @@
         0
       ]
     },
-    "kimi-k2p6-coached": {
+    "kimi-k2p6": {
       "games": 40,
       "wins": 31,
       "losses": 9,
@@ -447,7 +447,7 @@
         0
       ]
     },
-    "glm-5p1-coached": {
+    "glm-5p1": {
       "games": 40,
       "wins": 30,
       "losses": 10,
@@ -592,7 +592,7 @@
         0
       ]
     },
-    "minimax-m2p7-coached": {
+    "minimax-m2p7": {
       "games": 40,
       "wins": 6,
       "losses": 34,
@@ -739,111 +739,111 @@
     }
   },
   "h2h": {
-    "deepseek-v4-pro-coached": {
-      "gpt-oss-120b-coached": [
+    "deepseek-v4-pro": {
+      "gpt-oss-120b": [
         5,
         5,
         0
       ],
-      "kimi-k2p6-coached": [
+      "kimi-k2p6": [
         4,
         6,
         0
       ],
-      "glm-5p1-coached": [
+      "glm-5p1": [
         4,
         6,
         0
       ],
-      "minimax-m2p7-coached": [
+      "minimax-m2p7": [
         9,
         1,
         0
       ]
     },
-    "gpt-oss-120b-coached": {
-      "deepseek-v4-pro-coached": [
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": [
         5,
         5,
         0
       ],
-      "kimi-k2p6-coached": [
+      "kimi-k2p6": [
         0,
         10,
         0
       ],
-      "glm-5p1-coached": [
+      "glm-5p1": [
         0,
         10,
         0
       ],
-      "minimax-m2p7-coached": [
+      "minimax-m2p7": [
         6,
         4,
         0
       ]
     },
-    "kimi-k2p6-coached": {
-      "deepseek-v4-pro-coached": [
+    "kimi-k2p6": {
+      "deepseek-v4-pro": [
         6,
         4,
         0
       ],
-      "gpt-oss-120b-coached": [
+      "gpt-oss-120b": [
         10,
         0,
         0
       ],
-      "glm-5p1-coached": [
+      "glm-5p1": [
         5,
         5,
         0
       ],
-      "minimax-m2p7-coached": [
+      "minimax-m2p7": [
         10,
         0,
         0
       ]
     },
-    "glm-5p1-coached": {
-      "deepseek-v4-pro-coached": [
+    "glm-5p1": {
+      "deepseek-v4-pro": [
         6,
         4,
         0
       ],
-      "gpt-oss-120b-coached": [
+      "gpt-oss-120b": [
         10,
         0,
         0
       ],
-      "kimi-k2p6-coached": [
+      "kimi-k2p6": [
         5,
         5,
         0
       ],
-      "minimax-m2p7-coached": [
+      "minimax-m2p7": [
         9,
         1,
         0
       ]
     },
-    "minimax-m2p7-coached": {
-      "deepseek-v4-pro-coached": [
+    "minimax-m2p7": {
+      "deepseek-v4-pro": [
         1,
         9,
         0
       ],
-      "gpt-oss-120b-coached": [
+      "gpt-oss-120b": [
         4,
         6,
         0
       ],
-      "kimi-k2p6-coached": [
+      "kimi-k2p6": [
         0,
         10,
         0
       ],
-      "glm-5p1-coached": [
+      "glm-5p1": [
         1,
         9,
         0
@@ -851,11 +851,11 @@
     }
   },
   "elo": {
-    "deepseek-v4-pro-coached": 1541,
-    "gpt-oss-120b-coached": 1333,
-    "kimi-k2p6-coached": 1712,
-    "glm-5p1-coached": 1692,
-    "minimax-m2p7-coached": 1221
+    "deepseek-v4-pro": 1541,
+    "gpt-oss-120b": 1333,
+    "kimi-k2p6": 1712,
+    "glm-5p1": 1692,
+    "minimax-m2p7": 1221
   },
   "len_bins": [
     "7\u201310",

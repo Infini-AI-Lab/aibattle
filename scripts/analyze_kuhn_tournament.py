@@ -1,6 +1,6 @@
 """Analyze the Kuhn Poker ("poker light") round-robin tournament.
 
-Reads runs/kuhn_tournament/kuhn_data.json and, because Kuhn has a fully solved
+Reads runs/kuhn_poker/kuhn_data.json and, because Kuhn has a fully solved
 Nash equilibrium, scores models on *poker fundamentals* rather than just chips
 (30 hands/pair is far too few for chips to be reliable — that number is
 directional only). Three lenses:
@@ -17,7 +17,7 @@ directional only). Three lenses:
      the time, and (almost) never bet the Queen. How close a model gets to that
      polarized shape says more in 30 hands than its chip count does.
 
-Writes a Chart.js HTML report to runs/kuhn_tournament/kuhn_report.html and
+Writes a Chart.js HTML report to runs/kuhn_poker/kuhn_report.html and
 reports/kuhn_tournament_report.html, plus the raw numbers to
 reports/kuhn_tournament_analysis.json. Styling matches the other tournament
 reports.
@@ -29,11 +29,11 @@ import json
 import os
 from collections import defaultdict
 
-# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
-# parallel coached mirror; unset, paths default to the base run.
-_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
-DATA = f"runs/kuhn_tournament{_VARIANT}/kuhn_data.json"
-OUT_HTML = f"runs/kuhn_tournament{_VARIANT}/kuhn_report.html"
+from model_names import strip_coached
+
+# Coached is now the canonical (and only) run set; data lives in per-game folders.
+DATA = "runs/kuhn_poker/kuhn_data.json"
+OUT_HTML = "runs/kuhn_poker/kuhn_report.html"
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
@@ -324,7 +324,7 @@ def render_html(rep: dict) -> str:
 
 
 def main():
-    data = json.load(open(DATA))
+    data = strip_coached(json.load(open(DATA)))
     rep = analyze(data)
     html = render_html(rep)
     os.makedirs(REPORT_DIR, exist_ok=True)

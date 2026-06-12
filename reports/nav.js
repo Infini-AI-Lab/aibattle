@@ -14,7 +14,15 @@
     "match_tournament_report.html": "match_tournament_report.html",
     "match_replay.html": "match_tournament_report.html",
     "table_tournament_report.html": "table_tournament_report.html",
-    "table_replay.html": "table_tournament_report.html"
+    "table_replay.html": "table_tournament_report.html",
+    "blackjack_report.html": "blackjack_report.html",
+    "blackjack_replay.html": "blackjack_report.html",
+    "leduc_report.html": "leduc_report.html",
+    "leduc_replay.html": "leduc_report.html",
+    "blotto_report.html": "blotto_report.html",
+    "blotto_replay.html": "blotto_report.html",
+    "othello_report.html": "othello_report.html",
+    "othello_replay.html": "othello_report.html"
   };
   var file = location.pathname.split("/").pop() || "index.html";
   var active = ACTIVE[file] || "";

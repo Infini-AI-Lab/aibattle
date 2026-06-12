@@ -1,17 +1,17 @@
 {
   "models": [
-    "deepseek-v4-pro-coached",
-    "gpt-oss-120b-coached",
-    "kimi-k2p6-coached",
-    "glm-5p1-coached",
-    "minimax-m2p7-coached"
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
   ],
   "num_players": 5,
   "sessions": 100,
   "max_hands": 40,
   "leaderboard": [
     {
-      "model": "kimi-k2p6-coached",
+      "model": "kimi-k2p6",
       "avg_rank": 2.68,
       "top1_rate": 0.24,
       "avg_final_stack": 227.4,
@@ -26,7 +26,7 @@
       "bust_rate": 0.16
     },
     {
-      "model": "glm-5p1-coached",
+      "model": "glm-5p1",
       "avg_rank": 2.81,
       "top1_rate": 0.22,
       "avg_final_stack": 213.4,
@@ -41,7 +41,7 @@
       "bust_rate": 0.21
     },
     {
-      "model": "deepseek-v4-pro-coached",
+      "model": "deepseek-v4-pro",
       "avg_rank": 2.93,
       "top1_rate": 0.13,
       "avg_final_stack": 200.9,
@@ -56,7 +56,7 @@
       "bust_rate": 0.19
     },
     {
-      "model": "gpt-oss-120b-coached",
+      "model": "gpt-oss-120b",
       "avg_rank": 2.99,
       "top1_rate": 0.23,
       "avg_final_stack": 207.4,
@@ -71,7 +71,7 @@
       "bust_rate": 0.2
     },
     {
-      "model": "minimax-m2p7-coached",
+      "model": "minimax-m2p7",
       "avg_rank": 3.59,
       "top1_rate": 0.18,
       "avg_final_stack": 150.8,
@@ -87,7 +87,7 @@
     }
   ],
   "behavior": {
-    "deepseek-v4-pro-coached": {
+    "deepseek-v4-pro": {
       "decisions": 6054,
       "hands": 3554,
       "vpip": 0.324,
@@ -116,7 +116,7 @@
         "river": 0.165
       }
     },
-    "gpt-oss-120b-coached": {
+    "gpt-oss-120b": {
       "decisions": 6270,
       "hands": 3641,
       "vpip": 0.364,
@@ -145,7 +145,7 @@
         "river": 0.254
       }
     },
-    "kimi-k2p6-coached": {
+    "kimi-k2p6": {
       "decisions": 6362,
       "hands": 3734,
       "vpip": 0.332,
@@ -174,7 +174,7 @@
         "river": 0.133
       }
     },
-    "glm-5p1-coached": {
+    "glm-5p1": {
       "decisions": 6434,
       "hands": 3721,
       "vpip": 0.353,
@@ -203,7 +203,7 @@
         "river": 0.205
       }
     },
-    "minimax-m2p7-coached": {
+    "minimax-m2p7": {
       "decisions": 6823,
       "hands": 3067,
       "vpip": 0.577,

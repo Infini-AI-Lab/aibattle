@@ -1,7 +1,7 @@
 """Analyze the tournament data and emit a self-contained interactive HTML report.
 
-Reads runs/tournament/tournament_data.json (games -> episodes -> steps) and
-computes per-model poker behavior + results, then writes runs/tournament/report.html.
+Reads runs/holdem_1hand/tournament_data.json (games -> episodes -> steps) and
+computes per-model poker behavior + results, then writes runs/holdem_1hand/report.html.
 
 Behavior metrics (the "player personality"):
   - VPIP   : % of hands the model voluntarily put chips in preflop (looseness)
@@ -18,12 +18,11 @@ import json
 import os
 from collections import defaultdict
 
-# A "variant" suffix (e.g. "_coached") retargets every path at a parallel run,
-# so the same script renders a coached mirror without touching the base report.
-# Set AIBATTLE_VARIANT="_coached" and AIBATTLE_REPORT_DIR="reports/coached".
-_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
-DATA = f"runs/tournament{_VARIANT}/tournament_data.json"
-OUT = f"runs/tournament{_VARIANT}/report.html"
+from model_names import strip_coached
+
+# Coached is now the canonical (and only) run set; data lives in per-game folders.
+DATA = "runs/holdem_1hand/tournament_data.json"
+OUT = "runs/holdem_1hand/report.html"
 # Tracked copy committed to the repo (runs/ is gitignored).
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 BB = 2
@@ -404,9 +403,8 @@ def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
     payload = json.dumps(report)
-    # Coached variant has no replay viewer built; omit the button so it never 404s.
-    replay_btn = ("" if _VARIANT else
-                  '<a class="replaybtn" href="holdem_replay.html">▶ Watch hand replays</a>')
+    # Coached runs have no replay viewer built; omit the button so it never 404s.
+    replay_btn = ""
 
     # ranked leaderboard by bb/100
     ranked = sorted(models, key=lambda m: pm[m]["bb_per_100"], reverse=True)
@@ -686,7 +684,7 @@ new Chart(madeHand, {{ type:'bar',
 
 
 def main():
-    data = json.load(open(DATA))
+    data = strip_coached(json.load(open(DATA)))
     report = analyze(data)
     html = render_html(report)
     with open(OUT, "w", encoding="utf-8") as f:

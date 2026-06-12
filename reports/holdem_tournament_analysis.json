@@ -1,13 +1,13 @@
 {
   "models": [
-    "deepseek-v4-pro-coached",
-    "gpt-oss-120b-coached",
-    "kimi-k2p6-coached",
-    "glm-5p1-coached",
-    "minimax-m2p7-coached"
+    "deepseek-v4-pro",
+    "gpt-oss-120b",
+    "kimi-k2p6",
+    "glm-5p1",
+    "minimax-m2p7"
   ],
   "per_model": {
-    "deepseek-v4-pro-coached": {
+    "deepseek-v4-pro": {
       "hands": 200,
       "decisions": 356,
       "chips": 439.0,
@@ -153,7 +153,7 @@
         "full house": 0.0909
       }
     },
-    "gpt-oss-120b-coached": {
+    "gpt-oss-120b": {
       "hands": 200,
       "decisions": 413,
       "chips": -348.0,
@@ -299,7 +299,7 @@
         "full house": 0.08
       }
     },
-    "kimi-k2p6-coached": {
+    "kimi-k2p6": {
       "hands": 200,
       "decisions": 422,
       "chips": 69.0,
@@ -445,7 +445,7 @@
         "full house": 0.025
       }
     },
-    "glm-5p1-coached": {
+    "glm-5p1": {
       "hands": 200,
       "decisions": 423,
       "chips": 321.0,
@@ -591,7 +591,7 @@
         "full house": 0.0
       }
     },
-    "minimax-m2p7-coached": {
+    "minimax-m2p7": {
       "hands": 200,
       "decisions": 451,
       "chips": -481.0,
@@ -739,35 +739,35 @@
     }
   },
   "h2h": {
-    "deepseek-v4-pro-coached": {
-      "gpt-oss-120b-coached": 57.0,
-      "kimi-k2p6-coached": 145.0,
-      "glm-5p1-coached": -37.0,
-      "minimax-m2p7-coached": 274.0
+    "deepseek-v4-pro": {
+      "gpt-oss-120b": 57.0,
+      "kimi-k2p6": 145.0,
+      "glm-5p1": -37.0,
+      "minimax-m2p7": 274.0
     },
-    "gpt-oss-120b-coached": {
-      "deepseek-v4-pro-coached": -57.0,
-      "kimi-k2p6-coached": -86.0,
-      "glm-5p1-coached": -78.0,
-      "minimax-m2p7-coached": -127.0
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": -57.0,
+      "kimi-k2p6": -86.0,
+      "glm-5p1": -78.0,
+      "minimax-m2p7": -127.0
     },
-    "kimi-k2p6-coached": {
-      "deepseek-v4-pro-coached": -145.0,
-      "gpt-oss-120b-coached": 86.0,
-      "glm-5p1-coached": 50.0,
-      "minimax-m2p7-coached": 78.0
+    "kimi-k2p6": {
+      "deepseek-v4-pro": -145.0,
+      "gpt-oss-120b": 86.0,
+      "glm-5p1": 50.0,
+      "minimax-m2p7": 78.0
     },
-    "glm-5p1-coached": {
-      "deepseek-v4-pro-coached": 37.0,
-      "gpt-oss-120b-coached": 78.0,
-      "kimi-k2p6-coached": -50.0,
-      "minimax-m2p7-coached": 256.0
+    "glm-5p1": {
+      "deepseek-v4-pro": 37.0,
+      "gpt-oss-120b": 78.0,
+      "kimi-k2p6": -50.0,
+      "minimax-m2p7": 256.0
     },
-    "minimax-m2p7-coached": {
-      "deepseek-v4-pro-coached": -274.0,
-      "gpt-oss-120b-coached": 127.0,
-      "kimi-k2p6-coached": -78.0,
-      "glm-5p1-coached": -256.0
+    "minimax-m2p7": {
+      "deepseek-v4-pro": -274.0,
+      "gpt-oss-120b": 127.0,
+      "kimi-k2p6": -78.0,
+      "glm-5p1": -256.0
     }
   },
   "hands_per_game": 50,

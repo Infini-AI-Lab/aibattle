@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>GPT vs Claude — 🃏 Hold'em Match</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<style>
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
+  .wrap { max-width:1100px; margin:0 auto; padding:28px 28px 80px; }
+  h1 { font-size:25px; } h2 { font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
+  h3 { font-size:14px; color:#9aa3b5; }
+  .sub { color:#8b93a7; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
+  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
+  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
+  .small { font-size:10px; color:#8b93a7; }
+  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
+  canvas { max-height:300px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
+  .fam { font-size:10px; padding:1px 6px; border-radius:999px; font-weight:600; }
+  .fam.gpt { background:#10322a; color:#4ade80; }
+  .fam.claude { background:#2a2138; color:#c4b5fd; }
+  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
+    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
+  @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
+</style></head>
+<body><div class="wrap">
+  <h1>🎲 GPT vs Claude — 🃏 Hold'em Match</h1>
+  <div class="sub">Heads-up · 20 matches/pair · up to 30 hands/match · stacks carried, match-level winner</div>
+  <a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>
+
+  <h2>Leaderboard — match win rate</h2>
+  <table>
+    <tr><th>#</th><th class='model'>model</th><th>match win%</th><th>wins</th>
+        <th>draws</th><th>busted-out%</th><th>avg hands/match</th><th>avg win margin</th></tr>
+    <tr>
+          <td>1</td>
+          <td class='model'><span class='fam gpt'>GPT</span> gpt-5.5</td>
+          <td>63%</td><td>38</td><td>0</td>
+          <td>22%</td>
+          <td>25.6</td>
+          <td>178</td>
+        </tr><tr>
+          <td>2</td>
+          <td class='model'><span class='fam gpt'>GPT</span> gpt-5.4</td>
+          <td>57%</td><td>34</td><td>0</td>
+          <td>22%</td>
+          <td>25.1</td>
+          <td>182</td>
+        </tr><tr>
+          <td>3</td>
+          <td class='model'><span class='fam claude'>Claude</span> claude-sonnet-4.6</td>
+          <td>47%</td><td>28</td><td>0</td>
+          <td>23%</td>
+          <td>24.3</td>
+          <td>272</td>
+        </tr><tr>
+          <td>4</td>
+          <td class='model'><span class='fam claude'>Claude</span> claude-opus-4.8</td>
+          <td>33%</td><td>20</td><td>0</td>
+          <td>15%</td>
+          <td>26.6</td>
+          <td>314</td>
+        </tr>
+  </table>
+  <div class="note">A match is a heads-up sit-and-go (up to 30 hands, stacks
+    carried); the match winner is whoever holds more chips at the end. Win margin is the average
+    final chip gap in matches won. Busted-out% = share of matches lost by going broke.</div>
+
+  <div class="grid2">
+    <div><h3>Match win rate</h3><canvas id="wr"></canvas></div>
+    <div><h3>Avg hands per match</h3><canvas id="hp"></canvas></div>
+  </div>
+
+  <h2>Head-to-head (row match-wins vs column / matches played)</h2>
+  <table class='h2h'><tr><th></th><th>claude-opus-4.8</th><th>claude-sonnet-4.6</th><th>gpt-5.5</th><th>gpt-5.4</th></tr><tr><th class='model'>claude-opus-4.8</th><td class='diag'>—</td><td class='neg'>7-13<div class='small'>/20</div></td><td class='neg'>6-14<div class='small'>/20</div></td><td class='neg'>7-13<div class='small'>/20</div></td></tr><tr><th class='model'>claude-sonnet-4.6</th><td class='pos'>13-7<div class='small'>/20</div></td><td class='diag'>—</td><td class='neg'>8-12<div class='small'>/20</div></td><td class='neg'>7-13<div class='small'>/20</div></td></tr><tr><th class='model'>gpt-5.5</th><td class='pos'>14-6<div class='small'>/20</div></td><td class='pos'>12-8<div class='small'>/20</div></td><td class='diag'>—</td><td class='pos'>12-8<div class='small'>/20</div></td></tr><tr><th class='model'>gpt-5.4</th><td class='pos'>13-7<div class='small'>/20</div></td><td class='pos'>13-7<div class='small'>/20</div></td><td class='neg'>8-12<div class='small'>/20</div></td><td class='diag'>—</td></tr></table>
+
+<script>
+const R = {"models": ["claude-opus-4.8", "claude-sonnet-4.6", "gpt-5.5", "gpt-5.4"], "max_hands": 30, "episodes_per_pair": 20, "leaderboard": [{"model": "gpt-5.5", "matches": 60, "win_rate": 0.633, "wins": 38, "draws": 0, "busted_out_rate": 0.217, "avg_hands_per_match": 25.6, "avg_win_margin": 177.6}, {"model": "gpt-5.4", "matches": 60, "win_rate": 0.567, "wins": 34, "draws": 0, "busted_out_rate": 0.217, "avg_hands_per_match": 25.1, "avg_win_margin": 181.5}, {"model": "claude-sonnet-4.6", "matches": 60, "win_rate": 0.467, "wins": 28, "draws": 0, "busted_out_rate": 0.233, "avg_hands_per_match": 24.3, "avg_win_margin": 272.4}, {"model": "claude-opus-4.8", "matches": 60, "win_rate": 0.333, "wins": 20, "draws": 0, "busted_out_rate": 0.15, "avg_hands_per_match": 26.6, "avg_win_margin": 313.9}], "h2h_wins": {"claude-opus-4.8": {"claude-opus-4.8": 0, "claude-sonnet-4.6": 7, "gpt-5.5": 6, "gpt-5.4": 7}, "claude-sonnet-4.6": {"claude-opus-4.8": 13, "claude-sonnet-4.6": 0, "gpt-5.5": 8, "gpt-5.4": 7}, "gpt-5.5": {"claude-opus-4.8": 14, "claude-sonnet-4.6": 12, "gpt-5.5": 0, "gpt-5.4": 12}, "gpt-5.4": {"claude-opus-4.8": 13, "claude-sonnet-4.6": 13, "gpt-5.5": 8, "gpt-5.4": 0}}, "h2h_played": {"claude-opus-4.8": {"claude-opus-4.8": 0, "claude-sonnet-4.6": 20, "gpt-5.5": 20, "gpt-5.4": 20}, "claude-sonnet-4.6": {"claude-opus-4.8": 20, "claude-sonnet-4.6": 0, "gpt-5.5": 20, "gpt-5.4": 20}, "gpt-5.5": {"claude-opus-4.8": 20, "claude-sonnet-4.6": 20, "gpt-5.5": 0, "gpt-5.4": 20}, "gpt-5.4": {"claude-opus-4.8": 20, "claude-sonnet-4.6": 20, "gpt-5.5": 20, "gpt-5.4": 0}}};
+const lb = R.leaderboard, M = lb.map(r=>r.model);
+Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
+const col = m => m.startsWith('gpt') ? '#4ade80' : '#a78bfa';
+new Chart(document.getElementById('wr'), { type:'bar',
+  data:{ labels:M, datasets:[{label:'win %', data:lb.map(r=>r.win_rate*100),
+    backgroundColor:M.map(col)}]},
+  options:{ indexAxis:'y', scales:{x:{min:0,max:100}}, plugins:{legend:{display:false}} } });
+new Chart(document.getElementById('hp'), { type:'bar',
+  data:{ labels:M, datasets:[{label:'hands', data:lb.map(r=>r.avg_hands_per_match),
+    backgroundColor:M.map(col)}]},
+  options:{ indexAxis:'y', plugins:{legend:{display:false}} } });
+</script>
+</div></body></html>

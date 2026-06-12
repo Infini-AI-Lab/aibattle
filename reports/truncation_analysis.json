@@ -1,0 +1,173 @@
+{
+  "connect4": {
+    "kimi-k2p6-coached": {
+      "decisions": 334,
+      "generations": 334,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "minimax-m2p7-coached": {
+      "decisions": 321,
+      "generations": 321,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "glm-5p1-coached": {
+      "decisions": 434,
+      "generations": 434,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "deepseek-v4-pro-coached": {
+      "decisions": 314,
+      "generations": 314,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "gpt-oss-120b-coached": {
+      "decisions": 294,
+      "generations": 294,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    }
+  },
+  "gomoku": {
+    "gpt-oss-120b-coached": {
+      "decisions": 338,
+      "generations": 355,
+      "trunc_decisions": 0,
+      "trunc_generations": 17,
+      "invalid_decisions": 1,
+      "invalid_nontrunc": 1,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0479,
+      "invalid_rate": 0.003
+    },
+    "minimax-m2p7-coached": {
+      "decisions": 317,
+      "generations": 345,
+      "trunc_decisions": 0,
+      "trunc_generations": 28,
+      "invalid_decisions": 1,
+      "invalid_nontrunc": 1,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0812,
+      "invalid_rate": 0.0032
+    },
+    "kimi-k2p6-coached": {
+      "decisions": 354,
+      "generations": 361,
+      "trunc_decisions": 0,
+      "trunc_generations": 7,
+      "invalid_decisions": 3,
+      "invalid_nontrunc": 3,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0194,
+      "invalid_rate": 0.0085
+    },
+    "glm-5p1-coached": {
+      "decisions": 362,
+      "generations": 395,
+      "trunc_decisions": 0,
+      "trunc_generations": 33,
+      "invalid_decisions": 3,
+      "invalid_nontrunc": 3,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0835,
+      "invalid_rate": 0.0083
+    },
+    "deepseek-v4-pro-coached": {
+      "decisions": 405,
+      "generations": 458,
+      "trunc_decisions": 0,
+      "trunc_generations": 53,
+      "invalid_decisions": 7,
+      "invalid_nontrunc": 7,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.1157,
+      "invalid_rate": 0.0173
+    }
+  },
+  "holdem": {
+    "deepseek-v4-pro-coached": {
+      "decisions": 356,
+      "generations": 356,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "gpt-oss-120b-coached": {
+      "decisions": 413,
+      "generations": 413,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "minimax-m2p7-coached": {
+      "decisions": 451,
+      "generations": 451,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "glm-5p1-coached": {
+      "decisions": 423,
+      "generations": 423,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    },
+    "kimi-k2p6-coached": {
+      "decisions": 422,
+      "generations": 422,
+      "trunc_decisions": 0,
+      "trunc_generations": 0,
+      "invalid_decisions": 0,
+      "invalid_nontrunc": 0,
+      "decision_trunc_rate": 0.0,
+      "generation_trunc_rate": 0.0,
+      "invalid_rate": 0.0
+    }
+  }
+}

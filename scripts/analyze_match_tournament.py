@@ -1,9 +1,9 @@
 """Analyze the Heads-Up Match-mode tournament.
 
-Reads runs/match_tournament/match_data.json and reports match win rate (the
+Reads runs/holdem_match/match_data.json and reports match win rate (the
 primary metric), head-to-head grid, and match-shape stats (bust vs max-hands,
 avg hands/match, avg final-stack margin). Writes a Chart.js HTML report to
-runs/match_tournament/match_report.html and reports/match_tournament_report.html
+runs/holdem_match/match_report.html and reports/match_tournament_report.html
 plus the raw numbers to reports/match_tournament_analysis.json. Styling matches
 the board-game tournament report.
 """
@@ -15,13 +15,12 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
+from model_names import strip_coached
 
-# AIBATTLE_VARIANT="_coached" + AIBATTLE_REPORT_DIR="reports/coached" render a
-# parallel coached mirror; unset, paths default to the base run.
-_VARIANT = os.environ.get("AIBATTLE_VARIANT", "")
-DATA = f"runs/match_tournament{_VARIANT}/match_data.json"
-EP_GLOB = f"runs/match_tournament{_VARIANT}/*__vs__*/ep*.json"
-OUT_HTML = f"runs/match_tournament{_VARIANT}/match_report.html"
+# Coached is now the canonical (and only) run set; data lives in per-game folders.
+DATA = "runs/holdem_match/match_data.json"
+EP_GLOB = "runs/holdem_match/*__vs__*/ep*.json"
+OUT_HTML = "runs/holdem_match/match_report.html"
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
@@ -102,9 +101,8 @@ def render_html(rep: dict, beh: dict) -> str:
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    # Coached variant has no replay viewer built; omit the button so it never 404s.
-    replay_btn = ("" if _VARIANT else
-                  '<a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>')
+    # Coached runs have no replay viewer built; omit the button so it never 404s.
+    replay_btn = ""
 
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -165,7 +163,7 @@ def render_html(rep: dict, beh: dict) -> str:
 
 
 def main():
-    data = json.load(open(DATA))
+    data = strip_coached(json.load(open(DATA)))
     rep = analyze(data)
     beh = pb.behavior(EP_GLOB, "match_hand", rep["models"])
     rep["behavior"] = beh
