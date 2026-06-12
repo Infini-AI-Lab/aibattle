@@ -1,23 +1,38 @@
-/* Single source of truth for the site navbar styling. Every page links this
-   file; the markup is injected by nav.js. Colours are hard-coded (not theme
-   vars) so the bar looks identical on the report pages and the differently
-   themed replay pages. */
-.navbar { position:sticky; top:0; z-index:50; display:flex; align-items:center;
-  flex-wrap:wrap; gap:6px 18px; padding:0 22px; min-height:52px;
-  background:rgba(12,14,20,.92); backdrop-filter:blur(8px);
-  border-bottom:1px solid #232838;
-  font-family:-apple-system,Segoe UI,Roboto,sans-serif; }
-.navbar .brand { font-weight:700; color:#cdd6f4; text-decoration:none;
-  font-size:15px; margin-right:10px; }
-.navbar a.nav { color:#9aa3b5; text-decoration:none; font-size:13px;
-  padding:16px 2px; border-bottom:2px solid transparent; }
-.navbar a.nav:hover { color:#e6e6e6; }
-.navbar a.nav.active { color:#fff; border-bottom-color:#60a5fa; }
-.navbar .navgrp { font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-  color:#6b7280; align-self:center; padding-left:12px; margin-left:2px;
-  border-left:1px solid #2a3142; }
-.navbar .navclust { font-size:13px; color:#8b93a7; align-self:center; margin-left:4px; }
-.navbar a.navarena { text-decoration:none; }
-.navbar a.navarena:hover { color:#cbd5e1; }
-.navbar .soon { font-size:9px; color:#0b1020; background:#6b7280; border-radius:999px;
-  padding:1px 6px; margin-left:6px; letter-spacing:.03em; }
+/* Site nav styling (markup injected by nav.js). Terminal theme:
+   fixed LEFT SIDEBAR — white background, dark-red right border separating it
+   from the content, monospace. Brand reads like a shell prompt, links are
+   lowercase commands, the active page is marked with [brackets]. Brackets are
+   rendered transparent on inactive links so activating one shifts no layout.
+   body padding (not margin) offsets the pages: every page sets `margin:0` in
+   its own later <style>, which would clobber a margin-left set here.
+   Colours are hard-coded so the bar looks identical across pages regardless
+   of each page's own theme. On narrow screens it falls back to a top bar. */
+body { padding-left:190px; }
+.navbar { position:fixed; left:0; top:0; bottom:0; width:190px; box-sizing:border-box;
+  z-index:50; display:flex; flex-direction:column; align-items:stretch; gap:2px;
+  padding:18px 16px; overflow-y:auto;
+  background:#ffffff; border-right:2px solid #8f1d1d;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.navbar .brand { font-weight:700; color:#8f1d1d; text-decoration:none;
+  font-size:13px; margin-bottom:16px; line-height:1.4; }
+.navbar .brand .prompt { color:#1c1c1c; font-weight:400; }
+.navbar a.nav { color:#6b6b6b; text-decoration:none; font-size:12px;
+  padding:5px 0; }
+.navbar a.nav::before { content:"["; opacity:0; }
+.navbar a.nav::after { content:"]"; opacity:0; }
+.navbar a.nav:hover { color:#1c1c1c; }
+.navbar a.nav:hover::before, .navbar a.nav:hover::after { opacity:.45; }
+.navbar a.nav.active { color:#8f1d1d; font-weight:700; }
+.navbar a.nav.active::before, .navbar a.nav.active::after { opacity:1; }
+.navbar a.nav.navsub { padding-left:14px; }
+.navbar .navclust { font-size:12px; color:#b0a99c; margin-top:8px; padding:2px 0; }
+@media (max-width:760px) {
+  body { padding-left:0; }
+  .navbar { position:sticky; top:0; bottom:auto; width:auto;
+    flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px 10px;
+    min-height:44px; padding:6px 16px;
+    border-right:none; border-bottom:2px solid #8f1d1d; }
+  .navbar .brand { margin-bottom:0; margin-right:8px; }
+  .navbar a.nav.navsub { padding-left:0; }
+  .navbar .navclust { margin-top:0; }
+}

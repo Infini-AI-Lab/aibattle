@@ -48,8 +48,9 @@ data-log/
 .DS_Store
 *.swp
 
-# Claude Code
-.claude/
+# Claude Code (local state stays out; skills are versioned with the repo)
+.claude/*
+!.claude/skills/
 
 # Generated PDFs
 *.pdf

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — 🎴 Leduc Poker Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=10"></script>
+<link rel="stylesheet" href="replay.css?v=3">
+<style>
+  .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
+  @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
+
+  /* two-seat felt, public card in the middle */
+  .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
+    background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+    padding:10px 14px; min-width:300px; position:relative;}
+  .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
+  .seat .meta{flex:1; min-width:0; margin:0;}
+  .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
+  .ret{font-weight:700; font-size:14px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
+  .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
+    padding:3px 10px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+  .bubble.fold{border-color:var(--dim); color:var(--dim);}
+
+  .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
+  .pubwrap{display:flex; align-items:center; gap:10px;}
+  .publbl{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#3d5c46;}
+
+  /* rank-only Leduc cards (J/Q/K, no suits) */
+  .card.rank{justify-content:center; font-weight:700;}
+  .card.rank .r{font-size:20px;}
+
+  .seatdot{width:10px; height:10px; border-radius:50%; display:inline-block; flex:none;}
+  .seatdot.player_0,.mv .d.player_0{background:#60a5fa;}
+  .seatdot.player_1,.mv .d.player_1{background:#f472b6;}
+  .chipline{font-size:12px; color:var(--dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>$ ~/aibattle/leduc/replay<span class="cursor"></span></h1>
+  <div class="sub">🎴 Leduc Poker · 6-card deck (J Q K ×2), two betting rounds, one public card ·
+    <b>both private cards are shown</b> for analysis — pairing the public card beats everything, otherwise high card wins.</div>
+
+  <div class="selectors">
+    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+  </div>
+
+  <div class="stage">
+    <div>
+      <div class="felt">
+        <div id="seatTop"></div>
+        <div class="middle">
+          <div class="potline">Pot <b id="pot">0</b> · <span id="round">round 1</span></div>
+          <div class="pubwrap"><span class="publbl">public</span><span id="pubcard"></span></div>
+        </div>
+        <div id="seatBot"></div>
+      </div>
+      <div class="deck">
+        <div class="deckrow">
+          <button class="btn" id="first" title="Back to start">⏮</button>
+          <button class="btn step" id="prev" title="Previous action (←)">◀ Prev</button>
+          <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
+          <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
+          <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+        </div>
+        <div class="scrub">
+          <input type="range" id="slider" min="0" value="0">
+          <span class="movecount" id="movecount"></span>
+        </div>
+        <div class="tip">← / → step · space play/pause</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="arena-head"><h2>action analysis</h2></div>
+      <div class="pbody" id="panel"></div>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="arena-head"><h2>action summary</h2><span class="arena-tag">click to jump</span></div>
+    <div class="movelist" id="movelist"></div>
+  </div>
+</div>
+
+<script>
+const BASE = "runs/leduc_poker/replays/leduc/";
+const PLAY_MS = 950;
+const SPEEDS = [1, 2, 4];
+let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+const $ = id => document.getElementById(id);
+
+async function init(){
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  catch(e){
+    $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
+      "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
+      "<code>python3 scripts/build_replays.py</code> and serve the repo root.</div>";
+    return;
+  }
+  $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
+    `<option value="${i}">${p.a} vs ${p.b}</option>`).join("");
+  $("pairSel").onchange = () => loadPair(+$("pairSel").value);
+  $("epSel").onchange = () => selectEp(+$("epSel").value);
+  $("first").onclick = () => { stop(); cursor=0; render(); };
+  $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
+  $("next").onclick  = () => { stop(); step(1); };
+  $("play").onclick  = togglePlay;
+  $("speed").onclick = cycleSpeed;
+  $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
+  document.addEventListener("keydown", e => {
+    if (!ep) return;
+    if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
+    if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
+    if (e.key===" "){ togglePlay(); e.preventDefault(); }
+  });
+  await loadPair(0);
+}
+
+async function loadPair(i){
+  const p = manifest.pairs[i];
+  pairData = await (await fetch(BASE + p.file)).json();
+  $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
+    const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "split pot";
+    const n = e.moves.length;
+    return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
+  }).join("");
+  selectEp(0);
+}
+
+function fmt(n){ return (n>0?"+":"") + n; }
+function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
+
+function selectEp(idx){
+  stop();
+  ep = pairData.episodes[idx];
+  cursor = 0;
+  $("slider").max = ep.moves.length;
+  render();
+}
+
+// table state at `cursor`: pre-action state of move[cursor-1]; at the end show
+// the final pot and reveal the public card no matter when the hand ended.
+function stateAt(k){
+  if (!ep.moves.length) return {pot:ep.pot, round:1, pub:ep.public_card, acting:null, last:null, result:true};
+  if (k===0){ const m=ep.moves[0];
+    return {pot:m.pot, round:m.round, pub:m.public_card, acting:m.player, last:null, result:false}; }
+  const m = ep.moves[k-1];
+  const result = (k===ep.moves.length);
+  return {pot: result ? ep.pot : m.pot, round:m.round,
+          pub: result ? ep.public_card : m.public_card,
+          acting: result ? null : m.player, last:m, result};
+}
+
+function cardHTML(rank, faceUp, big=true){
+  if (!faceUp) return `<div class="card back"></div>`;
+  if (!rank) return `<div class="card empty"></div>`;
+  return `<div class="card rank"><span class="r">${rank}</span></div>`;
+}
+
+function seatHTML(player, st){
+  const name = ep.seat_assignment[player];
+  const folded = ep.reason==="fold" && st.result && ep.winner && player!==ep.winner;
+  const won = st.result && ep.winner===player;
+  const cls = "seat" + (st.acting===player?" acting":"") + (won?" winner":"");
+  const ret = st.result ? `<span class="ret ${ep.returns[player]>=0?"pos":"neg"}">${fmt(ep.returns[player])}</span>` : "";
+  let bubble = "";
+  if (st.last && st.last.player===player && !st.result)
+    bubble = `<span class="bubble">${st.last.action}</span>`;
+  if (st.result && st.last && st.last.player===player)
+    bubble = `<span class="bubble${st.last.action==="fold"?" fold":""}">${st.last.action}</span>`;
+  const status = st.result
+    ? (won ? "🏆 wins the pot" : (folded ? "folded" : "")) : "";
+  return `<div class="${cls}">${bubble}
+    <span class="seatdot ${player}"></span>
+    ${cardHTML(ep.cards[player], true)}
+    <div class="meta"><div class="nm">${name}</div>
+      <div class="sub">${player==="player_0"?"first to act":"second to act"}${status?" · "+status:""}</div></div>
+    ${ret}</div>`;
+}
+
+function render(){
+  const st = stateAt(cursor);
+  $("seatTop").innerHTML = seatHTML("player_1", st);
+  $("seatBot").innerHTML = seatHTML("player_0", st);
+  $("pot").textContent = st.pot;
+  $("round").textContent = st.result ? ep.reason : `round ${st.round}`;
+  $("pubcard").innerHTML = cardHTML(st.pub, !!st.pub);
+  $("slider").value = cursor;
+  $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
+  $("prev").disabled = cursor===0;
+  $("next").disabled = cursor===ep.moves.length;
+  renderPanel();
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  ml.innerHTML = ep.moves.map((m,i)=>{
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    return `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d ${m.player}"></span>R${m.round} ${m.action}${m.trunc?" ⚠":""}</button>`;
+  }).join("");
+}
+
+function renderPanel(){
+  const p=$("panel");
+  if (cursor===0){
+    const hands = `${ep.seat_assignment.player_0} holds ${ep.cards.player_0} · ` +
+                  `${ep.seat_assignment.player_1} holds ${ep.cards.player_1}`;
+    p.innerHTML =
+      `<div class="movenum">Deal</div>` +
+      `<div class="meta">${hands}<br>Both ante 1 chip. Round 1 bets are 2 chips; the public card ` +
+      `is dealt, then round 2 bets are 4 chips. Max one raise per round.</div>` +
+      (ep.moves.length ? `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`
+                       : `<div class="hint">No decisions in this hand.</div>`);
+    return;
+  }
+  const m=ep.moves[cursor-1];
+  const result = cursor===ep.moves.length;
+  const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
+  const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
+  const tid = "think-"+cursor;
+  const warn = m.trunc
+    ? `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
+      `so the played action may be arbitrary rather than the model's intended choice.</div></div>` : "";
+  const resline = result
+    ? `<div class="meta"><b>Hand over (${ep.reason}).</b> ` +
+      (ep.winner_name ? `${ep.winner_name} wins the ${ep.pot}-chip pot.` : "Pot split.") +
+      (ep.public_card ? ` Public card: ${ep.public_card}.` : "") + `</div>` : "";
+  p.innerHTML =
+    `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot ${m.player}"></span>${m.agent}</span>` +
+    `<span class="colchip">${m.action}</span></div>` +
+    `<div class="meta">round ${m.round} · holds ${ep.cards[m.player]} · pot ${m.pot} · to call ${m.to_call}` +
+    ` · ⏱ ${lat} thinking${inv}</div>` +
+    warn + resline +
+    (m.thinking
+      ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+        (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
+        `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
+      : `<div class="hint">No reasoning recorded for this action.</div>`);
+}
+
+function toggleThink(btn, id){
+  showThink = !showThink;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function step(d){
+  const n=ep.moves.length;
+  if (cursor+d<0||cursor+d>n) return;
+  cursor+=d; render();
+  if (cursor===n) stop();
+}
+function togglePlay(){ playing ? stop() : start(); }
+function start(){
+  if (cursor>=ep.moves.length) cursor=0;
+  playing=true; $("play").textContent="⏸ Pause";
+  timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
+}
+function stop(){ playing=false; $("play").textContent="▶ Play"; if(timer){clearInterval(timer); timer=null;} }
+function cycleSpeed(){
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  $("speed").textContent = "⏩ " + SPEEDS[speedIdx] + "×";
+  if (playing){ clearInterval(timer); timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]); }
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+init();
+</script>
+</body></html>
