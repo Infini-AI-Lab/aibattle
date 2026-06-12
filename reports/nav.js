@@ -13,7 +13,8 @@
     "holdem_replay.html": "holdem_tournament_report.html",
     "match_tournament_report.html": "match_tournament_report.html",
     "match_replay.html": "match_tournament_report.html",
-    "table_tournament_report.html": "table_tournament_report.html"
+    "table_tournament_report.html": "table_tournament_report.html",
+    "table_replay.html": "table_tournament_report.html"
   };
   var file = location.pathname.split("/").pop() || "index.html";
   var active = ACTIVE[file] || "";

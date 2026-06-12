@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — 🎰 Blackjack Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=10"></script>
+<link rel="stylesheet" href="replay.css?v=3">
+<style>
+  .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
+  @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
+
+  .felt{display:grid; grid-template-rows:1fr 1fr; gap:16px; justify-items:center;
+    background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+    padding:10px 14px; min-width:340px; position:relative;}
+  .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
+  .seat .meta{flex:1; min-width:0; margin:0;}
+  .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
+  .hand{display:flex; gap:5px; flex-wrap:wrap;}
+  .card.rank{justify-content:center; font-weight:700;}
+  .card.rank .r{font-size:17px;}
+  .total{font-weight:700; font-size:15px; min-width:34px; text-align:right;}
+  .total.bust{color:var(--neg);}
+  .ret{font-weight:700; font-size:14px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);} .ret.push{color:var(--dim);}
+  .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
+    padding:3px 10px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+  .bubble.dealer{border-color:var(--dim); color:var(--dim);}
+  .tag{font-weight:600; font-size:9px; letter-spacing:.05em; padding:1px 5px; margin-left:6px;}
+  .tag.nat{color:var(--amber); border:1px solid var(--amber);}
+  .tag.dbl{color:var(--link); border:1px solid var(--link);}
+  .tag.bust{color:var(--neg); border:1px solid var(--neg);}
+  .mv .d.player{background:#60a5fa;}
+  .mv .d.dealer{background:#9ca3af;}
+  .seatdot{width:10px; height:10px; border-radius:50%; display:inline-block; flex:none;}
+  .seatdot.player{background:#60a5fa;} .seatdot.dealer{background:#9ca3af;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>$ ~/aibattle/blackjack/replay<span class="cursor"></span></h1>
+  <div class="sub">🎰 Blackjack · each model plays 20 hands against the house dealer (hits to 17) ·
+    1-unit bet, double allowed · hands with a natural have no decisions — the result card tells the story.
+    Dealer hit cards are face-down (only its upcard and final total are public).</div>
+
+  <div class="selectors">
+    <div><label class="sel">Model</label><select id="modelSel"></select></div>
+    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+  </div>
+
+  <div class="stage">
+    <div>
+      <div class="felt">
+        <div id="seatDealer"></div>
+        <div id="seatPlayer"></div>
+      </div>
+      <div class="deck">
+        <div class="deckrow">
+          <button class="btn" id="first" title="Back to start">⏮</button>
+          <button class="btn step" id="prev" title="Previous action (←)">◀ Prev</button>
+          <button class="btn step" id="next" title="Next action (→)">Next ▶</button>
+          <button class="btn primary" id="play" title="Auto-play / pause (space)">▶ Play</button>
+          <button class="btn" id="speed" title="Playback speed">⏩ 1×</button>
+        </div>
+        <div class="scrub">
+          <input type="range" id="slider" min="0" value="0">
+          <span class="movecount" id="movecount"></span>
+        </div>
+        <div class="tip">← / → step · space play/pause</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="arena-head"><h2>action analysis</h2></div>
+      <div class="pbody" id="panel"></div>
+    </div>
+  </div>
+  <div class="summary">
+    <div class="arena-head"><h2>action summary</h2><span class="arena-tag">click to jump</span></div>
+    <div class="movelist" id="movelist"></div>
+  </div>
+</div>
+
+<script>
+const BASE = "runs/blackjack/replays/blackjack/";
+const PLAY_MS = 950;
+const SPEEDS = [1, 2, 4];
+let manifest=null, modelData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+const $ = id => document.getElementById(id);
+
+async function init(){
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  catch(e){
+    $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
+      "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
+      "<code>python3 scripts/build_replays.py</code> and serve the repo root.</div>";
+    return;
+  }
+  $("modelSel").innerHTML = manifest.models.map((m,i) =>
+    `<option value="${i}">${m.model}</option>`).join("");
+  $("modelSel").onchange = () => loadModel(+$("modelSel").value);
+  $("epSel").onchange = () => selectEp(+$("epSel").value);
+  $("first").onclick = () => { stop(); cursor=0; render(); };
+  $("prev").onclick  = () => { stop(); if (cursor>0){cursor--; render();} };
+  $("next").onclick  = () => { stop(); step(1); };
+  $("play").onclick  = togglePlay;
+  $("speed").onclick = cycleSpeed;
+  $("slider").oninput = () => { stop(); cursor=+$("slider").value; render(); };
+  document.addEventListener("keydown", e => {
+    if (!ep) return;
+    if (e.key==="ArrowLeft"){ stop(); if(cursor>0){cursor--; render();} e.preventDefault(); }
+    if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
+    if (e.key===" "){ togglePlay(); e.preventDefault(); }
+  });
+  await loadModel(0);
+}
+
+async function loadModel(i){
+  const m = manifest.models[i];
+  modelData = await (await fetch(BASE + m.file)).json();
+  $("epSel").innerHTML = modelData.episodes.map((e,idx) => {
+    const r = e.net>0 ? `won ${fmt(e.net)}` : (e.net<0 ? `lost ${fmt(e.net)}` : "push");
+    const n = e.moves.filter(m=>m.actor==="player").length;
+    const note = n===0 ? "no decisions" : `${n} decision${n===1?"":"s"}`;
+    return `<option value="${idx}">#${e.episode+1} · ${note} · ${r}</option>`;
+  }).join("");
+  selectEp(0);
+}
+
+function fmt(n){ return (n>0?"+":"") + n; }
+
+function selectEp(idx){
+  stop();
+  ep = modelData.episodes[idx];
+  cursor = ep.moves.length ? 0 : 0;
+  $("slider").max = ep.moves.length;
+  render();
+}
+
+// state at cursor k = the situation move[k-1] was decided in (plus its action
+// as a bubble), exactly like the poker viewers. k = moves.length reveals the
+// final totals from the hand summary.
+function stateAt(k){
+  const n = ep.moves.length;
+  const result = (k===n);
+  const upcard = (ep.moves.find(m=>m.upcard)||{}).upcard || null;
+  // last player decision at or before k-1 (its observation = visible hand)
+  let hand=null, total=null, soft=null, extraCards=0;
+  const past = ep.moves.slice(0,k).filter(m=>m.actor==="player");
+  const nxt = ep.moves.slice(k).find(m=>m.actor==="player");
+  if (k>0 && ep.moves[k-1].actor==="player"){
+    const m = ep.moves[k-1];
+    hand=m.hand; total=m.total; soft=m.soft;
+    const act=(m.action||"").toLowerCase();
+    if (!nxt && (act==="hit"||act==="double")) extraCards=1;   // outcome card unobserved
+  } else if (past.length){
+    const m = past[past.length-1];
+    hand=m.hand; total=m.total; soft=m.soft;
+    const act=(m.action||"").toLowerCase();
+    if (act==="hit"||act==="double") { extraCards=1; total=null; soft=null; }
+  } else if (k===0 && nxt){
+    hand=nxt.hand; total=nxt.total; soft=nxt.soft;
+  } else {
+    extraCards=2; // natural either way: no decision observation at all
+  }
+  if (result) total = ep.player_total;
+  const dealerHits = ep.moves.slice(0,k).filter(m=>m.actor==="dealer").length;
+  const acting = (!result && n) ? ep.moves[Math.min(k, n-1)].actor : null;
+  const last = k>0 ? ep.moves[k-1] : null;
+  return {result, upcard, hand, total, soft, extraCards, dealerHits, acting, last};
+}
+
+function rankCard(r){ return `<div class="card rank"><span class="r">${r}</span></div>`; }
+function unknownCard(){ return `<div class="card unknown"></div>`; }
+function backCard(){ return `<div class="card back"></div>`; }
+
+function dealerHTML(st){
+  const won = st.result && ep.net<0;
+  const cls = "seat" + (st.acting==="dealer" && !st.result ? " acting" : "") + (won?" winner":"");
+  let cards = st.upcard ? rankCard(st.upcard) : unknownCard();
+  cards += st.result ? unknownCard() : backCard();
+  for (let i=0;i<st.dealerHits;i++) cards += st.result ? unknownCard() : backCard();
+  const tags = (st.result && ep.dealer_natural ? `<span class="tag nat">NATURAL</span>` : "") +
+               (st.result && ep.dealer_bust ? `<span class="tag bust">BUST</span>` : "");
+  const total = st.result ? `<span class="total${ep.dealer_bust?" bust":""}">${ep.dealer_total}</span>` : `<span class="total">?</span>`;
+  const bubble = (st.last && st.last.actor==="dealer")
+    ? `<span class="bubble dealer">${st.last.action}</span>` : "";
+  return `<div class="${cls}">${bubble}
+    <span class="seatdot dealer"></span>
+    <div class="hand">${cards}</div>
+    <div class="meta"><div class="nm">house dealer${tags}</div>
+      <div class="sub">fixed rules · hits to 17</div></div>
+    ${total}</div>`;
+}
+
+function playerHTML(st){
+  const won = st.result && ep.net>0;
+  const cls = "seat" + (st.acting==="player" && !st.result ? " acting" : "") + (won?" winner":"");
+  let cards = (st.hand||[]).map(rankCard).join("");
+  for (let i=0;i<st.extraCards;i++) cards += unknownCard();
+  const tags = (st.result && ep.player_natural ? `<span class="tag nat">NATURAL</span>` : "") +
+               (st.result && ep.doubled ? `<span class="tag dbl">DOUBLED</span>` : "") +
+               (st.result && ep.player_bust ? `<span class="tag bust">BUST</span>` : "");
+  const totalTxt = st.total!=null ? (st.soft && !st.result ? `${st.total}s` : st.total) : "?";
+  const total = `<span class="total${st.result && ep.player_bust?" bust":""}">${totalTxt}</span>`;
+  const ret = st.result
+    ? `<span class="ret ${ep.net>0?"pos":(ep.net<0?"neg":"push")}">${ep.net===0?"push":fmt(ep.net)}</span>` : "";
+  const bubble = (st.last && st.last.actor==="player")
+    ? `<span class="bubble">${st.last.action}</span>` : "";
+  return `<div class="${cls}">${bubble}
+    <span class="seatdot player"></span>
+    <div class="hand">${cards}</div>
+    <div class="meta"><div class="nm">${modelData.model}${tags}</div>
+      <div class="sub">bets 1 unit</div></div>
+    ${total}${ret}</div>`;
+}
+
+function render(){
+  const st = stateAt(cursor);
+  $("seatDealer").innerHTML = dealerHTML(st);
+  $("seatPlayer").innerHTML = playerHTML(st);
+  $("slider").value = cursor;
+  $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
+  $("prev").disabled = cursor===0;
+  $("next").disabled = cursor===ep.moves.length;
+  renderPanel(st);
+  renderMoveList();
+}
+
+function jump(k){ stop(); cursor=k; render(); }
+
+function renderMoveList(){
+  const ml=$("movelist");
+  if (!ep.moves.length){ ml.innerHTML = `<span class="hint">No decisions in this hand (a natural ended it immediately).</span>`; return; }
+  ml.innerHTML = ep.moves.map((m,i)=>{
+    const cur = cursor===i+1 ? " cur" : "";
+    const tr = m.trunc ? " trunc" : "";
+    return `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
+      `<span class="d ${m.actor}"></span>${m.action}${m.trunc?" ⚠":""}</button>`;
+  }).join("");
+}
+
+function resultLine(){
+  const who = ep.net>0 ? `${modelData.model} wins ${fmt(ep.net)}` :
+              (ep.net<0 ? `dealer wins (${modelData.model} ${fmt(ep.net)})` : "push — bet returned");
+  const why = ep.player_bust ? "player busts" :
+              ep.dealer_bust ? "dealer busts" :
+              ep.player_natural && !ep.dealer_natural ? "natural blackjack" :
+              ep.dealer_natural && !ep.player_natural ? "dealer natural" :
+              `player ${ep.player_total} vs dealer ${ep.dealer_total}`;
+  return `<b>${who}</b> · ${why}.`;
+}
+
+function renderPanel(st){
+  const p=$("panel");
+  if (cursor===0){
+    if (!ep.moves.length){
+      p.innerHTML = `<div class="movenum">Hand over before any decision</div>` +
+        `<div class="meta">${resultLine()}</div>` +
+        `<div class="hint">A natural 21 (either side) settles the hand with no choices to make.</div>`;
+      return;
+    }
+    const m0 = ep.moves.find(m=>m.actor==="player");
+    p.innerHTML =
+      `<div class="movenum">Deal</div>` +
+      `<div class="meta">${modelData.model} is dealt ${(m0&&m0.hand||[]).join(" ")} (total ${m0?m0.total:"?"}` +
+      `${m0&&m0.soft?", soft":""}) against dealer upcard ${st.upcard||"?"}.</div>` +
+      `<div class="hint">Use “Next ▶” / → or press Play to step through the decisions.</div>`;
+    return;
+  }
+  const m = ep.moves[cursor-1];
+  const result = cursor===ep.moves.length;
+  const resline = result ? `<div class="meta">${resultLine()}</div>` : "";
+  if (m.actor==="dealer"){
+    p.innerHTML =
+      `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
+      `<div class="actor"><span class="who"><span class="seatdot dealer"></span>house dealer</span>` +
+      `<span class="colchip">${m.action}</span></div>` +
+      `<div class="meta">The dealer plays fixed rules — no model involved: hit until reaching 17.</div>` +
+      resline;
+    return;
+  }
+  const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
+  const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
+  const tid = "think-"+cursor;
+  const warn = m.trunc
+    ? `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This decision hit the token limit mid-thought, ` +
+      `so the played action may be arbitrary rather than the model's intended choice.</div></div>` : "";
+  p.innerHTML =
+    `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
+    `<div class="actor"><span class="who"><span class="seatdot player"></span>${modelData.model}</span>` +
+    `<span class="colchip">${m.action}</span></div>` +
+    `<div class="meta">holds ${(m.hand||[]).join(" ")} = ${m.total}${m.soft?" (soft)":""} vs upcard ${m.upcard}` +
+    `${m.can_double?" · double available":""} · ⏱ ${lat} thinking${inv}</div>` +
+    warn + resline +
+    (m.thinking
+      ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
+        (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
+        `<pre class="think ${showThink?"":"hidden"}" id="${tid}">${escapeHtml(m.thinking)}</pre>`
+      : `<div class="hint">No reasoning recorded for this decision.</div>`);
+}
+
+function toggleThink(btn, id){
+  showThink = !showThink;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function step(d){
+  const n=ep.moves.length;
+  if (cursor+d<0||cursor+d>n) return;
+  cursor+=d; render();
+  if (cursor===n) stop();
+}
+function togglePlay(){ playing ? stop() : start(); }
+function start(){
+  if (cursor>=ep.moves.length) cursor=0;
+  playing=true; $("play").textContent="⏸ Pause";
+  timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]);
+}
+function stop(){ playing=false; $("play").textContent="▶ Play"; if(timer){clearInterval(timer); timer=null;} }
+function cycleSpeed(){
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  $("speed").textContent = "⏩ " + SPEEDS[speedIdx] + "×";
+  if (playing){ clearInterval(timer); timer=setInterval(()=>step(1), PLAY_MS / SPEEDS[speedIdx]); }
+}
+function escapeHtml(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+init();
+</script>
+</body></html>
