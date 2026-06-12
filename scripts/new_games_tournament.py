@@ -18,8 +18,12 @@ aggregated report is written under ``reports/``.
 Usage:
   PYTHONPATH=src python scripts/new_games_tournament.py [--episodes N] [--games g1,g2]
 Environment:
-  EPISODES   override episodes per pair / per model (default small for cost)
-  OUT        output root (default runs/new_games_experiment)
+  EPISODES            override episodes per pair / per model (default small for cost)
+  BLACKJACK_EPISODES  per-model blackjack hand count (default: EPISODES)
+  OTHELLO_EPISODES    per-pair othello episode count (default: EPISODES)
+  PARALLEL_GAMES      1 = run all selected games concurrently under the one
+                      shared MAX_CONCURRENCY semaphore (default: sequential)
+  OUT                 output root (default runs/new_games_experiment)
 """
 
 from __future__ import annotations
@@ -62,6 +66,8 @@ MODEL_TIMEOUT_S = float(os.environ.get("MODEL_TIMEOUT_S", "900"))
 MAX_TOKENS = int(os.environ.get("MAX_TOKENS", "131072"))
 # Inject the per-game coaching line into the prompt template (COACHED=0 disables).
 COACHED = os.environ.get("COACHED", "1").lower() in ("1", "true", "yes")
+TEMPERATURE = float(os.environ.get("TEMPERATURE", "0.6"))
+MAX_RETRIES = 2
 
 
 def acfg(label: str) -> dict:
@@ -71,9 +77,26 @@ def acfg(label: str) -> dict:
             "provider": "fireworks",
             "model_id": f"accounts/fireworks/models/{label}",
             "api_key_env": "FIREWORKS_API_KEY",
-            "temperature": 0.6, "max_tokens": MAX_TOKENS, "timeout_s": MODEL_TIMEOUT_S,
+            "temperature": TEMPERATURE, "max_tokens": MAX_TOKENS,
+            "timeout_s": MODEL_TIMEOUT_S,
         },
-        "max_retries": 2,
+        "max_retries": MAX_RETRIES,
+    }
+
+
+def run_settings() -> dict:
+    """Every knob that shaped model behavior, stamped into each game's data.json
+    so a stored run is self-describing (COACHED in particular is otherwise
+    unrecoverable after the fact)."""
+    return {
+        "coached": COACHED,
+        "temperature": TEMPERATURE,
+        "max_tokens": MAX_TOKENS,
+        "model_timeout_s": MODEL_TIMEOUT_S,
+        "max_retries": MAX_RETRIES,
+        "max_concurrency": MAX_CONCURRENCY,
+        "provider": "fireworks",
+        "on_invalid_action": "fallback",
     }
 
 
@@ -139,7 +162,8 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
     os.makedirs(out, exist_ok=True)
     pairs = list(itertools.combinations(MODELS, 2))
     data = {"game": game, "models": MODELS, "episodes_per_pair": episodes,
-            "structure": "round_robin_seat_swap", "pairs": [], "leaderboard": []}
+            "structure": "round_robin_seat_swap", "settings": run_settings(),
+            "pairs": [], "leaderboard": []}
 
     def save():
         # Refresh the leaderboard from whatever pairs have completed so far, so an
@@ -196,7 +220,8 @@ async def run_blackjack(episodes: int, sem) -> dict:
     out = os.path.join(OUT, game)
     os.makedirs(out, exist_ok=True)
     data = {"game": game, "models": MODELS, "episodes_per_model": episodes,
-            "structure": "independent_vs_dealer", "model_runs": {}}
+            "structure": "independent_vs_dealer", "settings": run_settings(),
+            "model_runs": {}}
 
     def save():
         json.dump(data, open(os.path.join(out, "data.json"), "w"))
@@ -268,7 +293,8 @@ async def run_versus_baseline(game: str, episodes: int, sem) -> dict:
     os.makedirs(out, exist_ok=True)
     baseline = _BASELINE[game]
     data = {"game": game, "models": MODELS, "episodes_per_model": episodes,
-            "structure": f"model_vs_{baseline}", "model_runs": {}}
+            "structure": f"model_vs_{baseline}", "settings": run_settings(),
+            "model_runs": {}}
     model_runs = {}
 
     def save():
@@ -446,10 +472,11 @@ async def main():
     # Blackjack and Leduc finish quickest (short hands); Blotto is medium; Othello
     # games are long (~30 plies) with slow reasoning models, so run it LAST. Every
     # game uses per-episode resume, so a later re-run continues where it left off.
-    # OTHELLO_EPISODES lets Othello use a smaller count so the run completes.
+    # OTHELLO_EPISODES / BLACKJACK_EPISODES override the per-game episode count.
     fast_first = ENV_GAMES + ["leduc_poker", "repeated_colonel_blotto",
                               "othello_lite_6x6"]
     othello_episodes = int(os.environ.get("OTHELLO_EPISODES", str(episodes)))
+    blackjack_episodes = int(os.environ.get("BLACKJACK_EPISODES", str(episodes)))
     # BASELINE_MODE=1 evaluates the long games (Blotto/Othello) as model-vs-local-
     # baseline instead of model-vs-model, so only one seat calls the API and the
     # games actually finish. Optionally restrict to specific games via a CSV in
@@ -458,15 +485,17 @@ async def main():
     baseline_games = set(
         os.environ.get("BASELINE_GAMES",
                        "repeated_colonel_blotto,othello_lite_6x6").split(","))
+    # PARALLEL_GAMES=1 runs ALL selected games concurrently under the single
+    # shared semaphore, so MAX_CONCURRENCY is a true global model-call budget
+    # (the per-game ordering above only matters for the sequential mode).
+    parallel_games = os.environ.get("PARALLEL_GAMES", "").lower() in ("1", "true", "yes")
 
-    for game in fast_first:
-        if want and game not in want:
-            continue
+    async def run_one(game: str):
         n = othello_episodes if game == "othello_lite_6x6" else episodes
         if game in ENV_GAMES:
-            print(f"== {game} (independent vs dealer, {episodes} hands/model) ==",
-                  flush=True)
-            all_data[game] = await run_blackjack(episodes, sem)
+            print(f"== {game} (independent vs dealer, "
+                  f"{blackjack_episodes} hands/model) ==", flush=True)
+            all_data[game] = await run_blackjack(blackjack_episodes, sem)
         elif baseline_mode and game in baseline_games:
             print(f"== {game} (model vs baseline, {n} games/model) ==", flush=True)
             all_data[game] = await run_versus_baseline(game, n, sem)
@@ -474,6 +503,13 @@ async def main():
             print(f"== {game} (round-robin, {n} hands/pair) ==", flush=True)
             all_data[game] = await run_versus_game(game, n, sem)
         write_report(all_data)   # incremental report so partial progress is saved
+
+    selected = [g for g in fast_first if not want or g in want]
+    if parallel_games:
+        await asyncio.gather(*(run_one(g) for g in selected))
+    else:
+        for game in selected:
+            await run_one(game)
 
     print(f"\nEXPERIMENT DONE in {time.perf_counter()-t0:.0f}s")
 

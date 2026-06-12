@@ -198,15 +198,34 @@ def test_template_parse_coord_and_pass():
     assert t.parse("I have to pass here", req_pass) == Move(type="pass")
 
 
-def test_fallback_prefers_corner():
+def test_fallback_is_neutral_random_legal():
     g = _game()
     s = g.initial_state(random.Random(0))
-    # If a corner is among legal, fallback picks it; else first legal.
     legal = ["B2", "A1", "C5"]
-    assert g.fallback_action(s, "player_0", legal) == Move(type="A1")
-    legal2 = ["B2", "C5"]
-    assert g.fallback_action(s, "player_0", legal2) == Move(type="B2")
+    # The substitute move is always legal, deterministic for a given position,
+    # and NOT a corner-preferring heuristic (no reward for invalid output).
+    fb = g.fallback_action(s, "player_0", legal)
+    assert fb.type in legal
+    assert fb == g.fallback_action(s, "player_0", legal)  # reproducible
     assert g.fallback_action(s, "player_0", [PASS]) == Move(type=PASS)
+    # Across positions/option sets the pick varies (it is not "always first"
+    # or "always corner"): different inputs reach different choices.
+    picks = set()
+    for legal_set in (["B2", "A1", "C5"], ["A1", "B2"], ["C5", "A6", "F1"],
+                      ["E4", "A1"], ["D6", "C5", "B2"]):
+        picks.add(g.fallback_action(s, "player_0", legal_set).type)
+    assert len(picks) > 1
+
+
+def test_template_parse_last_mention_wins():
+    t = make_template("othello_lite_6x6")
+    req = _empty_request(["B2", "C5", "E4"])
+    # Exact final line, with markdown/punctuation decoration.
+    assert t.parse("thinking...\n**C5.**", req) == Move(type="C5")
+    assert t.parse("reasoning\n- e4", req) == Move(type="E4")
+    # Rejected-then-chosen on one line: the LAST legal coordinate wins.
+    assert t.parse("B2 is tempting but C5 is better", req) == Move(type="C5")
+    assert t.parse("Not B2. Not E4. Play C5", req) == Move(type="C5")
 
 
 # --- full self-play smoke (engine-level) -----------------------------------

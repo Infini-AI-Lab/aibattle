@@ -113,7 +113,10 @@ class BlottoState:
 
 class RepeatedColonelBlotto(Game):
     name = "repeated_colonel_blotto"
-    version = "1.0.0"
+    # 1.1.0: the rendered observation now carries the FULL resolved round
+    # history (1.0.0 showed only the last round). Episodes record this version,
+    # so results across the two prompt regimes can be separated in analysis.
+    version = "1.1.0"
     players = list(_PLAYERS)
 
     # -- setup --------------------------------------------------------------
@@ -239,13 +242,23 @@ class RepeatedColonelBlotto(Game):
             f"Cumulative score — you: {you}, opponent: {opp}.",
         ]
         if s.history:
-            last = s.history[-1]
-            lines.append(
-                f"Last resolved round {last['round']}: you allocated "
-                f"{last['alloc_0'] if player == 'player_0' else last['alloc_1']}, "
-                f"opponent allocated "
-                f"{last['alloc_1'] if player == 'player_0' else last['alloc_0']}."
-            )
+            # The FULL resolved history, one line per round — the rules promise
+            # "you can see the resolved allocations from previous rounds", so the
+            # rendered state (the only thing in the prompt) must carry all of it,
+            # not just the last round.
+            you_a, opp_a = (("alloc_0", "alloc_1") if player == "player_0"
+                            else ("alloc_1", "alloc_0"))
+            you_p, opp_p = (("points_0", "points_1") if player == "player_0"
+                            else ("points_1", "points_0"))
+            lines.append("Resolved rounds so far "
+                         "(your allocation | opponent's allocation | points you:opp):")
+            for rec in s.history:
+                lines.append(
+                    f"  Round {rec['round']}: "
+                    f"{','.join(str(x) for x in rec[you_a])} | "
+                    f"{','.join(str(x) for x in rec[opp_a])} | "
+                    f"{rec[you_p]}:{rec[opp_p]}"
+                )
         lines.append(
             f"Submit your allocation as alloc:a,b,c,d,e (five non-negative "
             f"integers summing to {RESOURCES})."

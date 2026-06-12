@@ -309,3 +309,18 @@ def test_template_parse_fills_amount():
     assert t.parse("call", req2) == Move(type="call")
     assert t.parse("fold", req2) == Move(type="fold")
     assert t.parse("uhh", req2) is None
+
+
+def test_template_parse_last_mention_wins():
+    t = make_template("leduc_poker")
+    obs = Observation("player_0", {"card": "K"},
+                      {"bet_size": 2, "your_commit": 0, "to_call": 2, "round": 1},
+                      [], ["fold", "call", "raise"], "")
+    req = AgentRequest("leduc_poker", "1.0.0", "player_0", obs, "", 0)
+    # A rejected action mentioned before the chosen one must NOT win: the
+    # latest-mentioned legal action is the conclusion.
+    assert t.parse("I shouldn't raise here, just call", req) == Move(type="call")
+    assert t.parse("Folding is too weak. I call", req) == Move(type="call")
+    # Exact final line with decoration parses via the fast path.
+    assert t.parse("reasoning about raising...\n**call**", req) == Move(type="call")
+    assert t.parse("blah\n- raise:", req) == Move(type="raise", amount=4)

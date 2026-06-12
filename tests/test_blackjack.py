@@ -272,3 +272,18 @@ def test_template_parse():
     assert t.parse("reasoning...\nstand", req) == Move(type="stand")
     assert t.parse("Let's double down here", req) == Move(type="double")
     assert t.parse("no idea", req) is None
+
+
+def test_template_parse_last_mention_wins_and_no_broad_aliases():
+    t = make_template("independent_blackjack")
+    req = AgentRequest("independent_blackjack", "1.0.0", "player_0",
+                       Observation("player_0", {}, {}, [],
+                                   ["hit", "stand", "double"], ""), "", 0)
+    # The latest-mentioned legal action is the conclusion.
+    assert t.parse("Don't double here, just stand", req) == Move(type="stand")
+    assert t.parse("Standing is too passive — hit", req) == Move(type="hit")
+    # Exact final line with decoration parses via the fast path.
+    assert t.parse("thinking...\n**Stand.**", req) == Move(type="stand")
+    # 'take'/'draw' are no longer hit aliases: incidental prose must not parse.
+    assert t.parse("take the upcard into account", req) is None
+    assert t.parse("the dealer could draw a ten", req) is None

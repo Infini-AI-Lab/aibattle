@@ -6,7 +6,7 @@ import re
 from typing import Optional
 
 from ...types import AgentRequest, Move
-from .base import GameTemplate
+from .base import GameTemplate, clean_answer_line
 
 
 _RULES = (
@@ -23,10 +23,13 @@ _RULES = (
     "and both blackjack is a push."
 )
 
+# No 'take'/'draw' aliases for hit: they match incidental prose ("take the
+# upcard into account", "the dealer could draw"). Unparseable output goes
+# through the repair-retry loop instead of being guessed at.
 _ALIASES = {
-    "double": r"\bdouble\b|\bdouble\s*down\b|\bdd\b",
+    "double": r"\bdouble(?:\s*down)?\b|\bdd\b",
     "stand": r"\bstand\b|\bstay\b|\bhold\b",
-    "hit": r"\bhit\b|\bdraw\b|\btake\b",
+    "hit": r"\bhit\b",
 }
 
 
@@ -46,13 +49,24 @@ class BlackjackTemplate(GameTemplate):
         if not raw:
             return None
         legal = list(request.observation.legal_actions)
-        lines = [ln for ln in raw.splitlines() if ln.strip()]
-        for chunk in ([lines[-1]] if lines else []) + [raw]:
-            low = chunk.lower()
-            # Check 'double' before 'hit'/'stand' so "double down" is not eaten.
-            for atype in ("double", "stand", "hit"):
-                if atype in legal and re.search(_ALIASES[atype], low):
-                    return Move(type=atype)
+        text = raw.lower()
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        # Fast path: the last line IS exactly one legal action word (modulo
+        # decoration) — unambiguous, no scanning.
+        if lines:
+            bare = clean_answer_line(lines[-1])
+            if bare in legal:
+                return Move(type=bare)
+        # Fuzzy path: the LATEST-mentioned legal action wins, so "don't double,
+        # stand" parses as stand (a fixed priority order would pick double).
+        for chunk in ([lines[-1]] if lines else []) + [text]:
+            best = None  # (position, action)
+            for atype in legal:
+                for m in re.finditer(_ALIASES[atype], chunk):
+                    if best is None or m.start() > best[0]:
+                        best = (m.start(), atype)
+            if best:
+                return Move(type=best[1])
         return None
 
     def repair_hint(self, request: AgentRequest, bad_output: str) -> str:

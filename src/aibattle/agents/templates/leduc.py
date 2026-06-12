@@ -12,7 +12,7 @@ import re
 from typing import Optional
 
 from ...types import AgentRequest, Move
-from .base import GameTemplate
+from .base import GameTemplate, clean_answer_line
 
 
 _RULES = (
@@ -60,18 +60,34 @@ class LeducTemplate(GameTemplate):
             return cur_max + size
         return None
 
+    def _move_for(self, atype: str, request: AgentRequest) -> Move:
+        if atype in ("bet", "raise"):
+            return Move(type=atype, amount=self._amount_for(atype, request))
+        return Move(type=atype)
+
     def parse(self, raw: str, request: AgentRequest) -> Optional[Move]:
         if not raw:
             return None
         legal = list(request.observation.legal_actions)
         text = raw.lower()
         lines = [ln for ln in text.splitlines() if ln.strip()]
+        # Fast path: the last line IS exactly one legal action word (modulo
+        # decoration) — unambiguous, no scanning.
+        if lines:
+            bare = clean_answer_line(lines[-1])
+            if bare in legal:
+                return self._move_for(bare, request)
+        # Fuzzy path: the LATEST-mentioned legal action wins. Models state their
+        # conclusion last, so a fixed priority order would turn "I shouldn't
+        # raise, just call" into a raise; position order does not.
         for chunk in ([lines[-1]] if lines else []) + [text]:
-            for atype in ("raise", "bet", "call", "check", "fold"):
-                if atype in legal and re.search(_ALIASES[atype], chunk):
-                    if atype in ("bet", "raise"):
-                        return Move(type=atype, amount=self._amount_for(atype, request))
-                    return Move(type=atype)
+            best = None  # (position, action)
+            for atype in legal:
+                for m in re.finditer(_ALIASES[atype], chunk):
+                    if best is None or m.start() > best[0]:
+                        best = (m.start(), atype)
+            if best:
+                return self._move_for(best[1], request)
         return None
 
     def repair_hint(self, request: AgentRequest, bad_output: str) -> str:

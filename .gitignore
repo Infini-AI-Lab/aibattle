@@ -59,3 +59,5 @@ data-log/
 
 # Humanize RLCR plan file (loop-local; not part of the implementation diff)
 claude-doc/new-games-implementation-plan.md
+
+runs-backup/

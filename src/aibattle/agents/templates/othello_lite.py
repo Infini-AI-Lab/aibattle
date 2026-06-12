@@ -6,7 +6,7 @@ import re
 from typing import Optional
 
 from ...types import AgentRequest, Move
-from .base import GameTemplate
+from .base import GameTemplate, clean_answer_line
 
 
 _RULES = (
@@ -47,14 +47,31 @@ class OthelloLiteTemplate(GameTemplate):
             return None
         legal = set(request.observation.legal_actions)
         lines = [ln for ln in raw.splitlines() if ln.strip()]
-        # Prefer the last line (the conclusion), then the whole text.
-        for chunk in ([lines[-1]] if lines else []) + [raw]:
-            if "pass" in legal and re.search(r"\bpass\b", chunk, re.IGNORECASE):
+        # Fast path: the last line IS exactly one legal move (modulo decoration).
+        if lines:
+            bare = clean_answer_line(lines[-1])
+            if "pass" in legal and bare.lower() == "pass":
                 return Move(type="pass")
-            for m in _COORD_RE.finditer(chunk):
+            m = re.fullmatch(r"([A-Fa-f])\s*-?\s*([1-6])", bare)
+            if m:
                 coord = f"{m.group(1).upper()}{m.group(2)}"
                 if coord in legal:
                     return Move(type=coord)
+        # Fuzzy path: prefer the last line, then the whole text; within a chunk
+        # the LATEST-mentioned legal move wins — models conclude with their
+        # choice, so "B2 is tempting but C5 is better" must play C5, not B2.
+        for chunk in ([lines[-1]] if lines else []) + [raw]:
+            best = None  # (position, move)
+            if "pass" in legal:
+                for m in re.finditer(r"\bpass\b", chunk, re.IGNORECASE):
+                    if best is None or m.start() > best[0]:
+                        best = (m.start(), Move(type="pass"))
+            for m in _COORD_RE.finditer(chunk):
+                coord = f"{m.group(1).upper()}{m.group(2)}"
+                if coord in legal and (best is None or m.start() > best[0]):
+                    best = (m.start(), Move(type=coord))
+            if best:
+                return best[1]
         return None
 
     def repair_hint(self, request: AgentRequest, bad_output: str) -> str:

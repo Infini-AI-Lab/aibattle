@@ -15,6 +15,7 @@ empty cell is ``None``. ``pass`` is encoded as the literal action ``"pass"``.
 from __future__ import annotations
 
 import random
+import zlib
 from dataclasses import dataclass
 from typing import Optional
 
@@ -181,15 +182,18 @@ class OthelloLite6x6(Game):
         reason = "draw" if c0 == c1 else "majority"
         return {"reason": reason, "piece_counts": counts}
 
-    # -- invalid-move fallback: a corner if available, else first legal -----
+    # -- invalid-move fallback: a uniformly random legal move ----------------
     def fallback_action(self, s: OthelloState, player: PlayerId, legal: list) -> Move:
+        """A NEUTRAL substitute move. Deliberately not a heuristic (an earlier
+        version grabbed a corner — often the best move on the board — which
+        would reward an agent for emitting unparseable output). Seeded from the
+        position so a replay of the same state picks the same move."""
         if legal == [PASS]:
             return Move(type=PASS)
-        corners = {rc_to_coord(r, c) for r in (0, SIZE - 1) for c in (0, SIZE - 1)}
-        for coord in legal:
-            if coord in corners:
-                return Move(type=coord)
-        return Move(type=legal[0]) if legal else Move(type="__invalid__")
+        if not legal:
+            return Move(type="__invalid__")
+        seed = zlib.crc32(repr((s.grid, player, tuple(legal))).encode())
+        return Move(type=random.Random(seed).choice(legal))
 
     # -- observation / render ----------------------------------------------
     def observation(self, s: OthelloState, player: PlayerId) -> Observation:
