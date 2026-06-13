@@ -76,7 +76,7 @@ def make_client(cfg: dict) -> ModelClient:
                 if cfg.get("temperature") is not None
                 else None
             ),
-            max_tokens=int(cfg.get("max_tokens", 4096)),
+            max_tokens=int(cfg.get("max_tokens", 128000)),
             system_prompt=cfg.get("system_prompt"),
             reasoning_effort=cfg.get("reasoning_effort"),
             timeout=float(cfg.get("timeout_s", 900)),
@@ -93,7 +93,7 @@ def make_client(cfg: dict) -> ModelClient:
                 if cfg.get("temperature") is not None
                 else None
             ),
-            max_tokens=int(cfg.get("max_tokens", 4096)),
+            max_tokens=int(cfg.get("max_tokens", 128000)),
             system_prompt=cfg.get("system_prompt"),
             reasoning_effort=cfg.get("reasoning_effort"),
             thinking_budget_tokens=(

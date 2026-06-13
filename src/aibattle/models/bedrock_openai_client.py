@@ -56,7 +56,7 @@ class BedrockOpenAIClient(ModelClient):
         model_id: str,
         aws_region: str,
         temperature: Optional[float] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 128000,
         system_prompt: Optional[str] = None,
         reasoning_effort: Optional[str] = None,
         timeout: float = 900.0,
@@ -229,7 +229,6 @@ class BedrockOpenAIClient(ModelClient):
         temp = self._default_temperature if temperature is None else temperature
         if temp is not None:
             inference_config["temperature"] = temp
-
         kwargs = {
             "modelId": self.model_id,
             "messages": text_message(prompt, system_prompt=self._system_prompt),
