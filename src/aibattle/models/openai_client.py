@@ -8,10 +8,81 @@ config, so Fireworks-over-OpenAI-compat is the near-term path.
 from __future__ import annotations
 
 import asyncio
+import json
+import os
 import random
+import re
+import time
+import uuid
+from pathlib import Path
 from typing import Optional, Union
 
 from .base import ModelClient, ModelOutput
+
+
+_LEASE_ROOT = Path(
+    os.environ.get("AIBATTLE_MODEL_LEASE_DIR", "/tmp/aibattle-model-leases")
+)
+
+
+def _safe_slug(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", value)
+
+
+def _acquire_global_lease(
+    key: str,
+    limit: int,
+    *,
+    lease_ttl_s: float,
+) -> tuple[str, str]:
+    import fcntl
+
+    _LEASE_ROOT.mkdir(parents=True, exist_ok=True)
+    path = _LEASE_ROOT / f"{_safe_slug(key)}.json"
+    token = f"{os.getpid()}-{uuid.uuid4().hex}"
+    while True:
+        with path.open("a+", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            fh.seek(0)
+            raw = fh.read().strip()
+            state = json.loads(raw) if raw else {"leases": {}}
+            now = time.time()
+            leases = {
+                lease_token: float(expires_at)
+                for lease_token, expires_at in (state.get("leases") or {}).items()
+                if float(expires_at) > now
+            }
+            if len(leases) < limit:
+                leases[token] = now + lease_ttl_s
+                fh.seek(0)
+                fh.truncate()
+                json.dump({"leases": leases}, fh)
+                fh.flush()
+                return str(path), token
+            fh.seek(0)
+            fh.truncate()
+            json.dump({"leases": leases}, fh)
+            fh.flush()
+        time.sleep(0.5 + random.random())
+
+
+def _release_global_lease(path_str: str, token: str) -> None:
+    import fcntl
+
+    path = Path(path_str)
+    if not path.exists():
+        return
+    with path.open("a+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        fh.seek(0)
+        raw = fh.read().strip()
+        state = json.loads(raw) if raw else {"leases": {}}
+        leases = dict(state.get("leases") or {})
+        leases.pop(token, None)
+        fh.seek(0)
+        fh.truncate()
+        json.dump({"leases": leases}, fh)
+        fh.flush()
 
 
 class OpenAIClient(ModelClient):
@@ -25,6 +96,8 @@ class OpenAIClient(ModelClient):
         max_tokens: int = 256,
         system_prompt: Optional[str] = None,
         timeout: float = 300.0,
+        global_concurrency_limit: Optional[int] = None,
+        concurrency_key: Optional[str] = None,
     ):
         try:
             from openai import AsyncOpenAI
@@ -38,6 +111,9 @@ class OpenAIClient(ModelClient):
         self._default_temperature = temperature
         self._default_max_tokens = max_tokens
         self._system_prompt = system_prompt
+        self._timeout = timeout
+        self._global_concurrency_limit = global_concurrency_limit
+        self._concurrency_key = concurrency_key or model_id
         # Per-request timeout. A hung call is retried with backoff rather than
         # blocking for the SDK default (600s). Keep it generous enough for a full
         # reasoning generation (16k tokens can take a few minutes on slow models).
@@ -64,7 +140,15 @@ class OpenAIClient(ModelClient):
         # retries to avoid a thundering-herd spike when many calls back off at once.
         attempts = 8
         for attempt in range(attempts):
+            lease = None
             try:
+                if self._global_concurrency_limit:
+                    lease = await asyncio.to_thread(
+                        _acquire_global_lease,
+                        self._concurrency_key,
+                        self._global_concurrency_limit,
+                        lease_ttl_s=max(900.0, self._timeout * 4.0),
+                    )
                 resp = await self._client.chat.completions.create(
                     model=self.model_id,
                     messages=messages,
@@ -77,6 +161,9 @@ class OpenAIClient(ModelClient):
                     raise
                 base = min(60, 2 ** attempt)
                 await asyncio.sleep(base * (0.5 + random.random()))
+            finally:
+                if lease is not None:
+                    await asyncio.to_thread(_release_global_lease, *lease)
         choice = resp.choices[0]
         msg = choice.message
         # Reasoning models expose chain-of-thought in a separate field; the name

@@ -242,6 +242,9 @@ def _agent_cfg(model: dict, args: argparse.Namespace) -> dict:
         model_block["api_key_env"] = "FIREWORKS_API_KEY"
         if args.fireworks_temperature is not None:
             model_block["temperature"] = args.fireworks_temperature
+        if model["name"] == "kimi-k2p6":
+            model_block["global_concurrency_limit"] = args.kimi_global_concurrency_limit
+            model_block["concurrency_key"] = "fireworks:kimi-k2p6"
     return {
         "type": "model",
         "name": model["name"],
@@ -446,6 +449,8 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--fireworks-temperature", type=float,
                    default=(float(default_fireworks_temperature)
                            if default_fireworks_temperature is not None else 0.0))
+    p.add_argument("--kimi-global-concurrency-limit", type=int,
+                   default=_env_int("KIMI_GLOBAL_CONCURRENCY_LIMIT", 4))
     p.add_argument("--timeout-s", type=float,
                    default=float(os.environ.get("TOURNAMENT_TIMEOUT", "900")))
     p.add_argument("--max-retries", type=int, default=_env_int("MAX_RETRIES", 2))
@@ -496,6 +501,7 @@ async def main_async() -> None:
         "system_prompt": ACTION_ONLY_SYSTEM_PROMPT,
         "temperature": args.temperature,
         "fireworks_temperature": args.fireworks_temperature,
+        "kimi_global_concurrency_limit": args.kimi_global_concurrency_limit,
         "pair_batch_size": args.pair_batch_size,
         "models": models,
         "games": games,

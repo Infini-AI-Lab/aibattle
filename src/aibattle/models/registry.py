@@ -52,6 +52,12 @@ def make_client(cfg: dict) -> ModelClient:
             max_tokens=int(cfg.get("max_tokens", 256)),
             system_prompt=cfg.get("system_prompt"),
             timeout=float(cfg.get("timeout_s", 300)),
+            global_concurrency_limit=(
+                int(cfg["global_concurrency_limit"])
+                if cfg.get("global_concurrency_limit") is not None
+                else None
+            ),
+            concurrency_key=cfg.get("concurrency_key"),
         )
 
     if provider == "anthropic":
