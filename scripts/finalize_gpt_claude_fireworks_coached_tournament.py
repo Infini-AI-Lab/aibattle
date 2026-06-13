@@ -24,17 +24,13 @@ TARGETS = {
     "holdem_match": 420,
 }
 COMMIT_PATHS = [
-    "scripts/bedrock_coached_tournament.py",
-    "src/aibattle/models/bedrock_anthropic_client.py",
-    "src/aibattle/models/bedrock_openai_client.py",
-    "src/aibattle/models/registry.py",
     "scripts/gpt_claude_fireworks_coached_tournament.py",
     "scripts/run_gpt_claude_fireworks_coached_queue.py",
     "scripts/summarize_tournament_markdown.py",
     "scripts/finalize_gpt_claude_fireworks_coached_tournament.py",
     "reports/gpt_claude_fireworks_coached_tournament_summary.md",
 ]
-COMMIT_MESSAGE = "Add GPT Claude Fireworks coached tournament automation and results"
+COMMIT_MESSAGE = "Update GPT Claude Fireworks coached tournament results"
 POLL_SECONDS = 60
 
 
