@@ -48,6 +48,7 @@ def _freshness_bucket(age_s: float | None) -> int:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--games", default="")
     p.add_argument("--active-limit", type=int, default=6)
     p.add_argument("--poll-s", type=float, default=15.0)
     p.add_argument("--stale-seconds", type=float, default=420.0)
@@ -83,9 +84,16 @@ def heartbeat_age_s(game: str, pair: str) -> float | None:
     return time.time() - path.stat().st_mtime
 
 
-def unfinished_pairs() -> list[dict]:
+def _allowed_games(raw: str) -> set[str] | None:
+    keep = {x.strip() for x in raw.split(",") if x.strip()}
+    return keep or None
+
+
+def unfinished_pairs(*, allowed_games: set[str] | None = None) -> list[dict]:
     rows = []
     for game, target in TARGETS.items():
+        if allowed_games is not None and game not in allowed_games:
+            continue
         game_dir = OUT_ROOT / game
         for pair_dir in sorted(p for p in game_dir.glob("*__vs__*") if p.is_dir()):
             done = completed_count(pair_dir)
@@ -171,6 +179,8 @@ def save_state(
         tuple[dict, subprocess.Popen, float, int, float, float | None],
     ],
     cooldowns: dict[tuple[str, str], float],
+    *,
+    allowed_games: set[str] | None,
 ) -> None:
     payload = {
         "updated_at": time.time(),
@@ -206,7 +216,7 @@ def save_state(
             for (game, pair), until in sorted(cooldowns.items())
             if until > time.time()
         ],
-        "unfinished": unfinished_pairs(),
+        "unfinished": unfinished_pairs(allowed_games=allowed_games),
     }
     tmp = state_file.with_suffix(state_file.suffix + ".tmp")
     tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -216,6 +226,7 @@ def save_state(
 def main() -> None:
     args = parse_args()
     state_file = Path(args.state_file).resolve()
+    allowed_games = _allowed_games(args.games)
     active: dict[
         tuple[str, str],
         tuple[dict, subprocess.Popen, float, int, float, float | None],
@@ -224,7 +235,7 @@ def main() -> None:
 
     try:
         while True:
-            rows = unfinished_pairs()
+            rows = unfinished_pairs(allowed_games=allowed_games)
             if not rows and not active:
                 print("All requested pairs are complete.", flush=True)
                 return
@@ -394,7 +405,12 @@ def main() -> None:
                     heartbeat_age_s(spec["game"], spec["pair"]),
                 )
 
-            save_state(state_file, active, cooldowns)
+            save_state(
+                state_file,
+                active,
+                cooldowns,
+                allowed_games=allowed_games,
+            )
             live = ", ".join(
                 f"{spec['game']}:{spec['pair']} pid={proc.pid}"
                 for spec, proc, _, _, _, _ in active.values()
