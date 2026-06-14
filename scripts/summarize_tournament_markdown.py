@@ -197,6 +197,48 @@ def _resolve_games(root: Path, manifest: dict) -> list[dict]:
     return merged
 
 
+def _fmt_layout_value(value) -> str:
+    if isinstance(value, list):
+        return ",".join(str(x) for x in value)
+    return str(value)
+
+
+def _resume_layout_lines(manifest: dict) -> list[str]:
+    layout = manifest.get("resume_layout")
+    if not isinstance(layout, dict) or not layout:
+        return []
+
+    lines = []
+    mode = layout.get("mode")
+    if mode:
+        lines.append(f"- Scheduler mode: `{mode}`")
+
+    top_keys = [
+        "queue_poll_seconds",
+        "queue_stale_seconds",
+        "queue_no_progress_seconds",
+        "queue_cooldown_seconds",
+        "external_watchdogs",
+    ]
+    for key in top_keys:
+        if key in layout:
+            lines.append(f"- {key.replace('_', ' ').capitalize()}: `{_fmt_layout_value(layout[key])}`")
+
+    for key, value in layout.items():
+        if key == "mode" or key in top_keys:
+            continue
+        if isinstance(value, dict):
+            parts = ", ".join(
+                f"{sub_key}={_fmt_layout_value(sub_value)}"
+                for sub_key, sub_value in value.items()
+            )
+            lines.append(f"- {key.replace('_', ' ').capitalize()}: `{parts}`")
+        else:
+            lines.append(f"- {key.replace('_', ' ').capitalize()}: `{_fmt_layout_value(value)}`")
+
+    return lines
+
+
 def main() -> None:
     args = _parse_args()
     out_dir = Path(args.out_dir).resolve()
@@ -359,6 +401,7 @@ def main() -> None:
         f"- Pair batch size: `{manifest.get('pair_batch_size')}`",
         f"- Thinking budget tokens: `{manifest.get('thinking_budget_tokens')}`",
     ]
+    settings.extend(_resume_layout_lines(manifest))
     timeout_s = args.timeout_s
     if timeout_s is None and manifest.get("timeout_s") is not None:
         timeout_s = float(manifest["timeout_s"])
