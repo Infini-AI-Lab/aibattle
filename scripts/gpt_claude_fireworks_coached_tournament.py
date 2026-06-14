@@ -220,7 +220,12 @@ class Heartbeat:
         self._files.clear()
 
 
-def _agent_cfg(model: dict, args: argparse.Namespace) -> dict:
+def _kimi_concurrency_key(game_label: str) -> str:
+    bucket = "holdem" if game_label.startswith("holdem") else "board"
+    return f"fireworks:kimi-k2p6:{bucket}"
+
+
+def _agent_cfg(model: dict, args: argparse.Namespace, *, game_label: str) -> dict:
     model_block = {
         "provider": model["provider"],
         "model_id": model["model_id"],
@@ -244,7 +249,7 @@ def _agent_cfg(model: dict, args: argparse.Namespace) -> dict:
             model_block["temperature"] = args.fireworks_temperature
         if model["name"] == "kimi-k2p6":
             model_block["global_concurrency_limit"] = args.kimi_global_concurrency_limit
-            model_block["concurrency_key"] = "fireworks:kimi-k2p6"
+            model_block["concurrency_key"] = _kimi_concurrency_key(game_label)
     return {
         "type": "model",
         "name": model["name"],
@@ -333,8 +338,14 @@ async def _run_pair(
             target = min(episodes, completed + args.pair_batch_size)
             with MatchLogger(None) as logger:
                 result = await runner.run_match(
-                    make_agent(_agent_cfg(model_a, args), game_name=game["game_name"]),
-                    make_agent(_agent_cfg(model_b, args), game_name=game["game_name"]),
+                    make_agent(
+                        _agent_cfg(model_a, args, game_label=game["label"]),
+                        game_name=game["game_name"],
+                    ),
+                    make_agent(
+                        _agent_cfg(model_b, args, game_label=game["label"]),
+                        game_name=game["game_name"],
+                    ),
                     episodes=target,
                     seat_swap=bool(game.get("seat_swap", False)),
                     seed=args.seed + pair_id,
