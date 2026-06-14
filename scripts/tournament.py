@@ -44,7 +44,7 @@ def _label(spec: str) -> str:
 MODELS = [_label(s) for s in _RAW_MODELS]
 HANDS = int(os.environ.get("HANDS", "20"))   # hands per game (Hold'em Lite)
 REPS = 1
-MAX_CONCURRENCY = 128  # GLOBAL cap on concurrent hands across all games
+MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", "128"))  # GLOBAL cap on concurrent hands
 OUT = os.environ.get("OUT", "runs/holdem_1hand")
 os.makedirs(OUT, exist_ok=True)
 # Deals are fully random and independent: every hand draws its own OS-entropy

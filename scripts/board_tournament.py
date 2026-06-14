@@ -27,7 +27,7 @@ from aibattle.runner.runner import Runner
 GAMES = os.environ.get("BOARD_GAMES", "connect4,gomoku").split(",")
 # qwen3p6-plus dropped: restrictive per-model 429 limit on this account (failed
 # 0/3 isolated calls while the others passed 3/3 under identical load).
-MODELS = ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"]
+MODELS = os.environ.get("MODELS", "deepseek-v4-pro,gpt-oss-120b,kimi-k2p6,glm-5p1,minimax-m2p7").split(",")
 # Coaching: COACHED=1 coaches every model; "<name>#coached" coaches just that one.
 # A coached model is an independent participant named "<base>-coached".
 _COACH_ALL = os.environ.get("COACHED", "").lower() not in ("", "0", "false", "no")
@@ -35,8 +35,8 @@ def _coach_label(spec):
     base = spec.split("#", 1)[0].strip()
     return f"{base}-coached" if (_COACH_ALL or spec.strip().endswith("#coached")) else base
 MODELS = [_coach_label(s) for s in MODELS]
-EPISODES = 10               # small "smell test"; raise later to add more (resume reuses)
-MAX_CONCURRENCY = 128           # global cap; 300+ over-runs the Fireworks limit
+EPISODES = int(os.environ.get("EPISODES", "10"))   # episodes per pair
+MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", "128"))  # 300+ over-runs the Fireworks limit
 RANDOM_OPEN = 2
 # Each game writes to its own per-game folder: <RUNS_DIR>/<game>/.
 RUNS_BASE = os.environ.get("RUNS_DIR", "runs")

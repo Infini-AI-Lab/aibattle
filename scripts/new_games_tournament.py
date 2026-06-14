@@ -104,6 +104,24 @@ def dealer_cfg() -> dict:
     return {"type": "builtin", "name": "blackjack_dealer"}
 
 
+def make_step_tracker(game: str, pair: str):
+    """A Runner on_step callback that appends one compact JSONL line per
+    completed decision to OUT/<game>/steps.jsonl. Pure observability (no model
+    behavior change): lets a monitor report in-game positions of in-flight
+    episodes, e.g. which round each Blotto episode has reached."""
+    path = os.path.join(OUT, game, "steps.jsonl")
+    def on_step(info):
+        rec = {"t": round(time.time(), 1), "pair": pair, "ep": info["episode"],
+               "step": info["step"], "agent": info["agent_name"],
+               "action": (info.get("action") or "")[:40]}
+        try:
+            with open(path, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec) + "\n")
+        except OSError:
+            pass  # progress telemetry must never kill an episode
+    return on_step
+
+
 def _aggregate_versus(pairs_data: list) -> list:
     hands = defaultdict(int); wins = defaultdict(int); net = defaultdict(float)
     decisions = defaultdict(int); invalid = defaultdict(int)
@@ -185,7 +203,8 @@ async def run_versus_game(game: str, episodes: int, sem) -> dict:
                     make_agent(acfg(a), game_name=game),
                     make_agent(acfg(b), game_name=game),
                     episodes=episodes, seed=seed, seat_swap=True,
-                    logger=lg, semaphore=sem, episode_dir=gdir)
+                    logger=lg, semaphore=sem, episode_dir=gdir,
+                    on_step=make_step_tracker(game, f"{a}__vs__{b}"))
             data["pairs"].append({"a": a, "b": b, "seed": seed,
                                   "episodes": res.episodes})
             save()
@@ -238,7 +257,8 @@ async def run_blackjack(episodes: int, sem) -> dict:
                     make_agent(acfg(m), game_name=game),       # player_0 = model
                     make_agent(dealer_cfg(), game_name=game),  # player_1 = dealer
                     episodes=episodes, seed=seed, seat_swap=False,
-                    logger=lg, semaphore=sem, episode_dir=gdir)
+                    logger=lg, semaphore=sem, episode_dir=gdir,
+                    on_step=make_step_tracker(game, f"{m}__vs__dealer"))
             model_runs[m] = res.episodes
             data["model_runs"][m] = {"hands": len(res.episodes)}
             save()
@@ -311,7 +331,8 @@ async def run_versus_baseline(game: str, episodes: int, sem) -> dict:
                     make_agent({"type": "builtin", "name": baseline},
                                game_name=game),                        # player_1 = baseline
                     episodes=episodes, seed=seed, seat_swap=False,
-                    logger=lg, semaphore=sem, episode_dir=gdir)
+                    logger=lg, semaphore=sem, episode_dir=gdir,
+                    on_step=make_step_tracker(game, f"{m}__vs__{baseline}"))
             model_runs[m] = res.episodes
             data["model_runs"][m] = {"games": len(res.episodes)}
             # Update the leaderboard incrementally as each model finishes, so a

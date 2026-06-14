@@ -18,8 +18,20 @@
 set -u
 cd "$(dirname "$0")/.."
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
-export MODEL_TIMEOUT_S=900     # long games: allow slow reasoning steps
-export MAX_CONCURRENCY=128     # ONE global model-call budget across all games
+# All FIVE models — the python script's default MODELS list predates
+# minimax-m2p7 becoming available and silently runs only four.
+export MODELS=${MODELS:-kimi-k2p6,deepseek-v4-pro,glm-5p1,minimax-m2p7,gpt-oss-120b}
+export MODEL_TIMEOUT_S=${MODEL_TIMEOUT_S:-900}   # long games: allow slow reasoning steps
+# Full 131k output cap — an eval condition, NOT tunable for speed (per owner:
+# capping reasoning changes model behavior). Long Blotto/Othello decisions from
+# heavy reasoners (~6+ min each measured) mean the run takes a day or more;
+# that is accepted. Stamped into data.json settings.
+export MAX_TOKENS=${MAX_TOKENS:-131072}
+# ONE global model-call budget across all games (per owner: 64). Note the
+# account's observed limits: at 128 every request 429'd and the run wedged in a
+# retry storm; at 64 the account sits at its concurrency ceiling (extra calls
+# 429, established streams do progress).
+export MAX_CONCURRENCY=${MAX_CONCURRENCY:-64}
 export SERIAL_PAIRS=0          # run model pairs concurrently under MAX_CONCURRENCY
 export PARALLEL_GAMES=1        # all games run concurrently in one process, so
                                # the 128-call budget is truly shared (separate
@@ -27,11 +39,13 @@ export PARALLEL_GAMES=1        # all games run concurrently in one process, so
 # BASELINE_MODE is intentionally UNSET so the long games use the AC-8
 # model-vs-model round-robin (run_versus_game), not the diagnostic baseline.
 
-# All four games in one invocation: blackjack 100 hands/model; Leduc, Blotto
-# and Othello 25 seat-swapped deals per pair (50 total episodes per pair).
-EPISODES=50 BLACKJACK_EPISODES=100 OTHELLO_EPISODES=50 \
-python scripts/new_games_tournament.py --episodes 50 \
-  --games independent_blackjack,leduc_poker,repeated_colonel_blotto,othello_lite_6x6
+# Blackjack (100 hands/model) and Leduc (50 eps/pair) completed 2026-06-11/12;
+# they are NOT relaunched so their stored aggregates stay at full size. Only the
+# long games run here. Per owner decision 2026-06-12: Blotto 20 episodes/pair,
+# Othello 50 episodes/pair.
+EPISODES=20 OTHELLO_EPISODES=50 \
+python scripts/new_games_tournament.py --episodes 20 \
+  --games repeated_colonel_blotto,othello_lite_6x6
 
 echo "OVERNIGHT AC-8 EXPERIMENT DONE"
 echo "Diagnostic-only model-vs-baseline mode (NOT AC-8) can be run separately with:"
