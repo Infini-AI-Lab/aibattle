@@ -19,6 +19,8 @@ import os
 from collections import defaultdict
 
 from model_names import strip_coached
+from elo_util import bradley_terry, elo_key, bootstrap_elo, gross_from_records
+from report_theme import BASE_CSS, CHART_SETUP
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_1hand/tournament_data.json"
@@ -129,7 +131,13 @@ def _betsize_bucket(ratio: float) -> str:
 def analyze(data: dict) -> dict:
     models = data["models"]
     stats = {m: _blank() for m in models}
-    h2h = defaultdict(lambda: defaultdict(float))  # h2h[a][b] = chips a won vs b
+    h2h = defaultdict(lambda: defaultdict(float))  # h2h[a][b] = net chips a won vs b
+    # gross chips each direction per pair; fed to the Bradley-Terry fit as a
+    # chip-weighted "win" total so the Elo rewards how *much* you win, not just
+    # how often (winning big pots > winning many tiny ones), while staying on the
+    # 1500 scale and adjusting for who each model actually played.
+    h2h_gross = defaultdict(lambda: defaultdict(float))
+    elo_records = []  # per-hand (a, b, chips_a, chips_b) for the Elo bootstrap
     pair_games = defaultdict(int)
 
     for g in data["games"]:
@@ -154,8 +162,13 @@ def analyze(data: dict) -> dict:
                 else:
                     st["ties"] += 1
             # head-to-head (a's chips vs b)
-            h2h[a][b] += returns[name_seat[a]]
-            h2h[b][a] += returns[name_seat[b]]
+            ra, rb = returns[name_seat[a]], returns[name_seat[b]]
+            h2h[a][b] += ra
+            h2h[b][a] += rb
+            # gross chips each side extracted this hand (the chip-weighted "score")
+            h2h_gross[a][b] += max(ra, 0.0)
+            h2h_gross[b][a] += max(rb, 0.0)
+            elo_records.append((a, b, ra, rb))
             if winner_name and reason == "showdown":
                 stats[winner_name]["showdown_wins"] += 1
             elif winner_name and reason == "fold":
@@ -375,7 +388,19 @@ def analyze(data: dict) -> dict:
             "showdown_cats": showdown_cat_dist,
         }
     h2h_out = {a: {b: round(h2h[a][b], 1) for b in models if b != a} for a in models}
+    # Chip-weighted Elo: a Bradley-Terry fit fed each pair's gross chips won in
+    # each direction (instead of hand counts). Magnitude counts — a model that
+    # wins big pots outrates one that wins more small ones — and the fit adjusts
+    # for opponent strength, so it stays fair when the round-robin is incomplete.
+    chip_wld = {a: {b: (h2h_gross[a][b], h2h_gross[b][a], 0.0)
+                    for b in models if b != a} for a in models}
+    _, elo = bradley_terry(models, chip_wld)
+    elo_ci = bootstrap_elo(models, elo_records, lambda s: gross_from_records(models, s))
+    for m in models:
+        out_models[m]["elo"] = elo[m]
+        out_models[m]["elo_sd"] = elo_ci[m]["sd"]
     return {"models": models, "per_model": out_models, "h2h": h2h_out,
+            "elo": elo, "elo_ci": elo_ci,
             "hands_per_game": data.get("hands"), "num_games": len(data["games"])}
 
 
@@ -406,16 +431,25 @@ def render_html(report: dict) -> str:
     # Coached runs have no replay viewer built; omit the button so it never 404s.
     replay_btn = ""
 
-    # ranked leaderboard by bb/100
-    ranked = sorted(models, key=lambda m: pm[m]["bb_per_100"], reverse=True)
+    # ranked leaderboard by chip-weighted Elo; raw metrics kept for reference.
+    elo = report.get("elo", {})
+    ranked = sorted(models, key=lambda m: (elo_key(elo, m), pm[m]["bb_per_100"]),
+                    reverse=True)
     rows = ""
     for i, m in enumerate(ranked, 1):
         s = pm[m]
         chip_cls = "pos" if s["chips"] > 0 else ("neg" if s["chips"] < 0 else "")
+        if s.get("elo") is None:
+            elo_disp = "—"
+        elif s.get("elo_sd") is not None:
+            elo_disp = f"{s['elo']}<div class='small'>±{s['elo_sd']:.0f}</div>"
+        else:
+            elo_disp = str(s["elo"])
         tags = " ".join(f"<span class='tag'>{t}</span>" for t in s["style"]["tags"])
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
           <td><b>{s['style']['label']}</b> {tags}</td>
+          <td><b>{elo_disp}</b></td>
           <td class='{chip_cls}'>{s['chips']:+.0f}</td>
           <td class='{chip_cls}'>{s['bb_per_100']:+.1f}</td>
           <td>{s['win_rate']*100:.0f}%</td>
@@ -467,11 +501,11 @@ def render_html(report: dict) -> str:
             r = pm[m]["pf_bucket"][b]
             rate = r["open_rate"]
             open_pct = rate * 100
-            # neutral blue heatmap: a single hue scaled by open-rate. Flip to dark
-            # text once the fill is saturated enough to wash out light text.
-            bg = f"rgba(96,165,250,{rate:.2f})"
-            txt = "#0f1117" if rate > 0.55 else "#e6e6e6"
-            sub = "#27324a" if rate > 0.55 else "#8b93a7"
+            # red (accent) heatmap: a single hue scaled by open-rate on the paper
+            # background. Flip to white text once the red fill is dark enough.
+            bg = f"rgba(143,29,29,{rate:.2f})"
+            txt = "#fbfbf8" if rate > 0.5 else "#1c1c1c"
+            sub = "#f1d9d9" if rate > 0.5 else "#6b6b6b"
             bucket_rows += (
                 f"<td style='background:{bg};color:{txt}'>{open_pct:.0f}%"
                 f"<div class='small' style='color:{sub}'>n={r['hands']}</div></td>"
@@ -483,49 +517,27 @@ def render_html(report: dict) -> str:
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}
-<style>
-  :root {{ color-scheme: dark; }}
-  body {{ font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
-          background: #0f1117; color: #e6e6e6; }}
-  .wrap {{ max-width: 1200px; margin: 0 auto; padding: 28px 28px 80px; }}
-  h1 {{ font-size: 26px; margin: 0 0 4px; }}
-  h2 {{ font-size: 18px; margin: 38px 0 12px; border-bottom: 1px solid #2a2f3a;
-        padding-bottom: 6px; }}
-  .sub {{ color: #8b93a7; margin-bottom: 8px; }}
-  table {{ border-collapse: collapse; width: 100%; font-size: 13px; }}
-  th, td {{ padding: 7px 9px; text-align: center; border-bottom: 1px solid #20242e; }}
-  th {{ color: #9aa3b5; font-weight: 600; }}
-  td.model, th.model {{ text-align: left; font-weight: 600; color: #cdd6f4; }}
-  .pos {{ color: #4ade80; }} .neg {{ color: #f87171; }}
-  .diag {{ color: #3a3f4b; }}
-  .tag {{ background: #2a2f3a; color: #a5b4fc; border-radius: 10px; padding: 1px 8px;
-          font-size: 11px; margin-left: 3px; }}
-  .cards {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
-  .card {{ background: #161a22; border: 1px solid #232838; border-radius: 12px;
-           padding: 16px; }}
-  canvas {{ max-height: 340px; }}
-  .grid2 {{ display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }}
-  .note {{ color: #8b93a7; font-size: 12px; margin-top: 6px; }}
-  .small {{ color: #8b93a7; font-size: 11px; }}
+<style>{BASE_CSS}
   td.bucket {{ font-weight: 600; }}
-  .replaybtn {{ display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }}
-  .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
-  @media (max-width: 760px) {{ .grid2, .cards {{ grid-template-columns: 1fr; }} }}
 </style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode</h1>
+  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode<span class="cursor"></span></h1>
   <div class="sub">heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   {replay_btn}
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>style</th><th>chips</th><th>bb/100</th>
+    <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     {rows}
   </table>
-  <div class="note">VPIP = how often it voluntarily plays a hand (looseness). PFR = preflop raise %.
+  <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
+    fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
+    win and adjusts for opponent strength — the fair comparison when models faced different opponents.
+    ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
+    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
+    (looseness). PFR = preflop raise %.
     aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
     think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
@@ -596,7 +608,7 @@ const col = i => COLORS[i % COLORS.length];
 const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
 const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
-Chart.defaults.color = '#9aa3b5'; Chart.defaults.borderColor = '#232838';
+{CHART_SETUP}
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, {{ type:'scatter',

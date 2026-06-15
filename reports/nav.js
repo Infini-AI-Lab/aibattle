@@ -30,7 +30,7 @@
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when pages are restyled. ACTIVE matching
   // uses the bare filename, so the query string never affects highlighting.
-  var V = "?v=7";
+  var V = "?v=13";
   function a(href, label, cls) {
     var on = href === active ? " active" : "";
     return '<a class="' + cls + on + '" href="' + href + V + '">' + label + "</a>";
@@ -39,9 +39,15 @@
   var html =
     '<a class="brand" href="index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
     a("index.html", "overview", "nav") +
-    a("connect4_report.html", "connect4", "nav") +
-    a("gomoku_report.html", "gomoku", "nav") +
-    a("kuhn_tournament_report.html", "kuhn", "nav") +
+    '<span class="navclust">perfect/</span>' +
+    a("connect4_report.html", "connect4", "nav navsub") +
+    a("gomoku_report.html", "gomoku", "nav navsub") +
+    a("othello_report.html", "othello", "nav navsub") +
+    '<span class="navclust">imperfect/</span>' +
+    a("kuhn_tournament_report.html", "kuhn", "nav navsub") +
+    a("leduc_report.html", "leduc", "nav navsub") +
+    a("blackjack_report.html", "blackjack", "nav navsub") +
+    a("blotto_report.html", "blotto", "nav navsub") +
     '<span class="navclust">holdem/</span>' +
     a("holdem_tournament_report.html", "1hand", "nav navsub") +
     a("match_tournament_report.html", "match", "nav navsub") +

@@ -16,6 +16,8 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached
+from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
+from report_theme import BASE_CSS, CHART_SETUP
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_match/match_data.json"
@@ -29,25 +31,11 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
-EXTRA_CSS = """
-  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
-  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
-"""
+EXTRA_CSS = ""
 
-_STYLE = """
-  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
-  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
-  h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
-  .sub { color:#8b93a7; }
-  table { border-collapse:collapse; width:100%; font-size:13px; margin-top:10px; }
-  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
-  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
-  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
-  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
-  td.hh { font-weight:600; color:#f3f4f6; }
-  td.hh .rec { display:block; font-weight:400; font-size:11px; color:#aab2c5; margin-top:1px; }
-  canvas { max-height:300px; margin-top:10px; }
+_STYLE = BASE_CSS + """
+  td.hh { font-weight:700; }
+  td.hh .rec { display:block; font-weight:400; font-size:11px; color:var(--dim); margin-top:1px; }
 """
 
 
@@ -57,6 +45,7 @@ def analyze(data: dict) -> dict:
     stack_margin = defaultdict(float); hands = defaultdict(int); busts = defaultdict(int)
     h2h = {a: {b: 0 for b in models} for a in models}
     h2h_played = {a: {b: 0 for b in models} for a in models}
+    elo_records = []  # per-match (a, b, result) for the Elo bootstrap
 
     for pair in data["pairs"]:
         for e in pair["episodes"]:
@@ -69,29 +58,40 @@ def analyze(data: dict) -> dict:
                 hands[seat[p]] += e.get("hands_played", 0)
             if wname is None:
                 drew[a] += 1; drew[b] += 1
+                elo_records.append((a, b, 0))
             else:
                 won[wname] += 1
                 loser = b if wname == a else a
                 h2h[wname][loser] += 1
+                elo_records.append((a, b, 1 if wname == a else -1))
                 if fs:
                     stack_margin[wname] += abs(fs.get("player_0", 0) - fs.get("player_1", 0))
                 if e.get("reason") == "bust":
                     busts[loser] += 1
             h2h_played[a][b] += 1; h2h_played[b][a] += 1
 
+    # Match mode is win-or-lose by design (chips don't carry meaning past the
+    # match outcome), so the Elo is a Bradley-Terry fit over match W/L/D —
+    # opponent-adjusted, fair when models faced different opponents.
+    wld = {a: {b: (h2h[a][b], h2h[b][a],
+                   h2h_played[a][b] - h2h[a][b] - h2h[b][a])
+               for b in models if b != a} for a in models}
+    _, elo = bradley_terry(models, wld)
+    elo_ci = bootstrap_elo(models, elo_records, lambda s: wld_from_records(models, s))
+
     rows = []
     for m in models:
         n = played[m] or 1
         rows.append({
-            "model": m, "matches": played[m],
+            "model": m, "matches": played[m], "elo": elo[m], "elo_sd": elo_ci[m]["sd"],
             "win_rate": round(won[m] / n, 3), "wins": won[m], "draws": drew[m],
             "busted_out_rate": round(busts[m] / n, 3),
             "avg_hands_per_match": round(hands[m] / n, 1),
             "avg_win_margin": round(stack_margin[m] / (won[m] or 1), 1),
         })
-    rows.sort(key=lambda r: r["win_rate"], reverse=True)
+    rows.sort(key=lambda r: (elo_key(elo, r["model"]), r["win_rate"]), reverse=True)
     return {"models": models, "max_hands": data.get("max_hands"),
-            "episodes_per_pair": data.get("episodes_per_pair"),
+            "episodes_per_pair": data.get("episodes_per_pair"), "elo": elo,
             "leaderboard": rows, "h2h_wins": h2h, "h2h_played": h2h_played}
 
 
@@ -106,7 +106,14 @@ def render_html(rep: dict, beh: dict) -> str:
 
     trows = ""
     for i, r in enumerate(lb, 1):
+        if r.get("elo") is None:
+            elo_disp = "—"
+        elif r.get("elo_sd") is not None:
+            elo_disp = f"{r['elo']}<div class='small'>±{r['elo_sd']:.0f}</div>"
+        else:
+            elo_disp = str(r["elo"])
         trows += (f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+                  f"<td><b>{elo_disp}</b></td>"
                   f"<td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}/{r['matches']}</td>"
                   f"<td>{r['draws']}</td><td>{r['busted_out_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td></tr>")
@@ -141,12 +148,16 @@ def render_html(rep: dict, beh: dict) -> str:
   {replay_btn}
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
-  <h2>Leaderboard</h2>
+  <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>win%</th><th>wins/matches</th>
+    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
         <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th></tr>
     {trows}
   </table>
+  <div class="note"><b>Elo</b> = Bradley-Terry rating (field mean 1500) over match win/loss results.
+    Match mode is win-or-lose — chips don't count past who took the match — so the rating uses match
+    outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within
+    ±1 of each other are a statistical tie. win% and the rest are raw, unadjusted metrics.</div>
   <h2>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h2>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
   {beh_html}
@@ -155,8 +166,8 @@ def render_html(rep: dict, beh: dict) -> str:
     type:'bar',
     data:{{labels:{json.dumps(labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:{json.dumps(wincols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},
-      scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}},
-               x:{{grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}}}}}}
+      scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}},
+               x:{{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}}}}}}
   }});
   </script>
 </div></body></html>"""

@@ -34,6 +34,8 @@ from collections import defaultdict
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
 from model_names import strip_coached
+from elo_util import bootstrap_elo, wld_from_records
+from report_theme import BASE_CSS, CHART_SETUP
 
 GAMES = ["connect4", "gomoku"]
 NEED = {"connect4": 4, "gomoku": 5}
@@ -205,6 +207,7 @@ def analyze_game(game: str, data: dict) -> dict:
     size = (len(sample), len(sample[0]))
     stats = {m: _blank(size) for m in models}
     h2h = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))  # [w,l,d] for a vs b
+    records = []  # per-game (a, b, result) for the Elo bootstrap; +1 a wins, -1 b
     fp_games = 0
     fp_wins = 0
 
@@ -231,10 +234,13 @@ def analyze_game(game: str, data: dict) -> dict:
 
             if winner_name == a:
                 h2h[a][b][0] += 1; h2h[b][a][1] += 1
+                records.append((a, b, 1))
             elif winner_name == b:
                 h2h[b][a][0] += 1; h2h[a][b][1] += 1
+                records.append((a, b, -1))
             else:
                 h2h[a][b][2] += 1; h2h[b][a][2] += 1
+                records.append((a, b, 0))
 
             if steps:
                 fm = steps[0]["agent_name"]
@@ -330,10 +336,11 @@ def analyze_game(game: str, data: dict) -> dict:
         }
 
     strength, elo = bradley_terry(models, h2h)
+    elo_ci = bootstrap_elo(models, records, lambda s: wld_from_records(models, s))
     h2h_out = {a: {b: h2h[a][b] for b in models if b != a} for a in models}
     return {
         "game": game, "size": list(size), "models": models,
-        "per_model": out, "h2h": h2h_out, "elo": elo,
+        "per_model": out, "h2h": h2h_out, "elo": elo, "elo_ci": elo_ci,
         "len_bins": bin_labels,
         "first_player_win_rate": round(fp_wins / max(fp_games, 1), 4),
         "num_games": sum(len(g["episodes"]) for g in data["games"]),
@@ -363,6 +370,16 @@ def _elo_txt(e):
     return "—" if e is None else str(e)
 
 
+def _elo_cell(e, ci):
+    """Elo with a small ±1-bootstrap-SD error bar under it for the table."""
+    if e is None:
+        return "—"
+    sd = (ci or {}).get("sd")
+    if sd is None:
+        return str(e)
+    return f"{e}<div class='small'>±{sd:.0f}</div>"
+
+
 def render_game(game: str, rep: dict) -> str:
     payload = json.dumps(rep)
     pm = rep["per_model"]
@@ -378,7 +395,7 @@ def render_game(game: str, rep: dict) -> str:
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
-          <td>{_elo_txt(rep['elo'][m])}</td>
+          <td>{_elo_cell(rep['elo'][m], rep.get('elo_ci', {}).get(m))}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
           <td>{s['first_move_win_rate']*100:.0f}%</td>
@@ -413,43 +430,23 @@ def render_game(game: str, rep: dict) -> str:
     # has no replay viewers built (they fetch run data at runtime), so omit it.
     # Coached runs have no replay viewer built; omit the button so it never 404s.
     replay_btn = ""
+    # Single leading emoji + plain name, matching the Hold'em report header style.
+    emoji, name = TITLE[game].split(" ", 1)
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>AI Battle Arena — {TITLE[game]}</title>
 {_favicon(FAVICON[game])}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}
-<style>
-  body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:1200px; margin:0 auto; padding:28px 28px 80px; }}
-  h1 {{ font-size:25px; }} h2 {{ font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }}
-  h3 {{ font-size:14px; color:#9aa3b5; }}
-  .sub {{ color:#8b93a7; }}
-  .kpis {{ display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }}
-  .kpi {{ background:#171a23; border:1px solid #232838; border-radius:10px; padding:12px 16px; }}
-  .kpi .v {{ font-size:22px; font-weight:700; color:#cdd6f4; }}
-  .kpi .l {{ font-size:11px; color:#8b93a7; text-transform:uppercase; letter-spacing:.04em; }}
-  table {{ border-collapse:collapse; width:100%; font-size:13px; }}
-  th,td {{ padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }}
-  th {{ color:#9aa3b5; }} td.model,th.model {{ text-align:left; font-weight:600; color:#cdd6f4; }}
-  .pos {{ color:#4ade80; }} .neg {{ color:#f87171; }} .diag {{ color:#3a3f4b; }}
-  .small {{ font-size:10px; color:#8b93a7; }}
-  .grid2 {{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }}
-  .note {{ color:#8b93a7; font-size:12px; margin:6px 0; }}
-  canvas {{ max-height:300px; }}
+<style>{BASE_CSS}
   .heatwrap {{ display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; }}
   .heatcard {{ text-align:center; }}
-  .hlabel {{ font-size:11px; color:#9aa3b5; margin-bottom:6px; }}
-  .board {{ display:grid; gap:1px; background:#232838; padding:1px; border-radius:4px; }}
+  .hlabel {{ font-size:11px; color:var(--dim); margin-bottom:6px; }}
+  .board {{ display:grid; gap:1px; background:var(--line); padding:1px; }}
   .cell {{ width:14px; height:14px; }}
-  .replaybtn {{ display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px;
-    text-decoration:none; }}
-  .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
-  @media (max-width:760px) {{ .grid2 {{ grid-template-columns:1fr; }} }}
 </style></head>
 <body><div class="wrap">
-  <h1>🎲 AI Battle Arena — {TITLE[game]}</h1>
+  <h1>{emoji} AI Battle Arena — {name}<span class="cursor"></span></h1>
   <div class="sub">Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
   {replay_btn}
 
@@ -459,7 +456,7 @@ def render_game(game: str, rep: dict) -> str:
     <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
   </div>
 
-  <h2>Leaderboard &amp; tactical accuracy</h2>
+  <h2>🏆 Leaderboard &amp; tactical accuracy</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
         <th>draw%</th><th>1st-move win%</th><th>win-take</th><th>block</th>
@@ -473,7 +470,9 @@ def render_game(game: str, rep: dict) -> str:
     tactical-accuracy measures read from the board.</div>
 
   <div class="grid2">
-    <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
+    <div><h3>Elo rating</h3><canvas id="elo"></canvas>
+      <div class="note">Whiskers show ±1 bootstrap SD (resampling games 300×) — wider bars mean
+        fewer/less-decisive games, so ratings that are within a whisker of each other are a near tie.</div></div>
     <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
   </div>
   <div class="grid2">
@@ -485,26 +484,45 @@ def render_game(game: str, rep: dict) -> str:
     <div></div>
   </div>
 
-  <h2>Head-to-head (row wins–losses vs column)</h2>
+  <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
   <table class='h2h'>{hh}</table>
 
-  <h2>Move-location heatmap</h2>
+  <h2>🗺️ Move-location heatmap</h2>
   <div class="note">Where each model places pieces (brighter = more frequent). Reveals
     center-control bias and opening preferences.</div>
   <div class="heatwrap">{heat_cards}</div>
 
 <script>
 const R = {payload};
-const pm=R.per_model, M=R.models, COLORS=['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa'];
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
+const pm=R.per_model, M=R.models;
+{CHART_SETUP}
+const COLORS=PALETTE;
 const ranked=[...M].sort((a,b)=>R.elo[b]-R.elo[a]);
 const eloRanked=ranked.filter(m=>R.elo[m]!=null);  // unrated (—) models omitted from the chart
 
+const ELO_CI = R.elo_ci || {{}};
+// Draw a horizontal ±1-SD whisker over each Elo bar (bootstrap uncertainty).
+const eloWhiskers = {{ id:'eloWhiskers', afterDatasetsDraw(c) {{
+  const {{ctx, scales:{{x, y}}}} = c;
+  ctx.save(); ctx.strokeStyle='#1c1c1c'; ctx.lineWidth=1.5;
+  eloRanked.forEach((m, i) => {{
+    const ci = ELO_CI[m]; if (!ci || ci.sd == null) return;
+    const yc = y.getPixelForValue(i), cap = 5;
+    const x1 = x.getPixelForValue(R.elo[m]-ci.sd), x2 = x.getPixelForValue(R.elo[m]+ci.sd);
+    ctx.beginPath();
+    ctx.moveTo(x1, yc); ctx.lineTo(x2, yc);
+    ctx.moveTo(x1, yc-cap); ctx.lineTo(x1, yc+cap);
+    ctx.moveTo(x2, yc-cap); ctx.lineTo(x2, yc+cap);
+    ctx.stroke();
+  }});
+  ctx.restore();
+}} }};
 new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:'#a78bfa',
+  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:ACCENT,
     data:eloRanked.map(m=>R.elo[m])}}]}},
-  options:{{ indexAxis:'y', scales:{{x:{{min:Math.min(...eloRanked.map(m=>R.elo[m]))-40}}}},
-    plugins:{{legend:{{display:false}}}} }} }});
+  options:{{ indexAxis:'y',
+    scales:{{x:{{min:Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20}}}},
+    plugins:{{legend:{{display:false}}}} }}, plugins:[eloWhiskers] }});
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
   data:{{ labels:M, datasets:[
@@ -672,14 +690,14 @@ def render_index(reps: dict) -> str:
     if os.path.exists(holdem_path):
         h = json.load(open(holdem_path))
         pm = h["per_model"]
-        ordered = sorted(h["models"], key=lambda m: pm[m]["bb_per_100"], reverse=True)
+        ordered = sorted(h["models"], key=lambda m: _elo_key(h["elo"], m), reverse=True)
         champ = ordered[0]
         entries.append({
             "key": "holdem", "title": "🃏 Hold'em 1-Hand",
             "href": "holdem_tournament_report.html",
             "meta": (f"heads-up · {h['num_games']} tables · {h['hands_per_game']} hands each"
-                     f" · per-hand bb/100"),
-            "champ_line": f"🏆 {champ} <span class='metric'>{pm[champ]['bb_per_100']:+.1f} bb/100</span>",
+                     f" · chip-weighted Elo"),
+            "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(h['elo'][champ])}</span>",
             "ranking": ordered, **GAME_TAXONOMY["holdem"],
         })
 
@@ -693,7 +711,7 @@ def render_index(reps: dict) -> str:
             "href": "match_tournament_report.html",
             "meta": (f"heads-up · {m['episodes_per_pair']} matches/pair · up to "
                      f"{m['max_hands']} hands · stacks carried"),
-            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['win_rate']*100:.0f}% match wins</span>",
+            "champ_line": f"🏆 {champ['model']} <span class='metric'>Elo {_elo_txt(champ['elo'])}</span>",
             "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["match"],
         })
 
@@ -730,74 +748,56 @@ def render_index(reps: dict) -> str:
 <html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 {_favicon("🎲")}
 {NAV_HEAD}
-<style>
-  body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:1200px; margin:0 auto; padding:40px 28px; }}
-  h1 {{ font-size:28px; margin-bottom:6px; }} .sub {{ color:#8b93a7; margin-bottom:28px; }}
-  h2 {{ font-size:20px; color:#cdd6f4; margin:0; }}
-  .note {{ color:#8b93a7; font-size:12px; margin:6px 0 14px; }}
-
-  .arena {{ margin-top:36px; border:1px solid #232838; border-radius:16px;
-    padding:22px 22px 26px; background:linear-gradient(180deg,#141823,#10131b);
-    scroll-margin-top:64px; }}
+<style>{BASE_CSS}
+  .arena {{ margin-top:34px; border:1px solid var(--line); padding:20px 20px 24px;
+    background:var(--panel); scroll-margin-top:60px; }}
   .arena-head {{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }}
-  .arena-tag {{ font-size:11px; color:#9aa3b5; background:#1c2130; border:1px solid #2a3142;
-    padding:3px 9px; border-radius:999px; }}
-  .group-label {{ display:flex; align-items:center; gap:10px; font-size:16px;
-    font-weight:700; color:#e9edf7; margin:24px 0 13px; padding-left:12px;
-    border-left:3px solid #3b82f6; }}
-  .group-label.perfect {{ border-left-color:#4ade80; }}
-  .group-label.imperfect {{ border-left-color:#f59e0b; }}
-  .group-label .gl-sub {{ font-size:11px; font-weight:400; color:#8b93a7; }}
-
-  .cards {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }}
-  .card {{ display:block; text-decoration:none; color:inherit; background:#171a23;
-    border:1px solid #232838; border-radius:14px; padding:20px; transition:.15s; }}
-  .card:hover {{ border-color:#60a5fa; transform:translateY(-2px); }}
-  .ctitle {{ font-size:19px; font-weight:700; color:#cdd6f4; }}
-  .badges {{ margin:8px 0; display:flex; gap:6px; flex-wrap:wrap; }}
-  .badge {{ font-size:10px; color:#aab2c5; background:#1c2130; border:1px solid #2a3142;
-    padding:2px 7px; border-radius:999px; }}
-  .cmeta {{ font-size:12px; color:#8b93a7; margin:0 0 14px; }}
-  .champ {{ font-size:14px; color:#e6e6e6; }} .metric {{ color:#a78bfa; font-weight:600; }}
-  .cgo {{ margin-top:14px; font-size:13px; color:#60a5fa; }}
-
-  table.lb {{ border-collapse:collapse; width:100%; font-size:13px; }}
-  table.lb th, table.lb td {{ padding:7px 10px; border-bottom:1px solid #20242f; text-align:center; }}
-  table.lb th {{ color:#9aa3b5; font-weight:600; }}
-  table.lb td.model, table.lb th.model {{ text-align:left; font-weight:600; color:#cdd6f4; }}
-  table.lb td.rk, table.lb th.rk {{ width:34px; color:#8b93a7; }}
-  table.lb td.cov {{ color:#8b93a7; }} table.lb td.best {{ color:#aab2c5; }}
+  .arena-tag {{ font-size:11px; color:var(--dim); }}
+  .arena-tag::before {{ content:"["; color:var(--red); }} .arena-tag::after {{ content:"]"; color:var(--red); }}
+  .group-label {{ display:flex; align-items:center; gap:10px; font-size:13px;
+    font-weight:700; margin:24px 0 12px; padding-left:10px; border-left:3px solid var(--red); }}
+  .group-label.perfect {{ border-left-color:var(--pos); }}
+  .group-label.imperfect {{ border-left-color:#b45309; }}
+  .group-label .gl-sub {{ font-size:11px; font-weight:400; color:var(--dim); }}
+  .card {{ display:block; text-decoration:none; color:inherit; transition:border-color .15s; }}
+  .card:hover {{ border-color:var(--red); }}
+  .ctitle {{ font-size:15px; font-weight:700; color:var(--red); }}
+  .ctitle::before {{ content:"> "; color:var(--dim); }}
+  .badges {{ margin:8px 0; display:flex; gap:10px; flex-wrap:wrap; }}
+  .badge {{ font-size:10px; color:var(--dim); }}
+  .badge::before {{ content:"["; }} .badge::after {{ content:"]"; }}
+  .cmeta {{ font-size:12px; color:var(--dim); margin:0 0 12px; }}
+  .champ {{ font-size:13px; }} .metric {{ color:var(--red); font-weight:700; }}
+  .cgo {{ margin-top:12px; font-size:12px; color:var(--red); }}
+  table.lb td, table.lb th {{ text-align:center; }}
+  table.lb td.rk, table.lb th.rk {{ width:34px; color:var(--dim); }}
+  table.lb td.cov {{ color:var(--dim); }} table.lb td.best {{ color:var(--dim); }}
   .scorecell {{ position:relative; min-width:140px; }}
   .scorecell .bar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
-    height:18px; border-radius:4px; background:linear-gradient(90deg,#3b82f6,#a78bfa); opacity:.5; }}
-  .scorecell .sval {{ position:relative; font-weight:600; color:#f3f4f6; }}
-
+    height:16px; background:var(--red); opacity:.16; }}
+  .scorecell .sval {{ position:relative; font-weight:700; color:var(--red); }}
   .cta {{ display:flex; align-items:center; justify-content:space-between; gap:16px;
-    flex-wrap:wrap; border:1px dashed #34405c; border-radius:14px; padding:22px;
-    background:#141a27; }}
-  .cta .ctatext b {{ color:#cdd6f4; font-size:15px; }}
-  .cta .ctatext div {{ color:#8b93a7; font-size:13px; margin-top:4px; }}
-  .cta .pill {{ font-size:13px; color:#0b1020; background:#60a5fa; font-weight:600;
-    padding:9px 16px; border-radius:999px; white-space:nowrap; }}
-  .empty {{ color:#8b93a7; font-size:13px; padding:8px 0; }}
-  @media (max-width:640px) {{ .cards {{ grid-template-columns:1fr; }} }}
+    flex-wrap:wrap; border:1px dashed var(--line); padding:22px; background:var(--faint); }}
+  .cta .ctatext b {{ color:var(--fg); font-size:15px; }}
+  .cta .ctatext div {{ color:var(--dim); font-size:13px; margin-top:4px; }}
+  .cta .pill {{ font-size:13px; color:var(--panel); background:var(--red); font-weight:700;
+    padding:9px 16px; white-space:nowrap; }}
+  .empty {{ color:var(--dim); font-size:13px; padding:8px 0; }}
 </style></head>
 <body><div class="wrap">
-  <h1>🎲 AI Battle Arena</h1>
+  <h1>🎲 AI Battle Arena<span class="cursor"></span></h1>
   <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
     identical pipeline; <b>Agentic Arena</b> is open to any model + any scaffolding.</div>
 
   <a href="gpt_vs_claude/index.html" style="display:flex;align-items:center;justify-content:space-between;
     gap:16px;flex-wrap:wrap;text-decoration:none;color:inherit;margin-top:8px;
-    border:1px solid #2a3142;border-radius:14px;padding:18px 22px;
-    background:linear-gradient(90deg,#10241d,#141823 55%,#1d1630);transition:.15s"
-    onmouseover="this.style.borderColor='#60a5fa'" onmouseout="this.style.borderColor='#2a3142'">
-    <div><b style="color:#cdd6f4;font-size:15px">🥊 GPT vs Claude — coached head-to-head</b>
-      <div style="color:#8b93a7;font-size:13px;margin-top:4px">gpt-5.5 / gpt-5.4 vs
+    border:1px solid var(--line);padding:18px 22px;background:var(--faint);transition:border-color .15s"
+    onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--line)'">
+    <div><b style="color:var(--red);font-size:15px">🥊 GPT vs Claude — coached head-to-head</b>
+      <div style="color:var(--dim);font-size:13px;margin-top:4px">gpt-5.5 / gpt-5.4 vs
         claude-opus-4.8 / claude-sonnet-4.6 across four games · family scoreboard + per-game analysis</div></div>
-    <span style="font-size:13px;color:#0b1020;background:#60a5fa;font-weight:600;
-      padding:9px 16px;border-radius:999px;white-space:nowrap">View →</span>
+    <span style="font-size:13px;color:var(--panel);background:var(--red);font-weight:700;
+      padding:9px 16px;white-space:nowrap">View →</span>
   </a>
   {board}
 

@@ -15,6 +15,7 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached
+from report_theme import BASE_CSS
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_table/table_data.json"
@@ -28,25 +29,9 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
-EXTRA_CSS = """
-  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
-  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
-"""
+EXTRA_CSS = ""
 
-_STYLE = """
-  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
-  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
-  h1 { font-size:25px; } h2 { font-size:19px; margin-top:40px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
-  .sub { color:#8b93a7; }
-  table { border-collapse:collapse; width:100%; font-size:13px; margin-top:10px; }
-  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
-  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
-  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
-  canvas { max-height:300px; }
-  @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
-"""
+_STYLE = BASE_CSS
 
 
 def analyze(data: dict) -> dict:
@@ -110,7 +95,7 @@ def render_html(rep: dict, beh: dict) -> str:
   </table>
   {beh_html}
   <script>
-  const axc={{grid:{{color:'#20242e'}},ticks:{{color:'#9aa3b5'}}}};
+  const axc={{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}};
   new Chart(document.getElementById('ar'),{{type:'bar',
     data:{{labels:{json.dumps(labels)},datasets:[{{label:'avg rank',data:{json.dumps(avg_rank)},backgroundColor:{json.dumps(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,max:{n},...axc}},x:axc}}}}}});

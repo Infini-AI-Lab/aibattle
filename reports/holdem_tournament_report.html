@@ -1,142 +1,179 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script><script>Chart.defaults.font.family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";Chart.defaults.color="#6b6b6b";</script>
-<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=10"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
 <style>
-  :root { color-scheme: light; }
-  body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0;
-          background: #fbfbf8; color: #1c1c1c; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 28px 80px; }
-  h1 { font-size: 26px; margin: 0 0 4px; }
-  h2 { font-size: 18px; margin: 38px 0 12px; border-bottom: 1px solid #ddd8cf;
-        padding-bottom: 6px; }
-  .sub { color: #6b6b6b; margin-bottom: 8px; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th, td { padding: 7px 9px; text-align: center; border-bottom: 1px solid #ddd8cf; }
-  th { color: #6b6b6b; font-weight: 600; }
-  td.model, th.model { text-align: left; font-weight: 600; color: #1c1c1c; }
-  .pos { color: #1a7f37; } .neg { color: #b91c1c; }
-  .diag { color: #c9c2b6; }
-  .tag { background: #ddd8cf; color: #4338ca; border-radius: 0; padding: 1px 8px;
-          font-size: 11px; margin-left: 3px; }
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .card { background: #f4f1ea; border: 1px solid #ddd8cf; border-radius: 0;
-           padding: 16px; }
-  canvas { max-height: 340px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-  .note { color: #6b6b6b; font-size: 12px; margin-top: 6px; }
-  .small { color: #6b6b6b; font-size: 11px; }
-  td.bucket { font-weight: 600; }
-  .replaybtn { display:inline-block; margin-top:12px; background:#f4f1ea; color:#4338ca;
-    border:1px solid #ddd8cf; border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
-  .replaybtn:hover { border-color:#8f1d1d; color:#1c1c1c; }
-  @media (max-width: 760px) { .grid2, .cards { grid-template-columns: 1fr; } }
-  /* Terminal heading conventions (match the overview page):
-     h1 = "$ <page addr>" with blinking cursor, h2 = "## ", h3 = "### ". */
-  h1 { color:#8f1d1d; font-size:22px; }
-  h1 .cursor { display:inline-block; width:11px; height:1em; background:#8f1d1d;
+  /* Terminal theme: paper-white background, dark-red accent, monospace. */
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+    --pos:#1a7f37; --neg:#b91c1c; --diag:#c9c2b6; }
+  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    margin:0; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+  a { color:var(--red); }
+  h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
+  h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
     vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
-  h2::before { content:"## "; color:#8f1d1d; }
-  h3::before { content:"### "; color:#8f1d1d; }
-  /* Sync sizing/spacing with the overview page:
-     wrap 1100px / 36-24px padding, sub 13px, h2 15px (no underline),
-     h3 14px, table rows 7px 10px. */
-  .wrap { max-width:1100px; padding:36px 24px 80px; }
-  .sub { font-size:13px; }
-  h2 { font-size:15px; margin:36px 0 10px; border-bottom:none; padding-bottom:0; }
-  h3 { font-size:14px; }
-  table { font-size:13px; }
-  th, td { padding:7px 10px; }
-  /* Consistency pass 2: h1/subtitle margins and h3 color as on the overview. */
-  h1 { margin:0 0 4px; }
   h1 + .sub { margin-bottom:30px; }
-  h3 { color:#1c1c1c; }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:30px; }
+  h2 { font-size:15px; margin:36px 0 10px; font-weight:700; }
+  h2::before { content:"## "; color:var(--red); }
+  h3 { font-size:14px; color:var(--fg); margin:0 0 6px; }
+  h3::before { content:"### "; color:var(--red); }
+  .note { color:var(--dim); font-size:12px; margin:6px 0 14px; }
+  .small { font-size:10px; color:var(--dim); font-weight:400; }
+
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:7px 10px; text-align:center; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; }
+  td.model, th.model { text-align:left; font-weight:700; color:var(--fg); }
+  .pos { color:var(--pos); } .neg { color:var(--neg); } .diag { color:var(--diag); }
+  .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
+    border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px; }
+
+  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
+  .kpi .v { font-size:22px; font-weight:700; color:var(--fg); }
+  .kpi .l { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
+  canvas { max-height:340px; }
+  .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; margin:14px 0; font-size:13px; }
+  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:var(--red);
+    border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
+
+  td.bucket { font-weight: 600; }
 </style></head>
 <body><div class="wrap">
-  <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
-  <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · 10 games · 50 hands each · 5 models · round-robin</div>
-  <a class='replaybtn' href='holdem_replay.html'>▶ watch hand replays</a>
+  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode<span class="cursor"></span></h1>
+  <div class="sub">heads-up · each hand scored independently (bb/100) · 18 games · 50 hands each · 7 models · round-robin</div>
+  
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>style</th><th>chips</th><th>bb/100</th>
+    <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     <tr>
           <td>1</td><td class='model'>deepseek-v4-pro</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
-          <td class='pos'>+439</td>
-          <td class='pos'>+109.8</td>
-          <td>46%</td>
+          <td><b>1652<div class='small'>±48</div></b></td>
+          <td class='pos'>+874</td>
+          <td class='pos'>+145.7</td>
           <td>50%</td>
-          <td>36%</td>
-          <td>43%</td>
-          <td>45%</td>
-          <td>1%</td>
-          <td>1.26x</td>
-          <td>17.1s</td>
-          <td>943</td>
-        </tr><tr>
-          <td>2</td><td class='model'>glm-5p1</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
-          <td class='pos'>+321</td>
-          <td class='pos'>+80.2</td>
-          <td>60%</td>
-          <td>56%</td>
-          <td>34%</td>
-          <td>35%</td>
-          <td>29%</td>
-          <td>0%</td>
-          <td>1.11x</td>
-          <td>57.4s</td>
-          <td>4,339</td>
-        </tr><tr>
-          <td>3</td><td class='model'>kimi-k2p6</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
-          <td class='pos'>+69</td>
-          <td class='pos'>+17.2</td>
-          <td>52%</td>
           <td>53%</td>
-          <td>36%</td>
-          <td>37%</td>
-          <td>36%</td>
-          <td>0%</td>
-          <td>1.03x</td>
-          <td>83.7s</td>
-          <td>8,230</td>
+          <td>39%</td>
+          <td>44%</td>
+          <td>42%</td>
+          <td>1%</td>
+          <td>1.22x</td>
+          <td>15.5s</td>
+          <td>915</td>
         </tr><tr>
-          <td>4</td><td class='model'>gpt-oss-120b</td>
-          <td><b>Loose-Aggressive</b> <span class='tag'>LAG</span></td>
-          <td class='neg'>-348</td>
-          <td class='neg'>-87.0</td>
-          <td>40%</td>
-          <td>55%</td>
-          <td>38%</td>
-          <td>49%</td>
-          <td>48%</td>
-          <td>0%</td>
-          <td>1.12x</td>
-          <td>4.5s</td>
-          <td>784</td>
-        </tr><tr>
-          <td>5</td><td class='model'>minimax-m2p7</td>
+          <td>2</td><td class='model'>qwen3p7-plus</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
-          <td class='neg'>-481</td>
-          <td class='neg'>-120.2</td>
+          <td><b>1563<div class='small'>±65</div></b></td>
+          <td class='pos'>+141</td>
+          <td class='pos'>+47.0</td>
+          <td>51%</td>
+          <td>67%</td>
+          <td>22%</td>
+          <td>19%</td>
+          <td>28%</td>
+          <td>0%</td>
+          <td>1.18x</td>
+          <td>10.7s</td>
+          <td>1,400</td>
+        </tr><tr>
+          <td>3</td><td class='model'>glm-5p1</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1532<div class='small'>±40</div></b></td>
+          <td class='pos'>+362</td>
+          <td class='pos'>+72.4</td>
+          <td>56%</td>
+          <td>56%</td>
+          <td>32%</td>
+          <td>33%</td>
+          <td>31%</td>
+          <td>0%</td>
+          <td>1.30x</td>
+          <td>61.6s</td>
+          <td>4,438</td>
+        </tr><tr>
+          <td>4</td><td class='model'>kimi-k2p6</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1532<div class='small'>±39</div></b></td>
+          <td class='pos'>+275</td>
+          <td class='pos'>+45.8</td>
+          <td>51%</td>
+          <td>53%</td>
+          <td>35%</td>
+          <td>39%</td>
+          <td>37%</td>
+          <td>0%</td>
+          <td>0.97x</td>
+          <td>83.8s</td>
+          <td>8,383</td>
+        </tr><tr>
+          <td>5</td><td class='model'>gpt-oss-120b</td>
+          <td><b>Loose-Aggressive</b> <span class='tag'>LAG</span></td>
+          <td><b>1434<div class='small'>±43</div></b></td>
+          <td class='neg'>-251</td>
+          <td class='neg'>-50.2</td>
+          <td>39%</td>
+          <td>53%</td>
+          <td>35%</td>
+          <td>50%</td>
+          <td>49%</td>
+          <td>0%</td>
+          <td>1.09x</td>
+          <td>4.4s</td>
+          <td>760</td>
+        </tr><tr>
+          <td>6</td><td class='model'>minimax-m3</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1398<div class='small'>±36</div></b></td>
+          <td class='neg'>-782</td>
+          <td class='neg'>-130.3</td>
           <td>51%</td>
           <td>58%</td>
-          <td>16%</td>
+          <td>31%</td>
+          <td>30%</td>
+          <td>29%</td>
+          <td>0%</td>
+          <td>1.33x</td>
+          <td>20.4s</td>
+          <td>2,403</td>
+        </tr><tr>
+          <td>7</td><td class='model'>minimax-m2p7</td>
+          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1388<div class='small'>±37</div></b></td>
+          <td class='neg'>-619</td>
+          <td class='neg'>-123.8</td>
+          <td>50%</td>
+          <td>60%</td>
+          <td>15%</td>
           <td>30%</td>
           <td>27%</td>
           <td>0%</td>
-          <td>0.95x</td>
-          <td>41.7s</td>
-          <td>7,291</td>
+          <td>0.93x</td>
+          <td>38.0s</td>
+          <td>6,769</td>
         </tr>
   </table>
-  <div class="note">VPIP = how often it voluntarily plays a hand (looseness). PFR = preflop raise %.
+  <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
+    fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
+    win and adjusts for opponent strength — the fair comparison when models faced different opponents.
+    ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
+    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
+    (looseness). PFR = preflop raise %.
     aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
     think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
@@ -164,7 +201,7 @@
   <table>
     <tr><th class='model'>model</th><th>c-bet%</th><th>n</th><th>fold→c-bet%</th><th>n</th>
         <th>WTSD%</th><th>W$SD%</th><th>SD seen / won</th></tr>
-    <tr><td class='model'>deepseek-v4-pro</td><td>41%</td><td class='small'>29</td><td>0%</td><td class='small'>13</td><td>11%</td><td>64%</td><td class='small'>22/14</td></tr><tr><td class='model'>glm-5p1</td><td>47%</td><td class='small'>30</td><td>5%</td><td class='small'>20</td><td>18%</td><td>58%</td><td class='small'>36/21</td></tr><tr><td class='model'>kimi-k2p6</td><td>53%</td><td class='small'>36</td><td>9%</td><td class='small'>11</td><td>20%</td><td>57%</td><td class='small'>40/23</td></tr><tr><td class='model'>gpt-oss-120b</td><td>48%</td><td class='small'>44</td><td>10%</td><td class='small'>10</td><td>12%</td><td>48%</td><td class='small'>25/12</td></tr><tr><td class='model'>minimax-m2p7</td><td>71%</td><td class='small'>14</td><td>9%</td><td class='small'>22</td><td>22%</td><td>26%</td><td class='small'>43/11</td></tr>
+    <tr><td class='model'>deepseek-v4-pro</td><td>48%</td><td class='small'>50</td><td>0%</td><td class='small'>15</td><td>14%</td><td>64%</td><td class='small'>42/27</td></tr><tr><td class='model'>qwen3p7-plus</td><td>43%</td><td class='small'>21</td><td>11%</td><td class='small'>18</td><td>30%</td><td>56%</td><td class='small'>45/25</td></tr><tr><td class='model'>glm-5p1</td><td>45%</td><td class='small'>38</td><td>4%</td><td class='small'>24</td><td>18%</td><td>53%</td><td class='small'>45/24</td></tr><tr><td class='model'>kimi-k2p6</td><td>53%</td><td class='small'>60</td><td>5%</td><td class='small'>21</td><td>22%</td><td>54%</td><td class='small'>67/36</td></tr><tr><td class='model'>gpt-oss-120b</td><td>53%</td><td class='small'>49</td><td>8%</td><td class='small'>12</td><td>12%</td><td>48%</td><td class='small'>31/15</td></tr><tr><td class='model'>minimax-m3</td><td>56%</td><td class='small'>45</td><td>8%</td><td class='small'>26</td><td>25%</td><td>42%</td><td class='small'>76/32</td></tr><tr><td class='model'>minimax-m2p7</td><td>73%</td><td class='small'>15</td><td>11%</td><td class='small'>28</td><td>26%</td><td>33%</td><td class='small'>64/21</td></tr>
   </table>
   <div class="note">
     <b>c-bet</b> = flop bet by the preflop aggressor. <b>fold→c-bet</b> = how often the
@@ -176,8 +213,8 @@
   <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
     bucket. A model that reads its cards opens premium ≫ trash.</div>
   <table>
-    <tr><th class='model'>bucket</th><th>deepseek-v4-pro</th><th>gpt-oss-120b</th><th>kimi-k2p6</th><th>glm-5p1</th><th>minimax-m2p7</th></tr>
-    <tr><th class='model'>premium</th><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#b0a99c'>n=11</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#b0a99c'>n=8</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#b0a99c'>n=14</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#b0a99c'>n=14</div></td><td style='background:rgba(143,29,29,0.82);color:#fbfbf8'>82%<div class='small' style='color:#b0a99c'>n=11</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(143,29,29,0.87);color:#fbfbf8'>87%<div class='small' style='color:#b0a99c'>n=23</div></td><td style='background:rgba(143,29,29,0.84);color:#fbfbf8'>84%<div class='small' style='color:#b0a99c'>n=19</div></td><td style='background:rgba(143,29,29,0.93);color:#fbfbf8'>93%<div class='small' style='color:#b0a99c'>n=14</div></td><td style='background:rgba(143,29,29,0.73);color:#fbfbf8'>73%<div class='small' style='color:#b0a99c'>n=22</div></td><td style='background:rgba(143,29,29,0.81);color:#fbfbf8'>81%<div class='small' style='color:#b0a99c'>n=16</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(143,29,29,0.71);color:#fbfbf8'>71%<div class='small' style='color:#b0a99c'>n=35</div></td><td style='background:rgba(143,29,29,0.65);color:#fbfbf8'>65%<div class='small' style='color:#b0a99c'>n=55</div></td><td style='background:rgba(143,29,29,0.49);color:#1c1c1c'>49%<div class='small' style='color:#6b6b6b'>n=47</div></td><td style='background:rgba(143,29,29,0.59);color:#fbfbf8'>59%<div class='small' style='color:#b0a99c'>n=41</div></td><td style='background:rgba(143,29,29,0.19);color:#1c1c1c'>19%<div class='small' style='color:#6b6b6b'>n=32</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(143,29,29,0.27);color:#1c1c1c'>27%<div class='small' style='color:#6b6b6b'>n=48</div></td><td style='background:rgba(143,29,29,0.28);color:#1c1c1c'>28%<div class='small' style='color:#6b6b6b'>n=40</div></td><td style='background:rgba(143,29,29,0.43);color:#1c1c1c'>43%<div class='small' style='color:#6b6b6b'>n=35</div></td><td style='background:rgba(143,29,29,0.28);color:#1c1c1c'>28%<div class='small' style='color:#6b6b6b'>n=40</div></td><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=35</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(143,29,29,0.03);color:#1c1c1c'>3%<div class='small' style='color:#6b6b6b'>n=62</div></td><td style='background:rgba(143,29,29,0.10);color:#1c1c1c'>10%<div class='small' style='color:#6b6b6b'>n=63</div></td><td style='background:rgba(143,29,29,0.09);color:#1c1c1c'>9%<div class='small' style='color:#6b6b6b'>n=67</div></td><td style='background:rgba(143,29,29,0.04);color:#1c1c1c'>4%<div class='small' style='color:#6b6b6b'>n=48</div></td><td style='background:rgba(143,29,29,0.02);color:#1c1c1c'>2%<div class='small' style='color:#6b6b6b'>n=63</div></td></tr>
+    <tr><th class='model'>bucket</th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>gpt-oss-120b</th><th>kimi-k2p6</th><th>minimax-m2p7</th><th>minimax-m3</th><th>qwen3p7-plus</th></tr>
+    <tr><th class='model'>premium</th><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=23</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=16</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=9</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=19</div></td><td style='background:rgba(143,29,29,0.82);color:#fbfbf8'>82%<div class='small' style='color:#f1d9d9'>n=11</div></td><td style='background:rgba(143,29,29,0.94);color:#fbfbf8'>94%<div class='small' style='color:#f1d9d9'>n=18</div></td><td style='background:rgba(143,29,29,0.95);color:#fbfbf8'>95%<div class='small' style='color:#f1d9d9'>n=19</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(143,29,29,0.88);color:#fbfbf8'>88%<div class='small' style='color:#f1d9d9'>n=33</div></td><td style='background:rgba(143,29,29,0.74);color:#fbfbf8'>74%<div class='small' style='color:#f1d9d9'>n=27</div></td><td style='background:rgba(143,29,29,0.79);color:#fbfbf8'>79%<div class='small' style='color:#f1d9d9'>n=24</div></td><td style='background:rgba(143,29,29,0.90);color:#fbfbf8'>90%<div class='small' style='color:#f1d9d9'>n=20</div></td><td style='background:rgba(143,29,29,0.76);color:#fbfbf8'>76%<div class='small' style='color:#f1d9d9'>n=21</div></td><td style='background:rgba(143,29,29,0.52);color:#fbfbf8'>52%<div class='small' style='color:#f1d9d9'>n=21</div></td><td style='background:rgba(143,29,29,0.60);color:#fbfbf8'>60%<div class='small' style='color:#f1d9d9'>n=10</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(143,29,29,0.69);color:#fbfbf8'>69%<div class='small' style='color:#f1d9d9'>n=64</div></td><td style='background:rgba(143,29,29,0.54);color:#fbfbf8'>54%<div class='small' style='color:#f1d9d9'>n=48</div></td><td style='background:rgba(143,29,29,0.65);color:#fbfbf8'>65%<div class='small' style='color:#f1d9d9'>n=65</div></td><td style='background:rgba(143,29,29,0.53);color:#fbfbf8'>53%<div class='small' style='color:#f1d9d9'>n=70</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=43</div></td><td style='background:rgba(143,29,29,0.47);color:#1c1c1c'>48%<div class='small' style='color:#6b6b6b'>n=80</div></td><td style='background:rgba(143,29,29,0.32);color:#1c1c1c'>32%<div class='small' style='color:#6b6b6b'>n=19</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(143,29,29,0.28);color:#1c1c1c'>28%<div class='small' style='color:#6b6b6b'>n=64</div></td><td style='background:rgba(143,29,29,0.26);color:#1c1c1c'>26%<div class='small' style='color:#6b6b6b'>n=54</div></td><td style='background:rgba(143,29,29,0.22);color:#1c1c1c'>22%<div class='small' style='color:#6b6b6b'>n=55</div></td><td style='background:rgba(143,29,29,0.36);color:#1c1c1c'>36%<div class='small' style='color:#6b6b6b'>n=59</div></td><td style='background:rgba(143,29,29,0.04);color:#1c1c1c'>4%<div class='small' style='color:#6b6b6b'>n=46</div></td><td style='background:rgba(143,29,29,0.32);color:#1c1c1c'>32%<div class='small' style='color:#6b6b6b'>n=56</div></td><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=33</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(143,29,29,0.03);color:#1c1c1c'>3%<div class='small' style='color:#6b6b6b'>n=91</div></td><td style='background:rgba(143,29,29,0.05);color:#1c1c1c'>5%<div class='small' style='color:#6b6b6b'>n=63</div></td><td style='background:rgba(143,29,29,0.08);color:#1c1c1c'>8%<div class='small' style='color:#6b6b6b'>n=79</div></td><td style='background:rgba(143,29,29,0.11);color:#1c1c1c'>11%<div class='small' style='color:#6b6b6b'>n=102</div></td><td style='background:rgba(143,29,29,0.01);color:#1c1c1c'>1%<div class='small' style='color:#6b6b6b'>n=81</div></td><td style='background:rgba(143,29,29,0.09);color:#1c1c1c'>9%<div class='small' style='color:#6b6b6b'>n=85</div></td><td style='background:rgba(143,29,29,0.02);color:#1c1c1c'>2%<div class='small' style='color:#6b6b6b'>n=43</div></td></tr>
   </table>
 
   <div class="grid2">
@@ -196,18 +233,23 @@
 
   <h2>⚔️ Head-to-head chip results</h2>
   <div class="sub">Net chips the row model won against the column model (sums to zero per pair).</div>
-  <table class="h2h"><tr><th></th><th>deepseek-v4-pro</th><th>gpt-oss-120b</th><th>kimi-k2p6</th><th>glm-5p1</th><th>minimax-m2p7</th></tr><tr><th class='model'>deepseek-v4-pro</th><td class='diag'>—</td><td class='pos' style='--v:57.0'>+57</td><td class='pos' style='--v:145.0'>+145</td><td class='neg' style='--v:-37.0'>-37</td><td class='pos' style='--v:274.0'>+274</td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg' style='--v:-57.0'>-57</td><td class='diag'>—</td><td class='neg' style='--v:-86.0'>-86</td><td class='neg' style='--v:-78.0'>-78</td><td class='neg' style='--v:-127.0'>-127</td></tr><tr><th class='model'>kimi-k2p6</th><td class='neg' style='--v:-145.0'>-145</td><td class='pos' style='--v:86.0'>+86</td><td class='diag'>—</td><td class='pos' style='--v:50.0'>+50</td><td class='pos' style='--v:78.0'>+78</td></tr><tr><th class='model'>glm-5p1</th><td class='pos' style='--v:37.0'>+37</td><td class='pos' style='--v:78.0'>+78</td><td class='neg' style='--v:-50.0'>-50</td><td class='diag'>—</td><td class='pos' style='--v:256.0'>+256</td></tr><tr><th class='model'>minimax-m2p7</th><td class='neg' style='--v:-274.0'>-274</td><td class='pos' style='--v:127.0'>+127</td><td class='neg' style='--v:-78.0'>-78</td><td class='neg' style='--v:-256.0'>-256</td><td class='diag'>—</td></tr></table>
+  <table class="h2h"><tr><th></th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>gpt-oss-120b</th><th>kimi-k2p6</th><th>minimax-m2p7</th><th>minimax-m3</th><th>qwen3p7-plus</th></tr><tr><th class='model'>deepseek-v4-pro</th><td class='diag'>—</td><td class='neg' style='--v:-37.0'>-37</td><td class='pos' style='--v:57.0'>+57</td><td class='pos' style='--v:145.0'>+145</td><td class='pos' style='--v:274.0'>+274</td><td class='pos' style='--v:192.0'>+192</td><td class='pos' style='--v:243.0'>+243</td></tr><tr><th class='model'>glm-5p1</th><td class='pos' style='--v:37.0'>+37</td><td class='diag'>—</td><td class='pos' style='--v:78.0'>+78</td><td class='neg' style='--v:-50.0'>-50</td><td class='pos' style='--v:256.0'>+256</td><td class='pos' style='--v:41.0'>+41</td><td class='' style='--v:0.0'>+0</td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg' style='--v:-57.0'>-57</td><td class='neg' style='--v:-78.0'>-78</td><td class='diag'>—</td><td class='neg' style='--v:-86.0'>-86</td><td class='neg' style='--v:-127.0'>-127</td><td class='pos' style='--v:97.0'>+97</td><td class='' style='--v:0.0'>+0</td></tr><tr><th class='model'>kimi-k2p6</th><td class='neg' style='--v:-145.0'>-145</td><td class='pos' style='--v:50.0'>+50</td><td class='pos' style='--v:86.0'>+86</td><td class='diag'>—</td><td class='pos' style='--v:78.0'>+78</td><td class='pos' style='--v:317.0'>+317</td><td class='neg' style='--v:-111.0'>-111</td></tr><tr><th class='model'>minimax-m2p7</th><td class='neg' style='--v:-274.0'>-274</td><td class='neg' style='--v:-256.0'>-256</td><td class='pos' style='--v:127.0'>+127</td><td class='neg' style='--v:-78.0'>-78</td><td class='diag'>—</td><td class='neg' style='--v:-138.0'>-138</td><td class='' style='--v:0.0'>+0</td></tr><tr><th class='model'>minimax-m3</th><td class='neg' style='--v:-192.0'>-192</td><td class='neg' style='--v:-41.0'>-41</td><td class='neg' style='--v:-97.0'>-97</td><td class='neg' style='--v:-317.0'>-317</td><td class='pos' style='--v:138.0'>+138</td><td class='diag'>—</td><td class='neg' style='--v:-273.0'>-273</td></tr><tr><th class='model'>qwen3p7-plus</th><td class='neg' style='--v:-243.0'>-243</td><td class='' style='--v:0.0'>+0</td><td class='' style='--v:0.0'>+0</td><td class='pos' style='--v:111.0'>+111</td><td class='' style='--v:0.0'>+0</td><td class='pos' style='--v:273.0'>+273</td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"models": ["deepseek-v4-pro", "gpt-oss-120b", "kimi-k2p6", "glm-5p1", "minimax-m2p7"], "per_model": {"deepseek-v4-pro": {"hands": 200, "decisions": 356, "chips": 439.0, "bb_per_100": 109.75, "win_rate": 0.46, "wins": 92, "losses": 107, "ties": 1, "showdown_wins": 14, "fold_wins": 78, "vpip": 0.505, "pfr": 0.355, "agg_freq": 0.4336, "agg_factor": 2.18, "fold_to_bet": 0.4464, "allin_freq": 0.0056, "avg_bet_xpot": 1.264, "avg_latency_s": 17.1, "avg_comp_tokens": 943, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 100, "check": 95, "call": 50, "bet": 36, "raise": 73, "all_in": 2}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 189, "agg_freq": 0.6068, "fold_share": 0.381, "mix": {"fold": 72, "check": 13, "call": 33, "bet": 3, "raise": 68, "all_in": 0}}, "flop": {"decisions": 93, "agg_freq": 0.2568, "fold_share": 0.2043, "mix": {"fold": 19, "check": 46, "call": 9, "bet": 13, "raise": 5, "all_in": 1}}, "turn": {"decisions": 47, "agg_freq": 0.375, "fold_share": 0.1489, "mix": {"fold": 7, "check": 19, "call": 6, "bet": 14, "raise": 0, "all_in": 1}}, "river": {"decisions": 27, "agg_freq": 0.24, "fold_share": 0.0741, "mix": {"fold": 2, "check": 17, "call": 2, "bet": 6, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.4138, "cbet_opps": 29, "fold_to_cbet": 0.0, "facing_cbet": 13, "wtsd": 0.11, "wsd": 0.6364, "saw_showdown": 22, "won_showdown": 14, "pf_bucket": {"premium": {"hands": 11, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 23, "open_rate": 0.8696, "call_rate": 0.1304, "fold_rate": 0.0}, "playable": {"hands": 35, "open_rate": 0.7143, "call_rate": 0.1714, "fold_rate": 0.0286}, "marginal": {"hands": 48, "open_rate": 0.2708, "call_rate": 0.25, "fold_rate": 0.3542}, "trash": {"hands": 62, "open_rate": 0.0323, "call_rate": 0.1452, "fold_rate": 0.7581}}, "betsize_dist": {"small": 0.0, "medium": 0.2973, "pot": 0.1892, "over": 0.5135}, "showdown_cats": {"high card": 0.0455, "pair": 0.4545, "two pair": 0.3636, "trips": 0.0, "straight": 0.0, "flush": 0.0455, "full house": 0.0909}}, "gpt-oss-120b": {"hands": 200, "decisions": 413, "chips": -348.0, "bb_per_100": -87.0, "win_rate": 0.395, "wins": 79, "losses": 120, "ties": 1, "showdown_wins": 12, "fold_wins": 67, "vpip": 0.55, "pfr": 0.385, "agg_freq": 0.4918, "agg_factor": 3.17, "fold_to_bet": 0.48, "allin_freq": 0.0024, "avg_bet_xpot": 1.119, "avg_latency_s": 4.5, "avg_comp_tokens": 784, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 108, "check": 108, "call": 47, "bet": 80, "raise": 69, "all_in": 1}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 198, "agg_freq": 0.5969, "fold_share": 0.3485, "mix": {"fold": 69, "check": 17, "call": 35, "bet": 11, "raise": 66, "all_in": 0}}, "flop": {"decisions": 113, "agg_freq": 0.4948, "fold_share": 0.1416, "mix": {"fold": 16, "check": 42, "call": 7, "bet": 45, "raise": 3, "all_in": 0}}, "turn": {"decisions": 67, "agg_freq": 0.3673, "fold_share": 0.2687, "mix": {"fold": 18, "check": 26, "call": 5, "bet": 17, "raise": 0, "all_in": 1}}, "river": {"decisions": 35, "agg_freq": 0.2333, "fold_share": 0.1429, "mix": {"fold": 5, "check": 23, "call": 0, "bet": 7, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.4773, "cbet_opps": 44, "fold_to_cbet": 0.1, "facing_cbet": 10, "wtsd": 0.125, "wsd": 0.48, "saw_showdown": 25, "won_showdown": 12, "pf_bucket": {"premium": {"hands": 8, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 19, "open_rate": 0.8421, "call_rate": 0.1579, "fold_rate": 0.0}, "playable": {"hands": 55, "open_rate": 0.6545, "call_rate": 0.2182, "fold_rate": 0.0909}, "marginal": {"hands": 40, "open_rate": 0.275, "call_rate": 0.3, "fold_rate": 0.275}, "trash": {"hands": 63, "open_rate": 0.0952, "call_rate": 0.0952, "fold_rate": 0.6667}}, "betsize_dist": {"small": 0.04, "medium": 0.34, "pot": 0.36, "over": 0.26}, "showdown_cats": {"high card": 0.16, "pair": 0.4, "two pair": 0.24, "trips": 0.12, "straight": 0.0, "flush": 0.0, "full house": 0.08}}, "kimi-k2p6": {"hands": 200, "decisions": 422, "chips": 69.0, "bb_per_100": 17.25, "win_rate": 0.525, "wins": 105, "losses": 93, "ties": 2, "showdown_wins": 23, "fold_wins": 82, "vpip": 0.53, "pfr": 0.355, "agg_freq": 0.3692, "agg_factor": 1.693, "fold_to_bet": 0.3594, "allin_freq": 0.0, "avg_bet_xpot": 1.031, "avg_latency_s": 83.7, "avg_comp_tokens": 8230, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 78, "check": 142, "call": 75, "bet": 63, "raise": 64, "all_in": 0}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 184, "agg_freq": 0.5547, "fold_share": 0.3043, "mix": {"fold": 56, "check": 17, "call": 40, "bet": 10, "raise": 61, "all_in": 0}}, "flop": {"decisions": 107, "agg_freq": 0.3093, "fold_share": 0.0935, "mix": {"fold": 10, "check": 53, "call": 14, "bet": 28, "raise": 2, "all_in": 0}}, "turn": {"decisions": 71, "agg_freq": 0.3231, "fold_share": 0.0845, "mix": {"fold": 6, "check": 34, "call": 10, "bet": 20, "raise": 1, "all_in": 0}}, "river": {"decisions": 60, "agg_freq": 0.0926, "fold_share": 0.1, "mix": {"fold": 6, "check": 38, "call": 11, "bet": 5, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.5278, "cbet_opps": 36, "fold_to_cbet": 0.0909, "facing_cbet": 11, "wtsd": 0.2, "wsd": 0.575, "saw_showdown": 40, "won_showdown": 23, "pf_bucket": {"premium": {"hands": 14, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 14, "open_rate": 0.9286, "call_rate": 0.0714, "fold_rate": 0.0}, "playable": {"hands": 47, "open_rate": 0.4894, "call_rate": 0.4043, "fold_rate": 0.0213}, "marginal": {"hands": 35, "open_rate": 0.4286, "call_rate": 0.2286, "fold_rate": 0.2286}, "trash": {"hands": 67, "open_rate": 0.0896, "call_rate": 0.1045, "fold_rate": 0.6716}}, "betsize_dist": {"small": 0.0, "medium": 0.4094, "pot": 0.2992, "over": 0.2913}, "showdown_cats": {"high card": 0.125, "pair": 0.475, "two pair": 0.3, "trips": 0.025, "straight": 0.025, "flush": 0.025, "full house": 0.025}}, "glm-5p1": {"hands": 200, "decisions": 423, "chips": 321.0, "bb_per_100": 80.25, "win_rate": 0.6, "wins": 120, "losses": 80, "ties": 0, "showdown_wins": 21, "fold_wins": 99, "vpip": 0.56, "pfr": 0.335, "agg_freq": 0.3492, "agg_factor": 1.344, "fold_to_bet": 0.2915, "allin_freq": 0.0, "avg_bet_xpot": 1.115, "avg_latency_s": 57.4, "avg_comp_tokens": 4339, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 65, "check": 140, "call": 93, "bet": 60, "raise": 65, "all_in": 0}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 178, "agg_freq": 0.4789, "fold_share": 0.2022, "mix": {"fold": 36, "check": 21, "call": 53, "bet": 7, "raise": 61, "all_in": 0}}, "flop": {"decisions": 119, "agg_freq": 0.2913, "fold_share": 0.1345, "mix": {"fold": 16, "check": 51, "call": 22, "bet": 28, "raise": 2, "all_in": 0}}, "turn": {"decisions": 79, "agg_freq": 0.2388, "fold_share": 0.1519, "mix": {"fold": 12, "check": 38, "call": 13, "bet": 15, "raise": 1, "all_in": 0}}, "river": {"decisions": 47, "agg_freq": 0.2391, "fold_share": 0.0213, "mix": {"fold": 1, "check": 30, "call": 5, "bet": 10, "raise": 1, "all_in": 0}}}, "cbet_rate": 0.4667, "cbet_opps": 30, "fold_to_cbet": 0.05, "facing_cbet": 20, "wtsd": 0.18, "wsd": 0.5833, "saw_showdown": 36, "won_showdown": 21, "pf_bucket": {"premium": {"hands": 14, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 22, "open_rate": 0.7273, "call_rate": 0.2273, "fold_rate": 0.0}, "playable": {"hands": 41, "open_rate": 0.5854, "call_rate": 0.3415, "fold_rate": 0.0244}, "marginal": {"hands": 40, "open_rate": 0.275, "call_rate": 0.3, "fold_rate": 0.225}, "trash": {"hands": 48, "open_rate": 0.0417, "call_rate": 0.2917, "fold_rate": 0.4583}}, "betsize_dist": {"small": 0.024, "medium": 0.408, "pot": 0.144, "over": 0.424}, "showdown_cats": {"high card": 0.0556, "pair": 0.5, "two pair": 0.3056, "trips": 0.0556, "straight": 0.0, "flush": 0.0833, "full house": 0.0}}, "minimax-m2p7": {"hands": 200, "decisions": 451, "chips": -481.0, "bb_per_100": -120.25, "win_rate": 0.51, "wins": 102, "losses": 98, "ties": 0, "showdown_wins": 11, "fold_wins": 91, "vpip": 0.58, "pfr": 0.155, "agg_freq": 0.3039, "agg_factor": 0.88, "fold_to_bet": 0.2739, "allin_freq": 0.0, "avg_bet_xpot": 0.955, "avg_latency_s": 41.7, "avg_comp_tokens": 7291, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 66, "check": 135, "call": 133, "bet": 75, "raise": 42, "all_in": 0}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 176, "agg_freq": 0.2336, "fold_share": 0.2216, "mix": {"fold": 39, "check": 7, "call": 98, "bet": 0, "raise": 32, "all_in": 0}}, "flop": {"decisions": 127, "agg_freq": 0.3478, "fold_share": 0.0945, "mix": {"fold": 12, "check": 54, "call": 21, "bet": 32, "raise": 8, "all_in": 0}}, "turn": {"decisions": 88, "agg_freq": 0.4156, "fold_share": 0.125, "mix": {"fold": 11, "check": 36, "call": 9, "bet": 30, "raise": 2, "all_in": 0}}, "river": {"decisions": 60, "agg_freq": 0.2321, "fold_share": 0.0667, "mix": {"fold": 4, "check": 38, "call": 5, "bet": 13, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.7143, "cbet_opps": 14, "fold_to_cbet": 0.0909, "facing_cbet": 22, "wtsd": 0.215, "wsd": 0.2558, "saw_showdown": 43, "won_showdown": 11, "pf_bucket": {"premium": {"hands": 11, "open_rate": 0.8182, "call_rate": 0.1818, "fold_rate": 0.0}, "strong": {"hands": 16, "open_rate": 0.8125, "call_rate": 0.1875, "fold_rate": 0.0}, "playable": {"hands": 32, "open_rate": 0.1875, "call_rate": 0.6875, "fold_rate": 0.0625}, "marginal": {"hands": 35, "open_rate": 0.0571, "call_rate": 0.7143, "fold_rate": 0.2}, "trash": {"hands": 63, "open_rate": 0.0159, "call_rate": 0.5238, "fold_rate": 0.3968}}, "betsize_dist": {"small": 0.0684, "medium": 0.5556, "pot": 0.2222, "over": 0.1538}, "showdown_cats": {"high card": 0.2093, "pair": 0.4651, "two pair": 0.2093, "trips": 0.0233, "straight": 0.0465, "flush": 0.0465, "full house": 0.0}}}, "h2h": {"deepseek-v4-pro": {"gpt-oss-120b": 57.0, "kimi-k2p6": 145.0, "glm-5p1": -37.0, "minimax-m2p7": 274.0}, "gpt-oss-120b": {"deepseek-v4-pro": -57.0, "kimi-k2p6": -86.0, "glm-5p1": -78.0, "minimax-m2p7": -127.0}, "kimi-k2p6": {"deepseek-v4-pro": -145.0, "gpt-oss-120b": 86.0, "glm-5p1": 50.0, "minimax-m2p7": 78.0}, "glm-5p1": {"deepseek-v4-pro": 37.0, "gpt-oss-120b": 78.0, "kimi-k2p6": -50.0, "minimax-m2p7": 256.0}, "minimax-m2p7": {"deepseek-v4-pro": -274.0, "gpt-oss-120b": 127.0, "kimi-k2p6": -78.0, "glm-5p1": -256.0}}, "hands_per_game": 50, "num_games": 10};
+const R = {"models": ["deepseek-v4-pro", "glm-5p1", "gpt-oss-120b", "kimi-k2p6", "minimax-m2p7", "minimax-m3", "qwen3p7-plus"], "per_model": {"deepseek-v4-pro": {"hands": 300, "decisions": 579, "chips": 874.0, "bb_per_100": 145.67, "win_rate": 0.5033, "wins": 151, "losses": 148, "ties": 1, "showdown_wins": 27, "fold_wins": 124, "vpip": 0.5333, "pfr": 0.39, "agg_freq": 0.4404, "agg_factor": 2.757, "fold_to_bet": 0.4241, "allin_freq": 0.0052, "avg_bet_xpot": 1.219, "avg_latency_s": 15.5, "avg_comp_tokens": 915, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 134, "check": 179, "call": 70, "bet": 83, "raise": 110, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 289, "agg_freq": 0.6134, "fold_share": 0.3287, "mix": {"fold": 95, "check": 28, "call": 47, "bet": 14, "raise": 104, "all_in": 1}}, "flop": {"decisions": 151, "agg_freq": 0.2734, "fold_share": 0.1523, "mix": {"fold": 23, "check": 80, "call": 13, "bet": 28, "raise": 6, "all_in": 1}}, "turn": {"decisions": 88, "agg_freq": 0.3816, "fold_share": 0.1364, "mix": {"fold": 12, "check": 40, "call": 7, "bet": 28, "raise": 0, "all_in": 1}}, "river": {"decisions": 51, "agg_freq": 0.2766, "fold_share": 0.0784, "mix": {"fold": 4, "check": 31, "call": 3, "bet": 13, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.48, "cbet_opps": 50, "fold_to_cbet": 0.0, "facing_cbet": 15, "wtsd": 0.14, "wsd": 0.6429, "saw_showdown": 42, "won_showdown": 27, "pf_bucket": {"premium": {"hands": 23, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 33, "open_rate": 0.8788, "call_rate": 0.1212, "fold_rate": 0.0}, "playable": {"hands": 64, "open_rate": 0.6875, "call_rate": 0.1562, "fold_rate": 0.0156}, "marginal": {"hands": 64, "open_rate": 0.2812, "call_rate": 0.2656, "fold_rate": 0.3125}, "trash": {"hands": 91, "open_rate": 0.033, "call_rate": 0.1319, "fold_rate": 0.7253}}, "betsize_dist": {"small": 0.0102, "medium": 0.3367, "pot": 0.1837, "over": 0.4694}, "showdown_cats": {"high card": 0.0952, "pair": 0.4762, "two pair": 0.2619, "trips": 0.0476, "straight": 0.0476, "flush": 0.0238, "full house": 0.0476}, "elo": 1652, "elo_sd": 47.5}, "glm-5p1": {"hands": 250, "decisions": 553, "chips": 362.0, "bb_per_100": 72.4, "win_rate": 0.564, "wins": 141, "losses": 109, "ties": 0, "showdown_wins": 24, "fold_wins": 117, "vpip": 0.556, "pfr": 0.316, "agg_freq": 0.3312, "agg_factor": 1.244, "fold_to_bet": 0.3066, "allin_freq": 0.0018, "avg_bet_xpot": 1.299, "avg_latency_s": 61.6, "avg_comp_tokens": 4438, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 88, "check": 188, "call": 123, "bet": 78, "raise": 75, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 224, "agg_freq": 0.4598, "fold_share": 0.2232, "mix": {"fold": 50, "check": 26, "call": 68, "bet": 8, "raise": 71, "all_in": 1}}, "flop": {"decisions": 150, "agg_freq": 0.2612, "fold_share": 0.1067, "mix": {"fold": 16, "check": 68, "call": 31, "bet": 33, "raise": 2, "all_in": 0}}, "turn": {"decisions": 112, "agg_freq": 0.2421, "fold_share": 0.1518, "mix": {"fold": 17, "check": 54, "call": 18, "bet": 22, "raise": 1, "all_in": 0}}, "river": {"decisions": 67, "agg_freq": 0.2581, "fold_share": 0.0746, "mix": {"fold": 5, "check": 40, "call": 6, "bet": 15, "raise": 1, "all_in": 0}}}, "cbet_rate": 0.4474, "cbet_opps": 38, "fold_to_cbet": 0.0417, "facing_cbet": 24, "wtsd": 0.18, "wsd": 0.5333, "saw_showdown": 45, "won_showdown": 24, "pf_bucket": {"premium": {"hands": 16, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 27, "open_rate": 0.7407, "call_rate": 0.2222, "fold_rate": 0.0}, "playable": {"hands": 48, "open_rate": 0.5417, "call_rate": 0.3542, "fold_rate": 0.0208}, "marginal": {"hands": 54, "open_rate": 0.2593, "call_rate": 0.3519, "fold_rate": 0.2222}, "trash": {"hands": 63, "open_rate": 0.0476, "call_rate": 0.2857, "fold_rate": 0.4762}}, "betsize_dist": {"small": 0.026, "medium": 0.4221, "pot": 0.1429, "over": 0.4091}, "showdown_cats": {"high card": 0.0667, "pair": 0.5111, "two pair": 0.2889, "trips": 0.0667, "straight": 0.0, "flush": 0.0667, "full house": 0.0}, "elo": 1532, "elo_sd": 39.5}, "gpt-oss-120b": {"hands": 250, "decisions": 505, "chips": -251.0, "bb_per_100": -50.2, "win_rate": 0.388, "wins": 97, "losses": 152, "ties": 1, "showdown_wins": 15, "fold_wins": 82, "vpip": 0.528, "pfr": 0.352, "agg_freq": 0.4973, "agg_factor": 3.068, "fold_to_bet": 0.4946, "allin_freq": 0.004, "avg_bet_xpot": 1.088, "avg_latency_s": 4.4, "avg_comp_tokens": 760, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 137, "check": 126, "call": 59, "bet": 102, "raise": 79, "all_in": 2}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 248, "agg_freq": 0.5705, "fold_share": 0.371, "mix": {"fold": 92, "check": 21, "call": 46, "bet": 12, "raise": 76, "all_in": 1}}, "flop": {"decisions": 135, "agg_freq": 0.5217, "fold_share": 0.1481, "mix": {"fold": 20, "check": 47, "call": 8, "bet": 57, "raise": 3, "all_in": 0}}, "turn": {"decisions": 80, "agg_freq": 0.3667, "fold_share": 0.25, "mix": {"fold": 20, "check": 33, "call": 5, "bet": 21, "raise": 0, "all_in": 1}}, "river": {"decisions": 42, "agg_freq": 0.3243, "fold_share": 0.119, "mix": {"fold": 5, "check": 25, "call": 0, "bet": 12, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.5306, "cbet_opps": 49, "fold_to_cbet": 0.0833, "facing_cbet": 12, "wtsd": 0.124, "wsd": 0.4839, "saw_showdown": 31, "won_showdown": 15, "pf_bucket": {"premium": {"hands": 9, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 24, "open_rate": 0.7917, "call_rate": 0.2083, "fold_rate": 0.0}, "playable": {"hands": 65, "open_rate": 0.6462, "call_rate": 0.2308, "fold_rate": 0.0923}, "marginal": {"hands": 55, "open_rate": 0.2182, "call_rate": 0.2727, "fold_rate": 0.3818}, "trash": {"hands": 79, "open_rate": 0.0759, "call_rate": 0.1139, "fold_rate": 0.6582}}, "betsize_dist": {"small": 0.0383, "medium": 0.377, "pot": 0.3279, "over": 0.2568}, "showdown_cats": {"high card": 0.129, "pair": 0.4516, "two pair": 0.1935, "trips": 0.129, "straight": 0.0, "flush": 0.0323, "full house": 0.0645}, "elo": 1434, "elo_sd": 43.1}, "kimi-k2p6": {"hands": 300, "decisions": 655, "chips": 275.0, "bb_per_100": 45.83, "win_rate": 0.5067, "wins": 152, "losses": 144, "ties": 4, "showdown_wins": 36, "fold_wins": 116, "vpip": 0.5333, "pfr": 0.3533, "agg_freq": 0.3866, "agg_factor": 1.971, "fold_to_bet": 0.3714, "allin_freq": 0.0015, "avg_bet_xpot": 0.973, "avg_latency_s": 83.8, "avg_comp_tokens": 8383, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 117, "check": 225, "call": 105, "bet": 114, "raise": 93, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 279, "agg_freq": 0.5464, "fold_share": 0.3047, "mix": {"fold": 85, "check": 29, "call": 59, "bet": 18, "raise": 88, "all_in": 0}}, "flop": {"decisions": 174, "agg_freq": 0.3567, "fold_share": 0.0977, "mix": {"fold": 17, "check": 81, "call": 20, "bet": 52, "raise": 4, "all_in": 0}}, "turn": {"decisions": 110, "agg_freq": 0.3495, "fold_share": 0.0636, "mix": {"fold": 7, "check": 55, "call": 12, "bet": 35, "raise": 1, "all_in": 0}}, "river": {"decisions": 92, "agg_freq": 0.119, "fold_share": 0.087, "mix": {"fold": 8, "check": 60, "call": 14, "bet": 9, "raise": 0, "all_in": 1}}}, "cbet_rate": 0.5333, "cbet_opps": 60, "fold_to_cbet": 0.0476, "facing_cbet": 21, "wtsd": 0.2233, "wsd": 0.5373, "saw_showdown": 67, "won_showdown": 36, "pf_bucket": {"premium": {"hands": 19, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 20, "open_rate": 0.9, "call_rate": 0.1, "fold_rate": 0.0}, "playable": {"hands": 70, "open_rate": 0.5286, "call_rate": 0.3857, "fold_rate": 0.0286}, "marginal": {"hands": 59, "open_rate": 0.3559, "call_rate": 0.2373, "fold_rate": 0.2373}, "trash": {"hands": 102, "open_rate": 0.1078, "call_rate": 0.1078, "fold_rate": 0.6373}}, "betsize_dist": {"small": 0.0048, "medium": 0.4519, "pot": 0.3077, "over": 0.2356}, "showdown_cats": {"high card": 0.1343, "pair": 0.4478, "two pair": 0.2985, "trips": 0.0448, "straight": 0.0299, "flush": 0.0149, "full house": 0.0299}, "elo": 1532, "elo_sd": 39.2}, "minimax-m2p7": {"hands": 250, "decisions": 584, "chips": -619.0, "bb_per_100": -123.8, "win_rate": 0.504, "wins": 126, "losses": 124, "ties": 0, "showdown_wins": 21, "fold_wins": 105, "vpip": 0.604, "pfr": 0.148, "agg_freq": 0.2962, "agg_factor": 0.898, "fold_to_bet": 0.2746, "allin_freq": 0.0, "avg_bet_xpot": 0.931, "avg_latency_s": 38.0, "avg_comp_tokens": 6769, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 81, "check": 188, "call": 166, "bet": 101, "raise": 48, "all_in": 0}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 223, "agg_freq": 0.2147, "fold_share": 0.2063, "mix": {"fold": 46, "check": 11, "call": 128, "bet": 4, "raise": 34, "all_in": 0}}, "flop": {"decisions": 165, "agg_freq": 0.3581, "fold_share": 0.103, "mix": {"fold": 17, "check": 73, "call": 22, "bet": 44, "raise": 9, "all_in": 0}}, "turn": {"decisions": 114, "agg_freq": 0.4, "fold_share": 0.1228, "mix": {"fold": 14, "check": 49, "call": 11, "bet": 37, "raise": 3, "all_in": 0}}, "river": {"decisions": 82, "agg_freq": 0.2308, "fold_share": 0.0488, "mix": {"fold": 4, "check": 55, "call": 5, "bet": 16, "raise": 2, "all_in": 0}}}, "cbet_rate": 0.7333, "cbet_opps": 15, "fold_to_cbet": 0.1071, "facing_cbet": 28, "wtsd": 0.256, "wsd": 0.3281, "saw_showdown": 64, "won_showdown": 21, "pf_bucket": {"premium": {"hands": 11, "open_rate": 0.8182, "call_rate": 0.1818, "fold_rate": 0.0}, "strong": {"hands": 21, "open_rate": 0.7619, "call_rate": 0.1905, "fold_rate": 0.0}, "playable": {"hands": 43, "open_rate": 0.2093, "call_rate": 0.6279, "fold_rate": 0.0465}, "marginal": {"hands": 46, "open_rate": 0.0435, "call_rate": 0.7609, "fold_rate": 0.1739}, "trash": {"hands": 81, "open_rate": 0.0123, "call_rate": 0.5679, "fold_rate": 0.3704}}, "betsize_dist": {"small": 0.0537, "medium": 0.5705, "pot": 0.2215, "over": 0.1544}, "showdown_cats": {"high card": 0.2031, "pair": 0.4531, "two pair": 0.2031, "trips": 0.0312, "straight": 0.0625, "flush": 0.0469, "full house": 0.0}, "elo": 1388, "elo_sd": 36.9}, "minimax-m3": {"hands": 300, "decisions": 743, "chips": -782.0, "bb_per_100": -130.33, "win_rate": 0.5067, "wins": 152, "losses": 147, "ties": 1, "showdown_wins": 32, "fold_wins": 120, "vpip": 0.58, "pfr": 0.3067, "agg_freq": 0.2989, "agg_factor": 1.138, "fold_to_bet": 0.2897, "allin_freq": 0.0013, "avg_bet_xpot": 1.326, "avg_latency_s": 20.4, "avg_comp_tokens": 2403, "invalid_actions": 0, "invalid_amounts": 2, "action_mix": {"fold": 104, "check": 281, "call": 167, "bet": 102, "raise": 88, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 291, "agg_freq": 0.4061, "fold_share": 0.2131, "mix": {"fold": 62, "check": 47, "call": 89, "bet": 5, "raise": 87, "all_in": 1}}, "flop": {"decisions": 201, "agg_freq": 0.2652, "fold_share": 0.0995, "mix": {"fold": 20, "check": 96, "call": 37, "bet": 47, "raise": 1, "all_in": 0}}, "turn": {"decisions": 147, "agg_freq": 0.2331, "fold_share": 0.0952, "mix": {"fold": 14, "check": 78, "call": 24, "bet": 31, "raise": 0, "all_in": 0}}, "river": {"decisions": 104, "agg_freq": 0.1979, "fold_share": 0.0769, "mix": {"fold": 8, "check": 60, "call": 17, "bet": 19, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.5556, "cbet_opps": 45, "fold_to_cbet": 0.0769, "facing_cbet": 26, "wtsd": 0.2533, "wsd": 0.4211, "saw_showdown": 76, "won_showdown": 32, "pf_bucket": {"premium": {"hands": 18, "open_rate": 0.9444, "call_rate": 0.0556, "fold_rate": 0.0}, "strong": {"hands": 21, "open_rate": 0.5238, "call_rate": 0.381, "fold_rate": 0.0}, "playable": {"hands": 80, "open_rate": 0.475, "call_rate": 0.2625, "fold_rate": 0.0}, "marginal": {"hands": 56, "open_rate": 0.3214, "call_rate": 0.3929, "fold_rate": 0.1429}, "trash": {"hands": 85, "open_rate": 0.0941, "call_rate": 0.3529, "fold_rate": 0.3647}}, "betsize_dist": {"small": 0.0262, "medium": 0.4398, "pot": 0.1623, "over": 0.3717}, "showdown_cats": {"high card": 0.1711, "pair": 0.5263, "two pair": 0.1579, "trips": 0.0132, "straight": 0.1184, "flush": 0.0132, "full house": 0.0}, "elo": 1398, "elo_sd": 35.6}, "qwen3p7-plus": {"hands": 150, "decisions": 365, "chips": 141.0, "bb_per_100": 47.0, "win_rate": 0.5067, "wins": 76, "losses": 71, "ties": 3, "showdown_wins": 25, "fold_wins": 51, "vpip": 0.6667, "pfr": 0.22, "agg_freq": 0.1897, "agg_factor": 0.552, "fold_to_bet": 0.2827, "allin_freq": 0.0027, "avg_bet_xpot": 1.176, "avg_latency_s": 10.7, "avg_comp_tokens": 1400, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 54, "check": 147, "call": 105, "bet": 26, "raise": 32, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 138, "agg_freq": 0.2957, "fold_share": 0.1667, "mix": {"fold": 23, "check": 6, "call": 75, "bet": 3, "raise": 31, "all_in": 0}}, "flop": {"decisions": 106, "agg_freq": 0.1667, "fold_share": 0.1509, "mix": {"fold": 16, "check": 60, "call": 15, "bet": 14, "raise": 1, "all_in": 0}}, "turn": {"decisions": 68, "agg_freq": 0.1034, "fold_share": 0.1471, "mix": {"fold": 10, "check": 42, "call": 10, "bet": 6, "raise": 0, "all_in": 0}}, "river": {"decisions": 53, "agg_freq": 0.0833, "fold_share": 0.0943, "mix": {"fold": 5, "check": 39, "call": 5, "bet": 3, "raise": 0, "all_in": 1}}}, "cbet_rate": 0.4286, "cbet_opps": 21, "fold_to_cbet": 0.1111, "facing_cbet": 18, "wtsd": 0.3, "wsd": 0.5556, "saw_showdown": 45, "won_showdown": 25, "pf_bucket": {"premium": {"hands": 19, "open_rate": 0.9474, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 10, "open_rate": 0.6, "call_rate": 0.4, "fold_rate": 0.0}, "playable": {"hands": 19, "open_rate": 0.3158, "call_rate": 0.5789, "fold_rate": 0.0526}, "marginal": {"hands": 33, "open_rate": 0.0606, "call_rate": 0.7879, "fold_rate": 0.1212}, "trash": {"hands": 43, "open_rate": 0.0233, "call_rate": 0.6047, "fold_rate": 0.3023}}, "betsize_dist": {"small": 0.0169, "medium": 0.339, "pot": 0.2203, "over": 0.4237}, "showdown_cats": {"high card": 0.1556, "pair": 0.5333, "two pair": 0.2, "trips": 0.0889, "straight": 0.0, "flush": 0.0, "full house": 0.0222}, "elo": 1563, "elo_sd": 64.6}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": -37.0, "gpt-oss-120b": 57.0, "kimi-k2p6": 145.0, "minimax-m2p7": 274.0, "minimax-m3": 192.0, "qwen3p7-plus": 243.0}, "glm-5p1": {"deepseek-v4-pro": 37.0, "gpt-oss-120b": 78.0, "kimi-k2p6": -50.0, "minimax-m2p7": 256.0, "minimax-m3": 41.0, "qwen3p7-plus": 0.0}, "gpt-oss-120b": {"deepseek-v4-pro": -57.0, "glm-5p1": -78.0, "kimi-k2p6": -86.0, "minimax-m2p7": -127.0, "minimax-m3": 97.0, "qwen3p7-plus": 0.0}, "kimi-k2p6": {"deepseek-v4-pro": -145.0, "glm-5p1": 50.0, "gpt-oss-120b": 86.0, "minimax-m2p7": 78.0, "minimax-m3": 317.0, "qwen3p7-plus": -111.0}, "minimax-m2p7": {"deepseek-v4-pro": -274.0, "glm-5p1": -256.0, "gpt-oss-120b": 127.0, "kimi-k2p6": -78.0, "minimax-m3": -138.0, "qwen3p7-plus": 0.0}, "minimax-m3": {"deepseek-v4-pro": -192.0, "glm-5p1": -41.0, "gpt-oss-120b": -97.0, "kimi-k2p6": -317.0, "minimax-m2p7": 138.0, "qwen3p7-plus": -273.0}, "qwen3p7-plus": {"deepseek-v4-pro": -243.0, "glm-5p1": 0.0, "gpt-oss-120b": 0.0, "kimi-k2p6": 111.0, "minimax-m2p7": 0.0, "minimax-m3": 273.0}}, "elo": {"deepseek-v4-pro": 1652, "glm-5p1": 1532, "gpt-oss-120b": 1434, "kimi-k2p6": 1532, "minimax-m2p7": 1388, "minimax-m3": 1398, "qwen3p7-plus": 1563}, "elo_ci": {"deepseek-v4-pro": {"sd": 47.5, "lo": 1561, "hi": 1740}, "glm-5p1": {"sd": 39.5, "lo": 1455, "hi": 1605}, "gpt-oss-120b": {"sd": 43.1, "lo": 1344, "hi": 1515}, "kimi-k2p6": {"sd": 39.2, "lo": 1465, "hi": 1607}, "minimax-m2p7": {"sd": 36.9, "lo": 1317, "hi": 1459}, "minimax-m3": {"sd": 35.6, "lo": 1321, "hi": 1475}, "qwen3p7-plus": {"sd": 64.6, "lo": 1428, "hi": 1688}}, "hands_per_game": 50, "num_games": 18};
 const MODELS = R.models, PM = R.per_model;
-const COLORS = ['#8f1d1d','#be185d','#1a7f37','#b45309','#6d28d9','#155e75'];
+const COLORS = ['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa','#22d3ee'];
 const col = i => COLORS[i % COLORS.length];
 // stable per-model color, used everywhere a chart is keyed by model
 const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
 const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
-Chart.defaults.color = '#6b6b6b'; Chart.defaults.borderColor = '#ddd8cf';
+
+Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';
+Chart.defaults.font.family='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const ACCENT='#8f1d1d';
+const PALETTE=['#8f1d1d','#b45309','#1a7f37','#1d4ed8','#6d28d9','#be185d','#0f766e'];
+
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, { type:'scatter',
@@ -227,7 +269,7 @@ new Chart(bbchart, { type:'bar',
 
 // action distribution (stacked %)
 const ACTS=['fold','check','call','bet','raise','all_in'];
-const ACOL={fold:'#6b6b6b',check:'#6b6b6b',call:'#0e7490',bet:'#b45309',raise:'#9a3412',all_in:'#b91c1c'};
+const ACOL={fold:'#6b7280',check:'#94a3b8',call:'#38bdf8',bet:'#fbbf24',raise:'#fb923c',all_in:'#f87171'};
 new Chart(actions, { type:'bar',
   data:{ labels:MODELS, datasets:ACTS.map(a=>({ label:a, backgroundColor:ACOL[a],
       data:MODELS.map(m=>{const mix=PM[m].action_mix;const tot=Object.values(mix).reduce((x,y)=>x+y,0)||1;
@@ -263,7 +305,7 @@ new Chart(streetAgg, { type:'line',
 
 // bet-sizing distribution (stacked %)
 const BS=['small','medium','pot','over'];
-const BSC={small:'#6b6b6b',medium:'#0e7490',pot:'#b45309',over:'#b91c1c'};
+const BSC={small:'#94a3b8',medium:'#38bdf8',pot:'#fbbf24',over:'#f87171'};
 new Chart(betsize, { type:'bar',
   data:{ labels:MODELS, datasets:BS.map(b=>({ label:b, backgroundColor:BSC[b],
       data:MODELS.map(m=>PM[m].betsize_dist[b]*100) })) },
@@ -283,7 +325,7 @@ new Chart(latVsWin, { type:'scatter',
 
 // made-hand mix at showdown (stacked %)
 const CATS=['high card','pair','two pair','trips','straight','flush','full house'];
-const CC=['#6b6b6b','#6b6b6b','#0e7490','#1a7f37','#b45309','#6d28d9','#be185d'];
+const CC=['#6b7280','#94a3b8','#38bdf8','#4ade80','#fbbf24','#a78bfa','#f472b6'];
 new Chart(madeHand, { type:'bar',
   data:{ labels:MODELS, datasets:CATS.map((c,j)=>({ label:c, backgroundColor:CC[j],
       data:MODELS.map(m=>(PM[m].showdown_cats[c]||0)*100) })) },

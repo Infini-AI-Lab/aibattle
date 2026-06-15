@@ -14,8 +14,8 @@ Two report shapes, picked by game structure:
     profit, mean/hand, win/push/loss split, plus blackjack-specific play signals
     (bust rate, double rate, natural rate) read from the per-hand episode files.
 
-Reads each game's coached run folder (runs/blackjack, runs/leduc_poker,
-runs/colonel_blotto, runs/othello — see GAMES[*]["dir"]); writes <name>_report.html
+Reads each game's run folder under runs/new_games_experiment/ (the 6-model rerun;
+see GAMES[*]["dir"]); writes <name>_report.html
 per game to reports/, plus a
 small new_games_index.json that analyze_board_tournament.render_index() reads to
 add the four games to the landing page and the cross-game Arena Score.
@@ -29,6 +29,9 @@ import math
 import os
 from collections import defaultdict
 
+from elo_util import bootstrap_elo, wld_from_records, gross_from_records
+from report_theme import BASE_CSS, CHART_SETUP
+
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
 # Per-game presentation + taxonomy. "dir" is the per-game run folder under runs/
@@ -37,25 +40,28 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # matching the vocabulary in analyze_board_tournament.GAME_TAXONOMY.
 GAMES = {
     "independent_blackjack": {
-        "dir": "blackjack", "kind": "dealer", "title": "🃏 Blackjack", "emoji": "🃏",
+        "dir": "new_games_experiment/independent_blackjack", "kind": "dealer", "title": "🃏 Blackjack", "emoji": "🃏",
         "href": "blackjack_report.html", "group": "imperfect",
         "badges": ["Imperfect info", "vs Dealer", "Stochastic"],
         "blurb": "Model vs the built-in dealer · hit/stand/double · scored by chip profit",
     },
     "leduc_poker": {
-        "dir": "leduc_poker", "kind": "versus", "title": "🃏 Leduc Poker", "emoji": "🃏",
+        "dir": "new_games_experiment/leduc_poker", "kind": "versus", "title": "🃏 Leduc Poker", "emoji": "🃏",
         "href": "leduc_report.html", "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Stochastic"],
         "blurb": "Imperfect-information poker · 6-card deck · round-robin, seat-swapped",
+        # Poker — score is chips, so rate by a chip-weighted Elo and rank by it
+        # (like Hold'em 1-Hand), not by win counts.
+        "elo_basis": "chips",
     },
     "repeated_colonel_blotto": {
-        "dir": "colonel_blotto", "kind": "versus", "title": "⚔️ Colonel Blotto", "emoji": "⚔️",
+        "dir": "new_games_experiment/repeated_colonel_blotto", "kind": "versus", "title": "⚔️ Colonel Blotto", "emoji": "⚔️",
         "href": "blotto_report.html", "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Simultaneous"],
         "blurb": "Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped",
     },
     "othello_lite_6x6": {
-        "dir": "othello", "kind": "versus", "title": "⚫ Othello 6×6", "emoji": "⚫",
+        "dir": "new_games_experiment/othello_lite_6x6", "kind": "versus", "title": "⚫ Othello 6×6", "emoji": "⚫",
         "href": "othello_report.html", "group": "perfect",
         "badges": ["Perfect info", "2P", "Deterministic"],
         "blurb": "Perfect-information board game · 6×6 board · round-robin, seat-swapped",
@@ -167,6 +173,10 @@ def analyze_versus(game: str, data: dict) -> dict:
                  "decisions": 0, "invalid": 0, "lengths": [], "latencies": [],
                  "first_moves": 0, "first_move_wins": 0} for m in models}
     h2h = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))  # [w,l,d] a vs b
+    elo_records = []  # per-game (a, b, result) for the win/loss Elo bootstrap
+    # chip-basis accumulators (used when the game scores in chips, e.g. Leduc)
+    gross = defaultdict(lambda: defaultdict(float))
+    chip_records = []  # per-game (a, b, chips_a, chips_b) for the chip Elo
     fp_games = fp_wins = 0
 
     for pair in data["pairs"]:
@@ -175,6 +185,10 @@ def analyze_versus(game: str, data: dict) -> dict:
             seat = e["seat_assignment"]
             winner = e.get("winner_name")
             length = e["length"]
+            name_seat = {v: k for k, v in seat.items()}
+            ca, cb = e["returns"][name_seat[a]], e["returns"][name_seat[b]]
+            gross[a][b] += max(ca, 0.0); gross[b][a] += max(cb, 0.0)
+            chip_records.append((a, b, ca, cb))
             for s_, nm in seat.items():
                 st = stats[nm]
                 st["games"] += 1
@@ -190,10 +204,13 @@ def analyze_versus(game: str, data: dict) -> dict:
 
             if winner == a:
                 h2h[a][b][0] += 1; h2h[b][a][1] += 1
+                elo_records.append((a, b, 1))
             elif winner == b:
                 h2h[b][a][0] += 1; h2h[a][b][1] += 1
+                elo_records.append((a, b, -1))
             else:
                 h2h[a][b][2] += 1; h2h[b][a][2] += 1
+                elo_records.append((a, b, 0))
 
             steps = e["steps"]
             if steps:
@@ -237,11 +254,23 @@ def analyze_versus(game: str, data: dict) -> dict:
             "len_hist": _histogram(st["lengths"], edges),
         }
 
-    _, elo = bradley_terry(models, h2h)
+    basis = GAMES[game].get("elo_basis", "wins")
+    if basis == "chips":
+        # Poker: rate by chips won (magnitude matters), like Hold'em 1-Hand.
+        chip_h2h = {a: {b: (gross[a][b], gross[b][a], 0.0)
+                        for b in models if b != a} for a in models}
+        _, elo = bradley_terry(models, chip_h2h)
+        elo_ci = bootstrap_elo(models, chip_records,
+                               lambda s: gross_from_records(models, s))
+    else:
+        _, elo = bradley_terry(models, h2h)
+        elo_ci = bootstrap_elo(models, elo_records,
+                               lambda s: wld_from_records(models, s))
     h2h_out = {a: {b: h2h[a][b] for b in models if b != a} for a in models}
     return {
         "game": game, "kind": "versus", "models": models, "per_model": out,
-        "h2h": h2h_out, "elo": elo, "len_bins": bin_labels,
+        "h2h": h2h_out, "elo": elo, "elo_ci": elo_ci, "elo_basis": basis,
+        "len_bins": bin_labels,
         "first_player_win_rate": round(fp_wins / max(fp_games, 1), 4),
         "num_games": sum(len(p["episodes"]) for p in data["pairs"]),
         "episodes_per_pair": data.get("episodes_per_pair"),
@@ -249,9 +278,16 @@ def analyze_versus(game: str, data: dict) -> dict:
 
 
 def analyze_dealer(game: str, data: dict) -> dict:
-    models = data["models"]
-    out = {}
     run_dir = os.path.join("runs", GAMES[game]["dir"])
+    # The per-game data.json roster can lag the episode dirs (e.g. a model added
+    # after the aggregate was last written). Trust the dirs on disk as the source
+    # of truth: keep data["models"] order, then append any extra dealer opponents.
+    discovered = [os.path.basename(d)[: -len("__vs__dealer")]
+                  for d in sorted(glob.glob(os.path.join(run_dir, "*__vs__dealer")))
+                  if os.path.isdir(d)]
+    models = list(data["models"]) + [m for m in discovered
+                                     if m not in data["models"]]
+    out = {}
     for m in models:
         eps = sorted(glob.glob(os.path.join(run_dir, f"{m}__vs__dealer", "ep*.json")))
         hands = wins = losses = pushes = busts = doubles = naturals = 0
@@ -305,44 +341,37 @@ def analyze_dealer(game: str, data: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-_HEAD_CSS = """
-  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
-  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
-  h1 { font-size:25px; } h2 { font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
-  h3 { font-size:14px; color:#9aa3b5; }
-  .sub { color:#8b93a7; }
-  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
-  .kpi { background:#171a23; border:1px solid #232838; border-radius:10px; padding:12px 16px; }
-  .kpi .v { font-size:22px; font-weight:700; color:#cdd6f4; }
-  .kpi .l { font-size:11px; color:#8b93a7; text-transform:uppercase; letter-spacing:.04em; }
-  table { border-collapse:collapse; width:100%; font-size:13px; }
-  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
-  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
-  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
-  .small { font-size:10px; color:#8b93a7; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
-  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
-  canvas { max-height:300px; }
-  @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
-"""
+_HEAD_CSS = BASE_CSS
 
 
 def render_versus(rep: dict) -> str:
     cfg = GAMES[rep["game"]]
+    emoji, name = cfg["title"].split(" ", 1)  # single leading emoji, Hold'em-style header
     payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
     elo = rep["elo"]
+    elo_ci = rep.get("elo_ci", {})
     ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
 
+    def _elo_cell(m):
+        if elo[m] is None:
+            return "—"
+        sd = (elo_ci.get(m) or {}).get("sd")
+        return f"{elo[m]}<div class='small'>±{sd:.0f}</div>" if sd is not None else str(elo[m])
+
+    # Chip-scored games (poker) rank by Elo; others by net result per game.
+    if rep.get("elo_basis") == "chips":
+        order = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
+    else:
+        order = sorted(models, key=lambda x: pm[x]["net_per_game"], reverse=True)
     rows = ""
-    for i, m in enumerate(sorted(models, key=lambda x: pm[x]["net_per_game"],
-                                 reverse=True), 1):
+    for i, m in enumerate(order, 1):
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
-          <td>{_elo_txt(elo[m])}</td>
+          <td>{_elo_cell(m)}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
           <td>{s['first_move_win_rate']*100:.0f}%</td>
@@ -362,6 +391,13 @@ def render_versus(rep: dict) -> str:
                 hh += f"<td class='{cls}'>{w}-{l}<div class='small'>{d}d</div></td>"
         hh += "</tr>"
 
+    if rep.get("elo_basis") == "chips":
+        elo_desc = ("<b>Elo</b> is a chip-weighted Bradley-Terry rating (field mean 1500) — fed the "
+                    "chips won in each matchup rather than win counts, so it rewards <i>how much</i> "
+                    "you win, like Hold'em. <b>The leaderboard is ranked by Elo.</b>")
+    else:
+        elo_desc = "Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500)."
+
     fpw = rep["first_player_win_rate"] * 100
     deals = (rep["episodes_per_pair"] or 0) // 2
     return f"""<!DOCTYPE html>
@@ -372,7 +408,7 @@ def render_versus(rep: dict) -> str:
 {NAV_HEAD}
 <style>{_HEAD_CSS}</style></head>
 <body><div class="wrap">
-  <h1>🎲 AI Battle Arena — {cfg['title']}</h1>
+  <h1>{emoji} AI Battle Arena — {name}</h1>
   <div class="sub">{cfg['blurb']} · {rep['num_games']} games</div>
 
   <div class="kpis">
@@ -382,16 +418,16 @@ def render_versus(rep: dict) -> str:
     <div class="kpi"><div class="v">{deals}</div><div class="l">deals/pair (seat-swapped)</div></div>
   </div>
 
-  <h2>Leaderboard</h2>
+  <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
         <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     {rows}
   </table>
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
-    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
-    net/game is the average game payoff (+1 win / −1 loss / 0 draw). Seats are swapped within every
-    pair, so first-mover advantage is balanced across the field.</div>
+  <div class="note">{elo_desc} ± is one bootstrap SD (resampling games 300×); ratings within ±1
+    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
+    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
+    every pair, so first-mover advantage is balanced across the field.</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
@@ -402,20 +438,38 @@ def render_versus(rep: dict) -> str:
     <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
   </div>
 
-  <h2>Head-to-head (row wins–losses vs column)</h2>
+  <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
   <table class='h2h'>{hh}</table>
 
 <script>
 const R = {payload};
-const pm=R.per_model, M=R.models, COLORS=['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa'];
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
+const pm=R.per_model, M=R.models;
+{CHART_SETUP}
+const COLORS=PALETTE;
 const eloRanked=[...M].filter(m=>R.elo[m]!=null).sort((a,b)=>R.elo[b]-R.elo[a]);
-
+const ELO_CI = R.elo_ci || {{}};
+// Horizontal ±1-SD whisker over each Elo bar (bootstrap uncertainty).
+const eloWhiskers = {{ id:'eloWhiskers', afterDatasetsDraw(c) {{
+  const {{ctx, scales:{{x, y}}}} = c;
+  ctx.save(); ctx.strokeStyle='#1c1c1c'; ctx.lineWidth=1.5;
+  eloRanked.forEach((m, i) => {{
+    const ci = ELO_CI[m]; if (!ci || ci.sd == null) return;
+    const yc = y.getPixelForValue(i), cap = 5;
+    const x1 = x.getPixelForValue(R.elo[m]-ci.sd), x2 = x.getPixelForValue(R.elo[m]+ci.sd);
+    ctx.beginPath();
+    ctx.moveTo(x1, yc); ctx.lineTo(x2, yc);
+    ctx.moveTo(x1, yc-cap); ctx.lineTo(x1, yc+cap);
+    ctx.moveTo(x2, yc-cap); ctx.lineTo(x2, yc+cap);
+    ctx.stroke();
+  }});
+  ctx.restore();
+}} }};
 new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:'#a78bfa',
+  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:ACCENT,
     data:eloRanked.map(m=>R.elo[m])}}]}},
-  options:{{ indexAxis:'y', scales:{{x:{{min:eloRanked.length?Math.min(...eloRanked.map(m=>R.elo[m]))-40:0}}}},
-    plugins:{{legend:{{display:false}}}} }} }});
+  options:{{ indexAxis:'y',
+    scales:{{x:{{min:eloRanked.length?Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20:0}}}},
+    plugins:{{legend:{{display:false}}}} }}, plugins:[eloWhiskers] }});
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
   data:{{ labels:M, datasets:[
@@ -441,6 +495,7 @@ new Chart(document.getElementById('len'), {{ type:'bar',
 
 def render_dealer(rep: dict) -> str:
     cfg = GAMES[rep["game"]]
+    emoji, name = cfg["title"].split(" ", 1)  # single leading emoji, Hold'em-style header
     payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
@@ -471,7 +526,7 @@ def render_dealer(rep: dict) -> str:
 {NAV_HEAD}
 <style>{_HEAD_CSS}</style></head>
 <body><div class="wrap">
-  <h1>🎲 AI Battle Arena — {cfg['title']}</h1>
+  <h1>{emoji} AI Battle Arena — {name}</h1>
   <div class="sub">{cfg['blurb']} · {rep['total_hands']} hands total</div>
 
   <div class="kpis">
@@ -480,7 +535,7 @@ def render_dealer(rep: dict) -> str:
     <div class="kpi"><div class="v">{rep['total_hands']}</div><div class="l">hands played</div></div>
   </div>
 
-  <h2>Leaderboard</h2>
+  <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>profit</th><th>mean/hand</th>
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
@@ -504,7 +559,7 @@ def render_dealer(rep: dict) -> str:
 <script>
 const R = {payload};
 const pm=R.per_model, M=R.models;
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
+{CHART_SETUP}
 const ranked=[...M].sort((a,b)=>pm[b].profit-pm[a].profit);
 
 new Chart(document.getElementById('profit'), {{ type:'bar',
