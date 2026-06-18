@@ -2,50 +2,72 @@
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>
 <style>
-  :root { color-scheme: dark; }
-  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
-          background: #0f1117; color: #e6e6e6; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 28px 80px; }
-  h1 { font-size: 26px; margin: 0 0 4px; }
-  h2 { font-size: 18px; margin: 38px 0 12px; border-bottom: 1px solid #2a2f3a;
-        padding-bottom: 6px; }
-  .sub { color: #8b93a7; margin-bottom: 8px; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th, td { padding: 7px 9px; text-align: center; border-bottom: 1px solid #20242e; }
-  th { color: #9aa3b5; font-weight: 600; }
-  td.model, th.model { text-align: left; font-weight: 600; color: #cdd6f4; }
-  .pos { color: #4ade80; } .neg { color: #f87171; }
-  .diag { color: #3a3f4b; }
-  .tag { background: #2a2f3a; color: #a5b4fc; border-radius: 10px; padding: 1px 8px;
-          font-size: 11px; margin-left: 3px; }
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .card { background: #161a22; border: 1px solid #232838; border-radius: 12px;
-           padding: 16px; }
-  canvas { max-height: 340px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-  .note { color: #8b93a7; font-size: 12px; margin-top: 6px; }
-  .small { color: #8b93a7; font-size: 11px; }
+  /* Terminal theme: paper-white background, dark-red accent, monospace. */
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+    --pos:#1a7f37; --neg:#b91c1c; --diag:#c9c2b6; }
+  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    margin:0; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+  a { color:var(--red); }
+  h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
+  h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
+    vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  h1 + .sub { margin-bottom:30px; }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:30px; }
+  h2 { font-size:15px; margin:36px 0 10px; font-weight:700; }
+  h2::before { content:"## "; color:var(--red); }
+  h3 { font-size:14px; color:var(--fg); margin:0 0 6px; }
+  h3::before { content:"### "; color:var(--red); }
+  .note { color:var(--dim); font-size:12px; margin:6px 0 14px; }
+  .small { font-size:10px; color:var(--dim); font-weight:400; }
+
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:7px 10px; text-align:center; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; }
+  td.model, th.model { text-align:left; font-weight:700; color:var(--fg); }
+  .pos { color:var(--pos); } .neg { color:var(--neg); } .diag { color:var(--diag); }
+  .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
+    border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px;
+    white-space:nowrap; }
+
+  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
+  .kpi .v { font-size:22px; font-weight:700; color:var(--fg); }
+  .kpi .l { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
+  canvas { max-height:340px; }
+  .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Replay button: the one place a non-token link color is used (indigo),
+     per the terminal-ui SKILL. Sits directly under the subtitle. */
+  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
+    border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
+
   td.bucket { font-weight: 600; }
-  .replaybtn { display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }
-  .replaybtn:hover { border-color:#60a5fa; color:#fff; }
-  @media (max-width: 760px) { .grid2, .cards { grid-template-columns: 1fr; } }
 </style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode</h1>
-  <div class="sub">heads-up · each hand scored independently (bb/100) · 6 games · 100 hands each · 4 models · round-robin</div>
-  
+  <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · 6 games · 100 hands each · 4 models · round-robin</div>
+  <a class="replaybtn" href="holdem_replay.html">▶ watch hand replays</a>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>style</th><th>chips</th><th>bb/100</th>
+    <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     <tr>
           <td>1</td><td class='model'>gpt-5.5</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1519<div class='small'>±35</div></b></td>
           <td class='pos'>+374</td>
           <td class='pos'>+62.3</td>
           <td>60%</td>
@@ -60,6 +82,7 @@
         </tr><tr>
           <td>2</td><td class='model'>gpt-5.4</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1501<div class='small'>±35</div></b></td>
           <td class='neg'>-15</td>
           <td class='neg'>-2.5</td>
           <td>56%</td>
@@ -74,6 +97,7 @@
         </tr><tr>
           <td>3</td><td class='model'>claude-sonnet-4.6</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1490<div class='small'>±39</div></b></td>
           <td class='neg'>-143</td>
           <td class='neg'>-23.8</td>
           <td>39%</td>
@@ -88,6 +112,7 @@
         </tr><tr>
           <td>4</td><td class='model'>claude-opus-4.8</td>
           <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td><b>1490<div class='small'>±37</div></b></td>
           <td class='neg'>-216</td>
           <td class='neg'>-36.0</td>
           <td>40%</td>
@@ -101,7 +126,12 @@
           <td>33</td>
         </tr>
   </table>
-  <div class="note">VPIP = how often it voluntarily plays a hand (looseness). PFR = preflop raise %.
+  <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
+    fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
+    win and adjusts for opponent strength — the fair comparison when models faced different opponents.
+    ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
+    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
+    (looseness). PFR = preflop raise %.
     aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
     think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
@@ -142,7 +172,7 @@
     bucket. A model that reads its cards opens premium ≫ trash.</div>
   <table>
     <tr><th class='model'>bucket</th><th>claude-opus-4.8</th><th>claude-sonnet-4.6</th><th>gpt-5.5</th><th>gpt-5.4</th></tr>
-    <tr><th class='model'>premium</th><td style='background:rgba(96,165,250,1.00);color:#0f1117'>100%<div class='small' style='color:#27324a'>n=13</div></td><td style='background:rgba(96,165,250,1.00);color:#0f1117'>100%<div class='small' style='color:#27324a'>n=6</div></td><td style='background:rgba(96,165,250,1.00);color:#0f1117'>100%<div class='small' style='color:#27324a'>n=12</div></td><td style='background:rgba(96,165,250,1.00);color:#0f1117'>100%<div class='small' style='color:#27324a'>n=15</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(96,165,250,0.74);color:#0f1117'>74%<div class='small' style='color:#27324a'>n=35</div></td><td style='background:rgba(96,165,250,0.73);color:#0f1117'>73%<div class='small' style='color:#27324a'>n=41</div></td><td style='background:rgba(96,165,250,0.89);color:#0f1117'>89%<div class='small' style='color:#27324a'>n=46</div></td><td style='background:rgba(96,165,250,0.88);color:#0f1117'>88%<div class='small' style='color:#27324a'>n=33</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(96,165,250,0.45);color:#e6e6e6'>45%<div class='small' style='color:#8b93a7'>n=76</div></td><td style='background:rgba(96,165,250,0.21);color:#e6e6e6'>21%<div class='small' style='color:#8b93a7'>n=61</div></td><td style='background:rgba(96,165,250,0.64);color:#0f1117'>64%<div class='small' style='color:#27324a'>n=66</div></td><td style='background:rgba(96,165,250,0.74);color:#0f1117'>74%<div class='small' style='color:#27324a'>n=68</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(96,165,250,0.06);color:#e6e6e6'>6%<div class='small' style='color:#8b93a7'>n=77</div></td><td style='background:rgba(96,165,250,0.04);color:#e6e6e6'>4%<div class='small' style='color:#8b93a7'>n=84</div></td><td style='background:rgba(96,165,250,0.30);color:#e6e6e6'>30%<div class='small' style='color:#8b93a7'>n=77</div></td><td style='background:rgba(96,165,250,0.48);color:#e6e6e6'>48%<div class='small' style='color:#8b93a7'>n=79</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(96,165,250,0.00);color:#e6e6e6'>0%<div class='small' style='color:#8b93a7'>n=90</div></td><td style='background:rgba(96,165,250,0.00);color:#e6e6e6'>0%<div class='small' style='color:#8b93a7'>n=103</div></td><td style='background:rgba(96,165,250,0.01);color:#e6e6e6'>1%<div class='small' style='color:#8b93a7'>n=86</div></td><td style='background:rgba(96,165,250,0.23);color:#e6e6e6'>23%<div class='small' style='color:#8b93a7'>n=97</div></td></tr>
+    <tr><th class='model'>premium</th><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=13</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=6</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=12</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=15</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(143,29,29,0.74);color:#fbfbf8'>74%<div class='small' style='color:#f1d9d9'>n=35</div></td><td style='background:rgba(143,29,29,0.73);color:#fbfbf8'>73%<div class='small' style='color:#f1d9d9'>n=41</div></td><td style='background:rgba(143,29,29,0.89);color:#fbfbf8'>89%<div class='small' style='color:#f1d9d9'>n=46</div></td><td style='background:rgba(143,29,29,0.88);color:#fbfbf8'>88%<div class='small' style='color:#f1d9d9'>n=33</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(143,29,29,0.45);color:#1c1c1c'>45%<div class='small' style='color:#6b6b6b'>n=76</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=61</div></td><td style='background:rgba(143,29,29,0.64);color:#fbfbf8'>64%<div class='small' style='color:#f1d9d9'>n=66</div></td><td style='background:rgba(143,29,29,0.74);color:#fbfbf8'>74%<div class='small' style='color:#f1d9d9'>n=68</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=77</div></td><td style='background:rgba(143,29,29,0.04);color:#1c1c1c'>4%<div class='small' style='color:#6b6b6b'>n=84</div></td><td style='background:rgba(143,29,29,0.30);color:#1c1c1c'>30%<div class='small' style='color:#6b6b6b'>n=77</div></td><td style='background:rgba(143,29,29,0.48);color:#1c1c1c'>48%<div class='small' style='color:#6b6b6b'>n=79</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=90</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=103</div></td><td style='background:rgba(143,29,29,0.01);color:#1c1c1c'>1%<div class='small' style='color:#6b6b6b'>n=86</div></td><td style='background:rgba(143,29,29,0.23);color:#1c1c1c'>23%<div class='small' style='color:#6b6b6b'>n=97</div></td></tr>
   </table>
 
   <div class="grid2">
@@ -164,7 +194,7 @@
   <table class="h2h"><tr><th></th><th>claude-opus-4.8</th><th>claude-sonnet-4.6</th><th>gpt-5.5</th><th>gpt-5.4</th></tr><tr><th class='model'>claude-opus-4.8</th><td class='diag'>—</td><td class='pos' style='--v:46.0'>+46</td><td class='neg' style='--v:-416.0'>-416</td><td class='pos' style='--v:154.0'>+154</td></tr><tr><th class='model'>claude-sonnet-4.6</th><td class='neg' style='--v:-46.0'>-46</td><td class='diag'>—</td><td class='pos' style='--v:159.0'>+159</td><td class='neg' style='--v:-256.0'>-256</td></tr><tr><th class='model'>gpt-5.5</th><td class='pos' style='--v:416.0'>+416</td><td class='neg' style='--v:-159.0'>-159</td><td class='diag'>—</td><td class='pos' style='--v:117.0'>+117</td></tr><tr><th class='model'>gpt-5.4</th><td class='neg' style='--v:-154.0'>-154</td><td class='pos' style='--v:256.0'>+256</td><td class='neg' style='--v:-117.0'>-117</td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"models": ["claude-opus-4.8", "claude-sonnet-4.6", "gpt-5.5", "gpt-5.4"], "per_model": {"claude-opus-4.8": {"hands": 300, "decisions": 928, "chips": -216.0, "bb_per_100": -36.0, "win_rate": 0.4033, "wins": 121, "losses": 170, "ties": 9, "showdown_wins": 43, "fold_wins": 78, "vpip": 0.7067, "pfr": 0.26, "agg_freq": 0.2965, "agg_factor": 0.936, "fold_to_bet": 0.2895, "allin_freq": 0.0011, "avg_bet_xpot": 0.965, "avg_latency_s": 34.4, "avg_comp_tokens": 33, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 132, "check": 309, "call": 251, "bet": 163, "raise": 72, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 329, "agg_freq": 0.2811, "fold_share": 0.1459, "mix": {"fold": 48, "check": 49, "call": 153, "bet": 17, "raise": 62, "all_in": 0}}, "flop": {"decisions": 285, "agg_freq": 0.373, "fold_share": 0.1158, "mix": {"fold": 33, "check": 109, "call": 49, "bet": 89, "raise": 4, "all_in": 1}}, "turn": {"decisions": 188, "agg_freq": 0.2662, "fold_share": 0.1809, "mix": {"fold": 34, "check": 77, "call": 36, "bet": 37, "raise": 4, "all_in": 0}}, "river": {"decisions": 126, "agg_freq": 0.2018, "fold_share": 0.1349, "mix": {"fold": 17, "check": 74, "call": 13, "bet": 20, "raise": 2, "all_in": 0}}}, "cbet_rate": 0.7049, "cbet_opps": 61, "fold_to_cbet": 0.2105, "facing_cbet": 38, "wtsd": 0.3, "wsd": 0.4778, "saw_showdown": 90, "won_showdown": 43, "pf_bucket": {"premium": {"hands": 13, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 35, "open_rate": 0.7429, "call_rate": 0.2, "fold_rate": 0.0}, "playable": {"hands": 76, "open_rate": 0.4474, "call_rate": 0.4737, "fold_rate": 0.0}, "marginal": {"hands": 77, "open_rate": 0.0649, "call_rate": 0.6364, "fold_rate": 0.0649}, "trash": {"hands": 90, "open_rate": 0.0, "call_rate": 0.4667, "fold_rate": 0.2778}}, "betsize_dist": {"small": 0.0254, "medium": 0.6017, "pot": 0.1059, "over": 0.2669}, "showdown_cats": {"high card": 0.1444, "pair": 0.4444, "two pair": 0.2333, "trips": 0.0667, "straight": 0.0, "flush": 0.0556, "full house": 0.0333}}, "claude-sonnet-4.6": {"hands": 300, "decisions": 897, "chips": -143.0, "bb_per_100": -23.83, "win_rate": 0.3933, "wins": 118, "losses": 174, "ties": 8, "showdown_wins": 31, "fold_wins": 87, "vpip": 0.6867, "pfr": 0.1733, "agg_freq": 0.2855, "agg_factor": 0.841, "fold_to_bet": 0.3179, "allin_freq": 0.0056, "avg_bet_xpot": 0.96, "avg_latency_s": 34.4, "avg_comp_tokens": 90, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 137, "check": 291, "call": 252, "bet": 173, "raise": 39, "all_in": 5}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 326, "agg_freq": 0.1884, "fold_share": 0.1534, "mix": {"fold": 50, "check": 47, "call": 177, "bet": 19, "raise": 33, "all_in": 0}}, "flop": {"decisions": 292, "agg_freq": 0.3347, "fold_share": 0.161, "mix": {"fold": 47, "check": 113, "call": 50, "bet": 77, "raise": 4, "all_in": 1}}, "turn": {"decisions": 170, "agg_freq": 0.3688, "fold_share": 0.1706, "mix": {"fold": 29, "check": 73, "call": 16, "bet": 48, "raise": 2, "all_in": 2}}, "river": {"decisions": 109, "agg_freq": 0.3163, "fold_share": 0.1009, "mix": {"fold": 11, "check": 58, "call": 9, "bet": 29, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.6471, "cbet_opps": 34, "fold_to_cbet": 0.1786, "facing_cbet": 56, "wtsd": 0.2533, "wsd": 0.4079, "saw_showdown": 76, "won_showdown": 31, "pf_bucket": {"premium": {"hands": 6, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 41, "open_rate": 0.7317, "call_rate": 0.2439, "fold_rate": 0.0}, "playable": {"hands": 61, "open_rate": 0.2131, "call_rate": 0.6885, "fold_rate": 0.0}, "marginal": {"hands": 84, "open_rate": 0.0357, "call_rate": 0.7619, "fold_rate": 0.0238}, "trash": {"hands": 103, "open_rate": 0.0, "call_rate": 0.3689, "fold_rate": 0.3883}}, "betsize_dist": {"small": 0.0046, "medium": 0.7097, "pot": 0.1014, "over": 0.1843}, "showdown_cats": {"high card": 0.1316, "pair": 0.5, "two pair": 0.25, "trips": 0.0132, "straight": 0.0395, "flush": 0.0395, "full house": 0.0}}, "gpt-5.5": {"hands": 300, "decisions": 896, "chips": 374.0, "bb_per_100": 62.33, "win_rate": 0.6, "wins": 180, "losses": 117, "ties": 3, "showdown_wins": 37, "fold_wins": 143, "vpip": 0.7767, "pfr": 0.3967, "agg_freq": 0.4167, "agg_factor": 1.398, "fold_to_bet": 0.1891, "allin_freq": 0.0112, "avg_bet_xpot": 1.035, "avg_latency_s": 37.3, "avg_comp_tokens": 238, "invalid_actions": 1, "invalid_amounts": 0, "action_mix": {"fold": 80, "check": 240, "call": 236, "bet": 227, "raise": 103, "all_in": 10}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 326, "agg_freq": 0.4, "fold_share": 0.0798, "mix": {"fold": 26, "check": 42, "call": 138, "bet": 27, "raise": 92, "all_in": 1}}, "flop": {"decisions": 289, "agg_freq": 0.4118, "fold_share": 0.1176, "mix": {"fold": 34, "check": 91, "call": 59, "bet": 97, "raise": 6, "all_in": 2}}, "turn": {"decisions": 174, "agg_freq": 0.4591, "fold_share": 0.0862, "mix": {"fold": 15, "check": 60, "call": 26, "bet": 68, "raise": 3, "all_in": 2}}, "river": {"decisions": 107, "agg_freq": 0.4118, "fold_share": 0.0467, "mix": {"fold": 5, "check": 47, "call": 13, "bet": 35, "raise": 2, "all_in": 5}}}, "cbet_rate": 0.7792, "cbet_opps": 77, "fold_to_cbet": 0.1636, "facing_cbet": 55, "wtsd": 0.2567, "wsd": 0.4805, "saw_showdown": 77, "won_showdown": 37, "pf_bucket": {"premium": {"hands": 12, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 46, "open_rate": 0.8913, "call_rate": 0.1087, "fold_rate": 0.0}, "playable": {"hands": 66, "open_rate": 0.6364, "call_rate": 0.303, "fold_rate": 0.0}, "marginal": {"hands": 77, "open_rate": 0.2987, "call_rate": 0.4935, "fold_rate": 0.013}, "trash": {"hands": 86, "open_rate": 0.0116, "call_rate": 0.593, "fold_rate": 0.1279}}, "betsize_dist": {"small": 0.1029, "medium": 0.4647, "pot": 0.0853, "over": 0.3471}, "showdown_cats": {"high card": 0.0779, "pair": 0.3636, "two pair": 0.4026, "trips": 0.0519, "straight": 0.013, "flush": 0.039, "full house": 0.0519}}, "gpt-5.4": {"hands": 300, "decisions": 930, "chips": -15.0, "bb_per_100": -2.5, "win_rate": 0.5633, "wins": 169, "losses": 127, "ties": 4, "showdown_wins": 41, "fold_wins": 128, "vpip": 0.7867, "pfr": 0.5133, "agg_freq": 0.4021, "agg_factor": 1.615, "fold_to_bet": 0.2062, "allin_freq": 0.0032, "avg_bet_xpot": 0.941, "avg_latency_s": 38.6, "avg_comp_tokens": 649, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 87, "check": 296, "call": 208, "bet": 211, "raise": 125, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 312, "agg_freq": 0.5203, "fold_share": 0.0513, "mix": {"fold": 16, "check": 51, "call": 91, "bet": 36, "raise": 118, "all_in": 0}}, "flop": {"decisions": 294, "agg_freq": 0.3925, "fold_share": 0.0986, "mix": {"fold": 29, "check": 101, "call": 60, "bet": 98, "raise": 5, "all_in": 1}}, "turn": {"decisions": 195, "agg_freq": 0.3584, "fold_share": 0.1128, "mix": {"fold": 22, "check": 75, "call": 36, "bet": 60, "raise": 2, "all_in": 0}}, "river": {"decisions": 129, "agg_freq": 0.1743, "fold_share": 0.155, "mix": {"fold": 20, "check": 69, "call": 21, "bet": 17, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.7143, "cbet_opps": 98, "fold_to_cbet": 0.1087, "facing_cbet": 46, "wtsd": 0.2833, "wsd": 0.4824, "saw_showdown": 85, "won_showdown": 41, "pf_bucket": {"premium": {"hands": 15, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 33, "open_rate": 0.8788, "call_rate": 0.1212, "fold_rate": 0.0}, "playable": {"hands": 68, "open_rate": 0.7353, "call_rate": 0.2206, "fold_rate": 0.0}, "marginal": {"hands": 79, "open_rate": 0.481, "call_rate": 0.2911, "fold_rate": 0.0127}, "trash": {"hands": 97, "open_rate": 0.2268, "call_rate": 0.4124, "fold_rate": 0.0412}}, "betsize_dist": {"small": 0.174, "medium": 0.3451, "pot": 0.2094, "over": 0.2714}, "showdown_cats": {"high card": 0.1059, "pair": 0.3647, "two pair": 0.3059, "trips": 0.0706, "straight": 0.0471, "flush": 0.0471, "full house": 0.0588}}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": 46.0, "gpt-5.5": -416.0, "gpt-5.4": 154.0}, "claude-sonnet-4.6": {"claude-opus-4.8": -46.0, "gpt-5.5": 159.0, "gpt-5.4": -256.0}, "gpt-5.5": {"claude-opus-4.8": 416.0, "claude-sonnet-4.6": -159.0, "gpt-5.4": 117.0}, "gpt-5.4": {"claude-opus-4.8": -154.0, "claude-sonnet-4.6": 256.0, "gpt-5.5": -117.0}}, "hands_per_game": 100, "num_games": 6};
+const R = {"models": ["claude-opus-4.8", "claude-sonnet-4.6", "gpt-5.5", "gpt-5.4"], "per_model": {"claude-opus-4.8": {"hands": 300, "decisions": 928, "chips": -216.0, "bb_per_100": -36.0, "win_rate": 0.4033, "wins": 121, "losses": 170, "ties": 9, "showdown_wins": 43, "fold_wins": 78, "vpip": 0.7067, "pfr": 0.26, "agg_freq": 0.2965, "agg_factor": 0.936, "fold_to_bet": 0.2895, "allin_freq": 0.0011, "avg_bet_xpot": 0.965, "avg_latency_s": 34.4, "avg_comp_tokens": 33, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 132, "check": 309, "call": 251, "bet": 163, "raise": 72, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 329, "agg_freq": 0.2811, "fold_share": 0.1459, "mix": {"fold": 48, "check": 49, "call": 153, "bet": 17, "raise": 62, "all_in": 0}}, "flop": {"decisions": 285, "agg_freq": 0.373, "fold_share": 0.1158, "mix": {"fold": 33, "check": 109, "call": 49, "bet": 89, "raise": 4, "all_in": 1}}, "turn": {"decisions": 188, "agg_freq": 0.2662, "fold_share": 0.1809, "mix": {"fold": 34, "check": 77, "call": 36, "bet": 37, "raise": 4, "all_in": 0}}, "river": {"decisions": 126, "agg_freq": 0.2018, "fold_share": 0.1349, "mix": {"fold": 17, "check": 74, "call": 13, "bet": 20, "raise": 2, "all_in": 0}}}, "cbet_rate": 0.7049, "cbet_opps": 61, "fold_to_cbet": 0.2105, "facing_cbet": 38, "wtsd": 0.3, "wsd": 0.4778, "saw_showdown": 90, "won_showdown": 43, "pf_bucket": {"premium": {"hands": 13, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 35, "open_rate": 0.7429, "call_rate": 0.2, "fold_rate": 0.0}, "playable": {"hands": 76, "open_rate": 0.4474, "call_rate": 0.4737, "fold_rate": 0.0}, "marginal": {"hands": 77, "open_rate": 0.0649, "call_rate": 0.6364, "fold_rate": 0.0649}, "trash": {"hands": 90, "open_rate": 0.0, "call_rate": 0.4667, "fold_rate": 0.2778}}, "betsize_dist": {"small": 0.0254, "medium": 0.6017, "pot": 0.1059, "over": 0.2669}, "showdown_cats": {"high card": 0.1444, "pair": 0.4444, "two pair": 0.2333, "trips": 0.0667, "straight": 0.0, "flush": 0.0556, "full house": 0.0333}, "elo": 1490, "elo_sd": 37.0}, "claude-sonnet-4.6": {"hands": 300, "decisions": 897, "chips": -143.0, "bb_per_100": -23.83, "win_rate": 0.3933, "wins": 118, "losses": 174, "ties": 8, "showdown_wins": 31, "fold_wins": 87, "vpip": 0.6867, "pfr": 0.1733, "agg_freq": 0.2855, "agg_factor": 0.841, "fold_to_bet": 0.3179, "allin_freq": 0.0056, "avg_bet_xpot": 0.96, "avg_latency_s": 34.4, "avg_comp_tokens": 90, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 137, "check": 291, "call": 252, "bet": 173, "raise": 39, "all_in": 5}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 326, "agg_freq": 0.1884, "fold_share": 0.1534, "mix": {"fold": 50, "check": 47, "call": 177, "bet": 19, "raise": 33, "all_in": 0}}, "flop": {"decisions": 292, "agg_freq": 0.3347, "fold_share": 0.161, "mix": {"fold": 47, "check": 113, "call": 50, "bet": 77, "raise": 4, "all_in": 1}}, "turn": {"decisions": 170, "agg_freq": 0.3688, "fold_share": 0.1706, "mix": {"fold": 29, "check": 73, "call": 16, "bet": 48, "raise": 2, "all_in": 2}}, "river": {"decisions": 109, "agg_freq": 0.3163, "fold_share": 0.1009, "mix": {"fold": 11, "check": 58, "call": 9, "bet": 29, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.6471, "cbet_opps": 34, "fold_to_cbet": 0.1786, "facing_cbet": 56, "wtsd": 0.2533, "wsd": 0.4079, "saw_showdown": 76, "won_showdown": 31, "pf_bucket": {"premium": {"hands": 6, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 41, "open_rate": 0.7317, "call_rate": 0.2439, "fold_rate": 0.0}, "playable": {"hands": 61, "open_rate": 0.2131, "call_rate": 0.6885, "fold_rate": 0.0}, "marginal": {"hands": 84, "open_rate": 0.0357, "call_rate": 0.7619, "fold_rate": 0.0238}, "trash": {"hands": 103, "open_rate": 0.0, "call_rate": 0.3689, "fold_rate": 0.3883}}, "betsize_dist": {"small": 0.0046, "medium": 0.7097, "pot": 0.1014, "over": 0.1843}, "showdown_cats": {"high card": 0.1316, "pair": 0.5, "two pair": 0.25, "trips": 0.0132, "straight": 0.0395, "flush": 0.0395, "full house": 0.0}, "elo": 1490, "elo_sd": 38.8}, "gpt-5.5": {"hands": 300, "decisions": 896, "chips": 374.0, "bb_per_100": 62.33, "win_rate": 0.6, "wins": 180, "losses": 117, "ties": 3, "showdown_wins": 37, "fold_wins": 143, "vpip": 0.7767, "pfr": 0.3967, "agg_freq": 0.4167, "agg_factor": 1.398, "fold_to_bet": 0.1891, "allin_freq": 0.0112, "avg_bet_xpot": 1.035, "avg_latency_s": 37.3, "avg_comp_tokens": 238, "invalid_actions": 1, "invalid_amounts": 0, "action_mix": {"fold": 80, "check": 240, "call": 236, "bet": 227, "raise": 103, "all_in": 10}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 326, "agg_freq": 0.4, "fold_share": 0.0798, "mix": {"fold": 26, "check": 42, "call": 138, "bet": 27, "raise": 92, "all_in": 1}}, "flop": {"decisions": 289, "agg_freq": 0.4118, "fold_share": 0.1176, "mix": {"fold": 34, "check": 91, "call": 59, "bet": 97, "raise": 6, "all_in": 2}}, "turn": {"decisions": 174, "agg_freq": 0.4591, "fold_share": 0.0862, "mix": {"fold": 15, "check": 60, "call": 26, "bet": 68, "raise": 3, "all_in": 2}}, "river": {"decisions": 107, "agg_freq": 0.4118, "fold_share": 0.0467, "mix": {"fold": 5, "check": 47, "call": 13, "bet": 35, "raise": 2, "all_in": 5}}}, "cbet_rate": 0.7792, "cbet_opps": 77, "fold_to_cbet": 0.1636, "facing_cbet": 55, "wtsd": 0.2567, "wsd": 0.4805, "saw_showdown": 77, "won_showdown": 37, "pf_bucket": {"premium": {"hands": 12, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 46, "open_rate": 0.8913, "call_rate": 0.1087, "fold_rate": 0.0}, "playable": {"hands": 66, "open_rate": 0.6364, "call_rate": 0.303, "fold_rate": 0.0}, "marginal": {"hands": 77, "open_rate": 0.2987, "call_rate": 0.4935, "fold_rate": 0.013}, "trash": {"hands": 86, "open_rate": 0.0116, "call_rate": 0.593, "fold_rate": 0.1279}}, "betsize_dist": {"small": 0.1029, "medium": 0.4647, "pot": 0.0853, "over": 0.3471}, "showdown_cats": {"high card": 0.0779, "pair": 0.3636, "two pair": 0.4026, "trips": 0.0519, "straight": 0.013, "flush": 0.039, "full house": 0.0519}, "elo": 1519, "elo_sd": 35.3}, "gpt-5.4": {"hands": 300, "decisions": 930, "chips": -15.0, "bb_per_100": -2.5, "win_rate": 0.5633, "wins": 169, "losses": 127, "ties": 4, "showdown_wins": 41, "fold_wins": 128, "vpip": 0.7867, "pfr": 0.5133, "agg_freq": 0.4021, "agg_factor": 1.615, "fold_to_bet": 0.2062, "allin_freq": 0.0032, "avg_bet_xpot": 0.941, "avg_latency_s": 38.6, "avg_comp_tokens": 649, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 87, "check": 296, "call": 208, "bet": 211, "raise": 125, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 312, "agg_freq": 0.5203, "fold_share": 0.0513, "mix": {"fold": 16, "check": 51, "call": 91, "bet": 36, "raise": 118, "all_in": 0}}, "flop": {"decisions": 294, "agg_freq": 0.3925, "fold_share": 0.0986, "mix": {"fold": 29, "check": 101, "call": 60, "bet": 98, "raise": 5, "all_in": 1}}, "turn": {"decisions": 195, "agg_freq": 0.3584, "fold_share": 0.1128, "mix": {"fold": 22, "check": 75, "call": 36, "bet": 60, "raise": 2, "all_in": 0}}, "river": {"decisions": 129, "agg_freq": 0.1743, "fold_share": 0.155, "mix": {"fold": 20, "check": 69, "call": 21, "bet": 17, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.7143, "cbet_opps": 98, "fold_to_cbet": 0.1087, "facing_cbet": 46, "wtsd": 0.2833, "wsd": 0.4824, "saw_showdown": 85, "won_showdown": 41, "pf_bucket": {"premium": {"hands": 15, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 33, "open_rate": 0.8788, "call_rate": 0.1212, "fold_rate": 0.0}, "playable": {"hands": 68, "open_rate": 0.7353, "call_rate": 0.2206, "fold_rate": 0.0}, "marginal": {"hands": 79, "open_rate": 0.481, "call_rate": 0.2911, "fold_rate": 0.0127}, "trash": {"hands": 97, "open_rate": 0.2268, "call_rate": 0.4124, "fold_rate": 0.0412}}, "betsize_dist": {"small": 0.174, "medium": 0.3451, "pot": 0.2094, "over": 0.2714}, "showdown_cats": {"high card": 0.1059, "pair": 0.3647, "two pair": 0.3059, "trips": 0.0706, "straight": 0.0471, "flush": 0.0471, "full house": 0.0588}, "elo": 1501, "elo_sd": 34.8}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": 46.0, "gpt-5.5": -416.0, "gpt-5.4": 154.0}, "claude-sonnet-4.6": {"claude-opus-4.8": -46.0, "gpt-5.5": 159.0, "gpt-5.4": -256.0}, "gpt-5.5": {"claude-opus-4.8": 416.0, "claude-sonnet-4.6": -159.0, "gpt-5.4": 117.0}, "gpt-5.4": {"claude-opus-4.8": -154.0, "claude-sonnet-4.6": 256.0, "gpt-5.5": -117.0}}, "elo": {"claude-opus-4.8": 1490, "claude-sonnet-4.6": 1490, "gpt-5.5": 1519, "gpt-5.4": 1501}, "elo_ci": {"claude-opus-4.8": {"sd": 37.0, "lo": 1420, "hi": 1556}, "claude-sonnet-4.6": {"sd": 38.8, "lo": 1416, "hi": 1571}, "gpt-5.5": {"sd": 35.3, "lo": 1450, "hi": 1595}, "gpt-5.4": {"sd": 34.8, "lo": 1435, "hi": 1566}}, "hands_per_game": 100, "num_games": 6};
 const MODELS = R.models, PM = R.per_model;
 const COLORS = ['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa','#22d3ee'];
 const col = i => COLORS[i % COLORS.length];
@@ -172,7 +202,12 @@ const col = i => COLORS[i % COLORS.length];
 const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
 const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
-Chart.defaults.color = '#9aa3b5'; Chart.defaults.borderColor = '#232838';
+
+Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';
+Chart.defaults.font.family='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const ACCENT='#8f1d1d';
+const PALETTE=['#8f1d1d','#b45309','#1a7f37','#1d4ed8','#6d28d9','#be185d','#0f766e'];
+
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, { type:'scatter',

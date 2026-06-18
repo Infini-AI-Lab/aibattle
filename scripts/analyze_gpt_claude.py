@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analyze_board_tournament as bt          # noqa: E402
 import analyze_tournament as ht                # noqa: E402  (Hold'em 1-hand)
 import analyze_match_tournament as mt          # noqa: E402
+from report_theme import BASE_CSS, CHART_SETUP  # noqa: E402
 
 RUN = "runs/gpt_vs_claude"
 OUT = "reports/gpt_vs_claude"
@@ -155,32 +156,16 @@ def render_match(rep: dict, title_meta: str) -> str:
 {bt._favicon("🃏")}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}
-<style>
-  body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:1100px; margin:0 auto; padding:28px 28px 80px; }}
-  h1 {{ font-size:25px; }} h2 {{ font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }}
-  h3 {{ font-size:14px; color:#9aa3b5; }}
-  .sub {{ color:#8b93a7; }}
-  table {{ border-collapse:collapse; width:100%; font-size:13px; }}
-  th,td {{ padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }}
-  th {{ color:#9aa3b5; }} td.model,th.model {{ text-align:left; font-weight:600; color:#cdd6f4; }}
-  .pos {{ color:#4ade80; }} .neg {{ color:#f87171; }} .diag {{ color:#3a3f4b; }}
-  .small {{ font-size:10px; color:#8b93a7; }}
-  .note {{ color:#8b93a7; font-size:12px; margin:6px 0; }}
-  canvas {{ max-height:300px; }}
-  .grid2 {{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }}
-  .fam {{ font-size:10px; padding:1px 6px; border-radius:999px; font-weight:600; }}
-  .fam.gpt {{ background:#10322a; color:#4ade80; }}
-  .fam.claude {{ background:#2a2138; color:#c4b5fd; }}
-  .replaybtn {{ display:inline-block; margin-top:12px; background:#1b2030; color:#a5b4fc;
-    border:1px solid #2a2f3a; border-radius:8px; padding:8px 14px; font-size:13px; text-decoration:none; }}
-  .replaybtn:hover {{ border-color:#60a5fa; color:#fff; }}
-  @media (max-width:760px) {{ .grid2 {{ grid-template-columns:1fr; }} }}
+<style>{BASE_CSS}
+  /* Family badge: green = GPT, indigo = Claude (the site's two accent colors). */
+  .fam {{ font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700; }}
+  .fam.gpt {{ background:var(--faint); color:var(--pos); }}
+  .fam.claude {{ background:var(--faint); color:#4338ca; }}
 </style></head>
 <body><div class="wrap">
-  <h1>🎲 GPT vs Claude — 🃏 Hold'em Match</h1>
-  <div class="sub">{title_meta}</div>
-  <a class="replaybtn" href="match_replay.html">▶ Watch match replays</a>
+  <h1>$ ~/aibattle/gpt-vs-claude/match<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em Match · {title_meta}</div>
+  <a class="replaybtn" href="match_replay.html">▶ watch match replays</a>
 
   <h2>Leaderboard — match win rate</h2>
   <table>
@@ -203,8 +188,8 @@ def render_match(rep: dict, title_meta: str) -> str:
 <script>
 const R = {payload};
 const lb = R.leaderboard, M = lb.map(r=>r.model);
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
-const col = m => m.startsWith('gpt') ? '#4ade80' : '#a78bfa';
+{CHART_SETUP}
+const col = m => m.startsWith('gpt') ? '#1a7f37' : '#4338ca';
 new Chart(document.getElementById('wr'), {{ type:'bar',
   data:{{ labels:M, datasets:[{{label:'win %', data:lb.map(r=>r.win_rate*100),
     backgroundColor:M.map(col)}}]}},
@@ -273,60 +258,53 @@ def render_index(fh: dict, rates: dict, cards: list, arena_rows: list,
 <html><head><meta charset="utf-8"><title>GPT vs Claude — AI Battle Arena</title>
 {bt._favicon("🥊")}
 {NAV_HEAD}
-<style>
-  body {{ font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }}
-  .wrap {{ max-width:1100px; margin:0 auto; padding:36px 28px 70px; }}
-  h1 {{ font-size:27px; margin-bottom:6px; }} .sub {{ color:#8b93a7; margin-bottom:26px; }}
-  h2 {{ font-size:19px; color:#cdd6f4; margin:0; }}
-  .note {{ color:#8b93a7; font-size:12px; margin:6px 0 14px; }}
-  section {{ margin-top:30px; border:1px solid #232838; border-radius:16px;
-    padding:22px; background:linear-gradient(180deg,#141823,#10131b); }}
+<style>{BASE_CSS}
+  section {{ margin-top:30px; border:1px solid var(--line); padding:20px 22px 24px; background:var(--panel); }}
+  .arena-head h2 {{ margin:0; }}
 
-  /* family scoreboard */
-  .vs {{ display:flex; align-items:stretch; gap:0; margin:18px 0 6px; border-radius:14px; overflow:hidden;
-    border:1px solid #232838; }}
-  .vs .side {{ flex:1; padding:18px 22px; }}
-  .vs .gptside {{ background:linear-gradient(180deg,#0f2a22,#0c1f1a); }}
-  .vs .claside {{ background:linear-gradient(180deg,#241c33,#160f22); text-align:right; }}
-  .vs .fname {{ font-size:13px; letter-spacing:.05em; text-transform:uppercase; color:#9aa3b5; }}
+  /* family scoreboard — green = GPT, indigo = Claude */
+  .vs {{ display:flex; align-items:stretch; margin:18px 0 6px; border:1px solid var(--line); }}
+  .vs .side {{ flex:1; padding:18px 22px; background:var(--panel); }}
+  .vs .gptside {{ background:var(--faint); }}
+  .vs .claside {{ background:var(--faint); text-align:right; }}
+  .vs .fname {{ font-size:13px; letter-spacing:.05em; text-transform:uppercase; color:var(--dim); }}
   .vs .fwins {{ font-size:40px; font-weight:800; line-height:1; margin-top:4px; }}
-  .vs .gptside .fwins {{ color:#4ade80; }} .vs .claside .fwins {{ color:#c4b5fd; }}
-  .vs .fpct {{ font-size:12px; color:#8b93a7; margin-top:4px; }}
+  .vs .gptside .fwins {{ color:var(--pos); }} .vs .claside .fwins {{ color:#4338ca; }}
+  .vs .fpct {{ font-size:12px; color:var(--dim); margin-top:4px; }}
   .vs .mid {{ display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:0 16px; background:#0d1017; color:#8b93a7; font-size:12px; }}
-  .vs .mid b {{ font-size:18px; color:#e6e6e6; }}
+    padding:0 16px; background:var(--panel); color:var(--dim); font-size:12px; border-left:1px solid var(--line); border-right:1px solid var(--line); }}
+  .vs .mid b {{ font-size:18px; color:var(--fg); }}
 
-  table {{ border-collapse:collapse; width:100%; font-size:13px; }}
-  th,td {{ padding:7px 9px; text-align:center; border-bottom:1px solid #20242f; }}
-  th {{ color:#9aa3b5; font-weight:600; }}
-  td.model,th.model {{ text-align:left; font-weight:600; color:#cdd6f4; }}
-  td.rk,th.rk {{ width:34px; color:#8b93a7; }} td.cov {{ color:#8b93a7; }} td.best {{ color:#aab2c5; text-align:left; }}
+  td.rk,th.rk {{ width:34px; color:var(--dim); }} td.cov {{ color:var(--dim); }}
+  td.best {{ color:var(--dim); text-align:left; }}
   .barcell {{ width:160px; }}
-  .hbar {{ display:inline-flex; width:150px; height:14px; border-radius:4px; overflow:hidden; background:#3a2330; }}
-  .hbar .hg {{ background:#4ade80; }} .hbar .hc {{ background:#a78bfa; }}
+  .hbar {{ display:inline-flex; width:150px; height:14px; overflow:hidden;
+    background:var(--faint); border:1px solid var(--line); }}
+  .hbar .hg {{ background:var(--pos); }} .hbar .hc {{ background:#4338ca; }}
   .scorecell {{ position:relative; min-width:120px; }}
   .scorecell .bar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
-    height:18px; border-radius:4px; background:linear-gradient(90deg,#3b82f6,#a78bfa); opacity:.5; }}
-  .scorecell .sval {{ position:relative; font-weight:600; color:#f3f4f6; }}
-  .fam {{ font-size:10px; padding:1px 6px; border-radius:999px; font-weight:600; }}
-  .fam.gpt {{ background:#10322a; color:#4ade80; }}
-  .fam.claude {{ background:#2a2138; color:#c4b5fd; }}
+    height:16px; background:var(--red); opacity:.16; }}
+  .scorecell .sval {{ position:relative; font-weight:700; color:var(--red); }}
+  .fam {{ font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700; }}
+  .fam.gpt {{ background:var(--faint); color:var(--pos); }}
+  .fam.claude {{ background:var(--faint); color:#4338ca; }}
 
   .cards {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px; }}
-  .card {{ display:block; text-decoration:none; color:inherit; background:#171a23;
-    border:1px solid #232838; border-radius:14px; padding:18px; transition:.15s; }}
-  .card:hover {{ border-color:#60a5fa; transform:translateY(-2px); }}
-  .ctitle {{ font-size:18px; font-weight:700; color:#cdd6f4; }}
-  .badges {{ margin:8px 0; display:flex; gap:6px; flex-wrap:wrap; }}
-  .badge {{ font-size:10px; color:#aab2c5; background:#1c2130; border:1px solid #2a3142;
-    padding:2px 7px; border-radius:999px; }}
-  .champ {{ font-size:13px; color:#e6e6e6; }} .metric {{ color:#a78bfa; font-weight:600; }}
-  .cgo {{ margin-top:12px; font-size:13px; color:#60a5fa; }}
+  .card {{ display:block; text-decoration:none; color:inherit; background:var(--panel);
+    border:1px solid var(--line); padding:16px; transition:border-color .15s; }}
+  .card:hover {{ border-color:var(--red); }}
+  .ctitle {{ font-size:15px; font-weight:700; color:var(--red); }}
+  .ctitle::before {{ content:"> "; color:var(--dim); }}
+  .badges {{ margin:8px 0; display:flex; gap:10px; flex-wrap:wrap; }}
+  .badge {{ font-size:10px; color:var(--dim); }}
+  .badge::before {{ content:"["; }} .badge::after {{ content:"]"; }}
+  .champ {{ font-size:13px; }} .metric {{ color:var(--red); font-weight:700; }}
+  .cgo {{ margin-top:12px; font-size:12px; color:var(--red); }}
   @media (max-width:640px) {{ .cards {{ grid-template-columns:1fr; }} }}
 </style></head>
 <body><div class="wrap">
-  <h1>🥊 GPT vs Claude — Coached Head-to-Head</h1>
-  <div class="sub">Two GPT models ({", ".join(GPT)}) vs two Claude models ({", ".join(CLAUDE)})
+  <h1>$ ~/aibattle/gpt-vs-claude<span class="cursor"></span></h1>
+  <div class="sub">🥊 Two GPT models ({", ".join(GPT)}) vs two Claude models ({", ".join(CLAUDE)})
     across four games, every move prompted with one-line coaching · reasoning effort medium.</div>
 
   <section>
@@ -431,11 +409,11 @@ NAV_JS = r"""// Navbar for the GPT-vs-Claude mini-site. Links resolve within
 # `runs` symlink, one level up from this subdir). The replay JSON is produced by
 # scripts/build_gpt_claude_replays.py.
 VIEWERS = {
-    # viewer file          (old BASE,                                  replay label)
-    "connect4_replay.html": ("runs/board_tournament/replays/connect4/", "connect4"),
-    "gomoku_replay.html":   ("runs/board_tournament/replays/gomoku/",   "gomoku"),
-    "holdem_replay.html":   ("runs/tournament/replays/holdem/",         "holdem_1hand"),
-    "match_replay.html":    ("runs/match_tournament/replays/match/",    "holdem_match"),
+    # viewer file          (base-site BASE,                       replay label)
+    "connect4_replay.html": ("runs/connect4/replays/connect4/",   "connect4"),
+    "gomoku_replay.html":   ("runs/gomoku/replays/gomoku/",       "gomoku"),
+    "holdem_replay.html":   ("runs/holdem_1hand/replays/holdem/", "holdem_1hand"),
+    "match_replay.html":    ("runs/holdem_match/replays/match/",  "holdem_match"),
 }
 
 

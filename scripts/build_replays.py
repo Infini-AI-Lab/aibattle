@@ -55,6 +55,11 @@ HOLDEM_DIR = "runs/holdem_1hand"
 GAMES = {"connect4": {"need": 4}, "gomoku": {"need": 5}}
 THINK_MARK = "===== thinking ====="
 ANSWER_MARK = "===== answer ====="
+# Cap stored reasoning so replay payloads stay loadable in the browser. Inline-
+# reasoning models can emit tens of KB per move; uncapped, a single match pair
+# file reached 120 MB+ and froze the viewer. 6k chars keeps the gist. Mirrors
+# build_new_games_replays.THINK_CAP.
+THINK_CAP = 6000
 _GOMOKU_COLS = "ABCDEFGHI"
 _PLAYERS = ("player_0", "player_1")
 
@@ -102,8 +107,14 @@ def _split_thinking(raw: str) -> str:
         return ""
     if THINK_MARK in raw:
         body = raw.split(THINK_MARK, 1)[1]
-        return body.split(ANSWER_MARK, 1)[0].strip()
-    return raw.strip()
+        return _cap_thinking(body.split(ANSWER_MARK, 1)[0].strip())
+    return _cap_thinking(raw.strip())
+
+
+def _cap_thinking(t: str) -> str:
+    if len(t) > THINK_CAP:
+        return t[:THINK_CAP] + f"\n\n… [reasoning clipped to {THINK_CAP} chars for replay]"
+    return t
 
 
 def _thinking_lookup(pair_dir: str) -> dict:
