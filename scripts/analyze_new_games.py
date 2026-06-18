@@ -360,11 +360,9 @@ def render_versus(rep: dict) -> str:
         sd = (elo_ci.get(m) or {}).get("sd")
         return f"{elo[m]}<div class='small'>±{sd:.0f}</div>" if sd is not None else str(elo[m])
 
-    # Chip-scored games (poker) rank by Elo; others by net result per game.
-    if rep.get("elo_basis") == "chips":
-        order = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
-    else:
-        order = sorted(models, key=lambda x: pm[x]["net_per_game"], reverse=True)
+    # Rank by Elo (opponent-adjusted), with net/game as the tiebreaker.
+    order = sorted(models, key=lambda m: (_elo_key(elo, m), pm[m]["net_per_game"]),
+                   reverse=True)
     rows = ""
     for i, m in enumerate(order, 1):
         s = pm[m]
@@ -500,15 +498,14 @@ def render_dealer(rep: dict) -> str:
     payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
-    ranked = sorted(models, key=lambda m: pm[m]["profit"], reverse=True)
+    ranked = sorted(models, key=lambda m: pm[m]["mean_per_hand"], reverse=True)
 
     rows = ""
     for i, m in enumerate(ranked, 1):
         s = pm[m]
-        pcls = "pos" if s["profit"] > 0 else ("neg" if s["profit"] < 0 else "")
+        pcls = "pos" if s["mean_per_hand"] > 0 else ("neg" if s["mean_per_hand"] < 0 else "")
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
-          <td class='{pcls}'>{s['profit']:+.1f}</td>
           <td class='{pcls}'>{s['mean_per_hand']:+.3f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['push_rate']*100:.0f}%</td>
           <td>{s['loss_rate']*100:.0f}%</td>
@@ -532,25 +529,25 @@ def render_dealer(rep: dict) -> str:
   <a class="replaybtn" href="{cfg['replay']}">▶ watch {cfg['replay_verb']} replays</a>
 
   <div class="kpis">
-    <div class="kpi"><div class="v">{pm[champ]['profit']:+.1f}</div><div class="l">top profit · {champ}</div></div>
-    <div class="kpi"><div class="v">{rep['field_profit']:+.1f}</div><div class="l">field net vs dealer</div></div>
+    <div class="kpi"><div class="v">{pm[champ]['mean_per_hand']:+.3f}</div><div class="l">top mean/hand · {champ}</div></div>
+    <div class="kpi"><div class="v">{rep['field_profit']/rep['total_hands']:+.3f}</div><div class="l">field avg/hand vs dealer</div></div>
     <div class="kpi"><div class="v">{rep['total_hands']}</div><div class="l">hands played</div></div>
   </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>profit</th><th>mean/hand</th>
+    <tr><th>#</th><th class='model'>model</th><th>mean/hand</th>
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
         <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
     {rows}
   </table>
-  <div class="note">Each model plays the same independent hands against the built-in dealer; the dealer
-    holds an inherent house edge, so a negative field net is expected. profit = total chips won/lost
-    (a doubled hand pays ±2). bust = player busted; double = chose to double down; natural = dealt a
-    blackjack. These read directly from the per-hand outcomes.</div>
+  <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
+    inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
+    (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;
+    double = chose to double down; natural = dealt a blackjack. Read directly from per-hand outcomes.</div>
 
   <div class="grid2">
-    <div><h3>Chip profit</h3><canvas id="profit"></canvas></div>
+    <div><h3>Mean chips per hand</h3><canvas id="profit"></canvas></div>
     <div><h3>Win / push / loss</h3><canvas id="wpl"></canvas></div>
   </div>
   <div class="grid2">
@@ -562,11 +559,11 @@ def render_dealer(rep: dict) -> str:
 const R = {payload};
 const pm=R.per_model, M=R.models;
 {CHART_SETUP}
-const ranked=[...M].sort((a,b)=>pm[b].profit-pm[a].profit);
+const ranked=[...M].sort((a,b)=>pm[b].mean_per_hand-pm[a].mean_per_hand);
 
 new Chart(document.getElementById('profit'), {{ type:'bar',
-  data:{{ labels:ranked, datasets:[{{label:'profit', backgroundColor:ranked.map(m=>pm[m].profit>=0?'#4ade80':'#f87171'),
-    data:ranked.map(m=>pm[m].profit)}}]}},
+  data:{{ labels:ranked, datasets:[{{label:'mean/hand', backgroundColor:ranked.map(m=>pm[m].mean_per_hand>=0?'#1a7f37':'#b91c1c'),
+    data:ranked.map(m=>pm[m].mean_per_hand)}}]}},
   options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
 
 new Chart(document.getElementById('wpl'), {{ type:'bar',
@@ -607,13 +604,13 @@ def _index_entry(rep: dict) -> dict:
             "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>",
         })
     else:  # dealer
-        ranked = sorted(rep["models"], key=lambda m: pm[m]["profit"], reverse=True)
+        ranked = sorted(rep["models"], key=lambda m: pm[m]["mean_per_hand"], reverse=True)
         champ = ranked[0]
         per_model_hands = rep["per_model"][champ]["hands"]
         base.update({
             "ranking": ranked,
-            "meta": f"vs dealer · {per_model_hands} hands/model · chip profit",
-            "champ_line": f"🏆 {champ} <span class='metric'>{pm[champ]['profit']:+.1f} profit</span>",
+            "meta": f"vs dealer · {per_model_hands} hands/model · mean chips/hand",
+            "champ_line": f"🏆 {champ} <span class='metric'>{pm[champ]['mean_per_hand']:+.3f}/hand</span>",
         })
     return base
 
@@ -658,7 +655,7 @@ def main():
                       f"net/g={s['net_per_game']:+.2f} win%={s['win_rate']*100:3.0f} "
                       f"draw%={s['draw_rate']*100:3.0f} invalid={s['invalid_rate']*100:.1f}%")
         else:
-            order = sorted(pm, key=lambda x: pm[x]["profit"], reverse=True)
+            order = sorted(pm, key=lambda x: pm[x]["mean_per_hand"], reverse=True)
             print(f"=== {game} ({rep['total_hands']} hands) ===")
             for m in order:
                 s = pm[m]

@@ -2,41 +2,13 @@
   "game": "othello_lite_6x6",
   "kind": "versus",
   "models": [
-    "kimi-k2p6",
     "deepseek-v4-pro",
     "glm-5p1",
+    "gpt-oss-120b",
     "minimax-m2p7",
-    "gpt-oss-120b"
+    "kimi-k2p6"
   ],
   "per_model": {
-    "kimi-k2p6": {
-      "games": 200,
-      "wins": 141,
-      "losses": 53,
-      "draws": 6,
-      "win_rate": 0.705,
-      "draw_rate": 0.03,
-      "net_per_game": 0.44,
-      "first_move_win_rate": 0.71,
-      "invalid_rate": 0.0,
-      "decisions": 3310,
-      "avg_len": 33.0,
-      "avg_latency_s": 404.9,
-      "len_hist": [
-        2,
-        1,
-        2,
-        0,
-        12,
-        68,
-        53,
-        29,
-        23,
-        7,
-        2,
-        1
-      ]
-    },
     "deepseek-v4-pro": {
       "games": 200,
       "wins": 132,
@@ -93,6 +65,34 @@
         1
       ]
     },
+    "gpt-oss-120b": {
+      "games": 200,
+      "wins": 86,
+      "losses": 106,
+      "draws": 8,
+      "win_rate": 0.43,
+      "draw_rate": 0.04,
+      "net_per_game": -0.1,
+      "first_move_win_rate": 0.39,
+      "invalid_rate": 0.0,
+      "decisions": 3269,
+      "avg_len": 32.72,
+      "avg_latency_s": 22.4,
+      "len_hist": [
+        2,
+        0,
+        2,
+        1,
+        9,
+        80,
+        62,
+        28,
+        14,
+        1,
+        1,
+        0
+      ]
+    },
     "minimax-m2p7": {
       "games": 200,
       "wins": 34,
@@ -121,36 +121,124 @@
         1
       ]
     },
-    "gpt-oss-120b": {
+    "kimi-k2p6": {
       "games": 200,
-      "wins": 86,
-      "losses": 106,
-      "draws": 8,
-      "win_rate": 0.43,
-      "draw_rate": 0.04,
-      "net_per_game": -0.1,
-      "first_move_win_rate": 0.39,
+      "wins": 141,
+      "losses": 53,
+      "draws": 6,
+      "win_rate": 0.705,
+      "draw_rate": 0.03,
+      "net_per_game": 0.44,
+      "first_move_win_rate": 0.71,
       "invalid_rate": 0.0,
-      "decisions": 3269,
-      "avg_len": 32.72,
-      "avg_latency_s": 22.4,
+      "decisions": 3310,
+      "avg_len": 33.0,
+      "avg_latency_s": 404.9,
       "len_hist": [
         2,
-        0,
+        1,
         2,
-        1,
-        9,
-        80,
-        62,
-        28,
-        14,
-        1,
-        1,
-        0
+        0,
+        12,
+        68,
+        53,
+        29,
+        23,
+        7,
+        2,
+        1
       ]
     }
   },
   "h2h": {
+    "deepseek-v4-pro": {
+      "glm-5p1": [
+        36,
+        14,
+        0
+      ],
+      "gpt-oss-120b": [
+        33,
+        14,
+        3
+      ],
+      "minimax-m2p7": [
+        42,
+        5,
+        3
+      ],
+      "kimi-k2p6": [
+        21,
+        28,
+        1
+      ]
+    },
+    "glm-5p1": {
+      "deepseek-v4-pro": [
+        14,
+        36,
+        0
+      ],
+      "gpt-oss-120b": [
+        25,
+        25,
+        0
+      ],
+      "minimax-m2p7": [
+        38,
+        12,
+        0
+      ],
+      "kimi-k2p6": [
+        15,
+        33,
+        2
+      ]
+    },
+    "gpt-oss-120b": {
+      "deepseek-v4-pro": [
+        14,
+        33,
+        3
+      ],
+      "glm-5p1": [
+        25,
+        25,
+        0
+      ],
+      "minimax-m2p7": [
+        32,
+        15,
+        3
+      ],
+      "kimi-k2p6": [
+        15,
+        33,
+        2
+      ]
+    },
+    "minimax-m2p7": {
+      "deepseek-v4-pro": [
+        5,
+        42,
+        3
+      ],
+      "glm-5p1": [
+        12,
+        38,
+        0
+      ],
+      "gpt-oss-120b": [
+        15,
+        32,
+        3
+      ],
+      "kimi-k2p6": [
+        2,
+        47,
+        1
+      ]
+    },
     "kimi-k2p6": {
       "deepseek-v4-pro": [
         28,
@@ -162,138 +250,50 @@
         15,
         2
       ],
+      "gpt-oss-120b": [
+        33,
+        15,
+        2
+      ],
       "minimax-m2p7": [
         47,
         2,
         1
-      ],
-      "gpt-oss-120b": [
-        33,
-        15,
-        2
-      ]
-    },
-    "deepseek-v4-pro": {
-      "kimi-k2p6": [
-        21,
-        28,
-        1
-      ],
-      "glm-5p1": [
-        36,
-        14,
-        0
-      ],
-      "minimax-m2p7": [
-        42,
-        5,
-        3
-      ],
-      "gpt-oss-120b": [
-        33,
-        14,
-        3
-      ]
-    },
-    "glm-5p1": {
-      "kimi-k2p6": [
-        15,
-        33,
-        2
-      ],
-      "deepseek-v4-pro": [
-        14,
-        36,
-        0
-      ],
-      "minimax-m2p7": [
-        38,
-        12,
-        0
-      ],
-      "gpt-oss-120b": [
-        25,
-        25,
-        0
-      ]
-    },
-    "minimax-m2p7": {
-      "kimi-k2p6": [
-        2,
-        47,
-        1
-      ],
-      "deepseek-v4-pro": [
-        5,
-        42,
-        3
-      ],
-      "glm-5p1": [
-        12,
-        38,
-        0
-      ],
-      "gpt-oss-120b": [
-        15,
-        32,
-        3
-      ]
-    },
-    "gpt-oss-120b": {
-      "kimi-k2p6": [
-        15,
-        33,
-        2
-      ],
-      "deepseek-v4-pro": [
-        14,
-        33,
-        3
-      ],
-      "glm-5p1": [
-        25,
-        25,
-        0
-      ],
-      "minimax-m2p7": [
-        32,
-        15,
-        3
       ]
     }
   },
   "elo": {
-    "kimi-k2p6": 1645,
     "deepseek-v4-pro": 1616,
     "glm-5p1": 1481,
+    "gpt-oss-120b": 1471,
     "minimax-m2p7": 1287,
-    "gpt-oss-120b": 1471
+    "kimi-k2p6": 1645
   },
   "elo_ci": {
-    "kimi-k2p6": {
-      "sd": 23.4,
-      "lo": 1602,
-      "hi": 1702
-    },
     "deepseek-v4-pro": {
-      "sd": 22.6,
+      "sd": 22.0,
       "lo": 1574,
-      "hi": 1658
+      "hi": 1661
     },
     "glm-5p1": {
-      "sd": 21.5,
-      "lo": 1437,
-      "hi": 1523
-    },
-    "minimax-m2p7": {
-      "sd": 22.8,
-      "lo": 1235,
-      "hi": 1328
+      "sd": 20.2,
+      "lo": 1438,
+      "hi": 1519
     },
     "gpt-oss-120b": {
-      "sd": 20.9,
-      "lo": 1427,
-      "hi": 1513
+      "sd": 21.8,
+      "lo": 1426,
+      "hi": 1515
+    },
+    "minimax-m2p7": {
+      "sd": 23.4,
+      "lo": 1237,
+      "hi": 1328
+    },
+    "kimi-k2p6": {
+      "sd": 21.6,
+      "lo": 1601,
+      "hi": 1693
     }
   },
   "elo_basis": "wins",

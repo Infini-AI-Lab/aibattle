@@ -34,6 +34,12 @@
   .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
     border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px;
     white-space:nowrap; }
+  /* Model-family badge (GPT vs Claude pages): green = GPT, indigo = Claude —
+     the site's two accent colors. Inline so it doesn't change row height. */
+  .fam { font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700;
+    vertical-align:middle; }
+  .fam.gpt { background:var(--faint); color:var(--pos); }
+  .fam.claude { background:var(--faint); color:#4338ca; }
 
   .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
   .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
@@ -55,13 +61,13 @@
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/leduc<span class="cursor"></span></h1>
-  <div class="sub">🎴 Leduc Poker · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 750 games</div>
+  <div class="sub">🎴 Leduc Poker · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 1300 games</div>
   <a class="replaybtn" href="leduc_replay.html">▶ watch hand replays</a>
 
   <div class="kpis">
-    <div class="kpi"><div class="v">1515</div><div class="l">top Elo · deepseek-v4-pro</div></div>
+    <div class="kpi"><div class="v">1519</div><div class="l">top Elo · qwen3p7-plus</div></div>
     <div class="kpi"><div class="v">42%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">750</div><div class="l">games played</div></div>
+    <div class="kpi"><div class="v">1300</div><div class="l">games played</div></div>
     <div class="kpi"><div class="v">25</div><div class="l">deals/pair (seat-swapped)</div></div>
   </div>
 
@@ -70,48 +76,64 @@
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
         <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     <tr>
-          <td>1</td><td class='model'>deepseek-v4-pro</td>
-          <td>1515<div class='small'>±27</div></td>
-          <td class='pos'>+0.12</td>
-          <td>39%</td><td>19%</td>
+          <td>1</td><td class='model'>qwen3p7-plus</td>
+          <td>1519<div class='small'>±27</div></td>
+          <td class='pos'>+0.11</td>
+          <td>40%</td><td>14%</td>
+          <td>39%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>33.3s</td>
+        </tr><tr>
+          <td>2</td><td class='model'>glm-5p2</td>
+          <td>1511<div class='small'>±27</div></td>
+          <td class='pos'>+0.05</td>
+          <td>43%</td><td>18%</td>
+          <td>43%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>62.6s</td>
+        </tr><tr>
+          <td>3</td><td class='model'>deepseek-v4-pro</td>
+          <td>1507<div class='small'>±24</div></td>
+          <td class='pos'>+0.05</td>
+          <td>40%</td><td>19%</td>
+          <td>43%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>34.9s</td>
+        </tr><tr>
+          <td>4</td><td class='model'>kimi-k2p6</td>
+          <td>1504<div class='small'>±25</div></td>
+          <td class='pos'>+0.04</td>
+          <td>42%</td><td>14%</td>
           <td>44%</td>
           <td>0.0%</td>
-          <td>4.1</td><td>36.5s</td>
+          <td>3.9</td><td>123.1s</td>
         </tr><tr>
-          <td>2</td><td class='model'>glm-5p1</td>
-          <td>1510<div class='small'>±29</div></td>
-          <td class='pos'>+0.08</td>
-          <td>38%</td><td>24%</td>
+          <td>5</td><td class='model'>gpt-oss-120b</td>
+          <td>1500<div class='small'>±24</div></td>
+          <td class=''>+0.00</td>
+          <td>45%</td><td>12%</td>
+          <td>47%</td>
+          <td>0.0%</td>
+          <td>3.9</td><td>8.7s</td>
+        </tr><tr>
+          <td>6</td><td class='model'>glm-5p1</td>
+          <td>1495<div class='small'>±26</div></td>
+          <td class='neg'>-0.03</td>
+          <td>39%</td><td>23%</td>
           <td>34%</td>
           <td>0.0%</td>
-          <td>4.1</td><td>27.7s</td>
+          <td>4.1</td><td>28.7s</td>
         </tr><tr>
-          <td>3</td><td class='model'>kimi-k2p6</td>
-          <td>1507<div class='small'>±28</div></td>
-          <td class='pos'>+0.08</td>
-          <td>41%</td><td>16%</td>
-          <td>44%</td>
+          <td>7</td><td class='model'>minimax-m3</td>
+          <td>1489<div class='small'>±26</div></td>
+          <td class='neg'>-0.07</td>
+          <td>43%</td><td>15%</td>
+          <td>45%</td>
           <td>0.0%</td>
-          <td>3.9</td><td>123.0s</td>
+          <td>3.9</td><td>17.3s</td>
         </tr><tr>
-          <td>4</td><td class='model'>gpt-oss-120b</td>
-          <td>1500<div class='small'>±28</div></td>
-          <td class='neg'>-0.02</td>
-          <td>46%</td><td>10%</td>
-          <td>46%</td>
-          <td>0.0%</td>
-          <td>4.0</td><td>8.8s</td>
-        </tr><tr>
-          <td>5</td><td class='model'>minimax-m3</td>
-          <td>1489<div class='small'>±27</div></td>
-          <td class='neg'>-0.09</td>
-          <td>44%</td><td>14%</td>
-          <td>46%</td>
-          <td>0.0%</td>
-          <td>3.8</td><td>16.6s</td>
-        </tr><tr>
-          <td>6</td><td class='model'>minimax-m2p7</td>
-          <td>1479<div class='small'>±28</div></td>
+          <td>8</td><td class='model'>minimax-m2p7</td>
+          <td>1473<div class='small'>±31</div></td>
           <td class='neg'>-0.18</td>
           <td>42%</td><td>15%</td>
           <td>40%</td>
@@ -134,10 +156,10 @@
   </div>
 
   <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'><tr><th></th><th>kimi-k2p6</th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>minimax-m2p7</th><th>gpt-oss-120b</th><th>minimax-m3</th></tr><tr><th class='model'>kimi-k2p6</th><td class='diag'>—</td><td class=''>17-17<div class='small'>16d</div></td><td class=''>18-18<div class='small'>14d</div></td><td class='neg'>23-25<div class='small'>2d</div></td><td class=''>24-24<div class='small'>2d</div></td><td class='neg'>21-23<div class='small'>6d</div></td></tr><tr><th class='model'>deepseek-v4-pro</th><td class=''>17-17<div class='small'>16d</div></td><td class='diag'>—</td><td class='neg'>18-20<div class='small'>12d</div></td><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class='neg'>21-22<div class='small'>7d</div></td></tr><tr><th class='model'>glm-5p1</th><td class=''>18-18<div class='small'>14d</div></td><td class='pos'>20-18<div class='small'>12d</div></td><td class='diag'>—</td><td class='pos'>18-16<div class='small'>16d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class='pos'>20-19<div class='small'>11d</div></td></tr><tr><th class='model'>minimax-m2p7</th><td class='pos'>25-23<div class='small'>2d</div></td><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>16-18<div class='small'>16d</div></td><td class='diag'>—</td><td class='neg'>21-24<div class='small'>5d</div></td><td class='neg'>21-23<div class='small'>6d</div></td></tr><tr><th class='model'>gpt-oss-120b</th><td class=''>24-24<div class='small'>2d</div></td><td class='pos'>24-21<div class='small'>5d</div></td><td class='pos'>22-20<div class='small'>8d</div></td><td class='pos'>24-21<div class='small'>5d</div></td><td class='diag'>—</td><td class=''>22-22<div class='small'>6d</div></td></tr><tr><th class='model'>minimax-m3</th><td class='pos'>23-21<div class='small'>6d</div></td><td class='pos'>22-21<div class='small'>7d</div></td><td class='neg'>19-20<div class='small'>11d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class=''>22-22<div class='small'>6d</div></td><td class='diag'>—</td></tr></table>
+  <table class='h2h'><tr><th></th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>glm-5p2</th><th>gpt-oss-120b</th><th>minimax-m2p7</th><th>minimax-m3</th><th>qwen3p7-plus</th><th>kimi-k2p6</th></tr><tr><th class='model'>deepseek-v4-pro</th><td class='diag'>—</td><td class='neg'>18-20<div class='small'>12d</div></td><td class='neg'>17-19<div class='small'>14d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>21-22<div class='small'>7d</div></td><td class='pos'>25-19<div class='small'>6d</div></td><td class=''>17-17<div class='small'>16d</div></td></tr><tr><th class='model'>glm-5p1</th><td class='pos'>20-18<div class='small'>12d</div></td><td class='diag'>—</td><td class='neg'>20-22<div class='small'>8d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class='pos'>18-16<div class='small'>16d</div></td><td class='pos'>20-19<div class='small'>11d</div></td><td class='pos'>20-17<div class='small'>13d</div></td><td class=''>18-18<div class='small'>14d</div></td></tr><tr><th class='model'>glm-5p2</th><td class='pos'>19-17<div class='small'>14d</div></td><td class='pos'>22-20<div class='small'>8d</div></td><td class='diag'>—</td><td class='pos'>22-19<div class='small'>9d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>21-19<div class='small'>10d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class='pos'>22-20<div class='small'>8d</div></td></tr><tr><th class='model'>gpt-oss-120b</th><td class='pos'>24-21<div class='small'>5d</div></td><td class='pos'>22-20<div class='small'>8d</div></td><td class='neg'>19-22<div class='small'>9d</div></td><td class='diag'>—</td><td class='pos'>24-21<div class='small'>5d</div></td><td class=''>22-22<div class='small'>6d</div></td><td class='pos'>24-19<div class='small'>7d</div></td><td class=''>24-24<div class='small'>2d</div></td></tr><tr><th class='model'>minimax-m2p7</th><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>16-18<div class='small'>16d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class='diag'>—</td><td class='neg'>21-23<div class='small'>6d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>25-23<div class='small'>2d</div></td></tr><tr><th class='model'>minimax-m3</th><td class='pos'>22-21<div class='small'>7d</div></td><td class='neg'>19-20<div class='small'>11d</div></td><td class='neg'>19-21<div class='small'>10d</div></td><td class=''>22-22<div class='small'>6d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class='diag'>—</td><td class='pos'>22-20<div class='small'>8d</div></td><td class='pos'>23-21<div class='small'>6d</div></td></tr><tr><th class='model'>qwen3p7-plus</th><td class='neg'>19-25<div class='small'>6d</div></td><td class='neg'>17-20<div class='small'>13d</div></td><td class='neg'>21-23<div class='small'>6d</div></td><td class='neg'>19-24<div class='small'>7d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class='diag'>—</td><td class=''>24-24<div class='small'>2d</div></td></tr><tr><th class='model'>kimi-k2p6</th><td class=''>17-17<div class='small'>16d</div></td><td class=''>18-18<div class='small'>14d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class=''>24-24<div class='small'>2d</div></td><td class='neg'>23-25<div class='small'>2d</div></td><td class='neg'>21-23<div class='small'>6d</div></td><td class=''>24-24<div class='small'>2d</div></td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"game": "leduc_poker", "kind": "versus", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b", "minimax-m3"], "per_model": {"kimi-k2p6": {"games": 250, "wins": 103, "losses": 107, "draws": 40, "win_rate": 0.412, "draw_rate": 0.16, "net_per_game": 0.08, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 498, "avg_len": 3.88, "avg_latency_s": 123.0, "len_hist": [49, 35, 82, 66, 16, 2]}, "deepseek-v4-pro": {"games": 250, "wins": 98, "losses": 104, "draws": 48, "win_rate": 0.392, "draw_rate": 0.192, "net_per_game": 0.12, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 520, "avg_len": 4.11, "avg_latency_s": 36.5, "len_hist": [31, 34, 90, 69, 23, 3]}, "glm-5p1": {"games": 250, "wins": 96, "losses": 93, "draws": 61, "win_rate": 0.384, "draw_rate": 0.244, "net_per_game": 0.084, "first_move_win_rate": 0.336, "invalid_rate": 0.0, "decisions": 520, "avg_len": 4.1, "avg_latency_s": 27.7, "len_hist": [33, 35, 82, 74, 26, 0]}, "minimax-m2p7": {"games": 250, "wins": 104, "losses": 109, "draws": 37, "win_rate": 0.416, "draw_rate": 0.148, "net_per_game": -0.18, "first_move_win_rate": 0.4, "invalid_rate": 0.0, "decisions": 498, "avg_len": 4.01, "avg_latency_s": 81.5, "len_hist": [38, 40, 84, 63, 19, 6]}, "gpt-oss-120b": {"games": 250, "wins": 116, "losses": 108, "draws": 26, "win_rate": 0.464, "draw_rate": 0.104, "net_per_game": -0.016, "first_move_win_rate": 0.456, "invalid_rate": 0.0, "decisions": 473, "avg_len": 3.95, "avg_latency_s": 8.8, "len_hist": [41, 49, 75, 54, 28, 3]}, "minimax-m3": {"games": 250, "wins": 109, "losses": 105, "draws": 36, "win_rate": 0.436, "draw_rate": 0.144, "net_per_game": -0.088, "first_move_win_rate": 0.464, "invalid_rate": 0.0, "decisions": 478, "avg_len": 3.84, "avg_latency_s": 16.6, "len_hist": [50, 37, 87, 58, 16, 2]}}, "h2h": {"kimi-k2p6": {"deepseek-v4-pro": [17, 17, 16], "glm-5p1": [18, 18, 14], "minimax-m2p7": [23, 25, 2], "gpt-oss-120b": [24, 24, 2], "minimax-m3": [21, 23, 6]}, "deepseek-v4-pro": {"kimi-k2p6": [17, 17, 16], "glm-5p1": [18, 20, 12], "minimax-m2p7": [21, 21, 8], "gpt-oss-120b": [21, 24, 5], "minimax-m3": [21, 22, 7]}, "glm-5p1": {"kimi-k2p6": [18, 18, 14], "deepseek-v4-pro": [20, 18, 12], "minimax-m2p7": [18, 16, 16], "gpt-oss-120b": [20, 22, 8], "minimax-m3": [20, 19, 11]}, "minimax-m2p7": {"kimi-k2p6": [25, 23, 2], "deepseek-v4-pro": [21, 21, 8], "glm-5p1": [16, 18, 16], "gpt-oss-120b": [21, 24, 5], "minimax-m3": [21, 23, 6]}, "gpt-oss-120b": {"kimi-k2p6": [24, 24, 2], "deepseek-v4-pro": [24, 21, 5], "glm-5p1": [22, 20, 8], "minimax-m2p7": [24, 21, 5], "minimax-m3": [22, 22, 6]}, "minimax-m3": {"kimi-k2p6": [23, 21, 6], "deepseek-v4-pro": [22, 21, 7], "glm-5p1": [19, 20, 11], "minimax-m2p7": [23, 21, 6], "gpt-oss-120b": [22, 22, 6]}}, "elo": {"kimi-k2p6": 1507, "deepseek-v4-pro": 1515, "glm-5p1": 1510, "minimax-m2p7": 1479, "gpt-oss-120b": 1500, "minimax-m3": 1489}, "elo_ci": {"kimi-k2p6": {"sd": 28.0, "lo": 1449, "hi": 1556}, "deepseek-v4-pro": {"sd": 26.9, "lo": 1469, "hi": 1569}, "glm-5p1": {"sd": 28.6, "lo": 1451, "hi": 1569}, "minimax-m2p7": {"sd": 27.5, "lo": 1423, "hi": 1535}, "gpt-oss-120b": {"sd": 28.3, "lo": 1443, "hi": 1561}, "minimax-m3": {"sd": 26.9, "lo": 1439, "hi": 1540}}, "elo_basis": "chips", "len_bins": ["2\u20133", "3\u20134", "4\u20135", "5\u20136", "6\u20137", "7\u20137"], "first_player_win_rate": 0.4227, "num_games": 750, "episodes_per_pair": 50};
+const R = {"game": "leduc_poker", "kind": "versus", "models": ["deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-oss-120b", "minimax-m2p7", "minimax-m3", "qwen3p7-plus", "kimi-k2p6"], "per_model": {"deepseek-v4-pro": {"games": 350, "wins": 140, "losses": 142, "draws": 68, "win_rate": 0.4, "draw_rate": 0.1943, "net_per_game": 0.0514, "first_move_win_rate": 0.4343, "invalid_rate": 0.0, "decisions": 730, "avg_len": 4.14, "avg_latency_s": 34.9, "len_hist": [36, 51, 127, 104, 29, 3]}, "glm-5p1": {"games": 350, "wins": 136, "losses": 132, "draws": 82, "win_rate": 0.3886, "draw_rate": 0.2343, "net_per_game": -0.0286, "first_move_win_rate": 0.3371, "invalid_rate": 0.0, "decisions": 734, "avg_len": 4.13, "avg_latency_s": 28.7, "len_hist": [40, 51, 118, 105, 36, 0]}, "glm-5p2": {"games": 300, "wins": 129, "losses": 116, "draws": 55, "win_rate": 0.43, "draw_rate": 0.1833, "net_per_game": 0.05, "first_move_win_rate": 0.4267, "invalid_rate": 0.0, "decisions": 604, "avg_len": 4.1, "avg_latency_s": 62.6, "len_hist": [45, 43, 82, 96, 34, 0]}, "gpt-oss-120b": {"games": 350, "wins": 159, "losses": 149, "draws": 42, "win_rate": 0.4543, "draw_rate": 0.12, "net_per_game": 0.0, "first_move_win_rate": 0.4743, "invalid_rate": 0.0, "decisions": 658, "avg_len": 3.89, "avg_latency_s": 8.7, "len_hist": [68, 66, 96, 81, 36, 3]}, "minimax-m2p7": {"games": 250, "wins": 104, "losses": 109, "draws": 37, "win_rate": 0.416, "draw_rate": 0.148, "net_per_game": -0.18, "first_move_win_rate": 0.4, "invalid_rate": 0.0, "decisions": 498, "avg_len": 4.01, "avg_latency_s": 81.5, "len_hist": [38, 40, 84, 63, 19, 6]}, "minimax-m3": {"games": 350, "wins": 150, "losses": 146, "draws": 54, "win_rate": 0.4286, "draw_rate": 0.1543, "net_per_game": -0.0743, "first_move_win_rate": 0.4514, "invalid_rate": 0.0, "decisions": 678, "avg_len": 3.87, "avg_latency_s": 17.3, "len_hist": [66, 56, 117, 83, 26, 2]}, "qwen3p7-plus": {"games": 300, "wins": 120, "losses": 138, "draws": 42, "win_rate": 0.4, "draw_rate": 0.14, "net_per_game": 0.1133, "first_move_win_rate": 0.3933, "invalid_rate": 0.0, "decisions": 612, "avg_len": 4.06, "avg_latency_s": 33.3, "len_hist": [34, 57, 92, 91, 26, 0]}, "kimi-k2p6": {"games": 350, "wins": 147, "losses": 153, "draws": 50, "win_rate": 0.42, "draw_rate": 0.1429, "net_per_game": 0.04, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 694, "avg_len": 3.88, "avg_latency_s": 123.1, "len_hist": [67, 54, 110, 95, 22, 2]}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": [18, 20, 12], "glm-5p2": [17, 19, 14], "gpt-oss-120b": [21, 24, 5], "minimax-m2p7": [21, 21, 8], "minimax-m3": [21, 22, 7], "qwen3p7-plus": [25, 19, 6], "kimi-k2p6": [17, 17, 16]}, "glm-5p1": {"deepseek-v4-pro": [20, 18, 12], "glm-5p2": [20, 22, 8], "gpt-oss-120b": [20, 22, 8], "minimax-m2p7": [18, 16, 16], "minimax-m3": [20, 19, 11], "qwen3p7-plus": [20, 17, 13], "kimi-k2p6": [18, 18, 14]}, "glm-5p2": {"deepseek-v4-pro": [19, 17, 14], "glm-5p1": [22, 20, 8], "gpt-oss-120b": [22, 19, 9], "minimax-m2p7": [0, 0, 0], "minimax-m3": [21, 19, 10], "qwen3p7-plus": [23, 21, 6], "kimi-k2p6": [22, 20, 8]}, "gpt-oss-120b": {"deepseek-v4-pro": [24, 21, 5], "glm-5p1": [22, 20, 8], "glm-5p2": [19, 22, 9], "minimax-m2p7": [24, 21, 5], "minimax-m3": [22, 22, 6], "qwen3p7-plus": [24, 19, 7], "kimi-k2p6": [24, 24, 2]}, "minimax-m2p7": {"deepseek-v4-pro": [21, 21, 8], "glm-5p1": [16, 18, 16], "glm-5p2": [0, 0, 0], "gpt-oss-120b": [21, 24, 5], "minimax-m3": [21, 23, 6], "qwen3p7-plus": [0, 0, 0], "kimi-k2p6": [25, 23, 2]}, "minimax-m3": {"deepseek-v4-pro": [22, 21, 7], "glm-5p1": [19, 20, 11], "glm-5p2": [19, 21, 10], "gpt-oss-120b": [22, 22, 6], "minimax-m2p7": [23, 21, 6], "qwen3p7-plus": [22, 20, 8], "kimi-k2p6": [23, 21, 6]}, "qwen3p7-plus": {"deepseek-v4-pro": [19, 25, 6], "glm-5p1": [17, 20, 13], "glm-5p2": [21, 23, 6], "gpt-oss-120b": [19, 24, 7], "minimax-m2p7": [0, 0, 0], "minimax-m3": [20, 22, 8], "kimi-k2p6": [24, 24, 2]}, "kimi-k2p6": {"deepseek-v4-pro": [17, 17, 16], "glm-5p1": [18, 18, 14], "glm-5p2": [20, 22, 8], "gpt-oss-120b": [24, 24, 2], "minimax-m2p7": [23, 25, 2], "minimax-m3": [21, 23, 6], "qwen3p7-plus": [24, 24, 2]}}, "elo": {"deepseek-v4-pro": 1507, "glm-5p1": 1495, "glm-5p2": 1511, "gpt-oss-120b": 1500, "minimax-m2p7": 1473, "minimax-m3": 1489, "qwen3p7-plus": 1519, "kimi-k2p6": 1504}, "elo_ci": {"deepseek-v4-pro": {"sd": 24.4, "lo": 1452, "hi": 1555}, "glm-5p1": {"sd": 25.8, "lo": 1442, "hi": 1546}, "glm-5p2": {"sd": 26.8, "lo": 1460, "hi": 1564}, "gpt-oss-120b": {"sd": 24.3, "lo": 1452, "hi": 1543}, "minimax-m2p7": {"sd": 31.3, "lo": 1414, "hi": 1539}, "minimax-m3": {"sd": 26.1, "lo": 1436, "hi": 1541}, "qwen3p7-plus": {"sd": 26.9, "lo": 1462, "hi": 1568}, "kimi-k2p6": {"sd": 25.2, "lo": 1449, "hi": 1555}}, "elo_basis": "chips", "len_bins": ["2\u20133", "3\u20134", "4\u20135", "5\u20136", "6\u20137", "7\u20137"], "first_player_win_rate": 0.4208, "num_games": 1300, "episodes_per_pair": 50};
 const pm=R.per_model, M=R.models;
 
 Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';

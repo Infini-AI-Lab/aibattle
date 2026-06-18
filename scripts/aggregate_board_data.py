@@ -53,6 +53,10 @@ def main(game: str) -> None:
         a, b = name.split("__vs__")
         eps = [_trim_episode(json.load(open(p)))
                for p in sorted(glob.glob(os.path.join(gdir, "ep*.json")))]
+        # Drop incomplete episodes (e.g. timed-out games missing returns/length/
+        # steps) so they don't break the analyzer downstream.
+        eps = [e for e in eps if all(k in e for k in
+                                     ("returns", "length", "steps", "seat_assignment"))]
         if not eps:
             continue
         for nm in (a, b):
