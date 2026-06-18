@@ -55,12 +55,15 @@ def build_board(game: str, need: int):
     manifest_pairs = []
     for pr in data["pairs"]:
         a, b = pr["a"], pr["b"]
-        think = br._thinking_lookup(os.path.join(RUN, game, f"{a}__vs__{b}"))
+        pair_dir = os.path.join(RUN, game, f"{a}__vs__{b}")
+        think = br._thinking_lookup(pair_dir)
+        prompts = br._prompt_lookup(pair_dir)
         episodes, man_eps = [], []
         for e in pr["episodes"]:
             init_board = (e["steps"][0]["observation"]["public"]["board"]
                           if e["steps"] else [[None] * cols for _ in range(rows)])
-            moves = [br._encode_move(game, s, think.get((e["episode"], s["step"]), ""))
+            moves = [br._encode_move(game, s, think.get((e["episode"], s["step"]), ""),
+                                     prompts.get((e["episode"], s["step"]), ""))
                      for s in e["steps"]]
             episodes.append({
                 "episode": e["episode"], "winner_name": e.get("winner_name"),

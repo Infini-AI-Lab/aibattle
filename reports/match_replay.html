@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🃏 Hold'em Match Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=10"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>
 <link rel="stylesheet" href="replay.css?v=3">
 <style>
   .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
@@ -15,14 +15,14 @@
   .mside{display:flex; align-items:baseline; gap:8px;}
   .mside .nm{font-weight:700; font-size:13px; color:var(--fg);}
   .mside .ch{font-size:13px; color:var(--red);}
-  .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:#f472b6; display:flex;}
-  .mbar .fill{background:#60a5fa; height:100%;}
+  .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:var(--red); display:flex;}
+  .mbar .fill{background:var(--link); height:100%;}
   .mtag{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim);}
 
   /* poker table */
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
-    background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
-  .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+    background:var(--faint); border:1px solid var(--line); padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
     padding:10px 14px; min-width:320px; position:relative;}
   .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
   .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
@@ -31,13 +31,13 @@
   .seat .meta{flex:1; min-width:0; margin:0;}
   .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
-  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:#fff; background:#6b6b6b; padding:1px 6px; margin-left:6px;}
+  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:var(--panel); background:var(--dim); padding:1px 6px; margin-left:6px;}
   .pos.btn{background:var(--amber);}
   .holes{display:flex; gap:6px;}
   .ret{font-weight:700; font-size:14px;}
   .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
   .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
-    padding:3px 10px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+    padding:3px 10px; background:var(--panel); border:1px solid var(--red); color:var(--red); white-space:nowrap;}
   .bubble.fold{border-color:var(--dim); color:var(--dim);}
 
   .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
@@ -107,11 +107,11 @@ const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
                   "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
 function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
 let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
-    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+    cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -142,7 +142,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
     const w = mt.winner_name || "—";
     return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
@@ -307,6 +307,7 @@ function renderPanel(st){
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
+  const iid = "input-"+cursor;
   if (st.result) html += resultBlock();
   html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
     `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
@@ -314,6 +315,7 @@ function renderPanel(st){
     `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += (m.prompt ? `<button class="thinkbtn" onclick="toggleInput(this,'${iid}')">${showInput?"🙈 Hide":"📥 Show"} input</button>` + `<pre class="think ${showInput?"":"hidden"}" id="${iid}">${escapeHtml(m.prompt)}</pre>` : "");
   html += m.thinking
     ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
@@ -338,6 +340,12 @@ function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function toggleInput(btn, id){
+  showInput = !showInput;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showInput?"🙈 Hide":"📥 Show") + " input";
 }
 
 function step(d){

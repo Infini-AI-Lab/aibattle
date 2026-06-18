@@ -55,6 +55,11 @@ HOLDEM_DIR = "runs/holdem_1hand"
 GAMES = {"connect4": {"need": 4}, "gomoku": {"need": 5}}
 THINK_MARK = "===== thinking ====="
 ANSWER_MARK = "===== answer ====="
+# Cap stored reasoning so replay payloads stay loadable in the browser. Inline-
+# reasoning models can emit tens of KB per move; uncapped, a single match pair
+# file reached 120 MB+ and froze the viewer. 6k chars keeps the gist. Mirrors
+# build_new_games_replays.THINK_CAP.
+THINK_CAP = 6000
 _GOMOKU_COLS = "ABCDEFGHI"
 _PLAYERS = ("player_0", "player_1")
 
@@ -102,8 +107,31 @@ def _split_thinking(raw: str) -> str:
         return ""
     if THINK_MARK in raw:
         body = raw.split(THINK_MARK, 1)[1]
-        return body.split(ANSWER_MARK, 1)[0].strip()
-    return raw.strip()
+        return _cap_thinking(body.split(ANSWER_MARK, 1)[0].strip())
+    return _cap_thinking(raw.strip())
+
+
+def _cap_thinking(t: str) -> str:
+    if len(t) > THINK_CAP:
+        return t[:THINK_CAP] + f"\n\n… [reasoning clipped to {THINK_CAP} chars for replay]"
+    return t
+
+
+# The exact prompt string sent to the model (response.prompt). Prompts are small
+# (~0.5-2 KB) but cap defensively against an outlier so a pair file stays loadable.
+PROMPT_CAP = 8000
+
+
+def _cap_prompt(p: str) -> str:
+    p = p or ""
+    if len(p) > PROMPT_CAP:
+        return p[:PROMPT_CAP] + f"\n\n… [prompt clipped to {PROMPT_CAP} chars for replay]"
+    return p
+
+
+def _input_of(s: dict) -> str:
+    """The prompt sent to the model for this step (v2 runs; '' for v1)."""
+    return _cap_prompt((s.get("response") or {}).get("prompt") or "")
 
 
 def _thinking_lookup(pair_dir: str) -> dict:
@@ -162,7 +190,7 @@ def _prompt_lookup(pair_dir: str) -> dict:
     return out
 
 
-def _encode_move(game: str, s: dict, thinking: str) -> dict:
+def _encode_move(game: str, s: dict, thinking: str, prompt: str = "") -> dict:
     invalid = bool(s.get("invalid"))
     mv = {
         "ply": s["step"],
@@ -172,6 +200,7 @@ def _encode_move(game: str, s: dict, thinking: str) -> dict:
         "latency_ms": (s.get("response") or {}).get("metadata", {}).get("latency_ms"),
         "tokens": (s.get("response") or {}).get("metadata", {}).get("completion_tokens"),
         "thinking": thinking,
+        "prompt": _cap_prompt(prompt) or None,
         "trunc": _truncated(thinking, invalid),
     }
     if game == "connect4":
@@ -197,13 +226,16 @@ def build_game(game: str, need: int):
     manifest_pairs = []
     for g in data["games"]:
         a, b = g["a"], g["b"]
-        think = _thinking_lookup(os.path.join(data_dir, f"{game}__{a}__vs__{b}"))
+        pair_dir = os.path.join(data_dir, f"{game}__{a}__vs__{b}")
+        think = _thinking_lookup(pair_dir)
+        prompts = _prompt_lookup(pair_dir)
 
         episodes, man_eps = [], []
         for e in g["episodes"]:
             init_board = (e["steps"][0]["observation"]["public"]["board"]
                           if e["steps"] else [[None] * cols for _ in range(rows)])
-            moves = [_encode_move(game, s, think.get((e["episode"], s["step"]), ""))
+            moves = [_encode_move(game, s, think.get((e["episode"], s["step"]), ""),
+                                  prompts.get((e["episode"], s["step"]), ""))
                      for s in e["steps"]]
             episodes.append({
                 "episode": e["episode"],
@@ -284,7 +316,7 @@ def _holdem_move(s: dict, thinking: str, prompt: str = "") -> dict:
         # v2 runs record the exact prompt string sent to the model; v1 has none.
         # The aggregate JSON trims it, so it is recovered from the ep files and
         # passed in (see _prompt_lookup).
-        "prompt": prompt or None,
+        "prompt": _cap_prompt(prompt) or None,
         "trunc": _truncated(thinking, invalid),
     }
 
@@ -410,7 +442,8 @@ def _match_move(s: dict) -> dict:
         "chips": {me: pub.get("match_your_chips"), _other(me): pub.get("match_opp_chips")},
         "invalid": invalid, "latency_ms": _meta(s, "latency_ms"),
         "tokens": _meta(s, "completion_tokens"),
-        "thinking": thinking, "trunc": _truncated(thinking, invalid),
+        "thinking": thinking, "prompt": _input_of(s) or None,
+        "trunc": _truncated(thinking, invalid),
     }
 
 
@@ -492,7 +525,8 @@ def _table_move(s: dict) -> dict:
         "button": pub.get("button"), "seats": pub.get("seats"),
         "invalid": invalid, "latency_ms": _meta(s, "latency_ms"),
         "tokens": _meta(s, "completion_tokens"),
-        "thinking": thinking, "trunc": _truncated(thinking, invalid),
+        "thinking": thinking, "prompt": _input_of(s) or None,
+        "trunc": _truncated(thinking, invalid),
     }
 
 
@@ -549,6 +583,74 @@ def build_table():
           f"({total/1e6:.1f} MB total)")
 
 
+def _bare(name):
+    """Drop the '-coached' agent suffix; the site shows bare model names."""
+    if isinstance(name, str) and name.endswith("-coached"):
+        return name[: -len("-coached")]
+    return name
+
+
+def build_kuhn():
+    """Heads-up Kuhn poker: one file per pairing, one hand per episode. Steps
+    (with reasoning) live inline in kuhn_data.json, so we build straight from it.
+    Both private cards are recoverable because each player acts at least once."""
+    path = "runs/kuhn_poker/kuhn_data.json"
+    if not os.path.exists(path):
+        print(f"skip kuhn: no data at {path}")
+        return
+    data = json.load(open(path))
+    out_dir = os.path.join("runs/kuhn_poker", "replays", "kuhn")
+    os.makedirs(out_dir, exist_ok=True)
+
+    manifest_pairs = []
+    for g in data["pairs"]:
+        a, b = _bare(g["a"]), _bare(g["b"])
+        # The re-aggregated kuhn_data.json trims BOTH response.raw_output and
+        # response.prompt, so recover reasoning + prompt from the ep files.
+        pair_dir = os.path.join("runs/kuhn_poker", f"{g['a']}__vs__{g['b']}")
+        think = _thinking_lookup(pair_dir)
+        prompts = _prompt_lookup(pair_dir)
+        episodes = []
+        for e in g["episodes"]:
+            seat = {k: _bare(v) for k, v in e["seat_assignment"].items()}
+            cards, moves = {}, []
+            for s in e.get("steps", []):
+                me = s["player"]
+                card = (s["observation"].get("private") or {}).get("card")
+                if card and me not in cards:
+                    cards[me] = card
+                pub = s["observation"].get("public") or {}
+                th = think.get((e["episode"], s["step"]), ""); inv = bool(s.get("invalid"))
+                moves.append({
+                    "ply": s["step"], "player": me, "agent": _bare(s["agent_name"]),
+                    "action": s.get("selected_action"), "pot": pub.get("pot"),
+                    "invalid": inv, "latency_ms": _meta(s, "latency_ms"),
+                    "tokens": _meta(s, "completion_tokens"),
+                    "thinking": th,
+                    "prompt": _cap_prompt(prompts.get((e["episode"], s["step"]), "")) or None,
+                    "trunc": _truncated(th, inv),
+                })
+            # pot starts at the 2-chip ante and grows 1 per bet and per call
+            final_pot = 2 + sum(1 for m in moves if m["action"] in ("bet", "call"))
+            reason = "fold" if moves and moves[-1]["action"] == "fold" else "showdown"
+            episodes.append({
+                "episode": e["episode"], "seat_assignment": seat, "cards": cards,
+                "pot": final_pot, "returns": e["returns"], "winner": e.get("winner"),
+                "winner_name": _bare(e.get("winner_name")), "reason": reason,
+                "length": e.get("length", len(moves)), "moves": moves,
+            })
+        fname = f"kuhn__{a}__vs__{b}.json"
+        json.dump({"game": "kuhn", "a": a, "b": b, "episodes": episodes},
+                  open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
+        manifest_pairs.append({"file": fname, "a": a, "b": b})
+
+    json.dump({"game": "kuhn", "pairs": manifest_pairs},
+              open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8"))
+    total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
+    print(f"[kuhn] wrote {len(manifest_pairs)} pairings + manifest to {out_dir} "
+          f"({total/1e6:.1f} MB)")
+
+
 def main():
     for game, cfg in GAMES.items():
         path = os.path.join("runs", game, f"{game}_data.json")
@@ -559,6 +661,7 @@ def main():
     build_holdem()
     build_match()
     build_table()
+    build_kuhn()
 
 
 if __name__ == "__main__":

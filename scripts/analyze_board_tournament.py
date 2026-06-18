@@ -47,6 +47,18 @@ PLAYERS = ["player_0", "player_1"]
 PHASES = ["early", "mid", "late"]
 TITLE = {"connect4": "🔴 Connect Four", "gomoku": "⚫ Gomoku-Lite"}
 FAVICON = {"connect4": "🔴", "gomoku": "⚫"}
+# Short intro per game (shown as a callout under the header, like the Kuhn page).
+INTRO = {
+    "connect4": ("Connect Four is a <b>solved</b>, perfect-information game — drop "
+                 "discs to make four in a row. With no hidden information or chance, "
+                 "every position has a known best move, so beyond results we score "
+                 "<b>tactical accuracy</b>: taking immediate wins and blocking the "
+                 "opponent's immediate threats."),
+    "gomoku": ("Gomoku-Lite is a perfect-information game — place stones to make five "
+               "in a row on a 9×9 board. Like Connect Four it rewards reading immediate "
+               "threats, so we score <b>tactical accuracy</b> (win-take / block rate) "
+               "alongside head-to-head results."),
+}
 
 
 def _favicon(emoji: str) -> str:
@@ -59,7 +71,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 
 def _other(p):
@@ -425,11 +437,10 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
-    # Per-move replay viewer exists for both board games. The coached variant
-    # has no replay viewers built (they fetch run data at runtime), so omit it.
-    # Coached runs have no replay viewer built; omit the button so it never 404s.
-    replay_btn = ""
-    # Single leading emoji + plain name, matching the Hold'em report header style.
+    # Per-move replay viewer exists for both board games (reports/<game>_replay.html).
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=15">'
+                  f'▶ watch game replays</a>')
+    # Emoji + plain name lead the subtitle; the h1 is the shell-prompt path.
     emoji, name = TITLE[game].split(" ", 1)
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
@@ -445,9 +456,11 @@ def render_game(game: str, rep: dict) -> str:
   .cell {{ width:14px; height:14px; }}
 </style></head>
 <body><div class="wrap">
-  <h1>{emoji} AI Battle Arena — {name}<span class="cursor"></span></h1>
-  <div class="sub">Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
+  <h1>$ ~/aibattle/{game}<span class="cursor"></span></h1>
+  <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
   {replay_btn}
+
+  <div class="callout">{INTRO[game]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
@@ -793,7 +806,7 @@ def render_index(reps: dict) -> str:
   .empty {{ color:var(--dim); font-size:13px; padding:8px 0; }}
 </style></head>
 <body><div class="wrap">
-  <h1>🎲 AI Battle Arena<span class="cursor"></span></h1>
+  <h1>$ ai-battle-arena -<span class="cursor"></span></h1>
   <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
     identical pipeline; <b>Agentic Arena</b> is open to any model + any scaffolding.</div>
 

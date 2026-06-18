@@ -38,6 +38,7 @@ coverage.xml
 # Arena run outputs (logs, summaries)
 runs/
 reports/runs
+runs_pre_merge_bak/
 
 # Debug heartbeat logs (per-move progress traces)
 data-log/
@@ -61,3 +62,6 @@ data-log/
 claude-doc/new-games-implementation-plan.md
 
 runs-backup/
+
+# Claude-vs-field tournament log (cloned locally, like runs/)
+aibattle-logs/

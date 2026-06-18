@@ -1,7 +1,7 @@
 [
   {
     "key": "independent_blackjack",
-    "title": "\ud83c\udccf Blackjack",
+    "title": "\ud83c\udca1 Blackjack",
     "href": "blackjack_report.html",
     "group": "imperfect",
     "badges": [
@@ -10,21 +10,21 @@
       "Stochastic"
     ],
     "ranking": [
-      "kimi-k2p6",
       "gpt-oss-120b",
       "glm-5p1",
       "minimax-m2p7",
       "glm-5p2",
-      "minimax-m3",
       "qwen3p7-plus",
+      "minimax-m3",
+      "kimi-k2p6",
       "deepseek-v4-pro"
     ],
-    "meta": "vs dealer \u00b7 100 hands/model \u00b7 mean chips/hand",
-    "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>+0.075/hand</span>"
+    "meta": "vs dealer \u00b7 500 hands/model \u00b7 mean chips/hand",
+    "champ_line": "\ud83c\udfc6 gpt-oss-120b <span class='metric'>+0.033/hand</span>"
   },
   {
     "key": "leduc_poker",
-    "title": "\ud83c\udccf Leduc Poker",
+    "title": "\ud83c\udfb4 Leduc Poker",
     "href": "leduc_report.html",
     "group": "imperfect",
     "badges": [

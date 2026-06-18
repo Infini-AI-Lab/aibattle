@@ -61,6 +61,11 @@ def _blank() -> dict:
 def accumulate(stats: dict, ep: dict, hand_key: str) -> None:
     """Fold one episode's steps into ``stats`` (model -> counters)."""
     seat = ep.get("seat_assignment", {})
+    # The episode glob can match stray matchups on disk (e.g. a model that ran
+    # later but isn't in this tournament's roster). Skip any episode involving a
+    # model we don't track rather than KeyError on stats[m].
+    if any(m not in stats for m in seat.values()):
+        return
     hsmap = {h["hand"]: h for h in ep.get("hand_summaries", [])}
 
     hands = defaultdict(list)

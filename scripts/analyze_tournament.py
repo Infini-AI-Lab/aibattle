@@ -36,7 +36,7 @@ HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -428,8 +428,8 @@ def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
     payload = json.dumps(report)
-    # Coached runs have no replay viewer built; omit the button so it never 404s.
-    replay_btn = ""
+    replay_btn = ('<a class="replaybtn" href="holdem_replay.html?v=15">'
+                  '▶ watch hand replays</a>')
 
     # ranked leaderboard by chip-weighted Elo; raw metrics kept for reference.
     elo = report.get("elo", {})
@@ -448,7 +448,7 @@ def render_html(report: dict) -> str:
         tags = " ".join(f"<span class='tag'>{t}</span>" for t in s["style"]["tags"])
         rows += f"""<tr>
           <td>{i}</td><td class='model'>{m}</td>
-          <td><b>{s['style']['label']}</b> {tags}</td>
+          <td class='stylecell'><div class='slabel'><b>{s['style']['label']}</b></div><div class='stags'>{tags or '&nbsp;'}</div></td>
           <td><b>{elo_disp}</b></td>
           <td class='{chip_cls}'>{s['chips']:+.0f}</td>
           <td class='{chip_cls}'>{s['bb_per_100']:+.1f}</td>
@@ -519,11 +519,21 @@ def render_html(report: dict) -> str:
 {NAV_HEAD}
 <style>{BASE_CSS}
   td.bucket {{ font-weight: 600; }}
+  /* Style cell: label on its own line, behaviour tag(s) on a second line, always
+     two lines so the column never wraps mid-phrase. */
+  td.stylecell {{ white-space:nowrap; line-height:1.5; }}
+  td.stylecell .stags {{ margin-top:2px; }}
 </style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Hold'em 1-Hand Mode<span class="cursor"></span></h1>
-  <div class="sub">heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
+  <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   {replay_btn}
+
+  <div class="callout">Heads-up No-Limit Hold'em with each hand scored independently
+    (bb/100). An imperfect-information game with chance, so beyond results we profile
+    each model's <b>playing style</b> (VPIP / aggression) and rate skill with a
+    <b>chip-weighted, opponent-adjusted Elo</b> — rewarding how much you win, not just
+    how often.</div>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>

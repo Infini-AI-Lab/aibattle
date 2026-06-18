@@ -1,167 +1,65 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Battle Arena — Hold'em Match Replay</title>
+<title>AI Battle Arena — 🃏 Hold'em Match Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>
+<link rel="stylesheet" href="replay.css?v=3">
 <style>
-  :root{
-    --bg:#080a11; --ink:#e8eaf0; --muted:#8b93a7; --faint:#5c6478;
-    --accent:#38bdf8; --line:rgba(255,255,255,.08); --panel:rgba(255,255,255,.025);
-    --red:#dc2647; --green:#4ade80;
-    --disp:'Rajdhani',sans-serif; --body:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
-  }
-  *{box-sizing:border-box}
-  html{color-scheme:dark}
-  body{margin:0; font-family:var(--body); color:var(--ink); background:var(--bg);
-    background-image:
-      radial-gradient(900px 500px at 12% -8%, rgba(56,189,248,.10), transparent 60%),
-      radial-gradient(900px 500px at 88% -8%, rgba(74,222,128,.08), transparent 60%),
-      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
-    background-size:auto,auto,34px 34px,34px 34px; background-attachment:fixed;}
-
-  .wrap{max-width:1180px; margin:0 auto; padding:30px 24px 90px;}
-  .eyebrow{font-family:var(--disp); font-weight:600; letter-spacing:.32em; text-transform:uppercase; font-size:12px; color:var(--accent); margin-bottom:6px;}
-  h1{font-family:var(--disp); font-weight:700; font-size:38px; letter-spacing:.01em; margin:0 0 4px; line-height:1;}
-  .lede{color:var(--muted); font-size:13.5px; max-width:680px; margin-bottom:22px;}
-  .lede b{color:#cdd3e1; font-weight:600;}
-
-  .selectors{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px;}
-  label.sel{display:block; font-family:var(--disp); font-weight:600; letter-spacing:.14em; text-transform:uppercase; font-size:11px; color:var(--faint); margin-bottom:5px;}
-  select{appearance:none; background:#11141d; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:9px 34px 9px 13px; font-family:var(--body); font-size:13px; cursor:pointer;
-    background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238b93a7'/></svg>"); background-repeat:no-repeat; background-position:right 13px center;}
-  select:hover{border-color:#2f3a52;} select:focus{outline:none; border-color:var(--accent);}
-
-  /* match scoreboard */
-  .matchbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; padding:12px 16px;
-    background:var(--panel); border:1px solid var(--line); border-radius:14px;}
-  .mside{display:flex; align-items:baseline; gap:8px;}
-  .mside .nm{font-family:var(--disp); font-weight:700; font-size:16px; color:#fff;}
-  .mside .ch{font-family:var(--mono); font-size:15px; color:#bdf0ff;}
-  .mbar{flex:1; min-width:160px; height:12px; border-radius:999px; overflow:hidden; background:#f472b6; display:flex;}
-  .mbar .fill{background:#60a5fa; height:100%;}
-  .mtag{font-family:var(--disp); font-weight:600; letter-spacing:.1em; text-transform:uppercase; font-size:11px; color:var(--faint);}
-
-  .stage{display:grid; grid-template-columns:minmax(360px,1fr) minmax(300px,420px); gap:28px; align-items:start;}
+  .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
 
+  /* match scoreboard */
+  .matchbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px; padding:16px 18px;
+    background:var(--panel); border:1px solid var(--line);}
+  .mside{display:flex; align-items:baseline; gap:8px;}
+  .mside .nm{font-weight:700; font-size:13px; color:var(--fg);}
+  .mside .ch{font-size:13px; color:var(--red);}
+  .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:var(--red); display:flex;}
+  .mbar .fill{background:var(--link); height:100%;}
+  .mtag{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim);}
+
+  /* poker table */
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
-    background:radial-gradient(130% 100% at 50% 50%,#15573f,#0c3a2c 68%,#0a2a21);
-    border:1px solid #1f6b52; border-radius:90px/64px; padding:24px 22px;
-    box-shadow:inset 0 0 70px rgba(0,0,0,.55), 0 22px 54px -22px rgba(0,0,0,.75);}
-  .seat{display:flex; align-items:center; gap:14px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.1);
-    border-radius:14px; padding:10px 14px; min-width:320px; position:relative; transition:.15s;}
-  .seat.acting{border-color:var(--accent); box-shadow:0 0 20px rgba(56,189,248,.4);}
-  .seat.winner{border-color:var(--green); box-shadow:0 0 24px rgba(74,222,128,.4);}
-  .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
-    font-family:var(--disp); font-weight:700; font-size:16px; background:#0e1626; border:1px solid rgba(255,255,255,.14);}
-  .seat .meta{flex:1; min-width:0;}
-  .seat .nm{font-family:var(--disp); font-weight:700; font-size:17px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .seat .sub{font-size:11px; color:var(--muted); font-family:var(--mono); margin-top:2px;}
-  .pos{font-family:var(--disp); font-weight:600; font-size:10px; letter-spacing:.08em; color:#0a0d14; background:#cbd2dd; border-radius:5px; padding:1px 6px; margin-left:6px;}
-  .pos.btn{background:#fbbf24;}
+    background:var(--faint); border:1px solid var(--line); padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
+    padding:10px 14px; min-width:320px; position:relative;}
+  .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+  .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
+  .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:15px; background:var(--faint); border:1px solid var(--line);}
+  .seat .meta{flex:1; min-width:0; margin:0;}
+  .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
+  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:var(--panel); background:var(--dim); padding:1px 6px; margin-left:6px;}
+  .pos.btn{background:var(--amber);}
   .holes{display:flex; gap:6px;}
-  .ret{font-family:var(--disp); font-weight:700; font-size:16px;}
-  .ret.pos{color:var(--green);} .ret.neg{color:#fb7185;}
-  .bubble{position:absolute; right:14px; top:-13px; font-family:var(--disp); font-weight:700; font-size:12px; letter-spacing:.04em;
-    padding:3px 10px; border-radius:999px; background:#0e1626; border:1px solid var(--accent); color:#bdf0ff; white-space:nowrap;}
-  .bubble.fold{border-color:#fb7185; color:#fda4af;}
+  .ret{font-weight:700; font-size:14px;}
+  .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
+  .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
+    padding:3px 10px; background:var(--panel); border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+  .bubble.fold{border-color:var(--dim); color:var(--dim);}
 
   .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
-  .potline{font-family:var(--disp); font-weight:600; letter-spacing:.1em; text-transform:uppercase; font-size:12px; color:#cfe8dd;}
-  .potline b{font-size:20px; color:#fff; margin:0 4px;}
   .board{display:flex; gap:7px;}
-
-  .card{width:40px; height:56px; border-radius:7px; background:#f5f7fb; color:#15171c; border:1px solid #c7cedb;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--disp); font-weight:700;
-    box-shadow:0 2px 6px rgba(0,0,0,.45);}
-  .card .r{font-size:18px; line-height:1;} .card .s{font-size:15px; line-height:1;}
-  .card.red{color:#d4183d;}
-  .card.back{background:repeating-linear-gradient(45deg,#2b3656,#2b3656 4px,#222c46 4px,#222c46 8px); border:1px solid #3c4868;}
-  .card.empty{background:rgba(255,255,255,.05); border:1px dashed rgba(255,255,255,.14); box-shadow:none;}
-  .card.unknown{background:#241b2e; border:1px dashed #6d5a8a; color:#b794d6; box-shadow:none; justify-content:center;}
-  .card.unknown::after{content:"?"; font-size:20px;}
-
-  .deck{margin-top:18px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px;}
-  .deckrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
-  button.btn{font-family:var(--disp); font-weight:600; letter-spacing:.03em; font-size:14px; background:#141926; color:var(--ink);
-    border:1px solid var(--line); border-radius:10px; padding:9px 13px; cursor:pointer; transition:.13s; display:inline-flex; align-items:center; gap:6px;}
-  button.btn:hover{border-color:var(--accent); color:#fff; transform:translateY(-1px);}
-  button.btn:active{transform:translateY(0);} button.btn:disabled{opacity:.35; cursor:default; transform:none;}
-  button.btn.step{border-color:#2c3850; background:#19223a;}
-  button.btn.primary{background:linear-gradient(180deg,#0e7490,#155e75); border-color:#22d3ee55; color:#e0f7ff;}
-  button.btn.primary:hover{border-color:#67e8f9;}
-  .scrub{display:flex; align-items:center; gap:12px; margin-top:12px;}
-  input[type=range]{-webkit-appearance:none; appearance:none; flex:1; height:6px; border-radius:999px; background:linear-gradient(90deg,#2a3b58,#1a2236); outline:none;}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#bdf0ff,var(--accent)); cursor:pointer; box-shadow:0 0 0 4px rgba(56,189,248,.18), 0 2px 6px rgba(0,0,0,.5);}
-  input[type=range]::-moz-range-thumb{width:16px; height:16px; border:none; border-radius:50%; background:var(--accent); cursor:pointer;}
-  .movecount{font-family:var(--mono); font-size:12px; color:var(--muted); min-width:96px; text-align:right; white-space:nowrap;}
-  .tip{color:var(--faint); font-size:11.5px; margin-top:10px; font-family:var(--mono);}
-
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-  .phead{padding:14px 18px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(255,255,255,.04), transparent);
-    font-family:var(--disp); font-weight:600; letter-spacing:.18em; text-transform:uppercase; font-size:11px; color:var(--faint);}
-  .pbody{padding:18px;}
-  .movenum{font-family:var(--disp); font-weight:700; font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin-bottom:8px;}
-  .movenum b{font-size:36px; color:#fff; letter-spacing:0; margin-right:4px;} .movenum .tot{font-size:15px; color:var(--faint);}
-  .actor{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
-  .actor .who{display:inline-flex; align-items:center; gap:8px; font-family:var(--disp); font-weight:700; font-size:21px; color:#fff;}
-  .seatdot{width:14px; height:14px; border-radius:50%; display:inline-block;}
-  .seatdot.player_0{background:#60a5fa;} .seatdot.player_1{background:#f472b6;}
-  .act{font-family:var(--disp); font-weight:700; font-size:17px; color:#bdf0ff; background:#0e1626; border:1px solid var(--accent); border-radius:8px; padding:1px 10px;}
-  .act.fold{color:#fda4af; border-color:#fb7185;}
-  .meta{color:var(--muted); font-size:12.5px; font-family:var(--mono); margin:10px 0 14px;}
-  .result{background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.3); border-radius:12px; padding:12px 14px; margin-bottom:14px;}
-  .result .rt{font-family:var(--disp); font-weight:700; font-size:16px; color:#bbf7d0;}
-  .result .rs{font-size:12px; color:var(--muted); margin-top:3px; font-family:var(--mono);}
-  .warn{display:flex; gap:8px; align-items:flex-start; background:rgba(251,146,60,.1); border:1px solid rgba(251,146,60,.35); border-radius:10px; padding:9px 12px; margin:0 0 13px; font-size:12.5px; color:#fdba74;}
-  .invalid{color:#fb7185; font-weight:600;}
-  .thinkbtn{font-family:var(--disp); font-weight:600; letter-spacing:.04em; font-size:13.5px; background:#141926; border:1px solid var(--line); color:var(--accent); border-radius:10px; padding:9px 14px; cursor:pointer; transition:.13s;}
-  .thinkbtn:hover{border-color:var(--accent); color:#bdf0ff;}
-  .toktag{display:inline-block; margin-left:10px; font-size:12px; color:var(--muted); font-family:var(--mono); vertical-align:middle;}
-  pre.think{white-space:pre-wrap; word-break:break-word; font-family:var(--mono); font-size:12.5px; line-height:1.62; color:#c4cbdb; background:#070a12; border:1px solid var(--line); border-radius:12px; padding:16px; max-height:460px; overflow:auto; margin-top:13px;}
-  pre.think::-webkit-scrollbar{width:9px;} pre.think::-webkit-scrollbar-thumb{background:#283248; border-radius:9px;}
-  .hidden{display:none;} .hint{color:var(--faint); font-size:12.5px; margin-top:10px;}
-  code{font-family:var(--mono); background:#11141d; padding:1px 5px; border-radius:5px;}
-  .summary{margin-top:24px; background:var(--panel); border:1px solid var(--line); border-radius:16px; overflow:hidden;}
-  .movelist{display:flex; flex-wrap:wrap; gap:7px; padding:16px; max-height:200px; overflow:auto; align-items:center;}
-  .streetsep{flex-basis:100%; font-family:var(--disp); font-weight:600; letter-spacing:.12em; text-transform:uppercase;
-    font-size:10px; color:var(--faint); margin-top:8px;}
-  .streetsep:first-child{margin-top:0;}
-  .mv{display:inline-flex; align-items:center; gap:6px; background:#141926; border:1px solid var(--line); color:var(--ink);
-    border-radius:8px; padding:5px 9px; font-family:var(--mono); font-size:12px; cursor:pointer; transition:.12s;}
-  .mv:hover{border-color:var(--accent);}
-  .mv.cur{border-color:var(--accent); background:#16263a; color:#fff; box-shadow:0 0 0 1px var(--accent);}
-  .mv.trunc{border-color:rgba(251,146,60,.5);}
-  .mv .n{color:var(--faint); font-size:11px;}
-  .mv .d{width:11px; height:11px; border-radius:50%; flex:none;}
-  .mv .d.player_0{background:#60a5fa;} .mv .d.player_1{background:#f472b6;}
-  .movelist::-webkit-scrollbar{width:8px;} .movelist::-webkit-scrollbar-thumb{background:#283248; border-radius:8px;}
-  .reveal{opacity:0; transform:translateY(10px); animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;}
-  @keyframes rise{to{opacity:1; transform:none;}}
-</style><link rel="stylesheet" href="nav.css">
-<script defer src="nav.js"></script>
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow reveal" style="animation-delay:.02s">Match Replay</div>
-  <h1 class="reveal" style="animation-delay:.05s">HOLD'EM · MATCH</h1>
-  <div class="lede reveal" style="animation-delay:.1s">Heads-up duel — stacks carry hand to hand until one player busts (or the hand cap hits).
-    Pick a <b>match</b>, then step through any <b>hand</b>. The scoreboard tracks the running chip count; <b>both hole cards</b> are shown.</div>
+  <h1>$ ~/aibattle/holdem/match/replay<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em Match · heads-up duel — stacks carry hand to hand until one player busts (or the hand cap hits).
+    Pick a <b>match</b>, then step through any <b>hand</b>; the bar tracks the running chip count. <b>Both hole cards</b> are shown.</div>
 
-  <div class="selectors reveal" style="animation-delay:.14s">
+  <div class="selectors">
     <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
     <div><label class="sel">Match</label><select id="matchSel"></select></div>
     <div><label class="sel">Hand</label><select id="handSel"></select></div>
   </div>
 
-  <div class="matchbar reveal" id="matchbar" style="animation-delay:.16s"></div>
+  <div class="matchbar" id="matchbar"></div>
 
   <div class="stage">
-    <div class="reveal" style="animation-delay:.2s">
+    <div>
       <div class="felt">
         <div id="seatTop"></div>
         <div class="middle">
@@ -187,13 +85,13 @@
         <div class="tip">← / → step · space play/pause</div>
       </div>
     </div>
-    <div class="panel reveal" style="animation-delay:.24s">
-      <div class="phead">Action Analysis</div>
+    <div class="panel">
+      <div class="arena-head"><h2>action analysis</h2></div>
       <div class="pbody" id="panel"></div>
     </div>
   </div>
-  <div class="summary reveal" style="animation-delay:.3s">
-    <div class="phead">Action summary · click to jump</div>
+  <div class="summary">
+    <div class="arena-head"><h2>action summary</h2><span class="arena-tag">click to jump</span></div>
     <div class="movelist" id="movelist"></div>
   </div>
 </div>
@@ -209,11 +107,11 @@ const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
                   "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
 function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
 let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
-    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+    cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -244,7 +142,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
     const w = mt.winner_name || "—";
     return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
@@ -409,6 +307,7 @@ function renderPanel(st){
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
+  const iid = "input-"+cursor;
   if (st.result) html += resultBlock();
   html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
     `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
@@ -416,6 +315,7 @@ function renderPanel(st){
     `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += (m.prompt ? `<button class="thinkbtn" onclick="toggleInput(this,'${iid}')">${showInput?"🙈 Hide":"📥 Show"} input</button>` + `<pre class="think ${showInput?"":"hidden"}" id="${iid}">${escapeHtml(m.prompt)}</pre>` : "");
   html += m.thinking
     ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
@@ -431,7 +331,7 @@ function resultBlock(){
   const line = Object.keys(match.seat_assignment).map(s =>
     `${match.seat_assignment[s]} ${fmt(d[s]!=null?d[s]:0)}`).join(" · ");
   const runout = (hand.reason==="showdown" && (hand.final_board||[]).length<5)
-    ? `<div class="rs" style="color:#c9a0e8">⚠ turn/river not recorded — players were all-in; the board runout isn't logged.</div>` : "";
+    ? `<div class="rs" style="color:#6d28d9">⚠ turn/river not recorded — players were all-in; the board runout isn't logged.</div>` : "";
   return `<div class="result"><div class="rt">${title}</div>` +
     `<div class="rs">by ${hand.reason} · ${line}</div>${runout}</div>`;
 }
@@ -440,6 +340,12 @@ function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function toggleInput(btn, id){
+  showInput = !showInput;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showInput?"🙈 Hide":"📥 Show") + " input";
 }
 
 function step(d){

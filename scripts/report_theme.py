@@ -41,7 +41,14 @@ BASE_CSS = """
   td.model, th.model { text-align:left; font-weight:700; color:var(--fg); }
   .pos { color:var(--pos); } .neg { color:var(--neg); } .diag { color:var(--diag); }
   .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
-    border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px; }
+    border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px;
+    white-space:nowrap; }
+  /* Model-family badge (GPT vs Claude pages): green = GPT, indigo = Claude —
+     the site's two accent colors. Inline so it doesn't change row height. */
+  .fam { font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700;
+    vertical-align:middle; }
+  .fam.gpt { background:var(--faint); color:var(--pos); }
+  .fam.claude { background:var(--faint); color:#4338ca; }
 
   .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
   .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
@@ -54,7 +61,9 @@ BASE_CSS = """
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
-  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:var(--red);
+  /* Replay button: the one place a non-token link color is used (indigo),
+     per the terminal-ui SKILL. Sits directly under the subtitle. */
+  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
   @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }

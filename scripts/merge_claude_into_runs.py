@@ -24,8 +24,12 @@ import glob
 import os
 import sys
 
-SRC = ("/Users/haizhong/code/aibattle-logs/"
-       "gpt_claude_fireworks_coached_tournament")
+# The Claude-vs-field tournament log, cloned into the repo (gitignored). Default
+# is repo-relative; override with AIBATTLE_CLAUDE_SRC. abspath() so the symlinks
+# we create under runs/<game>/ resolve regardless of where they live.
+SRC = os.path.abspath(os.environ.get(
+    "AIBATTLE_CLAUDE_SRC",
+    "aibattle-logs/gpt_claude_fireworks_coached_tournament"))
 CLAUDE = {"claude-opus-4.8", "claude-sonnet-4.6"}
 # game -> (dest subdir, name builder given ordered a,b raw model names)
 GAMES = {

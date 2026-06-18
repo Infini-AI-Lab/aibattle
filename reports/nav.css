@@ -7,8 +7,8 @@
    its own later <style>, which would clobber a margin-left set here.
    Colours are hard-coded so the bar looks identical across pages regardless
    of each page's own theme. On narrow screens it falls back to a top bar. */
-body { padding-left:190px; }
-.navbar { position:fixed; left:0; top:0; bottom:0; width:190px; box-sizing:border-box;
+body { padding-left:210px; }
+.navbar { position:fixed; left:0; top:0; bottom:0; width:210px; box-sizing:border-box;
   z-index:50; display:flex; flex-direction:column; align-items:stretch; gap:2px;
   padding:18px 16px; overflow-y:auto;
   background:#ffffff; border-right:2px solid #8f1d1d;
@@ -24,8 +24,13 @@ body { padding-left:190px; }
 .navbar a.nav:hover::before, .navbar a.nav:hover::after { opacity:.45; }
 .navbar a.nav.active { color:#8f1d1d; font-weight:700; }
 .navbar a.nav.active::before, .navbar a.nav.active::after { opacity:1; }
-.navbar a.nav.navsub { padding-left:14px; }
-.navbar .navclust { font-size:12px; color:#b0a99c; margin-top:8px; padding:2px 0; }
+.navbar a.nav.navsub { padding-left:22px; }
+/* Top class: overview / gpt-vs-claude / open-source model elo. A dark-red
+   section header (a link when it has a landing page, a plain span otherwise). */
+.navbar a.nav.navtop, .navbar .navtop { color:#8f1d1d; font-weight:700;
+  font-size:12px; margin-top:12px; padding:4px 0 2px; }
+.navbar a.nav.navtop:hover { color:#1c1c1c; }
+.navbar .navclust { font-size:12px; color:#b0a99c; margin-top:6px; padding:2px 0 2px 10px; }
 @media (max-width:760px) {
   body { padding-left:0; }
   .navbar { position:sticky; top:0; bottom:auto; width:auto;
@@ -34,5 +39,6 @@ body { padding-left:190px; }
     border-right:none; border-bottom:2px solid #8f1d1d; }
   .navbar .brand { margin-bottom:0; margin-right:8px; }
   .navbar a.nav.navsub { padding-left:0; }
-  .navbar .navclust { margin-top:0; }
+  .navbar .navclust { margin-top:0; padding-left:0; }
+  .navbar a.nav.navtop, .navbar .navtop { margin-top:0; padding:0; }
 }

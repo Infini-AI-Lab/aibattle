@@ -26,7 +26,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -65,8 +65,8 @@ def render_html(rep: dict, beh: dict) -> str:
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
     cols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    # Coached runs have no replay viewer built; omit the button so it never 404s.
-    replay_btn = ""
+    replay_btn = ('<a class="replaybtn" href="table_replay.html?v=15">'
+                  '▶ watch table replays</a>')
     rankhdr = "".join(f"<th>#{k}</th>" for k in range(1, n + 1))
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -80,9 +80,12 @@ def render_html(rep: dict, beh: dict) -> str:
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}<style>{EXTRA_CSS}{_STYLE}</style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Hold'em Table Mode</h1>
-  <div class="sub">{n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
+  <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em Table · {n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   {replay_btn}
+  <div class="callout">5-handed ring games scored by <b>average finishing rank</b>.
+    Multi-way play adds position and bubble dynamics, so models are ranked by consistent
+    finishes rather than raw chip swings (top-1 rate over-rewards high-variance play).</div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>

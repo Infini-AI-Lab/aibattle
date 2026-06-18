@@ -40,14 +40,14 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # matching the vocabulary in analyze_board_tournament.GAME_TAXONOMY.
 GAMES = {
     "independent_blackjack": {
-        "dir": "new_games_experiment/independent_blackjack", "kind": "dealer", "title": "🃏 Blackjack", "emoji": "🃏",
-        "href": "blackjack_report.html", "group": "imperfect",
+        "dir": "new_games_experiment/independent_blackjack", "kind": "dealer", "title": "🂡 Blackjack", "emoji": "🂡",
+        "href": "blackjack_report.html", "area": "blackjack", "replay": "blackjack_replay.html", "replay_verb": "hand", "group": "imperfect",
         "badges": ["Imperfect info", "vs Dealer", "Stochastic"],
         "blurb": "Model vs the built-in dealer · hit/stand/double · scored by chip profit",
     },
     "leduc_poker": {
-        "dir": "new_games_experiment/leduc_poker", "kind": "versus", "title": "🃏 Leduc Poker", "emoji": "🃏",
-        "href": "leduc_report.html", "group": "imperfect",
+        "dir": "new_games_experiment/leduc_poker", "kind": "versus", "title": "🎴 Leduc Poker", "emoji": "🎴",
+        "href": "leduc_report.html", "area": "leduc", "replay": "leduc_replay.html", "replay_verb": "hand", "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Stochastic"],
         "blurb": "Imperfect-information poker · 6-card deck · round-robin, seat-swapped",
         # Poker — score is chips, so rate by a chip-weighted Elo and rank by it
@@ -56,19 +56,40 @@ GAMES = {
     },
     "repeated_colonel_blotto": {
         "dir": "new_games_experiment/repeated_colonel_blotto", "kind": "versus", "title": "⚔️ Colonel Blotto", "emoji": "⚔️",
-        "href": "blotto_report.html", "group": "imperfect",
+        "href": "blotto_report.html", "area": "blotto", "replay": "blotto_replay.html", "replay_verb": "game", "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Simultaneous"],
         "blurb": "Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped",
     },
     "othello_lite_6x6": {
         "dir": "new_games_experiment/othello_lite_6x6", "kind": "versus", "title": "⚫ Othello 6×6", "emoji": "⚫",
-        "href": "othello_report.html", "group": "perfect",
+        "href": "othello_report.html", "area": "othello", "replay": "othello_replay.html", "replay_verb": "game", "group": "perfect",
         "badges": ["Perfect info", "2P", "Deterministic"],
         "blurb": "Perfect-information board game · 6×6 board · round-robin, seat-swapped",
     },
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+# Short intro per game (shown as a callout under the header, like the Kuhn page).
+INTRO = {
+    "independent_blackjack": (
+        "Each model plays the <b>same</b> hands against the built-in dealer "
+        "(hit / stand / double), scored by chip profit. The dealer's fixed house edge "
+        "means a negative field net is expected — the signal is who loses least and "
+        "plays soundest (bust / double / natural rates)."),
+    "leduc_poker": (
+        "Leduc Poker is a tiny <b>imperfect-information</b> poker — a 6-card deck and a "
+        "single public card. Small enough to reason about precisely, it tests bluffing "
+        "and value-betting under uncertainty; rated by a chip-weighted Elo like Hold'em."),
+    "repeated_colonel_blotto": (
+        "Repeated Colonel Blotto: each round, <b>simultaneously</b> allocate limited "
+        "troops across fronts — win the most fronts to win the round. No hidden state, "
+        "but simultaneous moves make it a game of strategic misdirection and adaptation."),
+    "othello_lite_6x6": (
+        "Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, "
+        "most discs at the end wins. Late-game swings make lookahead and stable-disc "
+        "control decisive."),
+}
+
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 
 def _favicon(emoji: str) -> str:
@@ -406,8 +427,10 @@ def render_versus(rep: dict) -> str:
 {NAV_HEAD}
 <style>{_HEAD_CSS}</style></head>
 <body><div class="wrap">
-  <h1>{emoji} AI Battle Arena — {name}</h1>
-  <div class="sub">{cfg['blurb']} · {rep['num_games']} games</div>
+  <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
+  <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['num_games']} games</div>
+  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <div class="callout">{INTRO[rep['game']]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(elo[ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
@@ -523,8 +546,10 @@ def render_dealer(rep: dict) -> str:
 {NAV_HEAD}
 <style>{_HEAD_CSS}</style></head>
 <body><div class="wrap">
-  <h1>{emoji} AI Battle Arena — {name}</h1>
-  <div class="sub">{cfg['blurb']} · {rep['total_hands']} hands total</div>
+  <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
+  <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['total_hands']} hands total</div>
+  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <div class="callout">{INTRO[rep['game']]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{pm[champ]['mean_per_hand']:+.3f}</div><div class="l">top mean/hand · {champ}</div></div>

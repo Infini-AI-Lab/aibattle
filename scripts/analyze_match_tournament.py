@@ -28,7 +28,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -101,8 +101,8 @@ def render_html(rep: dict, beh: dict) -> str:
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    # Coached runs have no replay viewer built; omit the button so it never 404s.
-    replay_btn = ""
+    replay_btn = ('<a class="replaybtn" href="match_replay.html?v=15">'
+                  '▶ watch match replays</a>')
 
     trows = ""
     for i, r in enumerate(lb, 1):
@@ -143,9 +143,13 @@ def render_html(rep: dict, beh: dict) -> str:
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}<style>{EXTRA_CSS}{_STYLE}</style></head>
 <body><div class="wrap">
-  <h1>🃏 AI Battle Arena — Hold'em Match Mode</h1>
-  <div class="sub">Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
+  <h1>$ ~/aibattle/holdem/match<span class="cursor"></span></h1>
+  <div class="sub">🃏 Hold'em Match · Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
   {replay_btn}
+  <div class="callout">Heads-up sit-and-go matches: stacks carry across hands and the
+    match winner is whoever busts the other (or leads at the hand cap). Win-or-lose by
+    design — chips don't count past the match outcome — so the <b>Elo rates match
+    wins/losses</b>, opponent-adjusted.</div>
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
   <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>

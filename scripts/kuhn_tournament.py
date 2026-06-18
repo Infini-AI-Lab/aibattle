@@ -110,10 +110,10 @@ def write_report(rows: list):
 <div class="sub">{EPISODES} hands/pair, round-robin · high variance, directional only</div>
 <table><tr><th>#</th><th class='model'>model</th><th>win%</th><th>net/hand</th>
 <th>invalid%</th><th>truncated%</th></tr>{trows}</table></div></body></html>"""
-    os.makedirs(REPORT_DIR, exist_ok=True)
-    for p in (os.path.join(OUT, "kuhn_report.html"),
-              os.path.join(REPORT_DIR, "kuhn_tournament_report.html")):
-        open(p, "w", encoding="utf-8").write(html)
+    # Only the runs/ quick-look copy. The PUBLISHED report
+    # (reports/kuhn_tournament_report.html) is owned by analyze_kuhn_tournament.py,
+    # which renders the full terminal-styled analysis — don't clobber it here.
+    open(os.path.join(OUT, "kuhn_report.html"), "w", encoding="utf-8").write(html)
 
 
 async def main():
