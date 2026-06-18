@@ -42,9 +42,6 @@ def main(data_dir: str) -> None:
 
     for pd in pair_dirs:
         a, b = _models_from_dir(os.path.basename(pd))
-        for m in (a, b):
-            if m not in models:
-                models.append(m)
         episodes = []
         for ep_path in sorted(glob.glob(os.path.join(pd, "ep*.json"))):
             e = json.load(open(ep_path))
@@ -53,6 +50,13 @@ def main(data_dir: str) -> None:
             if fs:
                 starting_stack = max(starting_stack, sum(fs.values()) // len(fs))
             episodes.append({k: e[k] for k in _KEEP if k in e})
+        # Skip pairs with no episodes (e.g. empty placeholder dirs synced from a
+        # partial run) so their models don't leak into the leaderboard.
+        if not episodes:
+            continue
+        for m in (a, b):
+            if m not in models:
+                models.append(m)
         max_eps = max(max_eps, len(episodes))
         pairs.append({"a": a, "b": b, "episodes": episodes})
 

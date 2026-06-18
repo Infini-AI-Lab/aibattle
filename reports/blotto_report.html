@@ -1,75 +1,192 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<html><head><meta charset="utf-8">
 <title>AI Battle Arena — ⚔️ Colonel Blotto</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
-<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=13"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>
 <style>
+  /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
-    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea; --green:#1a7f37; --neg:#b91c1c; }
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+    --pos:#1a7f37; --neg:#b91c1c; --diag:#c9c2b6; }
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
-  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px; }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+  a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
     vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
+  h1 + .sub { margin-bottom:30px; }
   .sub { color:var(--dim); font-size:13px; margin-bottom:30px; }
-  h2 { font-size:15px; margin:0; font-weight:700; }
+  h2 { font-size:15px; margin:36px 0 10px; font-weight:700; }
   h2::before { content:"## "; color:var(--red); }
+  h3 { font-size:14px; color:var(--fg); margin:0 0 6px; }
+  h3::before { content:"### "; color:var(--red); }
   .note { color:var(--dim); font-size:12px; margin:6px 0 14px; }
+  .small { font-size:10px; color:var(--dim); font-weight:400; }
 
-  .arena { margin-top:34px; border:1px solid var(--line); padding:20px 20px 24px;
-    background:var(--panel); }
-  .arena-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
-  .arena-tag { font-size:11px; color:var(--dim); }
-  .arena-tag::before { content:"["; color:var(--red); }
-  .arena-tag::after { content:"]"; color:var(--red); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:7px 10px; text-align:center; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; }
+  td.model, th.model { text-align:left; font-weight:700; color:var(--fg); }
+  .pos { color:var(--pos); } .neg { color:var(--neg); } .diag { color:var(--diag); }
+  .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
+    border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px; }
 
-  table.lb { border-collapse:collapse; width:100%; font-size:13px; margin-top:4px; }
-  table.lb th, table.lb td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:center; }
-  table.lb th { color:var(--dim); font-weight:600; }
-  table.lb td.model, table.lb th.model { text-align:left; font-weight:700; }
-  table.lb td.rk, table.lb th.rk { width:34px; color:var(--dim); }
-  .pos { color:var(--green); } .neg { color:var(--neg); }
-  .scorecell { position:relative; min-width:120px; }
-  .scorecell .bar { position:absolute; left:0; top:50%; transform:translateY(-50%);
-    height:16px; background:var(--red); opacity:.16; }
-  .scorecell .sval { position:relative; font-weight:700; color:var(--red); }
+  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
+  .kpi .v { font-size:22px; font-weight:700; color:var(--fg); }
+  .kpi .l { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; }
 
-  table.h2h { border-collapse:collapse; width:100%; font-size:12px; margin-top:4px; }
-  table.h2h th, table.h2h td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; }
-  table.h2h th { color:var(--dim); font-weight:600; }
-  table.h2h td.model, table.h2h th.model { text-align:left; font-weight:700; }
-  table.h2h td.diag { color:var(--line); }
-  table.h2h .small { font-size:10px; color:var(--dim); }
-
-  /* canonical replay button — matches the board/holdem reports: faint inset,
-     indigo label, sits directly under the subtitle. */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
+  canvas { max-height:340px; }
+  .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Replay button: the one place a non-token link color is used (indigo),
+     per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
-    border:1px solid var(--line); padding:8px 14px; font-size:13px; text-decoration:none; }
+    border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/blotto<span class="cursor"></span></h1>
-  <div class="sub">⚔️ Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 300 games</div>
+  <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 300 games</div>
   <a class="replaybtn" href="blotto_replay.html">▶ watch game replays</a>
-  <section class="arena">
-    <div class="arena-head"><h2>leaderboard</h2>
-      <span class="arena-tag">300 games · 10 deals/pair · first-mover 48%</span></div>
-    <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500);
-      a model with no wins or no losses has no finite rating and is shown as “—”. net/game is the average
-      game payoff (+1 win / −1 loss / 0 draw). Seats swap within every pair, so first-mover advantage is balanced.</div>
-    <table class="lb">
-      <tr><th class='rk'>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-          <th>draw%</th><th>1st-move</th><th>invalid%</th><th>plies</th><th>think</th></tr>
-      <tr><td class='rk'>🥇</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:100%'></span><span class='sval'>1803</span></td><td class='pos'>+0.64</td><td>81%</td><td>2%</td><td>82%</td><td>0.0%</td><td>40.0</td><td>433.0s</td></tr><tr><td class='rk'>🥈</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:91%'></span><span class='sval'>1744</span></td><td class='pos'>+0.52</td><td>75%</td><td>2%</td><td>78%</td><td>0.0%</td><td>40.0</td><td>432.2s</td></tr><tr><td class='rk'>🥉</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:81%'></span><span class='sval'>1680</span></td><td class='pos'>+0.38</td><td>68%</td><td>2%</td><td>66%</td><td>0.0%</td><td>40.0</td><td>338.2s</td></tr><tr><td class='rk'>4</td><td class='model'>minimax-m3</td><td class='scorecell'><span class='bar' style='width:41%'></span><span class='sval'>1421</span></td><td class='neg'>-0.19</td><td>40%</td><td>1%</td><td>38%</td><td>0.0%</td><td>40.0</td><td>161.3s</td></tr><tr><td class='rk'>5</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:6%'></span><span class='sval'>1196</span></td><td class='neg'>-0.64</td><td>18%</td><td>0%</td><td>14%</td><td>0.0%</td><td>40.0</td><td>21.4s</td></tr><tr><td class='rk'>6</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:0%'></span><span class='sval'>1156</span></td><td class='neg'>-0.71</td><td>14%</td><td>1%</td><td>10%</td><td>0.0%</td><td>40.0</td><td>181.2s</td></tr>
-    </table>
-  </section>
 
-  <section class="arena">
-    <div class="arena-head"><h2>head-to-head</h2>
-      <span class="arena-tag">row wins–losses vs column · d = draws</span></div>
-    <table class="h2h"><tr><th class='model'>model</th><th>kimi</th><th>deepseek</th><th>glm</th><th>minimax</th><th>gpt</th><th>minimax</th></tr><tr><td class='model'>kimi-k2p6</td><td class='diag'>—</td><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>9-10<div class='small'>1d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td></tr><tr><td class='model'>deepseek-v4-pro</td><td class='neg'>9-10<div class='small'>1d</div></td><td class='diag'>—</td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>18-1<div class='small'>1d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td></tr><tr><td class='model'>glm-5p1</td><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>4-16<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>18-2<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>16-3<div class='small'>1d</div></td></tr><tr><td class='model'>minimax-m2p7</td><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>1-18<div class='small'>1d</div></td><td class='neg'>2-18<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>7-13<div class='small'>0d</div></td><td class='neg'>4-16<div class='small'>0d</div></td></tr><tr><td class='model'>gpt-oss-120b</td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='pos'>13-7<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>3-17<div class='small'>0d</div></td></tr><tr><td class='model'>minimax-m3</td><td class='neg'>3-17<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>3-16<div class='small'>1d</div></td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
-  </section>
+  <div class="kpis">
+    <div class="kpi"><div class="v">1803</div><div class="l">top Elo · deepseek-v4-pro</div></div>
+    <div class="kpi"><div class="v">48%</div><div class="l">first-mover win rate</div></div>
+    <div class="kpi"><div class="v">300</div><div class="l">games played</div></div>
+    <div class="kpi"><div class="v">10</div><div class="l">deals/pair (seat-swapped)</div></div>
+  </div>
+
+  <h2>🏆 Leaderboard</h2>
+  <table>
+    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
+        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+    <tr>
+          <td>1</td><td class='model'>deepseek-v4-pro</td>
+          <td>1803<div class='small'>±46</div></td>
+          <td class='pos'>+0.64</td>
+          <td>81%</td><td>2%</td>
+          <td>82%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>433.0s</td>
+        </tr><tr>
+          <td>2</td><td class='model'>kimi-k2p6</td>
+          <td>1744<div class='small'>±43</div></td>
+          <td class='pos'>+0.52</td>
+          <td>75%</td><td>2%</td>
+          <td>78%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>432.2s</td>
+        </tr><tr>
+          <td>3</td><td class='model'>glm-5p1</td>
+          <td>1680<div class='small'>±40</div></td>
+          <td class='pos'>+0.38</td>
+          <td>68%</td><td>2%</td>
+          <td>66%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>338.2s</td>
+        </tr><tr>
+          <td>4</td><td class='model'>minimax-m3</td>
+          <td>1421<div class='small'>±41</div></td>
+          <td class='neg'>-0.19</td>
+          <td>40%</td><td>1%</td>
+          <td>38%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>161.3s</td>
+        </tr><tr>
+          <td>5</td><td class='model'>gpt-oss-120b</td>
+          <td>1196<div class='small'>±50</div></td>
+          <td class='neg'>-0.64</td>
+          <td>18%</td><td>0%</td>
+          <td>14%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>21.4s</td>
+        </tr><tr>
+          <td>6</td><td class='model'>minimax-m2p7</td>
+          <td>1156<div class='small'>±53</div></td>
+          <td class='neg'>-0.71</td>
+          <td>14%</td><td>1%</td>
+          <td>10%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>181.2s</td>
+        </tr>
+  </table>
+  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500). ± is one bootstrap SD (resampling games 300×); ratings within ±1
+    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
+    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
+    every pair, so first-mover advantage is balanced across the field.</div>
+
+  <div class="grid2">
+    <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
+    <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
+  </div>
+  <div class="grid2">
+    <div><h3>Net result per game</h3><canvas id="net"></canvas></div>
+    <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
+  </div>
+
+  <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
+  <table class='h2h'><tr><th></th><th>kimi-k2p6</th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>minimax-m2p7</th><th>gpt-oss-120b</th><th>minimax-m3</th></tr><tr><th class='model'>kimi-k2p6</th><td class='diag'>—</td><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>9-10<div class='small'>1d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td></tr><tr><th class='model'>deepseek-v4-pro</th><td class='neg'>9-10<div class='small'>1d</div></td><td class='diag'>—</td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>18-1<div class='small'>1d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td></tr><tr><th class='model'>glm-5p1</th><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>4-16<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>18-2<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>16-3<div class='small'>1d</div></td></tr><tr><th class='model'>minimax-m2p7</th><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>1-18<div class='small'>1d</div></td><td class='neg'>2-18<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>7-13<div class='small'>0d</div></td><td class='neg'>4-16<div class='small'>0d</div></td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='pos'>13-7<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>3-17<div class='small'>0d</div></td></tr><tr><th class='model'>minimax-m3</th><td class='neg'>3-17<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>3-16<div class='small'>1d</div></td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
+
+<script>
+const R = {"game": "repeated_colonel_blotto", "kind": "versus", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b", "minimax-m3"], "per_model": {"kimi-k2p6": {"games": 100, "wins": 75, "losses": 23, "draws": 2, "win_rate": 0.75, "draw_rate": 0.02, "net_per_game": 0.52, "first_move_win_rate": 0.78, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 432.2, "len_hist": [100]}, "deepseek-v4-pro": {"games": 100, "wins": 81, "losses": 17, "draws": 2, "win_rate": 0.81, "draw_rate": 0.02, "net_per_game": 0.64, "first_move_win_rate": 0.82, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 433.0, "len_hist": [100]}, "glm-5p1": {"games": 100, "wins": 68, "losses": 30, "draws": 2, "win_rate": 0.68, "draw_rate": 0.02, "net_per_game": 0.38, "first_move_win_rate": 0.66, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 338.2, "len_hist": [100]}, "minimax-m2p7": {"games": 100, "wins": 14, "losses": 85, "draws": 1, "win_rate": 0.14, "draw_rate": 0.01, "net_per_game": -0.71, "first_move_win_rate": 0.1, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 181.2, "len_hist": [100]}, "gpt-oss-120b": {"games": 100, "wins": 18, "losses": 82, "draws": 0, "win_rate": 0.18, "draw_rate": 0.0, "net_per_game": -0.64, "first_move_win_rate": 0.14, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 21.4, "len_hist": [100]}, "minimax-m3": {"games": 100, "wins": 40, "losses": 59, "draws": 1, "win_rate": 0.4, "draw_rate": 0.01, "net_per_game": -0.19, "first_move_win_rate": 0.38, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 161.3, "len_hist": [100]}}, "h2h": {"kimi-k2p6": {"deepseek-v4-pro": [10, 9, 1], "glm-5p1": [9, 10, 1], "minimax-m2p7": [20, 0, 0], "gpt-oss-120b": [19, 1, 0], "minimax-m3": [17, 3, 0]}, "deepseek-v4-pro": {"kimi-k2p6": [9, 10, 1], "glm-5p1": [16, 4, 0], "minimax-m2p7": [18, 1, 1], "gpt-oss-120b": [19, 1, 0], "minimax-m3": [19, 1, 0]}, "glm-5p1": {"kimi-k2p6": [10, 9, 1], "deepseek-v4-pro": [4, 16, 0], "minimax-m2p7": [18, 2, 0], "gpt-oss-120b": [20, 0, 0], "minimax-m3": [16, 3, 1]}, "minimax-m2p7": {"kimi-k2p6": [0, 20, 0], "deepseek-v4-pro": [1, 18, 1], "glm-5p1": [2, 18, 0], "gpt-oss-120b": [7, 13, 0], "minimax-m3": [4, 16, 0]}, "gpt-oss-120b": {"kimi-k2p6": [1, 19, 0], "deepseek-v4-pro": [1, 19, 0], "glm-5p1": [0, 20, 0], "minimax-m2p7": [13, 7, 0], "minimax-m3": [3, 17, 0]}, "minimax-m3": {"kimi-k2p6": [3, 17, 0], "deepseek-v4-pro": [1, 19, 0], "glm-5p1": [3, 16, 1], "minimax-m2p7": [16, 4, 0], "gpt-oss-120b": [17, 3, 0]}}, "elo": {"kimi-k2p6": 1744, "deepseek-v4-pro": 1803, "glm-5p1": 1680, "minimax-m2p7": 1156, "gpt-oss-120b": 1196, "minimax-m3": 1421}, "elo_ci": {"kimi-k2p6": {"sd": 42.6, "lo": 1676, "hi": 1838}, "deepseek-v4-pro": {"sd": 45.9, "lo": 1730, "hi": 1908}, "glm-5p1": {"sd": 40.4, "lo": 1608, "hi": 1758}, "minimax-m2p7": {"sd": 53.0, "lo": 1049, "hi": 1250}, "gpt-oss-120b": {"sd": 50.1, "lo": 1078, "hi": 1283}, "minimax-m3": {"sd": 40.6, "lo": 1340, "hi": 1500}}, "elo_basis": "wins", "len_bins": ["40\u201340"], "first_player_win_rate": 0.48, "num_games": 300, "episodes_per_pair": 20};
+const pm=R.per_model, M=R.models;
+
+Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';
+Chart.defaults.font.family='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const ACCENT='#8f1d1d';
+const PALETTE=['#8f1d1d','#b45309','#1a7f37','#1d4ed8','#6d28d9','#be185d','#0f766e'];
+
+const COLORS=PALETTE;
+const eloRanked=[...M].filter(m=>R.elo[m]!=null).sort((a,b)=>R.elo[b]-R.elo[a]);
+const ELO_CI = R.elo_ci || {};
+// Horizontal ±1-SD whisker over each Elo bar (bootstrap uncertainty).
+const eloWhiskers = { id:'eloWhiskers', afterDatasetsDraw(c) {
+  const {ctx, scales:{x, y}} = c;
+  ctx.save(); ctx.strokeStyle='#1c1c1c'; ctx.lineWidth=1.5;
+  eloRanked.forEach((m, i) => {
+    const ci = ELO_CI[m]; if (!ci || ci.sd == null) return;
+    const yc = y.getPixelForValue(i), cap = 5;
+    const x1 = x.getPixelForValue(R.elo[m]-ci.sd), x2 = x.getPixelForValue(R.elo[m]+ci.sd);
+    ctx.beginPath();
+    ctx.moveTo(x1, yc); ctx.lineTo(x2, yc);
+    ctx.moveTo(x1, yc-cap); ctx.lineTo(x1, yc+cap);
+    ctx.moveTo(x2, yc-cap); ctx.lineTo(x2, yc+cap);
+    ctx.stroke();
+  });
+  ctx.restore();
+} };
+new Chart(document.getElementById('elo'), { type:'bar',
+  data:{ labels:eloRanked, datasets:[{label:'Elo', backgroundColor:ACCENT,
+    data:eloRanked.map(m=>R.elo[m])}]},
+  options:{ indexAxis:'y',
+    scales:{x:{min:eloRanked.length?Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20:0}},
+    plugins:{legend:{display:false}} }, plugins:[eloWhiskers] });
+
+new Chart(document.getElementById('wdl'), { type:'bar',
+  data:{ labels:M, datasets:[
+    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
+    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
+    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+  ]},
+  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });
+
+new Chart(document.getElementById('net'), { type:'bar',
+  data:{ labels:M, datasets:[{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),
+    data:M.map(m=>pm[m].net_per_game)}]},
+  options:{ plugins:{legend:{display:false}} } });
+
+new Chart(document.getElementById('len'), { type:'bar',
+  data:{ labels:R.len_bins, datasets:M.map((m,i)=>({label:m,
+    backgroundColor:COLORS[i%COLORS.length], data:pm[m].len_hist}))},
+  options:{ scales:{y:{title:{display:true,text:'games'}}},
+    plugins:{legend:{position:'bottom'}} } });
+</script>
 </div></body></html>

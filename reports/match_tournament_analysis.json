@@ -4,60 +4,91 @@
     "gpt-oss-120b",
     "kimi-k2p6",
     "glm-5p1",
-    "minimax-m2p7"
+    "minimax-m2p7",
+    "minimax-m3"
   ],
   "max_hands": 30,
   "episodes_per_pair": 40,
+  "elo": {
+    "deepseek-v4-pro": 1542,
+    "gpt-oss-120b": 1499,
+    "kimi-k2p6": 1551,
+    "glm-5p1": 1551,
+    "minimax-m2p7": 1437,
+    "minimax-m3": 1420
+  },
   "leaderboard": [
     {
-      "model": "deepseek-v4-pro",
-      "matches": 160,
-      "win_rate": 0.575,
-      "wins": 92,
-      "draws": 0,
-      "busted_out_rate": 0.062,
-      "avg_hands_per_match": 28.4,
-      "avg_win_margin": 108.9
-    },
-    {
       "model": "kimi-k2p6",
-      "matches": 160,
-      "win_rate": 0.575,
-      "wins": 92,
+      "matches": 200,
+      "elo": 1551,
+      "elo_sd": 21.8,
+      "win_rate": 0.585,
+      "wins": 117,
       "draws": 0,
-      "busted_out_rate": 0.094,
-      "avg_hands_per_match": 27.7,
-      "avg_win_margin": 143.9
+      "busted_out_rate": 0.105,
+      "avg_hands_per_match": 27.6,
+      "avg_win_margin": 146.6
     },
     {
       "model": "glm-5p1",
-      "matches": 160,
-      "win_rate": 0.544,
-      "wins": 87,
+      "matches": 200,
+      "elo": 1551,
+      "elo_sd": 21.3,
+      "win_rate": 0.585,
+      "wins": 117,
       "draws": 0,
-      "busted_out_rate": 0.094,
-      "avg_hands_per_match": 28.7,
-      "avg_win_margin": 115.4
+      "busted_out_rate": 0.09,
+      "avg_hands_per_match": 28.8,
+      "avg_win_margin": 108.6
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "matches": 200,
+      "elo": 1542,
+      "elo_sd": 23.1,
+      "win_rate": 0.57,
+      "wins": 114,
+      "draws": 0,
+      "busted_out_rate": 0.07,
+      "avg_hands_per_match": 28.2,
+      "avg_win_margin": 114.7
     },
     {
       "model": "gpt-oss-120b",
-      "matches": 160,
-      "win_rate": 0.45,
-      "wins": 72,
-      "draws": 0,
-      "busted_out_rate": 0.087,
-      "avg_hands_per_match": 27.3,
-      "avg_win_margin": 189.9
+      "matches": 200,
+      "elo": 1499,
+      "elo_sd": 21.9,
+      "win_rate": 0.495,
+      "wins": 99,
+      "draws": 1,
+      "busted_out_rate": 0.08,
+      "avg_hands_per_match": 27.2,
+      "avg_win_margin": 193.2
     },
     {
       "model": "minimax-m2p7",
-      "matches": 160,
-      "win_rate": 0.356,
-      "wins": 57,
+      "matches": 200,
+      "elo": 1437,
+      "elo_sd": 22.4,
+      "win_rate": 0.395,
+      "wins": 79,
       "draws": 0,
-      "busted_out_rate": 0.138,
-      "avg_hands_per_match": 28.3,
-      "avg_win_margin": 178.0
+      "busted_out_rate": 0.145,
+      "avg_hands_per_match": 28.1,
+      "avg_win_margin": 169.2
+    },
+    {
+      "model": "minimax-m3",
+      "matches": 200,
+      "elo": 1420,
+      "elo_sd": 23.0,
+      "win_rate": 0.365,
+      "wins": 73,
+      "draws": 1,
+      "busted_out_rate": 0.135,
+      "avg_hands_per_match": 27.6,
+      "avg_win_margin": 195.5
     }
   ],
   "h2h_wins": {
@@ -66,35 +97,48 @@
       "gpt-oss-120b": 22,
       "kimi-k2p6": 15,
       "glm-5p1": 26,
-      "minimax-m2p7": 29
+      "minimax-m2p7": 29,
+      "minimax-m3": 22
     },
     "gpt-oss-120b": {
       "deepseek-v4-pro": 18,
       "gpt-oss-120b": 0,
       "kimi-k2p6": 19,
       "glm-5p1": 13,
-      "minimax-m2p7": 22
+      "minimax-m2p7": 22,
+      "minimax-m3": 27
     },
     "kimi-k2p6": {
       "deepseek-v4-pro": 25,
       "gpt-oss-120b": 21,
       "kimi-k2p6": 0,
       "glm-5p1": 21,
-      "minimax-m2p7": 25
+      "minimax-m2p7": 25,
+      "minimax-m3": 25
     },
     "glm-5p1": {
       "deepseek-v4-pro": 14,
       "gpt-oss-120b": 27,
       "kimi-k2p6": 19,
       "glm-5p1": 0,
-      "minimax-m2p7": 27
+      "minimax-m2p7": 27,
+      "minimax-m3": 30
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 11,
       "gpt-oss-120b": 18,
       "kimi-k2p6": 15,
       "glm-5p1": 13,
-      "minimax-m2p7": 0
+      "minimax-m2p7": 0,
+      "minimax-m3": 22
+    },
+    "minimax-m3": {
+      "deepseek-v4-pro": 18,
+      "gpt-oss-120b": 12,
+      "kimi-k2p6": 15,
+      "glm-5p1": 10,
+      "minimax-m2p7": 18,
+      "minimax-m3": 0
     }
   },
   "h2h_played": {
@@ -103,181 +147,223 @@
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
       "glm-5p1": 40,
-      "minimax-m2p7": 40
+      "minimax-m2p7": 40,
+      "minimax-m3": 40
     },
     "gpt-oss-120b": {
       "deepseek-v4-pro": 40,
       "gpt-oss-120b": 0,
       "kimi-k2p6": 40,
       "glm-5p1": 40,
-      "minimax-m2p7": 40
+      "minimax-m2p7": 40,
+      "minimax-m3": 40
     },
     "kimi-k2p6": {
       "deepseek-v4-pro": 40,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 0,
       "glm-5p1": 40,
-      "minimax-m2p7": 40
+      "minimax-m2p7": 40,
+      "minimax-m3": 40
     },
     "glm-5p1": {
       "deepseek-v4-pro": 40,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
       "glm-5p1": 0,
-      "minimax-m2p7": 40
+      "minimax-m2p7": 40,
+      "minimax-m3": 40
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 40,
       "gpt-oss-120b": 40,
       "kimi-k2p6": 40,
       "glm-5p1": 40,
-      "minimax-m2p7": 0
+      "minimax-m2p7": 0,
+      "minimax-m3": 40
+    },
+    "minimax-m3": {
+      "deepseek-v4-pro": 40,
+      "gpt-oss-120b": 40,
+      "kimi-k2p6": 40,
+      "glm-5p1": 40,
+      "minimax-m2p7": 40,
+      "minimax-m3": 0
     }
   },
   "behavior": {
     "deepseek-v4-pro": {
-      "decisions": 9404,
-      "hands": 4018,
+      "decisions": 11850,
+      "hands": 5004,
       "vpip": 0.526,
-      "pfr": 0.319,
-      "aggression": 0.597,
-      "fold_to_bet": 0.441,
-      "allin_rate": 0.003,
+      "pfr": 0.317,
+      "aggression": 0.601,
+      "fold_to_bet": 0.442,
+      "allin_rate": 0.004,
       "avg_betsize": 1.32,
-      "wtsd": 0.201,
+      "wtsd": 0.211,
       "wsd": 0.558,
-      "hand_win": 0.371,
-      "avg_tokens": 1419,
-      "avg_latency_s": 26.2,
+      "hand_win": 0.366,
+      "avg_tokens": 1446,
+      "avg_latency_s": 25.4,
       "action_mix": {
-        "fold": 0.231,
-        "check": 0.354,
-        "call": 0.167,
-        "bet": 0.121,
-        "raise": 0.124,
-        "all_in": 0.003
+        "fold": 0.228,
+        "check": 0.361,
+        "call": 0.164,
+        "bet": 0.122,
+        "raise": 0.122,
+        "all_in": 0.004
       },
       "street_aggr": {
-        "preflop": 0.304,
-        "flop": 0.219,
-        "turn": 0.216,
+        "preflop": 0.303,
+        "flop": 0.22,
+        "turn": 0.219,
         "river": 0.134
       }
     },
     "gpt-oss-120b": {
-      "decisions": 8557,
-      "hands": 3864,
-      "vpip": 0.605,
-      "pfr": 0.372,
-      "aggression": 0.69,
-      "fold_to_bet": 0.419,
-      "allin_rate": 0.019,
-      "avg_betsize": 1.53,
-      "wtsd": 0.152,
-      "wsd": 0.48,
-      "hand_win": 0.435,
-      "avg_tokens": 851,
-      "avg_latency_s": 5.1,
+      "decisions": 10799,
+      "hands": 4803,
+      "vpip": 0.606,
+      "pfr": 0.37,
+      "aggression": 0.693,
+      "fold_to_bet": 0.414,
+      "allin_rate": 0.018,
+      "avg_betsize": 1.51,
+      "wtsd": 0.164,
+      "wsd": 0.494,
+      "hand_win": 0.438,
+      "avg_tokens": 861,
+      "avg_latency_s": 5.2,
       "action_mix": {
-        "fold": 0.219,
-        "check": 0.272,
-        "call": 0.158,
-        "bet": 0.195,
+        "fold": 0.213,
+        "check": 0.275,
+        "call": 0.157,
+        "bet": 0.2,
         "raise": 0.137,
-        "all_in": 0.019
+        "all_in": 0.018
       },
       "street_aggr": {
-        "preflop": 0.354,
-        "flop": 0.359,
-        "turn": 0.324,
-        "river": 0.356
+        "preflop": 0.353,
+        "flop": 0.371,
+        "turn": 0.329,
+        "river": 0.358
       }
     },
     "kimi-k2p6": {
-      "decisions": 9439,
-      "hands": 3838,
-      "vpip": 0.614,
-      "pfr": 0.445,
-      "aggression": 0.621,
-      "fold_to_bet": 0.362,
+      "decisions": 11977,
+      "hands": 4806,
+      "vpip": 0.616,
+      "pfr": 0.435,
+      "aggression": 0.618,
+      "fold_to_bet": 0.363,
       "allin_rate": 0.003,
-      "avg_betsize": 1.32,
-      "wtsd": 0.235,
-      "wsd": 0.508,
-      "hand_win": 0.429,
-      "avg_tokens": 8204,
-      "avg_latency_s": 83.5,
+      "avg_betsize": 1.31,
+      "wtsd": 0.256,
+      "wsd": 0.522,
+      "hand_win": 0.421,
+      "avg_tokens": 8280,
+      "avg_latency_s": 82.0,
       "action_mix": {
-        "fold": 0.185,
-        "check": 0.359,
-        "call": 0.173,
+        "fold": 0.183,
+        "check": 0.365,
+        "call": 0.172,
         "bet": 0.129,
-        "raise": 0.151,
+        "raise": 0.148,
         "all_in": 0.003
       },
       "street_aggr": {
-        "preflop": 0.419,
-        "flop": 0.202,
-        "turn": 0.189,
-        "river": 0.122
+        "preflop": 0.412,
+        "flop": 0.205,
+        "turn": 0.191,
+        "river": 0.124
       }
     },
     "glm-5p1": {
-      "decisions": 10269,
-      "hands": 3979,
-      "vpip": 0.633,
-      "pfr": 0.248,
-      "aggression": 0.496,
+      "decisions": 13201,
+      "hands": 5027,
+      "vpip": 0.631,
+      "pfr": 0.247,
+      "aggression": 0.511,
       "fold_to_bet": 0.376,
       "allin_rate": 0.005,
-      "avg_betsize": 1.17,
-      "wtsd": 0.224,
-      "wsd": 0.504,
-      "hand_win": 0.386,
-      "avg_tokens": 4441,
-      "avg_latency_s": 54.2,
+      "avg_betsize": 1.14,
+      "wtsd": 0.245,
+      "wsd": 0.528,
+      "hand_win": 0.389,
+      "avg_tokens": 4469,
+      "avg_latency_s": 59.7,
       "action_mix": {
-        "fold": 0.195,
-        "check": 0.347,
-        "call": 0.231,
-        "bet": 0.133,
-        "raise": 0.089,
+        "fold": 0.188,
+        "check": 0.356,
+        "call": 0.222,
+        "bet": 0.142,
+        "raise": 0.087,
         "all_in": 0.005
       },
       "street_aggr": {
-        "preflop": 0.227,
-        "flop": 0.236,
-        "turn": 0.245,
-        "river": 0.183
+        "preflop": 0.228,
+        "flop": 0.241,
+        "turn": 0.257,
+        "river": 0.195
       }
     },
     "minimax-m2p7": {
-      "decisions": 10571,
-      "hands": 3861,
-      "vpip": 0.692,
-      "pfr": 0.234,
-      "aggression": 0.529,
-      "fold_to_bet": 0.262,
+      "decisions": 13368,
+      "hands": 4827,
+      "vpip": 0.69,
+      "pfr": 0.232,
+      "aggression": 0.539,
+      "fold_to_bet": 0.265,
       "allin_rate": 0.009,
-      "avg_betsize": 1.11,
-      "wtsd": 0.251,
-      "wsd": 0.342,
-      "hand_win": 0.483,
-      "avg_tokens": 6424,
-      "avg_latency_s": 33.3,
+      "avg_betsize": 1.09,
+      "wtsd": 0.272,
+      "wsd": 0.371,
+      "hand_win": 0.476,
+      "avg_tokens": 6454,
+      "avg_latency_s": 33.4,
       "action_mix": {
-        "fold": 0.128,
-        "check": 0.306,
-        "call": 0.266,
-        "bet": 0.2,
-        "raise": 0.091,
+        "fold": 0.127,
+        "check": 0.311,
+        "call": 0.259,
+        "bet": 0.204,
+        "raise": 0.09,
         "all_in": 0.009
       },
       "street_aggr": {
-        "preflop": 0.211,
-        "flop": 0.394,
-        "turn": 0.356,
-        "river": 0.295
+        "preflop": 0.213,
+        "flop": 0.388,
+        "turn": 0.364,
+        "river": 0.305
+      }
+    },
+    "minimax-m3": {
+      "decisions": 13356,
+      "hands": 4795,
+      "vpip": 0.649,
+      "pfr": 0.317,
+      "aggression": 0.507,
+      "fold_to_bet": 0.28,
+      "allin_rate": 0.005,
+      "avg_betsize": 1.32,
+      "wtsd": 0.304,
+      "wsd": 0.404,
+      "hand_win": 0.44,
+      "avg_tokens": 2450,
+      "avg_latency_s": 30.1,
+      "action_mix": {
+        "fold": 0.136,
+        "check": 0.38,
+        "call": 0.239,
+        "bet": 0.134,
+        "raise": 0.107,
+        "all_in": 0.005
+      },
+      "street_aggr": {
+        "preflop": 0.296,
+        "flop": 0.232,
+        "turn": 0.223,
+        "river": 0.167
       }
     }
   }

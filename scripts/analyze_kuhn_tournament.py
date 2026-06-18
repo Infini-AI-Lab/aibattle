@@ -17,10 +17,10 @@ directional only). Three lenses:
      the time, and (almost) never bet the Queen. How close a model gets to that
      polarized shape says more in 30 hands than its chip count does.
 
-Writes a terminal-styled HTML report to reports/kuhn_tournament_report.html
-(plus a runs/ copy and the raw numbers to reports/kuhn_tournament_analysis.json).
-Styling matches the other tournament reports; per-hand replays are built by
-build_replays.build_kuhn and viewed in reports/kuhn_replay.html.
+Writes a Chart.js HTML report to runs/kuhn_poker/kuhn_report.html and
+reports/kuhn_tournament_report.html, plus the raw numbers to
+reports/kuhn_tournament_analysis.json. Styling matches the other tournament
+reports.
 """
 
 from __future__ import annotations
@@ -30,6 +30,8 @@ import os
 from collections import defaultdict
 
 from model_names import strip_coached
+from elo_util import bradley_terry, bootstrap_elo, wld_from_records
+from report_theme import BASE_CSS, CHART_SETUP
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/kuhn_poker/kuhn_data.json"
@@ -39,48 +41,21 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # this page includes those two files in <head> via NAV_HEAD and the bar is
 # injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=13"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>'
 
-# Terminal theme — matches reports/index.html and the other report pages.
-_STYLE = """
-  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
-    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea; --green:#1a7f37; --neg:#b91c1c; --amber:#b45309; }
-  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    margin:0; background:var(--bg); color:var(--fg); }
-  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
-  h1 { color:var(--red); font-size:22px; font-weight:700; margin:0 0 4px; }
-  h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
-    vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
-  @keyframes blink { 50% { opacity:0; } }
-  .sub { color:var(--dim); font-size:13px; }
-  h1 + .sub { margin-bottom:18px; }
-  h2 { font-size:15px; margin:36px 0 10px; font-weight:700; }
-  h2::before { content:"## "; color:var(--red); }
-  h2 .note { font-weight:400; }
-  table { border-collapse:collapse; width:100%; font-size:13px; margin-top:10px; }
-  th,td { padding:7px 10px; text-align:center; border-bottom:1px solid var(--line); }
-  th { color:var(--dim); font-weight:600; }
-  td.model,th.model { text-align:left; font-weight:700; color:var(--fg); }
-  td.rk,th.rk { width:34px; color:var(--dim); }
-  .pos { color:var(--green); } .neg { color:var(--neg); } .diag { color:var(--line); }
-  .good { color:var(--green); } .warn { color:var(--amber); } .bad { color:var(--neg); }
-  .note { color:var(--dim); font-size:12px; margin:6px 0; }
-  .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
-    padding:12px 16px; margin:14px 0; font-size:13px; color:#3a3a3a; }
-  a { color:var(--red); text-decoration:none; } a:hover { text-decoration:underline; }
+_STYLE = BASE_CSS + """
+  a { text-decoration:none; } a:hover { text-decoration:underline; }
+  .good { color:var(--pos); } .warn { color:#b45309; } .bad { color:var(--neg); }
   .rules { background:var(--faint); border:1px solid var(--line);
-    padding:18px 20px; margin:18px 0; font-size:13.5px; color:#3a3a3a; line-height:1.55; }
-  .rules h3 { margin:0 0 8px; font-size:15px; color:var(--fg); }
-  .rules h3::before { content:"### "; color:var(--red); }
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:var(--fg); line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; }
+  .rules h3::before { content:""; }
   .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
   .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
-    background:#1c1c1c; color:#fbfbf8; font-weight:700; font-size:12px;
+    background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
     text-align:center; vertical-align:middle; line-height:1.4; }
-  .rules code { background:#efe9df; padding:1px 6px; color:var(--red); font-size:12px; }
+  .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
   .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
-  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
-    border:1px solid var(--line); padding:8px 14px; font-size:13px; text-decoration:none; }
-  .replaybtn:hover { border-color:var(--red); color:var(--fg); }
 """
 
 # Canonical Nash equilibrium bet frequencies when first to act (α = 1/3).
@@ -106,6 +81,8 @@ def analyze(data: dict) -> dict:
     # net chips per hand, row model vs column model
     h2h_net = {a: {b: 0.0 for b in models} for a in models}
     h2h_hands = {a: {b: 0 for b in models} for a in models}
+    h2h_wins = {a: {b: 0 for b in models} for a in models}  # a's hand wins vs b
+    elo_records = []  # per-hand (a, b, result) for the Elo bootstrap
 
     for g in data["pairs"]:
         for e in g["episodes"]:
@@ -120,6 +97,10 @@ def analyze(data: dict) -> dict:
                 h2h_hands[nm][opp] += 1
             if wname:
                 wins[wname] += 1
+                h2h_wins[wname][b if wname == a else a] += 1
+                elo_records.append((a, b, 1 if wname == a else -1))
+            else:
+                elo_records.append((a, b, 0))
 
             for s in e.get("steps", []):
                 obs = s.get("observation", {})
@@ -153,6 +134,14 @@ def analyze(data: dict) -> dict:
                         if action == "call":
                             j_call[nm] += 1
 
+    # Opponent-adjusted Elo over per-hand W/L/D (kept as a reference column; the
+    # leaderboard still ranks by fewest blunders, the cleaner skill signal here).
+    wld = {a: {b: (h2h_wins[a][b], h2h_wins[b][a],
+                   h2h_hands[a][b] - h2h_wins[a][b] - h2h_wins[b][a])
+               for b in models if b != a} for a in models}
+    _, elo = bradley_terry(models, wld)
+    elo_ci = bootstrap_elo(models, elo_records, lambda s: wld_from_records(models, s))
+
     rows = []
     for m in models:
         h = hands[m] or 1; d = decisions[m] or 1
@@ -163,6 +152,7 @@ def analyze(data: dict) -> dict:
         blunder_spots = k_fold_chance[m] + j_call_chance[m]
         rows.append({
             "model": m, "hands": hands[m], "decisions": decisions[m],
+            "elo": elo[m], "elo_sd": elo_ci[m]["sd"],
             "win_rate": round(wins[m] / h, 3),
             "net_per_hand": round(net[m] / h, 3),
             "invalid_rate": round(invalid[m] / d, 4),
@@ -180,7 +170,7 @@ def analyze(data: dict) -> dict:
     rows.sort(key=lambda r: (r["blunder_rate"], -r["net_per_hand"]))
 
     return {"models": models, "episodes_per_pair": data.get("episodes_per_pair"),
-            "gto_bet": GTO_BET, "leaderboard": rows,
+            "gto_bet": GTO_BET, "leaderboard": rows, "elo": elo,
             "h2h_net": h2h_net, "h2h_hands": h2h_hands}
 
 
@@ -195,19 +185,24 @@ def _cls(v, good, bad, invert=False):
 
 def render_html(rep: dict) -> str:
     models = rep["models"]; lb = rep["leaderboard"]
+    labels = [r["model"] for r in lb]
 
     def pct(v):
         return "—" if v is None else f"{v*100:.0f}%"
-
-    def medal(i):
-        return {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, str(i))
 
     # leaderboard
     lb_rows = ""
     for i, r in enumerate(lb, 1):
         ncls = "pos" if r["net_per_hand"] >= 0 else "neg"
+        if r.get("elo") is None:
+            elo_disp = "—"
+        elif r.get("elo_sd") is not None:
+            elo_disp = f"{r['elo']}<div class='small'>±{r['elo_sd']:.0f}</div>"
+        else:
+            elo_disp = str(r["elo"])
         lb_rows += (
-            f"<tr><td class='rk'>{medal(i)}</td><td class='model'>{r['model']}</td>"
+            f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+            f"<td><b>{elo_disp}</b></td>"
             f"<td class='{ncls}'>{r['net_per_hand']:+.3f}</td>"
             f"<td>{r['win_rate']*100:.0f}%</td>"
             f"<td>{r['hands']}</td><td>{r['decisions']}</td>"
@@ -222,7 +217,7 @@ def render_html(rep: dict) -> str:
         kf = f"{r['k_folds']}/{r['k_fold_chances']}" if r["k_fold_chances"] else "0/0"
         jc = f"{r['j_calls']}/{r['j_call_chances']}" if r["j_call_chances"] else "0/0"
         fund_rows += (
-            f"<tr><td class='rk'>{medal(i)}</td><td class='model'>{r['model']}</td>"
+            f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
             f"<td>{kf}</td><td>{jc}</td>"
             f"<td class='{bcls}'>{r['blunders']}/{r['blunder_spots']}"
             f" ({r['blunder_rate']*100:.0f}%)</td></tr>")
@@ -242,6 +237,11 @@ def render_html(rep: dict) -> str:
             f"<td class='{bq}'>{pct(r['bet_Q'])}</td>"
             f"<td class='{bj}'>{pct(r['bet_J'])}</td></tr>")
 
+    # bet-by-card grouped bar chart data
+    bet_k = [round((r["bet_K"] or 0) * 100, 1) for r in lb]
+    bet_q = [round((r["bet_Q"] or 0) * 100, 1) for r in lb]
+    bet_j = [round((r["bet_J"] or 0) * 100, 1) for r in lb]
+
     # head-to-head net chips/hand grid
     head = "".join(f"<th>{m.split('-')[0]}</th>" for m in models)
     grid = ""
@@ -258,10 +258,9 @@ def render_html(rep: dict) -> str:
         grid += f"<tr><td class='model'>{a}</td>{cells}</tr>"
 
     return f"""<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Battle Arena — Kuhn Poker</title>
+<html><head><meta charset="utf-8"><title>AI Battle Arena — Kuhn Poker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}<style>{_STYLE}</style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/kuhn<span class="cursor"></span></h1>
@@ -286,7 +285,15 @@ def render_html(rep: dict) -> str:
   <div class="callout">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash
   equilibrium rather than chips alone. At only {rep['episodes_per_pair']} hands/pair the chip totals
   are <b>high-variance and directional</b> — the <i>fundamentals</i> and <i>betting-style</i> sections
-  below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips.</div>
+  below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips;
+  the <b>Elo</b> column (opponent-adjusted Bradley-Terry rating over per-hand results, field mean
+  1500) is shown for reference, with ±1 bootstrap SD — note how wide those error bars are at this
+  sample size, which is exactly why the ranking leans on blunders instead.</div>
+
+  <h2>Bet frequency by card <span class="note">(when first to act)</span></h2>
+  <div class="note">Equilibrium is <b>polarized</b>: bet the King (green) ~100%, bluff the Jack (blue) ~33%,
+  and almost never bet the Queen (red). The closer a model matches that shape, the more GTO it plays.</div>
+  <canvas id="bet"></canvas>
 
   <h2>GTO fundamentals <span class="note">(unambiguous blunders)</span></h2>
   <div class="note"><b>Fold K to a bet</b> = folding the nuts (always wins the showdown).
@@ -299,8 +306,6 @@ def render_html(rep: dict) -> str:
   </table>
 
   <h2>Betting style <span class="note">(bet % by card, first to act · GTO: K 100% / Q 0% / J ~33%)</span></h2>
-  <div class="note">Equilibrium is <b>polarized</b>: bet the King ~100% (value), bluff the Jack ~33%,
-  and almost never bet the Queen. The closer a model's shape, the more GTO it plays.</div>
   <table>
     <tr><th class='model'>model</th><th>bet K (value)</th><th>bet Q (trap)</th><th>bet J (bluff)</th></tr>
     {style_rows}
@@ -308,13 +313,30 @@ def render_html(rep: dict) -> str:
 
   <h2>Leaderboard</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>net/hand</th><th>win%</th>
+    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/hand</th><th>win%</th>
         <th>hands</th><th>decisions</th><th>invalid%</th><th>trunc%</th><th>avg tokens/dec</th></tr>
     {lb_rows}
   </table>
 
   <h2>Head-to-head <span class="note">(row's net chips/hand vs column)</span></h2>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
+
+  <script>
+  const labels = {json.dumps(labels)};
+  const gto = {{K:{GTO_BET['K']*100}, Q:{GTO_BET['Q']*100}, J:{round(GTO_BET['J']*100,1)}}};
+  new Chart(document.getElementById('bet'), {{
+    type:'bar',
+    data:{{labels:labels,datasets:[
+      {{label:'bet K %',data:{json.dumps(bet_k)},backgroundColor:'#4ade80'}},
+      {{label:'bet Q %',data:{json.dumps(bet_q)},backgroundColor:'#f87171'}},
+      {{label:'bet J %',data:{json.dumps(bet_j)},backgroundColor:'#60a5fa'}}
+    ]}},
+    options:{{plugins:{{legend:{{labels:{{color:'#1c1c1c'}}}}}},
+      scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#e7e2d8'}},
+        ticks:{{color:'#1c1c1c',callback:v=>v+'%'}}}},
+        x:{{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}}}}}}
+  }});
+  </script>
 </div></body></html>"""
 
 

@@ -7,7 +7,8 @@
     "glm-5p1",
     "minimax-m2p7",
     "gpt-oss-120b",
-    "minimax-m3"
+    "minimax-m3",
+    "qwen3p7-plus"
   ],
   "per_model": {
     "kimi-k2p6": {
@@ -87,8 +88,21 @@
       "natural_rate": 0.01,
       "invalid_rate": 0.0,
       "avg_latency_s": 8.9
+    },
+    "qwen3p7-plus": {
+      "hands": 100,
+      "profit": -6.5,
+      "mean_per_hand": -0.065,
+      "win_rate": 0.41,
+      "loss_rate": 0.55,
+      "push_rate": 0.04,
+      "bust_rate": 0.23,
+      "double_rate": 0.13,
+      "natural_rate": 0.05,
+      "invalid_rate": 0.0,
+      "avg_latency_s": 9.3
     }
   },
-  "total_hands": 600,
-  "field_profit": 29.0
+  "total_hands": 700,
+  "field_profit": 22.5
 }

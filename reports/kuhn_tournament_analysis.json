@@ -18,6 +18,8 @@
       "model": "glm-5p1",
       "hands": 150,
       "decisions": 188,
+      "elo": 1512,
+      "elo_sd": 24.4,
       "win_rate": 0.52,
       "net_per_hand": 0.073,
       "invalid_rate": 0.0,
@@ -38,6 +40,8 @@
       "model": "minimax-m2p7",
       "hands": 150,
       "decisions": 181,
+      "elo": 1500,
+      "elo_sd": 24.4,
       "win_rate": 0.5,
       "net_per_hand": 0.04,
       "invalid_rate": 0.0,
@@ -58,6 +62,8 @@
       "model": "minimax-m3",
       "hands": 150,
       "decisions": 177,
+      "elo": 1508,
+      "elo_sd": 24.9,
       "win_rate": 0.513,
       "net_per_hand": 0.013,
       "invalid_rate": 0.0,
@@ -78,6 +84,8 @@
       "model": "gpt-oss-120b",
       "hands": 150,
       "decisions": 183,
+      "elo": 1477,
+      "elo_sd": 24.1,
       "win_rate": 0.46,
       "net_per_hand": -0.027,
       "invalid_rate": 0.0,
@@ -98,6 +106,8 @@
       "model": "deepseek-v4-pro",
       "hands": 150,
       "decisions": 184,
+      "elo": 1496,
+      "elo_sd": 25.2,
       "win_rate": 0.493,
       "net_per_hand": -0.04,
       "invalid_rate": 0.0,
@@ -118,6 +128,8 @@
       "model": "kimi-k2p6",
       "hands": 150,
       "decisions": 175,
+      "elo": 1508,
+      "elo_sd": 23.4,
       "win_rate": 0.513,
       "net_per_hand": -0.06,
       "invalid_rate": 0.0,
@@ -135,6 +147,14 @@
       "bet_J": 0.448
     }
   ],
+  "elo": {
+    "deepseek-v4-pro": 1496,
+    "gpt-oss-120b": 1477,
+    "kimi-k2p6": 1508,
+    "glm-5p1": 1512,
+    "minimax-m2p7": 1500,
+    "minimax-m3": 1508
+  },
   "h2h_net": {
     "deepseek-v4-pro": {
       "deepseek-v4-pro": 0.0,

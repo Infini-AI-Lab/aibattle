@@ -308,13 +308,46 @@
     }
   },
   "elo": {
-    "kimi-k2p6": 1495,
-    "deepseek-v4-pro": 1493,
-    "glm-5p1": 1503,
-    "minimax-m2p7": 1494,
-    "gpt-oss-120b": 1509,
-    "minimax-m3": 1505
+    "kimi-k2p6": 1507,
+    "deepseek-v4-pro": 1515,
+    "glm-5p1": 1510,
+    "minimax-m2p7": 1479,
+    "gpt-oss-120b": 1500,
+    "minimax-m3": 1489
   },
+  "elo_ci": {
+    "kimi-k2p6": {
+      "sd": 28.0,
+      "lo": 1449,
+      "hi": 1556
+    },
+    "deepseek-v4-pro": {
+      "sd": 26.9,
+      "lo": 1469,
+      "hi": 1569
+    },
+    "glm-5p1": {
+      "sd": 28.6,
+      "lo": 1451,
+      "hi": 1569
+    },
+    "minimax-m2p7": {
+      "sd": 27.5,
+      "lo": 1423,
+      "hi": 1535
+    },
+    "gpt-oss-120b": {
+      "sd": 28.3,
+      "lo": 1443,
+      "hi": 1561
+    },
+    "minimax-m3": {
+      "sd": 26.9,
+      "lo": 1439,
+      "hi": 1540
+    }
+  },
+  "elo_basis": "chips",
   "len_bins": [
     "2\u20133",
     "3\u20134",

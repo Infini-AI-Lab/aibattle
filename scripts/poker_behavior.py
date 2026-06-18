@@ -61,6 +61,11 @@ def _blank() -> dict:
 def accumulate(stats: dict, ep: dict, hand_key: str) -> None:
     """Fold one episode's steps into ``stats`` (model -> counters)."""
     seat = ep.get("seat_assignment", {})
+    # The episode glob can match stray matchups on disk (e.g. a model that ran
+    # later but isn't in this tournament's roster). Skip any episode involving a
+    # model we don't track rather than KeyError on stats[m].
+    if any(m not in stats for m in seat.values()):
+        return
     hsmap = {h["hand"]: h for h in ep.get("hand_summaries", [])}
 
     hands = defaultdict(list)
@@ -189,7 +194,7 @@ ACTION_COLORS = {
     "fold": "#fb7185", "check": "#64748b", "call": "#38bdf8",
     "bet": "#fbbf24", "raise": "#f97316", "all_in": "#a855f7",
 }
-_AXC = "{grid:{color:'#20242e'},ticks:{color:'#9aa3b5'}}"
+_AXC = "{grid:{color:'#e7e2d8'},ticks:{color:'#6b6b6b'}}"
 
 
 def _swatch(model: str) -> str:
@@ -261,20 +266,20 @@ def behavior_charts(beh: dict, models: list) -> str:
   const AXC={_AXC};
   new Chart(document.getElementById('behStyle'),{{type:'scatter',
     data:{{datasets:{j(scatter_ds)}}},
-    options:{{plugins:{{legend:{{position:'right',labels:{{color:'#cdd6f4'}}}}}},
-      scales:{{x:{{title:{{display:true,text:'VPIP %',color:'#9aa3b5'}},min:0,max:100,...AXC}},
-               y:{{title:{{display:true,text:'aggression %',color:'#9aa3b5'}},min:0,max:100,...AXC}}}}}}}});
+    options:{{plugins:{{legend:{{position:'right',labels:{{color:'#1c1c1c'}}}}}},
+      scales:{{x:{{title:{{display:true,text:'VPIP %',color:'#6b6b6b'}},min:0,max:100,...AXC}},
+               y:{{title:{{display:true,text:'aggression %',color:'#6b6b6b'}},min:0,max:100,...AXC}}}}}}}});
   new Chart(document.getElementById('behTokens'),{{type:'bar',
     data:{{labels:{j(short)},datasets:[{{label:'tokens/decision',data:{j(tokens)},backgroundColor:{j(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,...AXC}},x:AXC}}}}}});
   new Chart(document.getElementById('behMix'),{{type:'bar',
     data:{{labels:{j(short)},datasets:{j(mix_ds)}}},
-    options:{{plugins:{{legend:{{labels:{{color:'#cdd6f4'}}}}}},
+    options:{{plugins:{{legend:{{labels:{{color:'#1c1c1c'}}}}}},
       scales:{{x:{{stacked:true,...AXC}},y:{{stacked:true,max:100,...AXC}}}}}}}});
   new Chart(document.getElementById('behStreet'),{{type:'line',
     data:{{labels:{j(STREETS)},datasets:{j(street_ds)}}},
-    options:{{plugins:{{legend:{{labels:{{color:'#cdd6f4'}}}}}},
-      scales:{{y:{{beginAtZero:true,max:100,title:{{display:true,text:'aggression %',color:'#9aa3b5'}},...AXC}},x:AXC}}}}}});
+    options:{{plugins:{{legend:{{labels:{{color:'#1c1c1c'}}}}}},
+      scales:{{y:{{beginAtZero:true,max:100,title:{{display:true,text:'aggression %',color:'#6b6b6b'}},...AXC}},x:AXC}}}}}});
   }}
   </script>
 """
