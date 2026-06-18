@@ -25,6 +25,8 @@ import sys
 
 ENV_STRUCTURES = {"independent_vs_dealer", "model_vs_baseline"}
 ENV_GAMES = {"independent_blackjack"}
+# Games rated by chip-weighted Elo (magnitude matters), matching the analyzers.
+CHIP_BASIS_GAMES = {"leduc_poker", "kuhn_poker", "holdem_1hand", "holdem_match"}
 
 
 def convert_game(game_dir: str) -> dict | None:
@@ -63,7 +65,10 @@ def convert_game(game_dir: str) -> dict | None:
                     episodes.append({"scores": scores, "seed": ep.get("seed")})
         kind = "versus"
 
-    return {"game": game, "kind": kind, "models": models, "episodes": episodes}
+    out = {"game": game, "kind": kind, "models": models, "episodes": episodes}
+    if kind == "versus" and game in CHIP_BASIS_GAMES:
+        out["elo_basis"] = "chips"
+    return out
 
 
 def main() -> None:
