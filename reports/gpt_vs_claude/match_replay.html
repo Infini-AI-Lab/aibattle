@@ -15,14 +15,14 @@
   .mside{display:flex; align-items:baseline; gap:8px;}
   .mside .nm{font-weight:700; font-size:13px; color:var(--fg);}
   .mside .ch{font-size:13px; color:var(--red);}
-  .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:#f472b6; display:flex;}
-  .mbar .fill{background:#60a5fa; height:100%;}
+  .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:var(--red); display:flex;}
+  .mbar .fill{background:var(--link); height:100%;}
   .mtag{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim);}
 
   /* poker table */
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
-    background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
-  .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+    background:var(--faint); border:1px solid var(--line); padding:24px 22px;}
+  .seat{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
     padding:10px 14px; min-width:320px; position:relative;}
   .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
   .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
@@ -31,13 +31,13 @@
   .seat .meta{flex:1; min-width:0; margin:0;}
   .seat .nm{font-weight:700; font-size:14px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .seat .sub{font-size:11px; color:var(--dim); margin:2px 0 0;}
-  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:#fff; background:#6b6b6b; padding:1px 6px; margin-left:6px;}
+  .pos{font-weight:600; font-size:9px; letter-spacing:.05em; color:var(--panel); background:var(--dim); padding:1px 6px; margin-left:6px;}
   .pos.btn{background:var(--amber);}
   .holes{display:flex; gap:6px;}
   .ret{font-weight:700; font-size:14px;}
   .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
   .bubble{position:absolute; right:14px; top:-12px; font-weight:700; font-size:11px;
-    padding:3px 10px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap;}
+    padding:3px 10px; background:var(--panel); border:1px solid var(--red); color:var(--red); white-space:nowrap;}
   .bubble.fold{border-color:var(--dim); color:var(--dim);}
 
   .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}

@@ -391,11 +391,13 @@ def copy_viewers():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    # The navbar is one dir-aware file (reports/nav.js detects this subdir via
-    # location.pathname and rewrites links accordingly); ship a copy of it plus
-    # the shared CSS so each page's relative <script src="nav.js"> resolves here.
-    shutil.copy("reports/nav.css", os.path.join(OUT, "nav.css"))
-    shutil.copy("reports/nav.js", os.path.join(OUT, "nav.js"))
+    # Shared client-side assets every page here references relatively. The navbar
+    # is one dir-aware file (reports/nav.js detects this subdir via location.pathname
+    # and rewrites links); replay.css carries the replay viewers' layout (the .stage
+    # grid, deck, controls) — without its copy here the copied viewers render
+    # unstyled. Ship all three so the relative <link>/<script> tags resolve locally.
+    for asset in ("nav.css", "nav.js", "replay.css"):
+        shutil.copy(os.path.join("reports", asset), os.path.join(OUT, asset))
     copy_viewers()
 
     games = {g: load(g) for g in GAME_META}
