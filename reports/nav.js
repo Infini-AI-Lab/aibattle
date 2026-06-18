@@ -57,7 +57,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=15";
+  var V = "?v=16";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -66,15 +66,6 @@
   var html =
     '<a class="brand" href="' + P.oss + 'index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
     a("index.html", "overview", "nav navtop", "oss") +
-
-    // ── GPT vs Claude (coached head-to-head) ───────────────────────────────
-    a("index.html", "gpt-vs-claude", "nav navtop", "gvc") +
-    '<span class="navclust">perfect-info/</span>' +
-    a("connect4_report.html", "connect4", "nav navsub", "gvc") +
-    a("gomoku_report.html", "gomoku", "nav navsub", "gvc") +
-    '<span class="navclust">imperfect-info/</span>' +
-    a("holdem_1hand_report.html", "holdem 1hand", "nav navsub", "gvc") +
-    a("holdem_match_report.html", "holdem match", "nav navsub", "gvc") +
 
     // ── Open-source model Elo (the base arena) ─────────────────────────────
     '<span class="navtop">open-source model elo</span>' +

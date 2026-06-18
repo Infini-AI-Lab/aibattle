@@ -52,17 +52,17 @@
       "avg_latency_s": 13.1
     },
     "minimax-m2p7": {
-      "hands": 100,
-      "profit": 2.5,
-      "mean_per_hand": 0.025,
-      "win_rate": 0.46,
-      "loss_rate": 0.45,
-      "push_rate": 0.09,
-      "bust_rate": 0.14,
-      "double_rate": 0.13,
-      "natural_rate": 0.07,
+      "hands": 500,
+      "profit": 20.5,
+      "mean_per_hand": 0.041,
+      "win_rate": 0.462,
+      "loss_rate": 0.452,
+      "push_rate": 0.086,
+      "bust_rate": 0.136,
+      "double_rate": 0.116,
+      "natural_rate": 0.042,
       "invalid_rate": 0.0,
-      "avg_latency_s": 27.0
+      "avg_latency_s": 38.8
     },
     "gpt-oss-120b": {
       "hands": 500,
@@ -117,6 +117,6 @@
       "avg_latency_s": 7.4
     }
   },
-  "total_hands": 3600,
-  "field_profit": -70.5
+  "total_hands": 4000,
+  "field_profit": -52.5
 }

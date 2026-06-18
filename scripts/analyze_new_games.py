@@ -89,7 +89,7 @@ INTRO = {
         "control decisive."),
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=16"></script>'
 
 
 def _favicon(emoji: str) -> str:

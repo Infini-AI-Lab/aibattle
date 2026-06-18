@@ -55,6 +55,9 @@ data-log/
 # Generated PDFs
 *.pdf
 
+# Generated spreadsheets (e.g. matchup_counts.xlsx)
+*.xlsx
+
 # Humanize RLCR loop local state
 .humanize*
 

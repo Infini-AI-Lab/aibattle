@@ -10,9 +10,9 @@
       "Stochastic"
     ],
     "ranking": [
+      "minimax-m2p7",
       "gpt-oss-120b",
       "glm-5p1",
-      "minimax-m2p7",
       "glm-5p2",
       "qwen3p7-plus",
       "minimax-m3",
@@ -20,7 +20,7 @@
       "deepseek-v4-pro"
     ],
     "meta": "vs dealer \u00b7 500 hands/model \u00b7 mean chips/hand",
-    "champ_line": "\ud83c\udfc6 gpt-oss-120b <span class='metric'>+0.033/hand</span>"
+    "champ_line": "\ud83c\udfc6 minimax-m2p7 <span class='metric'>+0.041/hand</span>"
   },
   {
     "key": "leduc_poker",

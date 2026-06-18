@@ -3,7 +3,7 @@
 <title>AI Battle Arena — ⚫ Othello 6×6</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=16"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -78,7 +78,7 @@
         <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     <tr>
           <td>1</td><td class='model'>kimi-k2p6</td>
-          <td>1645<div class='small'>±22</div></td>
+          <td>1645<div class='small'>±23</div></td>
           <td class='pos'>+0.44</td>
           <td>70%</td><td>3%</td>
           <td>71%</td>
@@ -86,7 +86,7 @@
           <td>33.0</td><td>404.9s</td>
         </tr><tr>
           <td>2</td><td class='model'>deepseek-v4-pro</td>
-          <td>1616<div class='small'>±22</div></td>
+          <td>1616<div class='small'>±23</div></td>
           <td class='pos'>+0.35</td>
           <td>66%</td><td>4%</td>
           <td>64%</td>
@@ -94,7 +94,7 @@
           <td>33.1</td><td>372.7s</td>
         </tr><tr>
           <td>3</td><td class='model'>glm-5p1</td>
-          <td>1481<div class='small'>±20</div></td>
+          <td>1481<div class='small'>±22</div></td>
           <td class='neg'>-0.07</td>
           <td>46%</td><td>1%</td>
           <td>44%</td>
@@ -102,7 +102,7 @@
           <td>32.8</td><td>268.6s</td>
         </tr><tr>
           <td>4</td><td class='model'>gpt-oss-120b</td>
-          <td>1471<div class='small'>±22</div></td>
+          <td>1471<div class='small'>±21</div></td>
           <td class='neg'>-0.10</td>
           <td>43%</td><td>4%</td>
           <td>39%</td>
@@ -133,10 +133,10 @@
   </div>
 
   <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'><tr><th></th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>gpt-oss-120b</th><th>minimax-m2p7</th><th>kimi-k2p6</th></tr><tr><th class='model'>deepseek-v4-pro</th><td class='diag'>—</td><td class='pos'>36-14<div class='small'>0d</div></td><td class='pos'>33-14<div class='small'>3d</div></td><td class='pos'>42-5<div class='small'>3d</div></td><td class='neg'>21-28<div class='small'>1d</div></td></tr><tr><th class='model'>glm-5p1</th><td class='neg'>14-36<div class='small'>0d</div></td><td class='diag'>—</td><td class=''>25-25<div class='small'>0d</div></td><td class='pos'>38-12<div class='small'>0d</div></td><td class='neg'>15-33<div class='small'>2d</div></td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg'>14-33<div class='small'>3d</div></td><td class=''>25-25<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>32-15<div class='small'>3d</div></td><td class='neg'>15-33<div class='small'>2d</div></td></tr><tr><th class='model'>minimax-m2p7</th><td class='neg'>5-42<div class='small'>3d</div></td><td class='neg'>12-38<div class='small'>0d</div></td><td class='neg'>15-32<div class='small'>3d</div></td><td class='diag'>—</td><td class='neg'>2-47<div class='small'>1d</div></td></tr><tr><th class='model'>kimi-k2p6</th><td class='pos'>28-21<div class='small'>1d</div></td><td class='pos'>33-15<div class='small'>2d</div></td><td class='pos'>33-15<div class='small'>2d</div></td><td class='pos'>47-2<div class='small'>1d</div></td><td class='diag'>—</td></tr></table>
+  <table class='h2h'><tr><th></th><th>kimi-k2p6</th><th>deepseek-v4-pro</th><th>glm-5p1</th><th>minimax-m2p7</th><th>gpt-oss-120b</th></tr><tr><th class='model'>kimi-k2p6</th><td class='diag'>—</td><td class='pos'>28-21<div class='small'>1d</div></td><td class='pos'>33-15<div class='small'>2d</div></td><td class='pos'>47-2<div class='small'>1d</div></td><td class='pos'>33-15<div class='small'>2d</div></td></tr><tr><th class='model'>deepseek-v4-pro</th><td class='neg'>21-28<div class='small'>1d</div></td><td class='diag'>—</td><td class='pos'>36-14<div class='small'>0d</div></td><td class='pos'>42-5<div class='small'>3d</div></td><td class='pos'>33-14<div class='small'>3d</div></td></tr><tr><th class='model'>glm-5p1</th><td class='neg'>15-33<div class='small'>2d</div></td><td class='neg'>14-36<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>38-12<div class='small'>0d</div></td><td class=''>25-25<div class='small'>0d</div></td></tr><tr><th class='model'>minimax-m2p7</th><td class='neg'>2-47<div class='small'>1d</div></td><td class='neg'>5-42<div class='small'>3d</div></td><td class='neg'>12-38<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>15-32<div class='small'>3d</div></td></tr><tr><th class='model'>gpt-oss-120b</th><td class='neg'>15-33<div class='small'>2d</div></td><td class='neg'>14-33<div class='small'>3d</div></td><td class=''>25-25<div class='small'>0d</div></td><td class='pos'>32-15<div class='small'>3d</div></td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"game": "othello_lite_6x6", "kind": "versus", "models": ["deepseek-v4-pro", "glm-5p1", "gpt-oss-120b", "minimax-m2p7", "kimi-k2p6"], "per_model": {"deepseek-v4-pro": {"games": 200, "wins": 132, "losses": 61, "draws": 7, "win_rate": 0.66, "draw_rate": 0.035, "net_per_game": 0.355, "first_move_win_rate": 0.64, "invalid_rate": 0.0, "decisions": 3321, "avg_len": 33.1, "avg_latency_s": 372.7, "len_hist": [2, 0, 0, 0, 7, 79, 48, 32, 21, 6, 4, 1]}, "glm-5p1": {"games": 200, "wins": 92, "losses": 106, "draws": 2, "win_rate": 0.46, "draw_rate": 0.01, "net_per_game": -0.07, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 3275, "avg_len": 32.81, "avg_latency_s": 268.6, "len_hist": [0, 1, 0, 1, 6, 90, 61, 24, 12, 3, 1, 1]}, "gpt-oss-120b": {"games": 200, "wins": 86, "losses": 106, "draws": 8, "win_rate": 0.43, "draw_rate": 0.04, "net_per_game": -0.1, "first_move_win_rate": 0.39, "invalid_rate": 0.0, "decisions": 3269, "avg_len": 32.72, "avg_latency_s": 22.4, "len_hist": [2, 0, 2, 1, 9, 80, 62, 28, 14, 1, 1, 0]}, "minimax-m2p7": {"games": 200, "wins": 34, "losses": 159, "draws": 7, "win_rate": 0.17, "draw_rate": 0.035, "net_per_game": -0.625, "first_move_win_rate": 0.15, "invalid_rate": 0.0, "decisions": 3283, "avg_len": 32.95, "avg_latency_s": 133.5, "len_hist": [2, 0, 0, 0, 8, 77, 64, 19, 24, 5, 0, 1]}, "kimi-k2p6": {"games": 200, "wins": 141, "losses": 53, "draws": 6, "win_rate": 0.705, "draw_rate": 0.03, "net_per_game": 0.44, "first_move_win_rate": 0.71, "invalid_rate": 0.0, "decisions": 3310, "avg_len": 33.0, "avg_latency_s": 404.9, "len_hist": [2, 1, 2, 0, 12, 68, 53, 29, 23, 7, 2, 1]}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": [36, 14, 0], "gpt-oss-120b": [33, 14, 3], "minimax-m2p7": [42, 5, 3], "kimi-k2p6": [21, 28, 1]}, "glm-5p1": {"deepseek-v4-pro": [14, 36, 0], "gpt-oss-120b": [25, 25, 0], "minimax-m2p7": [38, 12, 0], "kimi-k2p6": [15, 33, 2]}, "gpt-oss-120b": {"deepseek-v4-pro": [14, 33, 3], "glm-5p1": [25, 25, 0], "minimax-m2p7": [32, 15, 3], "kimi-k2p6": [15, 33, 2]}, "minimax-m2p7": {"deepseek-v4-pro": [5, 42, 3], "glm-5p1": [12, 38, 0], "gpt-oss-120b": [15, 32, 3], "kimi-k2p6": [2, 47, 1]}, "kimi-k2p6": {"deepseek-v4-pro": [28, 21, 1], "glm-5p1": [33, 15, 2], "gpt-oss-120b": [33, 15, 2], "minimax-m2p7": [47, 2, 1]}}, "elo": {"deepseek-v4-pro": 1616, "glm-5p1": 1481, "gpt-oss-120b": 1471, "minimax-m2p7": 1287, "kimi-k2p6": 1645}, "elo_ci": {"deepseek-v4-pro": {"sd": 22.0, "lo": 1574, "hi": 1661}, "glm-5p1": {"sd": 20.2, "lo": 1438, "hi": 1519}, "gpt-oss-120b": {"sd": 21.8, "lo": 1426, "hi": 1515}, "minimax-m2p7": {"sd": 23.4, "lo": 1237, "hi": 1328}, "kimi-k2p6": {"sd": 21.6, "lo": 1601, "hi": 1693}}, "elo_basis": "wins", "len_bins": ["25\u201326", "26\u201328", "28\u201329", "29\u201330", "30\u201331", "31\u201332", "32\u201334", "34\u201335", "35\u201336", "36\u201338", "38\u201339", "39\u201340"], "first_player_win_rate": 0.466, "num_games": 500, "episodes_per_pair": 50};
+const R = {"game": "othello_lite_6x6", "kind": "versus", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b"], "per_model": {"kimi-k2p6": {"games": 200, "wins": 141, "losses": 53, "draws": 6, "win_rate": 0.705, "draw_rate": 0.03, "net_per_game": 0.44, "first_move_win_rate": 0.71, "invalid_rate": 0.0, "decisions": 3310, "avg_len": 33.0, "avg_latency_s": 404.9, "len_hist": [2, 1, 2, 0, 12, 68, 53, 29, 23, 7, 2, 1]}, "deepseek-v4-pro": {"games": 200, "wins": 132, "losses": 61, "draws": 7, "win_rate": 0.66, "draw_rate": 0.035, "net_per_game": 0.355, "first_move_win_rate": 0.64, "invalid_rate": 0.0, "decisions": 3321, "avg_len": 33.1, "avg_latency_s": 372.7, "len_hist": [2, 0, 0, 0, 7, 79, 48, 32, 21, 6, 4, 1]}, "glm-5p1": {"games": 200, "wins": 92, "losses": 106, "draws": 2, "win_rate": 0.46, "draw_rate": 0.01, "net_per_game": -0.07, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 3275, "avg_len": 32.81, "avg_latency_s": 268.6, "len_hist": [0, 1, 0, 1, 6, 90, 61, 24, 12, 3, 1, 1]}, "minimax-m2p7": {"games": 200, "wins": 34, "losses": 159, "draws": 7, "win_rate": 0.17, "draw_rate": 0.035, "net_per_game": -0.625, "first_move_win_rate": 0.15, "invalid_rate": 0.0, "decisions": 3283, "avg_len": 32.95, "avg_latency_s": 133.5, "len_hist": [2, 0, 0, 0, 8, 77, 64, 19, 24, 5, 0, 1]}, "gpt-oss-120b": {"games": 200, "wins": 86, "losses": 106, "draws": 8, "win_rate": 0.43, "draw_rate": 0.04, "net_per_game": -0.1, "first_move_win_rate": 0.39, "invalid_rate": 0.0, "decisions": 3269, "avg_len": 32.72, "avg_latency_s": 22.4, "len_hist": [2, 0, 2, 1, 9, 80, 62, 28, 14, 1, 1, 0]}}, "h2h": {"kimi-k2p6": {"deepseek-v4-pro": [28, 21, 1], "glm-5p1": [33, 15, 2], "minimax-m2p7": [47, 2, 1], "gpt-oss-120b": [33, 15, 2]}, "deepseek-v4-pro": {"kimi-k2p6": [21, 28, 1], "glm-5p1": [36, 14, 0], "minimax-m2p7": [42, 5, 3], "gpt-oss-120b": [33, 14, 3]}, "glm-5p1": {"kimi-k2p6": [15, 33, 2], "deepseek-v4-pro": [14, 36, 0], "minimax-m2p7": [38, 12, 0], "gpt-oss-120b": [25, 25, 0]}, "minimax-m2p7": {"kimi-k2p6": [2, 47, 1], "deepseek-v4-pro": [5, 42, 3], "glm-5p1": [12, 38, 0], "gpt-oss-120b": [15, 32, 3]}, "gpt-oss-120b": {"kimi-k2p6": [15, 33, 2], "deepseek-v4-pro": [14, 33, 3], "glm-5p1": [25, 25, 0], "minimax-m2p7": [32, 15, 3]}}, "elo": {"kimi-k2p6": 1645, "deepseek-v4-pro": 1616, "glm-5p1": 1481, "minimax-m2p7": 1287, "gpt-oss-120b": 1471}, "elo_ci": {"kimi-k2p6": {"sd": 23.4, "lo": 1602, "hi": 1702}, "deepseek-v4-pro": {"sd": 22.6, "lo": 1574, "hi": 1658}, "glm-5p1": {"sd": 21.5, "lo": 1437, "hi": 1523}, "minimax-m2p7": {"sd": 22.8, "lo": 1235, "hi": 1328}, "gpt-oss-120b": {"sd": 20.9, "lo": 1427, "hi": 1513}}, "elo_basis": "wins", "len_bins": ["25\u201326", "26\u201328", "28\u201329", "29\u201330", "30\u201331", "31\u201332", "32\u201334", "34\u201335", "35\u201336", "36\u201338", "38\u201339", "39\u201340"], "first_player_win_rate": 0.466, "num_games": 500, "episodes_per_pair": 50};
 const pm=R.per_model, M=R.models;
 
 Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';
