@@ -4,7 +4,8 @@
     "gpt-oss-120b",
     "kimi-k2p6",
     "glm-5p1",
-    "minimax-m2p7"
+    "minimax-m2p7",
+    "minimax-m3"
   ],
   "episodes_per_pair": 30,
   "gto_bet": {
@@ -15,103 +16,123 @@
   "leaderboard": [
     {
       "model": "glm-5p1",
-      "hands": 120,
-      "decisions": 147,
-      "win_rate": 0.525,
-      "net_per_hand": 0.067,
+      "hands": 150,
+      "decisions": 188,
+      "win_rate": 0.52,
+      "net_per_hand": 0.073,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 2451,
+      "avg_tokens": 2249,
       "k_folds": 0,
-      "k_fold_chances": 1,
+      "k_fold_chances": 6,
       "j_calls": 0,
-      "j_call_chances": 18,
+      "j_call_chances": 24,
       "blunders": 0,
-      "blunder_spots": 19,
+      "blunder_spots": 30,
       "blunder_rate": 0.0,
-      "bet_K": 0.825,
-      "bet_Q": 0.03,
-      "bet_J": 0.222
+      "bet_K": 0.812,
+      "bet_Q": 0.048,
+      "bet_J": 0.226
     },
     {
       "model": "minimax-m2p7",
-      "hands": 120,
-      "decisions": 141,
+      "hands": 150,
+      "decisions": 181,
       "win_rate": 0.5,
-      "net_per_hand": 0.042,
+      "net_per_hand": 0.04,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 11859,
+      "avg_tokens": 12668,
       "k_folds": 0,
-      "k_fold_chances": 0,
+      "k_fold_chances": 2,
       "j_calls": 0,
-      "j_call_chances": 17,
+      "j_call_chances": 26,
       "blunders": 0,
-      "blunder_spots": 17,
+      "blunder_spots": 28,
       "blunder_rate": 0.0,
       "bet_K": 1.0,
-      "bet_Q": 0.242,
-      "bet_J": 0.043
+      "bet_Q": 0.268,
+      "bet_J": 0.067
+    },
+    {
+      "model": "minimax-m3",
+      "hands": 150,
+      "decisions": 177,
+      "win_rate": 0.513,
+      "net_per_hand": 0.013,
+      "invalid_rate": 0.0,
+      "truncated_rate": 0.0,
+      "avg_tokens": 3483,
+      "k_folds": 0,
+      "k_fold_chances": 7,
+      "j_calls": 0,
+      "j_call_chances": 24,
+      "blunders": 0,
+      "blunder_spots": 31,
+      "blunder_rate": 0.0,
+      "bet_K": 1.0,
+      "bet_Q": 0.471,
+      "bet_J": 0.371
     },
     {
       "model": "gpt-oss-120b",
-      "hands": 120,
-      "decisions": 144,
-      "win_rate": 0.467,
-      "net_per_hand": -0.017,
+      "hands": 150,
+      "decisions": 183,
+      "win_rate": 0.46,
+      "net_per_hand": -0.027,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 719,
+      "avg_tokens": 784,
       "k_folds": 0,
-      "k_fold_chances": 1,
+      "k_fold_chances": 3,
       "j_calls": 0,
-      "j_call_chances": 20,
+      "j_call_chances": 24,
       "blunders": 0,
-      "blunder_spots": 21,
+      "blunder_spots": 27,
       "blunder_rate": 0.0,
-      "bet_K": 0.974,
-      "bet_Q": 0.107,
-      "bet_J": 0.029
+      "bet_K": 0.958,
+      "bet_Q": 0.111,
+      "bet_J": 0.026
     },
     {
       "model": "deepseek-v4-pro",
-      "hands": 120,
-      "decisions": 146,
-      "win_rate": 0.5,
-      "net_per_hand": -0.025,
+      "hands": 150,
+      "decisions": 184,
+      "win_rate": 0.493,
+      "net_per_hand": -0.04,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 2378,
+      "avg_tokens": 2090,
       "k_folds": 0,
-      "k_fold_chances": 1,
+      "k_fold_chances": 2,
       "j_calls": 0,
-      "j_call_chances": 19,
+      "j_call_chances": 27,
       "blunders": 0,
-      "blunder_spots": 20,
+      "blunder_spots": 29,
       "blunder_rate": 0.0,
       "bet_K": 1.0,
       "bet_Q": 0.0,
-      "bet_J": 0.036
+      "bet_J": 0.029
     },
     {
       "model": "kimi-k2p6",
-      "hands": 120,
-      "decisions": 143,
-      "win_rate": 0.508,
-      "net_per_hand": -0.067,
+      "hands": 150,
+      "decisions": 175,
+      "win_rate": 0.513,
+      "net_per_hand": -0.06,
       "invalid_rate": 0.0,
       "truncated_rate": 0.0,
-      "avg_tokens": 13647,
+      "avg_tokens": 13180,
       "k_folds": 0,
       "k_fold_chances": 0,
       "j_calls": 0,
-      "j_call_chances": 14,
+      "j_call_chances": 21,
       "blunders": 0,
-      "blunder_spots": 14,
+      "blunder_spots": 21,
       "blunder_rate": 0.0,
       "bet_K": 1.0,
       "bet_Q": 0.0,
-      "bet_J": 0.375
+      "bet_J": 0.448
     }
   ],
   "h2h_net": {
@@ -120,35 +141,48 @@
       "gpt-oss-120b": -1.0,
       "kimi-k2p6": 2.0,
       "glm-5p1": -3.0,
-      "minimax-m2p7": -1.0
+      "minimax-m2p7": -1.0,
+      "minimax-m3": -3.0
     },
     "gpt-oss-120b": {
       "deepseek-v4-pro": 1.0,
       "gpt-oss-120b": 0.0,
       "kimi-k2p6": -3.0,
       "glm-5p1": -2.0,
-      "minimax-m2p7": 2.0
+      "minimax-m2p7": 2.0,
+      "minimax-m3": -2.0
     },
     "kimi-k2p6": {
       "deepseek-v4-pro": -2.0,
       "gpt-oss-120b": 3.0,
       "kimi-k2p6": 0.0,
       "glm-5p1": -3.0,
-      "minimax-m2p7": -6.0
+      "minimax-m2p7": -6.0,
+      "minimax-m3": -1.0
     },
     "glm-5p1": {
       "deepseek-v4-pro": 3.0,
       "gpt-oss-120b": 2.0,
       "kimi-k2p6": 3.0,
       "glm-5p1": 0.0,
-      "minimax-m2p7": 0.0
+      "minimax-m2p7": 0.0,
+      "minimax-m3": 3.0
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 1.0,
       "gpt-oss-120b": -2.0,
       "kimi-k2p6": 6.0,
       "glm-5p1": 0.0,
-      "minimax-m2p7": 0.0
+      "minimax-m2p7": 0.0,
+      "minimax-m3": 1.0
+    },
+    "minimax-m3": {
+      "deepseek-v4-pro": 3.0,
+      "gpt-oss-120b": 2.0,
+      "kimi-k2p6": 1.0,
+      "glm-5p1": -3.0,
+      "minimax-m2p7": -1.0,
+      "minimax-m3": 0.0
     }
   },
   "h2h_hands": {
@@ -157,35 +191,48 @@
       "gpt-oss-120b": 30,
       "kimi-k2p6": 30,
       "glm-5p1": 30,
-      "minimax-m2p7": 30
+      "minimax-m2p7": 30,
+      "minimax-m3": 30
     },
     "gpt-oss-120b": {
       "deepseek-v4-pro": 30,
       "gpt-oss-120b": 0,
       "kimi-k2p6": 30,
       "glm-5p1": 30,
-      "minimax-m2p7": 30
+      "minimax-m2p7": 30,
+      "minimax-m3": 30
     },
     "kimi-k2p6": {
       "deepseek-v4-pro": 30,
       "gpt-oss-120b": 30,
       "kimi-k2p6": 0,
       "glm-5p1": 30,
-      "minimax-m2p7": 30
+      "minimax-m2p7": 30,
+      "minimax-m3": 30
     },
     "glm-5p1": {
       "deepseek-v4-pro": 30,
       "gpt-oss-120b": 30,
       "kimi-k2p6": 30,
       "glm-5p1": 0,
-      "minimax-m2p7": 30
+      "minimax-m2p7": 30,
+      "minimax-m3": 30
     },
     "minimax-m2p7": {
       "deepseek-v4-pro": 30,
       "gpt-oss-120b": 30,
       "kimi-k2p6": 30,
       "glm-5p1": 30,
-      "minimax-m2p7": 0
+      "minimax-m2p7": 0,
+      "minimax-m3": 30
+    },
+    "minimax-m3": {
+      "deepseek-v4-pro": 30,
+      "gpt-oss-120b": 30,
+      "kimi-k2p6": 30,
+      "glm-5p1": 30,
+      "minimax-m2p7": 30,
+      "minimax-m3": 0
     }
   }
 }

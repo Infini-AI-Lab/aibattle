@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Battle Arena — 🎴 Leduc Poker Replay</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
+<title>AI Battle Arena — 🃏 Kuhn Poker Replay</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=13"></script>
 <link rel="stylesheet" href="replay.css?v=3">
 <style>
   .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
 
-  /* two-seat felt, public card in the middle */
+  /* two-seat felt, pot in the middle */
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
     background:#e7eee2; border:1px solid #b5c2a8; border-radius:90px/64px; padding:24px 22px;}
   .seat{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
@@ -26,24 +26,21 @@
   .bubble.fold{border-color:var(--dim); color:var(--dim);}
 
   .middle{display:flex; flex-direction:column; align-items:center; gap:12px; padding:6px 0;}
-  .pubwrap{display:flex; align-items:center; gap:10px;}
-  .publbl{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#3d5c46;}
 
-  /* rank-only Leduc cards (J/Q/K, no suits) */
+  /* rank-only Kuhn cards (J/Q/K, no suits) */
   .card.rank{justify-content:center; font-weight:700;}
   .card.rank .r{font-size:20px;}
 
   .seatdot{width:10px; height:10px; border-radius:50%; display:inline-block; flex:none;}
   .seatdot.player_0,.mv .d.player_0{background:#60a5fa;}
   .seatdot.player_1,.mv .d.player_1{background:#f472b6;}
-  .chipline{font-size:12px; color:var(--dim);}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>$ ~/aibattle/leduc/replay<span class="cursor"></span></h1>
-  <div class="sub">🎴 Leduc Poker · 6-card deck (J Q K ×2), two betting rounds, one public card ·
-    <b>both private cards are shown</b> for analysis — pairing the public card beats everything, otherwise high card wins.</div>
+  <h1>$ ~/aibattle/kuhn/replay<span class="cursor"></span></h1>
+  <div class="sub">🃏 Kuhn Poker · 3-card deck (J&lt;Q&lt;K), one betting street ·
+    <b>both private cards are shown</b> for analysis — at showdown the higher card wins, a fold hands over the pot.</div>
 
   <div class="selectors">
     <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
@@ -55,8 +52,7 @@
       <div class="felt">
         <div id="seatTop"></div>
         <div class="middle">
-          <div class="potline">Pot <b id="pot">0</b> · <span id="round">round 1</span></div>
-          <div class="pubwrap"><span class="publbl">public</span><span id="pubcard"></span></div>
+          <div class="potline">Pot <b id="pot">0</b> · <span id="phase">betting</span></div>
         </div>
         <div id="seatBot"></div>
       </div>
@@ -87,7 +83,7 @@
 </div>
 
 <script>
-const BASE = "runs/new_games_experiment/leduc_poker/replays/leduc/";
+const BASE = "runs/kuhn_poker/replays/kuhn/";
 const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
 let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
@@ -132,7 +128,6 @@ async function loadPair(i){
 }
 
 function fmt(n){ return (n>0?"+":"") + n; }
-function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
 
 function selectEp(idx){
   stop();
@@ -143,19 +138,16 @@ function selectEp(idx){
 }
 
 // table state at `cursor`: pre-action state of move[cursor-1]; at the end show
-// the final pot and reveal the public card no matter when the hand ended.
+// the final pot and the showdown/fold result.
 function stateAt(k){
-  if (!ep.moves.length) return {pot:ep.pot, round:1, pub:ep.public_card, acting:null, last:null, result:true};
-  if (k===0){ const m=ep.moves[0];
-    return {pot:m.pot, round:m.round, pub:m.public_card, acting:m.player, last:null, result:false}; }
+  if (!ep.moves.length) return {pot:ep.pot, acting:null, last:null, result:true};
+  if (k===0){ const m=ep.moves[0]; return {pot:m.pot, acting:m.player, last:null, result:false}; }
   const m = ep.moves[k-1];
   const result = (k===ep.moves.length);
-  return {pot: result ? ep.pot : m.pot, round:m.round,
-          pub: result ? ep.public_card : m.public_card,
-          acting: result ? null : m.player, last:m, result};
+  return {pot: result ? ep.pot : m.pot, acting: result ? null : m.player, last:m, result};
 }
 
-function cardHTML(rank, faceUp, big=true){
+function cardHTML(rank, faceUp){
   if (!faceUp) return `<div class="card back"></div>`;
   if (!rank) return `<div class="card empty"></div>`;
   return `<div class="card rank"><span class="r">${rank}</span></div>`;
@@ -168,9 +160,7 @@ function seatHTML(player, st){
   const cls = "seat" + (st.acting===player?" acting":"") + (won?" winner":"");
   const ret = st.result ? `<span class="ret ${ep.returns[player]>=0?"pos":"neg"}">${fmt(ep.returns[player])}</span>` : "";
   let bubble = "";
-  if (st.last && st.last.player===player && !st.result)
-    bubble = `<span class="bubble">${st.last.action}</span>`;
-  if (st.result && st.last && st.last.player===player)
+  if (st.last && st.last.player===player)
     bubble = `<span class="bubble${st.last.action==="fold"?" fold":""}">${st.last.action}</span>`;
   const status = st.result
     ? (won ? "🏆 wins the pot" : (folded ? "folded" : "")) : "";
@@ -187,8 +177,7 @@ function render(){
   $("seatTop").innerHTML = seatHTML("player_1", st);
   $("seatBot").innerHTML = seatHTML("player_0", st);
   $("pot").textContent = st.pot;
-  $("round").textContent = st.result ? ep.reason : `round ${st.round}`;
-  $("pubcard").innerHTML = cardHTML(st.pub, !!st.pub);
+  $("phase").textContent = st.result ? ep.reason : "betting";
   $("slider").value = cursor;
   $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
   $("prev").disabled = cursor===0;
@@ -205,7 +194,7 @@ function renderMoveList(){
     const cur = cursor===i+1 ? " cur" : "";
     const tr = m.trunc ? " trunc" : "";
     return `<button class="mv${cur}${tr}" onclick="jump(${i+1})"><span class="n">${i+1}</span>` +
-      `<span class="d ${m.player}"></span>R${m.round} ${m.action}${m.trunc?" ⚠":""}</button>`;
+      `<span class="d ${m.player}"></span>${m.action}${m.trunc?" ⚠":""}</button>`;
   }).join("");
 }
 
@@ -216,8 +205,8 @@ function renderPanel(){
                   `${ep.seat_assignment.player_1} holds ${ep.cards.player_1}`;
     p.innerHTML =
       `<div class="movenum">Deal</div>` +
-      `<div class="meta">${hands}<br>Both ante 1 chip. Round 1 bets are 2 chips; the public card ` +
-      `is dealt, then round 2 bets are 4 chips. Max one raise per round.</div>` +
+      `<div class="meta">${hands}<br>Both ante 1 chip (pot starts at 2). Player 0 acts first and may ` +
+      `check or bet 1 chip; facing a bet the opponent calls or folds. Higher card wins at showdown.</div>` +
       (ep.moves.length ? `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`
                        : `<div class="hint">No decisions in this hand.</div>`);
     return;
@@ -232,14 +221,12 @@ function renderPanel(){
       `so the played action may be arbitrary rather than the model's intended choice.</div></div>` : "";
   const resline = result
     ? `<div class="meta"><b>Hand over (${ep.reason}).</b> ` +
-      (ep.winner_name ? `${ep.winner_name} wins the ${ep.pot}-chip pot.` : "Pot split.") +
-      (ep.public_card ? ` Public card: ${ep.public_card}.` : "") + `</div>` : "";
+      (ep.winner_name ? `${ep.winner_name} wins the ${ep.pot}-chip pot.` : "Pot split.") + `</div>` : "";
   p.innerHTML =
     `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
     `<div class="actor"><span class="who"><span class="seatdot ${m.player}"></span>${m.agent}</span>` +
     `<span class="colchip">${m.action}</span></div>` +
-    `<div class="meta">round ${m.round} · holds ${ep.cards[m.player]} · pot ${m.pot} · to call ${m.to_call}` +
-    ` · ⏱ ${lat} thinking${inv}</div>` +
+    `<div class="meta">holds ${ep.cards[m.player]} · pot ${m.pot} · ⏱ ${lat} thinking${inv}</div>` +
     warn + resline +
     (m.thinking
       ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +

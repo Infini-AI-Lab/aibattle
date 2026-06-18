@@ -1,7 +1,7 @@
 [
   {
     "key": "independent_blackjack",
-    "title": "\ud83c\udccf Blackjack",
+    "title": "\ud83c\udca1 Blackjack",
     "href": "blackjack_report.html",
     "group": "imperfect",
     "badges": [
@@ -10,18 +10,19 @@
       "Stochastic"
     ],
     "ranking": [
-      "gpt-oss-120b",
-      "kimi-k2p6",
-      "minimax-m2p7",
       "glm-5p1",
+      "kimi-k2p6",
+      "gpt-oss-120b",
+      "minimax-m2p7",
+      "minimax-m3",
       "deepseek-v4-pro"
     ],
-    "meta": "vs dealer \u00b7 20 hands/model \u00b7 chip profit",
-    "champ_line": "\ud83c\udfc6 gpt-oss-120b <span class='metric'>+8.5 profit</span>"
+    "meta": "vs dealer \u00b7 100 hands/model \u00b7 chip profit",
+    "champ_line": "\ud83c\udfc6 glm-5p1 <span class='metric'>+14.0 profit</span>"
   },
   {
     "key": "leduc_poker",
-    "title": "\ud83c\udccf Leduc Poker",
+    "title": "\ud83c\udfb4 Leduc Poker",
     "href": "leduc_report.html",
     "group": "imperfect",
     "badges": [
@@ -30,14 +31,15 @@
       "Stochastic"
     ],
     "ranking": [
+      "gpt-oss-120b",
+      "minimax-m3",
       "glm-5p1",
       "kimi-k2p6",
-      "gpt-oss-120b",
       "minimax-m2p7",
       "deepseek-v4-pro"
     ],
-    "meta": "200 games \u00b7 10 deals/pair \u00b7 first-mover 38%",
-    "champ_line": "\ud83c\udfc6 glm-5p1 <span class='metric'>Elo 1514</span>"
+    "meta": "750 games \u00b7 25 deals/pair \u00b7 first-mover 42%",
+    "champ_line": "\ud83c\udfc6 gpt-oss-120b <span class='metric'>Elo 1509</span>"
   },
   {
     "key": "repeated_colonel_blotto",
@@ -50,14 +52,15 @@
       "Simultaneous"
     ],
     "ranking": [
-      "glm-5p1",
       "deepseek-v4-pro",
       "kimi-k2p6",
+      "glm-5p1",
+      "minimax-m3",
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
-    "meta": "200 games \u00b7 10 deals/pair \u00b7 first-mover 50%",
-    "champ_line": "\ud83c\udfc6 glm-5p1 <span class='metric'>Elo 2222</span>"
+    "meta": "300 games \u00b7 10 deals/pair \u00b7 first-mover 48%",
+    "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1803</span>"
   },
   {
     "key": "othello_lite_6x6",
@@ -76,7 +79,7 @@
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
-    "meta": "200 games \u00b7 10 deals/pair \u00b7 first-mover 48%",
-    "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>Elo 1639</span>"
+    "meta": "500 games \u00b7 25 deals/pair \u00b7 first-mover 47%",
+    "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>Elo 1645</span>"
   }
 ]

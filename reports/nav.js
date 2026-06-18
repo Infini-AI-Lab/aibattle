@@ -9,6 +9,7 @@
     "gomoku_report.html": "gomoku_report.html",
     "gomoku_replay.html": "gomoku_report.html",
     "kuhn_tournament_report.html": "kuhn_tournament_report.html",
+    "kuhn_replay.html": "kuhn_tournament_report.html",
     "holdem_tournament_report.html": "holdem_tournament_report.html",
     "holdem_replay.html": "holdem_tournament_report.html",
     "match_tournament_report.html": "match_tournament_report.html",
@@ -30,22 +31,29 @@
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when pages are restyled. ACTIVE matching
   // uses the bare filename, so the query string never affects highlighting.
-  var V = "?v=7";
+  var V = "?v=13";
   function a(href, label, cls) {
     var on = href === active ? " active" : "";
     return '<a class="' + cls + on + '" href="' + href + V + '">' + label + "</a>";
   }
 
+  // Three layers: overview, then games grouped by information class
+  // (perfect / imperfect), then each game indented under its group.
   var html =
     '<a class="brand" href="index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
     a("index.html", "overview", "nav") +
-    a("connect4_report.html", "connect4", "nav") +
-    a("gomoku_report.html", "gomoku", "nav") +
-    a("kuhn_tournament_report.html", "kuhn", "nav") +
-    '<span class="navclust">holdem/</span>' +
-    a("holdem_tournament_report.html", "1hand", "nav navsub") +
-    a("match_tournament_report.html", "match", "nav navsub") +
-    a("table_tournament_report.html", "table", "nav navsub");
+    '<span class="navclust">perfect-info/</span>' +
+    a("connect4_report.html", "connect4", "nav navsub") +
+    a("gomoku_report.html", "gomoku", "nav navsub") +
+    a("othello_report.html", "othello", "nav navsub") +
+    '<span class="navclust">imperfect-info/</span>' +
+    a("kuhn_tournament_report.html", "kuhn", "nav navsub") +
+    a("holdem_tournament_report.html", "holdem 1hand", "nav navsub") +
+    a("match_tournament_report.html", "holdem match", "nav navsub") +
+    a("table_tournament_report.html", "holdem table", "nav navsub") +
+    a("leduc_report.html", "leduc", "nav navsub") +
+    a("blotto_report.html", "blotto", "nav navsub") +
+    a("blackjack_report.html", "blackjack", "nav navsub");
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

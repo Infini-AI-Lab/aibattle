@@ -14,11 +14,10 @@ Two report shapes, picked by game structure:
     profit, mean/hand, win/push/loss split, plus blackjack-specific play signals
     (bust rate, double rate, natural rate) read from the per-hand episode files.
 
-Reads each game's coached run folder (runs/blackjack, runs/leduc_poker,
-runs/colonel_blotto, runs/othello — see GAMES[*]["dir"]); writes <name>_report.html
-per game to reports/, plus a
-small new_games_index.json that analyze_board_tournament.render_index() reads to
-add the four games to the landing page and the cross-game Arena Score.
+Reads each game's run folder under runs/new_games_experiment/<game> (see
+GAMES[*]["dir"]); writes terminal-styled <name>_report.html per game to reports/,
+plus a small new_games_index.json (rankings/meta the index leaderboard uses).
+Replay data for these games is built separately by build_new_games_replays.py.
 """
 
 from __future__ import annotations
@@ -37,32 +36,40 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # matching the vocabulary in analyze_board_tournament.GAME_TAXONOMY.
 GAMES = {
     "independent_blackjack": {
-        "dir": "blackjack", "kind": "dealer", "title": "🃏 Blackjack", "emoji": "🃏",
-        "href": "blackjack_report.html", "group": "imperfect",
+        "dir": "new_games_experiment/independent_blackjack", "kind": "dealer",
+        "title": "🂡 Blackjack", "emoji": "🂡",
+        "href": "blackjack_report.html", "replay": "blackjack_replay.html", "area": "blackjack", "replay_verb": "hand",
+        "group": "imperfect",
         "badges": ["Imperfect info", "vs Dealer", "Stochastic"],
         "blurb": "Model vs the built-in dealer · hit/stand/double · scored by chip profit",
     },
     "leduc_poker": {
-        "dir": "leduc_poker", "kind": "versus", "title": "🃏 Leduc Poker", "emoji": "🃏",
-        "href": "leduc_report.html", "group": "imperfect",
+        "dir": "new_games_experiment/leduc_poker", "kind": "versus",
+        "title": "🎴 Leduc Poker", "emoji": "🎴",
+        "href": "leduc_report.html", "replay": "leduc_replay.html", "area": "leduc", "replay_verb": "hand",
+        "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Stochastic"],
         "blurb": "Imperfect-information poker · 6-card deck · round-robin, seat-swapped",
     },
     "repeated_colonel_blotto": {
-        "dir": "colonel_blotto", "kind": "versus", "title": "⚔️ Colonel Blotto", "emoji": "⚔️",
-        "href": "blotto_report.html", "group": "imperfect",
+        "dir": "new_games_experiment/repeated_colonel_blotto", "kind": "versus",
+        "title": "⚔️ Colonel Blotto", "emoji": "⚔️",
+        "href": "blotto_report.html", "replay": "blotto_replay.html", "area": "blotto", "replay_verb": "game",
+        "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Simultaneous"],
         "blurb": "Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped",
     },
     "othello_lite_6x6": {
-        "dir": "othello", "kind": "versus", "title": "⚫ Othello 6×6", "emoji": "⚫",
-        "href": "othello_report.html", "group": "perfect",
+        "dir": "new_games_experiment/othello_lite_6x6", "kind": "versus",
+        "title": "⚫ Othello 6×6", "emoji": "⚫",
+        "href": "othello_report.html", "replay": "othello_replay.html", "area": "othello", "replay_verb": "game",
+        "group": "perfect",
         "badges": ["Perfect info", "2P", "Deterministic"],
         "blurb": "Perfect-information board game · 6×6 board · round-robin, seat-swapped",
     },
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=13"></script>'
 
 
 def _favicon(emoji: str) -> str:
@@ -305,54 +312,113 @@ def analyze_dealer(game: str, data: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-_HEAD_CSS = """
-  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#0f1117; color:#e6e6e6; }
-  .wrap { max-width:1200px; margin:0 auto; padding:28px 28px 80px; }
-  h1 { font-size:25px; } h2 { font-size:18px; margin-top:38px; border-bottom:1px solid #2a2f3a; padding-bottom:6px; }
-  h3 { font-size:14px; color:#9aa3b5; }
-  .sub { color:#8b93a7; }
-  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
-  .kpi { background:#171a23; border:1px solid #232838; border-radius:10px; padding:12px 16px; }
-  .kpi .v { font-size:22px; font-weight:700; color:#cdd6f4; }
-  .kpi .l { font-size:11px; color:#8b93a7; text-transform:uppercase; letter-spacing:.04em; }
-  table { border-collapse:collapse; width:100%; font-size:13px; }
-  th,td { padding:6px 8px; text-align:center; border-bottom:1px solid #20242e; }
-  th { color:#9aa3b5; } td.model,th.model { text-align:left; font-weight:600; color:#cdd6f4; }
-  .pos { color:#4ade80; } .neg { color:#f87171; } .diag { color:#3a3f4b; }
-  .small { font-size:10px; color:#8b93a7; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
-  .note { color:#8b93a7; font-size:12px; margin:6px 0; }
-  canvas { max-height:300px; }
-  @media (max-width:760px) { .grid2 { grid-template-columns:1fr; } }
+_TERM_CSS = """
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea; --green:#1a7f37; --neg:#b91c1c; }
+  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    margin:0; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px; }
+  h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
+  h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
+    vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  .sub { color:var(--dim); font-size:13px; margin-bottom:30px; }
+  h2 { font-size:15px; margin:0; font-weight:700; }
+  h2::before { content:"## "; color:var(--red); }
+  .note { color:var(--dim); font-size:12px; margin:6px 0 14px; }
+
+  .arena { margin-top:34px; border:1px solid var(--line); padding:20px 20px 24px;
+    background:var(--panel); }
+  .arena-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .arena-tag { font-size:11px; color:var(--dim); }
+  .arena-tag::before { content:"["; color:var(--red); }
+  .arena-tag::after { content:"]"; color:var(--red); }
+
+  table.lb { border-collapse:collapse; width:100%; font-size:13px; margin-top:4px; }
+  table.lb th, table.lb td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:center; }
+  table.lb th { color:var(--dim); font-weight:600; }
+  table.lb td.model, table.lb th.model { text-align:left; font-weight:700; }
+  table.lb td.rk, table.lb th.rk { width:34px; color:var(--dim); }
+  .pos { color:var(--green); } .neg { color:var(--neg); }
+  .scorecell { position:relative; min-width:120px; }
+  .scorecell .bar { position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:16px; background:var(--red); opacity:.16; }
+  .scorecell .sval { position:relative; font-weight:700; color:var(--red); }
+
+  table.h2h { border-collapse:collapse; width:100%; font-size:12px; margin-top:4px; }
+  table.h2h th, table.h2h td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; }
+  table.h2h th { color:var(--dim); font-weight:600; }
+  table.h2h td.model, table.h2h th.model { text-align:left; font-weight:700; }
+  table.h2h td.diag { color:var(--line); }
+  table.h2h .small { font-size:10px; color:var(--dim); }
+
+  /* canonical replay button — matches the board/holdem reports: faint inset,
+     indigo label, sits directly under the subtitle. */
+  .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
+    border:1px solid var(--line); padding:8px 14px; font-size:13px; text-decoration:none; }
+  .replaybtn:hover { border-color:var(--red); color:var(--fg); }
 """
+
+
+def _page(cfg: dict, area: str, sub: str, body: str, replay_label: str) -> str:
+    """Terminal-style page shell shared by both report kinds."""
+    btn = (f'  <a class="replaybtn" href="{cfg["replay"]}">▶ watch {replay_label} replays</a>\n'
+           if cfg.get("replay") else "")
+    return f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — {cfg['title']}</title>
+{_favicon(cfg['emoji'])}
+{NAV_HEAD}
+<style>{_TERM_CSS}</style></head>
+<body><div class="wrap">
+  <h1>$ ~/aibattle/{area}<span class="cursor"></span></h1>
+  <div class="sub">{cfg['emoji']} {sub}</div>
+{btn}{body}
+</div></body></html>"""
+
+
+def _bar_cell(value: float, lo: float, hi: float, text: str) -> str:
+    """A scorecell: faint red bar scaled to [lo,hi] behind a bold red value."""
+    span = (hi - lo) or 1
+    w = max(0.0, min(100.0, (value - lo) / span * 100))
+    return (f"<td class='scorecell'><span class='bar' style='width:{w:.0f}%'></span>"
+            f"<span class='sval'>{text}</span></td>")
+
+
+def _medal(i: int) -> str:
+    return {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, str(i))
 
 
 def render_versus(rep: dict) -> str:
     cfg = GAMES[rep["game"]]
-    payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
     elo = rep["elo"]
     ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
 
+    rated = [elo[m] for m in models if elo[m] is not None]
+    lo, hi = (min(rated), max(rated)) if rated else (0, 1)
+
     rows = ""
-    for i, m in enumerate(sorted(models, key=lambda x: pm[x]["net_per_game"],
-                                 reverse=True), 1):
+    for i, m in enumerate(ranked, 1):
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
-        rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
-          <td>{_elo_txt(elo[m])}</td>
-          <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
-          <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
-          <td>{s['first_move_win_rate']*100:.0f}%</td>
-          <td>{s['invalid_rate']*100:.1f}%</td>
-          <td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td>
-        </tr>"""
+        elo_cell = (_bar_cell(elo[m], lo, hi, _elo_txt(elo[m])) if elo[m] is not None
+                    else "<td class='scorecell'><span class='sval'>—</span></td>")
+        rows += (
+            f"<tr><td class='rk'>{_medal(i)}</td><td class='model'>{m}</td>"
+            f"{elo_cell}"
+            f"<td class='{net_cls}'>{s['net_per_game']:+.2f}</td>"
+            f"<td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>"
+            f"<td>{s['first_move_win_rate']*100:.0f}%</td>"
+            f"<td>{s['invalid_rate']*100:.1f}%</td>"
+            f"<td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td></tr>")
 
-    hh = "<tr><th></th>" + "".join(f"<th>{m}</th>" for m in models) + "</tr>"
+    hh = ("<tr><th class='model'>model</th>"
+          + "".join(f"<th>{m.split('-')[0]}</th>" for m in models) + "</tr>")
     for a in models:
-        hh += f"<tr><th class='model'>{a}</th>"
+        hh += f"<tr><td class='model'>{a}</td>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -364,171 +430,66 @@ def render_versus(rep: dict) -> str:
 
     fpw = rep["first_player_win_rate"] * 100
     deals = (rep["episodes_per_pair"] or 0) // 2
-    return f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<title>AI Battle Arena — {cfg['title']}</title>
-{_favicon(cfg['emoji'])}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-{NAV_HEAD}
-<style>{_HEAD_CSS}</style></head>
-<body><div class="wrap">
-  <h1>🎲 AI Battle Arena — {cfg['title']}</h1>
-  <div class="sub">{cfg['blurb']} · {rep['num_games']} games</div>
+    body = f"""  <section class="arena">
+    <div class="arena-head"><h2>leaderboard</h2>
+      <span class="arena-tag">{rep['num_games']} games · {deals} deals/pair · first-mover {fpw:.0f}%</span></div>
+    <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500);
+      a model with no wins or no losses has no finite rating and is shown as “—”. net/game is the average
+      game payoff (+1 win / −1 loss / 0 draw). Seats swap within every pair, so first-mover advantage is balanced.</div>
+    <table class="lb">
+      <tr><th class='rk'>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
+          <th>draw%</th><th>1st-move</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+      {rows}
+    </table>
+  </section>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">{_elo_txt(elo[ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
-    <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">{deals}</div><div class="l">deals/pair (seat-swapped)</div></div>
-  </div>
-
-  <h2>Leaderboard</h2>
-  <table>
-    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
-    {rows}
-  </table>
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
-    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
-    net/game is the average game payoff (+1 win / −1 loss / 0 draw). Seats are swapped within every
-    pair, so first-mover advantage is balanced across the field.</div>
-
-  <div class="grid2">
-    <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
-    <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
-  </div>
-  <div class="grid2">
-    <div><h3>Net result per game</h3><canvas id="net"></canvas></div>
-    <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
-  </div>
-
-  <h2>Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'>{hh}</table>
-
-<script>
-const R = {payload};
-const pm=R.per_model, M=R.models, COLORS=['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa'];
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
-const eloRanked=[...M].filter(m=>R.elo[m]!=null).sort((a,b)=>R.elo[b]-R.elo[a]);
-
-new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:'#a78bfa',
-    data:eloRanked.map(m=>R.elo[m])}}]}},
-  options:{{ indexAxis:'y', scales:{{x:{{min:eloRanked.length?Math.min(...eloRanked.map(m=>R.elo[m]))-40:0}}}},
-    plugins:{{legend:{{display:false}}}} }} }});
-
-new Chart(document.getElementById('wdl'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
-    {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)}},
-    {{label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)}},
-    {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)}},
-  ]}},
-  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
-
-new Chart(document.getElementById('net'), {{ type:'bar',
-  data:{{ labels:M, datasets:[{{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),
-    data:M.map(m=>pm[m].net_per_game)}}]}},
-  options:{{ plugins:{{legend:{{display:false}}}} }} }});
-
-new Chart(document.getElementById('len'), {{ type:'bar',
-  data:{{ labels:R.len_bins, datasets:M.map((m,i)=>({{label:m,
-    backgroundColor:COLORS[i%COLORS.length], data:pm[m].len_hist}}))}},
-  options:{{ scales:{{y:{{title:{{display:true,text:'games'}}}}}},
-    plugins:{{legend:{{position:'bottom'}}}} }} }});
-</script>
-</div></body></html>"""
+  <section class="arena">
+    <div class="arena-head"><h2>head-to-head</h2>
+      <span class="arena-tag">row wins–losses vs column · d = draws</span></div>
+    <table class="h2h">{hh}</table>
+  </section>"""
+    return _page(cfg, cfg["area"], f"{cfg['blurb']} · {rep['num_games']} games",
+                 body, cfg["replay_verb"])
 
 
 def render_dealer(rep: dict) -> str:
     cfg = GAMES[rep["game"]]
-    payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
     ranked = sorted(models, key=lambda m: pm[m]["profit"], reverse=True)
+    profits = [pm[m]["profit"] for m in models]
+    lo, hi = min(profits + [0]), max(profits + [0])
 
     rows = ""
     for i, m in enumerate(ranked, 1):
         s = pm[m]
         pcls = "pos" if s["profit"] > 0 else ("neg" if s["profit"] < 0 else "")
-        rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
-          <td class='{pcls}'>{s['profit']:+.1f}</td>
-          <td class='{pcls}'>{s['mean_per_hand']:+.3f}</td>
-          <td>{s['win_rate']*100:.0f}%</td><td>{s['push_rate']*100:.0f}%</td>
-          <td>{s['loss_rate']*100:.0f}%</td>
-          <td>{s['bust_rate']*100:.0f}%</td><td>{s['double_rate']*100:.0f}%</td>
-          <td>{s['natural_rate']*100:.0f}%</td>
-          <td>{s['invalid_rate']*100:.1f}%</td>
-          <td>{s['hands']}</td><td>{s['avg_latency_s']:.1f}s</td>
-        </tr>"""
+        ptxt = f"{s['profit']:+.1f}"
+        rows += (
+            f"<tr><td class='rk'>{_medal(i)}</td><td class='model'>{m}</td>"
+            f"{_bar_cell(s['profit'], lo, hi, ptxt)}"
+            f"<td class='{pcls}'>{s['mean_per_hand']:+.3f}</td>"
+            f"<td>{s['win_rate']*100:.0f}%</td><td>{s['push_rate']*100:.0f}%</td>"
+            f"<td>{s['loss_rate']*100:.0f}%</td>"
+            f"<td>{s['bust_rate']*100:.0f}%</td><td>{s['double_rate']*100:.0f}%</td>"
+            f"<td>{s['natural_rate']*100:.0f}%</td>"
+            f"<td>{s['invalid_rate']*100:.1f}%</td><td>{s['hands']}</td></tr>")
 
-    champ = ranked[0]
-    return f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<title>AI Battle Arena — {cfg['title']}</title>
-{_favicon(cfg['emoji'])}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-{NAV_HEAD}
-<style>{_HEAD_CSS}</style></head>
-<body><div class="wrap">
-  <h1>🎲 AI Battle Arena — {cfg['title']}</h1>
-  <div class="sub">{cfg['blurb']} · {rep['total_hands']} hands total</div>
-
-  <div class="kpis">
-    <div class="kpi"><div class="v">{pm[champ]['profit']:+.1f}</div><div class="l">top profit · {champ}</div></div>
-    <div class="kpi"><div class="v">{rep['field_profit']:+.1f}</div><div class="l">field net vs dealer</div></div>
-    <div class="kpi"><div class="v">{rep['total_hands']}</div><div class="l">hands played</div></div>
-  </div>
-
-  <h2>Leaderboard</h2>
-  <table>
-    <tr><th>#</th><th class='model'>model</th><th>profit</th><th>mean/hand</th>
-        <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
-        <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
-    {rows}
-  </table>
-  <div class="note">Each model plays the same independent hands against the built-in dealer; the dealer
-    holds an inherent house edge, so a negative field net is expected. profit = total chips won/lost
-    (a doubled hand pays ±2). bust = player busted; double = chose to double down; natural = dealt a
-    blackjack. These read directly from the per-hand outcomes.</div>
-
-  <div class="grid2">
-    <div><h3>Chip profit</h3><canvas id="profit"></canvas></div>
-    <div><h3>Win / push / loss</h3><canvas id="wpl"></canvas></div>
-  </div>
-  <div class="grid2">
-    <div><h3>Play style (bust / double / natural %)</h3><canvas id="style"></canvas></div>
-    <div></div>
-  </div>
-
-<script>
-const R = {payload};
-const pm=R.per_model, M=R.models;
-Chart.defaults.color='#9aa3b5'; Chart.defaults.borderColor='#232838';
-const ranked=[...M].sort((a,b)=>pm[b].profit-pm[a].profit);
-
-new Chart(document.getElementById('profit'), {{ type:'bar',
-  data:{{ labels:ranked, datasets:[{{label:'profit', backgroundColor:ranked.map(m=>pm[m].profit>=0?'#4ade80':'#f87171'),
-    data:ranked.map(m=>pm[m].profit)}}]}},
-  options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
-
-new Chart(document.getElementById('wpl'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
-    {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].win_rate*100)}},
-    {{label:'push', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].push_rate*100)}},
-    {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].loss_rate*100)}},
-  ]}},
-  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
-
-new Chart(document.getElementById('style'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
-    {{label:'bust %', backgroundColor:'#f87171', data:M.map(m=>pm[m].bust_rate*100)}},
-    {{label:'double %', backgroundColor:'#fbbf24', data:M.map(m=>pm[m].double_rate*100)}},
-    {{label:'natural %', backgroundColor:'#60a5fa', data:M.map(m=>pm[m].natural_rate*100)}},
-  ]}},
-  options:{{ scales:{{y:{{min:0}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
-</script>
-</div></body></html>"""
+    body = f"""  <section class="arena">
+    <div class="arena-head"><h2>leaderboard</h2>
+      <span class="arena-tag">{rep['total_hands']} hands · field net {rep['field_profit']:+.1f}</span></div>
+    <div class="note">Each model plays the same independent hands against the built-in dealer; the dealer
+      holds an inherent house edge, so a negative field net is expected. profit = total chips won/lost
+      (a doubled hand pays ±2). bust = player busted; double = chose to double down; natural = dealt a blackjack.</div>
+    <table class="lb">
+      <tr><th class='rk'>#</th><th class='model'>model</th><th>profit</th><th>mean/hand</th>
+          <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
+          <th>natural%</th><th>invalid%</th><th>hands</th></tr>
+      {rows}
+    </table>
+  </section>"""
+    return _page(cfg, cfg["area"], f"{cfg['blurb']} · {rep['total_hands']} hands total",
+                 body, cfg["replay_verb"])
 
 
 # ---------------------------------------------------------------------------

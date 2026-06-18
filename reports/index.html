@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=10"></script>
+<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=13"></script>
 <style>
   /* Terminal theme: white paper background, dark-red primary, monospace everywhere. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -67,7 +67,8 @@
     <table class="lb">
       <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
         <th>coverage</th><th>best game</th></tr>
-      <tr><td class='rk'>🥇</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:75.0%'></span><span class='sval'>75</span></td><td class='cov'>6/6</td><td class='best'>🃏 Kuhn Poker</td></tr><tr><td class='rk'>🥈</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:70.8%'></span><span class='sval'>71</span></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥉</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:62.5%'></span><span class='sval'>62</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr><td class='rk'>4</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:25.0%'></span><span class='sval'>25</span></td><td class='cov'>6/6</td><td class='best'>🃏 Kuhn Poker</td></tr><tr><td class='rk'>5</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:16.7%'></span><span class='sval'>17</span></td><td class='cov'>6/6</td><td class='best'>🃏 Kuhn Poker</td></tr>
+      
+      <tr><td class='rk'>🥇</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:72.5%'></span><span class='sval'>72</span></td><td class='cov'>10/10</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥈</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:72.0%'></span><span class='sval'>72</span></td><td class='cov'>10/10</td><td class='best'>🃏 Kuhn Poker</td></tr><tr><td class='rk'>🥉</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:54.5%'></span><span class='sval'>54</span></td><td class='cov'>10/10</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>4</td><td class='model'>minimax-m3</td><td class='scorecell'><span class='bar' style='width:50.0%'></span><span class='sval'>50</span></td><td class='cov'>4/10</td><td class='best'>🎴 Leduc Poker</td></tr><tr><td class='rk'>5</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:34.5%'></span><span class='sval'>34</span></td><td class='cov'>10/10</td><td class='best'>🎴 Leduc Poker</td></tr><tr><td class='rk'>6</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:16.5%'></span><span class='sval'>16</span></td><td class='cov'>10/10</td><td class='best'>🃏 Kuhn Poker</td></tr>
     </table>
   </section>
 
@@ -90,15 +91,22 @@
           <div class="cmeta">100 games · board 9×9 · first-mover 54%</div>
           <div class="champ">🏆 kimi-k2p6 <span class='metric'>Elo 1712</span></div>
           <div class="cgo">view analysis →</div>
+        </a>
+        <a class="card" href="othello_report.html?v=12">
+          <div class="ctitle">⚫ Othello 6×6</div>
+          <div class="badges"><span class='badge'>perfect info</span><span class='badge'>2P</span><span class='badge'>deterministic</span></div>
+          <div class="cmeta">500 games · board 6×6 · first-mover 47%</div>
+          <div class="champ">🏆 kimi-k2p6 <span class='metric'>Elo 1645</span></div>
+          <div class="cgo">view analysis →</div>
         </a></div>
     <div class="group-label">🎭 imperfect information
       <span class="gl-sub">hidden cards · stochastic</span></div>
     <div class='cards'>
-        <a class="card" href="kuhn_tournament_report.html?v=6">
+        <a class="card" href="kuhn_tournament_report.html?v=13">
           <div class="ctitle">🃏 Kuhn Poker</div>
           <div class="badges"><span class='badge'>imperfect info</span><span class='badge'>heads-up</span><span class='badge'>stochastic</span></div>
           <div class="cmeta">30 hands/pair · solved game · GTO scoring</div>
-          <div class="champ">🏆 glm-5p1 <span class='metric'>+0.067 net/hand</span></div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>+0.073 net/hand</span></div>
           <div class="cgo">view analysis →</div>
         </a>
         <a class="card" href="holdem_tournament_report.html?v=6">
@@ -120,6 +128,27 @@
           <div class="badges"><span class='badge'>imperfect info</span><span class='badge'>5-handed</span><span class='badge'>stochastic</span></div>
           <div class="cmeta">5-handed · 100 sessions · up to 40 hands · avg finishing rank</div>
           <div class="champ">🏆 kimi-k2p6 <span class='metric'>2.68 avg rank</span></div>
+          <div class="cgo">view analysis →</div>
+        </a>
+        <a class="card" href="leduc_report.html?v=12">
+          <div class="ctitle">🎴 Leduc Poker</div>
+          <div class="badges"><span class='badge'>imperfect info</span><span class='badge'>heads-up</span><span class='badge'>stochastic</span></div>
+          <div class="cmeta">750 games · 25 deals/pair · 6-card deck · 2 betting rounds</div>
+          <div class="champ">🏆 gpt-oss-120b <span class='metric'>Elo 1509</span></div>
+          <div class="cgo">view analysis →</div>
+        </a>
+        <a class="card" href="blotto_report.html?v=12">
+          <div class="ctitle">⚔️ Colonel Blotto</div>
+          <div class="badges"><span class='badge'>imperfect info</span><span class='badge'>heads-up</span><span class='badge'>simultaneous</span></div>
+          <div class="cmeta">300 games · 10 deals/pair · 100 troops · 5 battlefields</div>
+          <div class="champ">🏆 deepseek-v4-pro <span class='metric'>Elo 1803</span></div>
+          <div class="cgo">view analysis →</div>
+        </a>
+        <a class="card" href="blackjack_report.html?v=12">
+          <div class="ctitle">🂡 Blackjack</div>
+          <div class="badges"><span class='badge'>imperfect info</span><span class='badge'>vs dealer</span><span class='badge'>stochastic</span></div>
+          <div class="cmeta">vs dealer · 100 hands/model · hit/stand/double · chip profit</div>
+          <div class="champ">🏆 glm-5p1 <span class='metric'>+14.0 profit</span></div>
           <div class="cgo">view analysis →</div>
         </a></div>
   </section>

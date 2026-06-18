@@ -86,6 +86,20 @@ Buttons (replay.css `.btn`): white, 1px `--line` border, 13px, square; hover →
 text; `.primary` → filled `--red` white text. Active/selected states use a red border +
 `box-shadow:0 0 0 1px var(--red)` ring, never a fill change.
 
+Replay button (`.replaybtn`) — every report page that has a replay viewer links to it with this
+ONE canonical control, placed directly under the `.sub` line (not in a section, not at the bottom):
+```html
+<a class='replaybtn' href='<game>_replay.html'>▶ watch <game|hand|table> replays</a>
+```
+```css
+.replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
+  border:1px solid var(--line); padding:8px 14px; font-size:13px; text-decoration:none; }
+.replaybtn:hover { border-color:var(--red); color:var(--fg); }
+```
+Note the label is **indigo `#4338ca`** (the one place a non-token link color is used) on a `--faint`
+inset, square, with the `▶` glyph. Verb matches the unit replayed: board games → "game", poker →
+"hand", ring poker → "table". Keep it short — no trailing description.
+
 Status colors: winner/positive `--green`, negative numbers `--neg`, attention/dealer `--amber`,
 acting/current `--red`. Emoji serve as icons (🏆 winner, 🎲 brand, per-game emoji in titles).
 

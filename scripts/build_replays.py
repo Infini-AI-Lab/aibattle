@@ -549,6 +549,67 @@ def build_table():
           f"({total/1e6:.1f} MB total)")
 
 
+def _bare(name):
+    """Drop the '-coached' agent suffix; the site shows bare model names."""
+    if isinstance(name, str) and name.endswith("-coached"):
+        return name[: -len("-coached")]
+    return name
+
+
+def build_kuhn():
+    """Heads-up Kuhn poker: one file per pairing, one hand per episode. Steps
+    (with reasoning) live inline in kuhn_data.json, so we build straight from it.
+    Both private cards are recoverable because each player acts at least once."""
+    path = "runs/kuhn_poker/kuhn_data.json"
+    if not os.path.exists(path):
+        print(f"skip kuhn: no data at {path}")
+        return
+    data = json.load(open(path))
+    out_dir = os.path.join("runs/kuhn_poker", "replays", "kuhn")
+    os.makedirs(out_dir, exist_ok=True)
+
+    manifest_pairs = []
+    for g in data["pairs"]:
+        a, b = _bare(g["a"]), _bare(g["b"])
+        episodes = []
+        for e in g["episodes"]:
+            seat = {k: _bare(v) for k, v in e["seat_assignment"].items()}
+            cards, moves = {}, []
+            for s in e.get("steps", []):
+                me = s["player"]
+                card = (s["observation"].get("private") or {}).get("card")
+                if card and me not in cards:
+                    cards[me] = card
+                pub = s["observation"].get("public") or {}
+                th = _think_of(s); inv = bool(s.get("invalid"))
+                moves.append({
+                    "ply": s["step"], "player": me, "agent": _bare(s["agent_name"]),
+                    "action": s.get("selected_action"), "pot": pub.get("pot"),
+                    "invalid": inv, "latency_ms": _meta(s, "latency_ms"),
+                    "tokens": _meta(s, "completion_tokens"),
+                    "thinking": th, "trunc": _truncated(th, inv),
+                })
+            # pot starts at the 2-chip ante and grows 1 per bet and per call
+            final_pot = 2 + sum(1 for m in moves if m["action"] in ("bet", "call"))
+            reason = "fold" if moves and moves[-1]["action"] == "fold" else "showdown"
+            episodes.append({
+                "episode": e["episode"], "seat_assignment": seat, "cards": cards,
+                "pot": final_pot, "returns": e["returns"], "winner": e.get("winner"),
+                "winner_name": _bare(e.get("winner_name")), "reason": reason,
+                "length": e.get("length", len(moves)), "moves": moves,
+            })
+        fname = f"kuhn__{a}__vs__{b}.json"
+        json.dump({"game": "kuhn", "a": a, "b": b, "episodes": episodes},
+                  open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
+        manifest_pairs.append({"file": fname, "a": a, "b": b})
+
+    json.dump({"game": "kuhn", "pairs": manifest_pairs},
+              open(os.path.join(out_dir, "manifest.json"), "w", encoding="utf-8"))
+    total = sum(os.path.getsize(os.path.join(out_dir, f)) for f in os.listdir(out_dir))
+    print(f"[kuhn] wrote {len(manifest_pairs)} pairings + manifest to {out_dir} "
+          f"({total/1e6:.1f} MB)")
+
+
 def main():
     for game, cfg in GAMES.items():
         path = os.path.join("runs", game, f"{game}_data.json")
@@ -559,6 +620,7 @@ def main():
     build_holdem()
     build_match()
     build_table()
+    build_kuhn()
 
 
 if __name__ == "__main__":
