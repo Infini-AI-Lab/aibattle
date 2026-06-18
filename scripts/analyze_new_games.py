@@ -68,7 +68,7 @@ GAMES = {
     },
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 
 def _favicon(emoji: str) -> str:

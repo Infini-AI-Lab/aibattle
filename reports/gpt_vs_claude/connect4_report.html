@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🔴 Connect Four</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -34,6 +34,12 @@
   .tag { background:var(--faint); color:var(--red); border:1px solid var(--line);
     border-radius:0; padding:1px 8px; font-size:11px; margin-left:3px;
     white-space:nowrap; }
+  /* Model-family badge (GPT vs Claude pages): green = GPT, indigo = Claude —
+     the site's two accent colors. Inline so it doesn't change row height. */
+  .fam { font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700;
+    vertical-align:middle; }
+  .fam.gpt { background:var(--faint); color:var(--pos); }
+  .fam.claude { background:var(--faint); color:#4338ca; }
 
   .kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
   .kpi { background:var(--faint); border:1px solid var(--line); padding:12px 16px; }
@@ -76,7 +82,7 @@
         <th>draw%</th><th>1st-move win%</th><th>win-take</th><th>block</th>
         <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     <tr>
-          <td>1</td><td class='model'>claude-opus-4.8</td>
+          <td>1</td><td class='model'><span class='fam claude'>Claude</span> claude-opus-4.8</td>
           <td>1583<div class='small'>±23</div></td>
           <td class='pos'>+0.30</td>
           <td>62%</td><td>6%</td>
@@ -87,7 +93,7 @@
           <td>2.4%</td>
           <td>19.1</td><td>269.1s</td>
         </tr><tr>
-          <td>2</td><td class='model'>gpt-5.4</td>
+          <td>2</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.4</td>
           <td>1531<div class='small'>±21</div></td>
           <td class='pos'>+0.11</td>
           <td>54%</td><td>3%</td>
@@ -98,7 +104,7 @@
           <td>2.4%</td>
           <td>18.1</td><td>240.7s</td>
         </tr><tr>
-          <td>3</td><td class='model'>gpt-5.5</td>
+          <td>3</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.5</td>
           <td>1491<div class='small'>±21</div></td>
           <td class='neg'>-0.03</td>
           <td>46%</td><td>5%</td>
@@ -109,7 +115,7 @@
           <td>0.1%</td>
           <td>18.0</td><td>219.0s</td>
         </tr><tr>
-          <td>4</td><td class='model'>claude-sonnet-4.6</td>
+          <td>4</td><td class='model'><span class='fam claude'>Claude</span> claude-sonnet-4.6</td>
           <td>1395<div class='small'>±23</div></td>
           <td class='neg'>-0.38</td>
           <td>29%</td><td>5%</td>

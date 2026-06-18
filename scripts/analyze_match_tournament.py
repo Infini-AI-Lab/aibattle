@@ -28,7 +28,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=4"><script defer src="nav.js?v=14"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""

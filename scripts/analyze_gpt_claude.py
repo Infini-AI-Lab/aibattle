@@ -127,9 +127,16 @@ def render_match(rep: dict, title_meta: str) -> str:
     rows = ""
     for i, r in enumerate(lb, 1):
         fam = family(r["model"])
+        if r.get("elo") is None:
+            elo_disp = "—"
+        elif r.get("elo_sd") is not None:
+            elo_disp = f"{r['elo']}<div class='small'>±{r['elo_sd']:.0f}</div>"
+        else:
+            elo_disp = str(r["elo"])
         rows += f"""<tr>
           <td>{i}</td>
           <td class='model'><span class='fam {fam.lower()}'>{fam}</span> {r['model']}</td>
+          <td><b>{elo_disp}</b></td>
           <td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}</td><td>{r['draws']}</td>
           <td>{r['busted_out_rate']*100:.0f}%</td>
           <td>{r['avg_hands_per_match']:.1f}</td>
@@ -156,26 +163,23 @@ def render_match(rep: dict, title_meta: str) -> str:
 {bt._favicon("🃏")}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 {NAV_HEAD}
-<style>{BASE_CSS}
-  /* Family badge: green = GPT, indigo = Claude (the site's two accent colors). */
-  .fam {{ font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700; }}
-  .fam.gpt {{ background:var(--faint); color:var(--pos); }}
-  .fam.claude {{ background:var(--faint); color:#4338ca; }}
-</style></head>
+<style>{BASE_CSS}</style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/gpt-vs-claude/match<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Match · {title_meta}</div>
   <a class="replaybtn" href="match_replay.html">▶ watch match replays</a>
 
-  <h2>Leaderboard — match win rate</h2>
+  <h2>🏆 Leaderboard</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>match win%</th><th>wins</th>
+    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>match win%</th><th>wins</th>
         <th>draws</th><th>busted-out%</th><th>avg hands/match</th><th>avg win margin</th></tr>
     {rows}
   </table>
-  <div class="note">A match is a heads-up sit-and-go (up to {rep['max_hands']} hands, stacks
-    carried); the match winner is whoever holds more chips at the end. Win margin is the average
-    final chip gap in matches won. Busted-out% = share of matches lost by going broke.</div>
+  <div class="note"><b>Elo</b> is a Bradley-Terry rating (field mean 1500) over match win/loss
+    results; ± is one bootstrap SD. <b>Ranked by Elo.</b> A match is a heads-up sit-and-go (up to
+    {rep['max_hands']} hands, stacks carried); the match winner is whoever holds more chips at the
+    end. Win margin is the average final chip gap in matches won. Busted-out% = share of matches
+    lost by going broke.</div>
 
   <div class="grid2">
     <div><h3>Match win rate</h3><canvas id="wr"></canvas></div>
@@ -285,9 +289,6 @@ def render_index(fh: dict, rates: dict, cards: list, arena_rows: list,
   .scorecell .bar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
     height:16px; background:var(--red); opacity:.16; }}
   .scorecell .sval {{ position:relative; font-weight:700; color:var(--red); }}
-  .fam {{ font-size:10px; padding:1px 6px; border:1px solid var(--line); font-weight:700; }}
-  .fam.gpt {{ background:var(--faint); color:var(--pos); }}
-  .fam.claude {{ background:var(--faint); color:#4338ca; }}
 
   .cards {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px; }}
   .card {{ display:block; text-decoration:none; color:inherit; background:var(--panel);
@@ -359,51 +360,6 @@ def write(path: str, html: str):
         f.write(html)
 
 
-NAV_JS = r"""// Navbar for the GPT-vs-Claude mini-site. Links resolve within
-// reports/gpt_vs_claude/; a back-link returns to the base arena.
-(function () {
-  var ACTIVE = {
-    "index.html": "index.html",
-    "connect4_report.html": "connect4_report.html",
-    "connect4_replay.html": "connect4_report.html",
-    "gomoku_report.html": "gomoku_report.html",
-    "gomoku_replay.html": "gomoku_report.html",
-    "holdem_1hand_report.html": "holdem_1hand_report.html",
-    "holdem_replay.html": "holdem_1hand_report.html",
-    "holdem_match_report.html": "holdem_match_report.html",
-    "match_replay.html": "holdem_match_report.html"
-  };
-  var file = location.pathname.split("/").pop() || "index.html";
-  var active = ACTIVE[file] || "";
-  function a(href, label, cls) {
-    var on = href === active ? " active" : "";
-    return '<a class="' + cls + on + '" href="' + href + '">' + label + "</a>";
-  }
-  var html =
-    '<a class="brand" href="index.html">🥊 GPT vs Claude</a>' +
-    a("index.html", "Overview", "nav") +
-    a("connect4_report.html", "🔴 Connect Four", "nav") +
-    a("gomoku_report.html", "⚫ Gomoku", "nav") +
-    "<span class=\"navclust\">🃏 Hold'em</span>" +
-    a("holdem_1hand_report.html", "1-Hand", "nav") +
-    a("holdem_match_report.html", "Match", "nav") +
-    '<a class="navgrp" href="../index.html">← Base Arena</a>';
-  function mount() {
-    var nav = document.querySelector("nav.navbar");
-    if (!nav) {
-      nav = document.createElement("nav");
-      nav.className = "navbar";
-      document.body.insertBefore(nav, document.body.firstChild);
-    }
-    nav.innerHTML = html;
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mount);
-  } else { mount(); }
-})();
-"""
-
-
 # Replay viewers are shared client-side apps; we copy each base viewer in and
 # only repoint its data BASE at this run's prebuilt replays (under the reports/
 # `runs` symlink, one level up from this subdir). The replay JSON is produced by
@@ -435,9 +391,11 @@ def copy_viewers():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    # Shared nav assets (css from base, custom js for this subdir).
+    # The navbar is one dir-aware file (reports/nav.js detects this subdir via
+    # location.pathname and rewrites links accordingly); ship a copy of it plus
+    # the shared CSS so each page's relative <script src="nav.js"> resolves here.
     shutil.copy("reports/nav.css", os.path.join(OUT, "nav.css"))
-    write(os.path.join(OUT, "nav.js"), NAV_JS)
+    shutil.copy("reports/nav.js", os.path.join(OUT, "nav.js"))
     copy_viewers()
 
     games = {g: load(g) for g in GAME_META}
@@ -446,15 +404,13 @@ def main():
     cards = []
     arena_entries = []  # for cross-game leaderboard (bt._arena_scores)
 
-    # --- board games: reuse the board analyzer + renderer ---
-    # Leave bt._VARIANT empty so render_game emits the "Watch replays" button
-    # (-> {game}_replay.html); we ship those viewers into this subdir below.
-    bt._VARIANT = ""
+    # --- board games: reuse the board analyzer + renderer (their report links
+    # straight to the {game}_replay.html viewers shipped into this subdir). ---
     for g in ("connect4", "gomoku"):
         data = games[g]
         reshaped = {"models": model_names, "games": data["pairs"]}
         rep = bt.analyze_game(g, reshaped)
-        write(os.path.join(OUT, HREF[g]), bt.render_game(g, rep))
+        write(os.path.join(OUT, HREF[g]), _badge_models(bt.render_game(g, rep), model_names))
         ordered = sorted(rep["models"],
                          key=lambda m: bt._elo_key(rep["elo"], m), reverse=True)
         champ = ordered[0]
@@ -463,14 +419,11 @@ def main():
                            f"<span class='metric'>Elo {bt._elo_txt(rep['elo'][champ])}</span>"))
 
     # --- Hold'em 1-hand: reuse the poker analyzer + renderer ---
-    # Empty _VARIANT keeps render_html's "Watch hand replays" button
-    # (-> holdem_replay.html), shipped into this subdir below.
-    ht._VARIANT = ""
     d1 = games["holdem_1hand"]
     reshaped = {"models": model_names, "games": d1["pairs"],
                 "hands": d1["episodes_per_pair"]}
     hrep = ht.analyze(reshaped)
-    write(os.path.join(OUT, HREF["holdem_1hand"]), ht.render_html(hrep))
+    write(os.path.join(OUT, HREF["holdem_1hand"]), _badge_models(ht.render_html(hrep), model_names))
     pm = hrep["per_model"]
     ordered = sorted(hrep["models"], key=lambda m: pm[m]["bb_per_100"], reverse=True)
     champ = ordered[0]
@@ -507,6 +460,23 @@ def main():
           f"({t['d']} draws, GPT poker chips {t['chips']:+.0f})")
     for r in arena_rows:
         print(f"  {r['model']:<20} arena={r['score']:>5}  invalid={rates[r['model']]['rate']*100:.2f}%")
+
+
+def _badge_models(html: str, models: list) -> str:
+    """Prefix each leaderboard model cell with its GPT/Claude family badge.
+
+    The board / 1-hand pages reuse the base renderers (shared with the
+    open-source arena, which has no families), so they emit a plain
+    `<td class='model'>{name}</td>`. We wrap the name post-hoc so every
+    GPT-vs-Claude leaderboard carries the same prefix as the match page. Only
+    the leaderboard cells match (the head-to-head grids use `<th class='model'>`).
+    """
+    for m in models:
+        fam = family(m)
+        html = html.replace(
+            f"<td class='model'>{m}</td>",
+            f"<td class='model'><span class='fam {fam.lower()}'>{fam}</span> {m}</td>")
+    return html
 
 
 def _card(game: str, champ_line: str) -> str:
