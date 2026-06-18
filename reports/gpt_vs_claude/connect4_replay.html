@@ -85,13 +85,13 @@
 const BASE = "../runs/gpt_vs_claude/replays/connect4/";
 const PLAY_MS = 850;
 const SPEEDS = [1, 2, 4];
-let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 
 const $ = id => document.getElementById(id);
 
 async function init() {
   try {
-    manifest = await (await fetch(BASE + "manifest.json")).json();
+    manifest = await (await fetch(BASE + "manifest.json?v=15")).json();
   } catch (e) {
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -129,7 +129,7 @@ function colHighlight(col){
 
 async function loadPair(i) {
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const r = e.reason==="win" ? `${e.winner_name} wins` : (e.reason||"");
     return `<option value="${idx}">#${e.episode+1} · ${e.length} plies · ${r}</option>`;
@@ -257,6 +257,7 @@ function renderPanel() {
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
+  const iid = "input-"+cursor;
   const warn = m.trunc
     ? `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This move hit the token limit mid-thought, ` +
       `so the played move may be arbitrary rather than the model's intended choice.</div></div>` : "";
@@ -266,6 +267,7 @@ function renderPanel() {
     `<div class="actor"><span class="drops">drops into</span> <span class="colchip">col ${m.col}</span></div>` +
     `<div class="meta">${color} · ply ${m.ply} · ⏱ ${lat} thinking${inv}</div>` +
     warn +
+    (m.prompt ? `<button class="thinkbtn" onclick="toggleInput(this,'${iid}')">${showInput?"🙈 Hide":"📥 Show"} input</button>` + `<pre class="think ${showInput?"":"hidden"}" id="${iid}">${escapeHtml(m.prompt)}</pre>` : "") +
     (m.thinking
       ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
         (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
@@ -277,6 +279,12 @@ function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function toggleInput(btn, id){
+  showInput = !showInput;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showInput?"🙈 Hide":"📥 Show") + " input";
 }
 
 function step(d){

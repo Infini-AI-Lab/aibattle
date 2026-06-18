@@ -59,7 +59,10 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · 5-player table · 100 sessions · up to 40 hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
-  <a class="replaybtn" href="table_replay.html">▶ watch table replays</a>
+  <a class="replaybtn" href="table_replay.html?v=15">▶ watch table replays</a>
+  <div class="callout">5-handed ring games scored by <b>average finishing rank</b>.
+    Multi-way play adds position and bubble dynamics, so models are ranked by consistent
+    finishes rather than raw chip swings (top-1 rate over-rewards high-variance play).</div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>

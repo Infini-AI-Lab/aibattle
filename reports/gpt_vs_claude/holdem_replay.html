@@ -93,7 +93,7 @@ let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -121,7 +121,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
     const n = e.moves.length;

@@ -65,7 +65,7 @@ def render_html(rep: dict, beh: dict) -> str:
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
     cols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    replay_btn = ('<a class="replaybtn" href="table_replay.html">'
+    replay_btn = ('<a class="replaybtn" href="table_replay.html?v=15">'
                   '▶ watch table replays</a>')
     rankhdr = "".join(f"<th>#{k}</th>" for k in range(1, n + 1))
     trows = ""
@@ -83,6 +83,9 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · {n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   {replay_btn}
+  <div class="callout">5-handed ring games scored by <b>average finishing rank</b>.
+    Multi-way play adds position and bubble dynamics, so models are ranked by consistent
+    finishes rather than raw chip swings (top-1 rate over-rewards high-variance play).</div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>

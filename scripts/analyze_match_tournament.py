@@ -101,7 +101,7 @@ def render_html(rep: dict, beh: dict) -> str:
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
-    replay_btn = ('<a class="replaybtn" href="match_replay.html">'
+    replay_btn = ('<a class="replaybtn" href="match_replay.html?v=15">'
                   '▶ watch match replays</a>')
 
     trows = ""
@@ -146,6 +146,10 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/match<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Match · Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
   {replay_btn}
+  <div class="callout">Heads-up sit-and-go matches: stacks carry across hands and the
+    match winner is whoever busts the other (or leads at the hand cap). Win-or-lose by
+    design — chips don't count past the match outcome — so the <b>Elo rates match
+    wins/losses</b>, opponent-adjusted.</div>
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
   <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>

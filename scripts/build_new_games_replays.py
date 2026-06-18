@@ -52,6 +52,17 @@ def _think(s: dict) -> str:
     return t
 
 
+PROMPT_CAP = 8000
+
+
+def _input(s: dict) -> str:
+    """The exact prompt sent to the model for this step ('' if not recorded)."""
+    p = (s.get("response") or {}).get("prompt") or ""
+    if len(p) > PROMPT_CAP:
+        p = p[:PROMPT_CAP] + f"\n\n… [prompt clipped to {PROMPT_CAP} chars for replay]"
+    return p
+
+
 def _trunc(thinking: str, invalid: bool) -> bool:
     if invalid:
         return True
@@ -157,7 +168,7 @@ def build_othello():
                     "flips": [list(f) for f in flips], "counts": cnt,
                     "invalid": inv, "latency_ms": _meta(s, "latency_ms"),
                     "tokens": _meta(s, "completion_tokens"),
-                    "thinking": th, "trunc": _trunc(th, inv),
+                    "thinking": th, "prompt": _input(s) or None, "trunc": _trunc(th, inv),
                 })
             final = {p: sum(r.count(p) for r in board) for p in _PLAYERS}
             recorded = e.get("piece_counts") or {}
@@ -201,7 +212,7 @@ def build_leduc():
                     "public_card": pub.get("public_card"),
                     "invalid": inv, "latency_ms": _meta(s, "latency_ms"),
                     "tokens": _meta(s, "completion_tokens"),
-                    "thinking": th, "trunc": _trunc(th, inv),
+                    "thinking": th, "prompt": _input(s) or None, "trunc": _trunc(th, inv),
                 })
             episodes.append({
                 "episode": e["episode"], "seat_assignment": e["seat_assignment"],
@@ -230,12 +241,15 @@ def build_blotto():
         a, b = os.path.basename(pd).split("__vs__")
         episodes = []
         for e in _eps(pd):
-            # truncation flag per (round, seat) from that step's reasoning
-            tr = {}
+            # reasoning, prompt, and truncation flag per (round, seat) from steps
+            th, pr, tr = {}, {}, {}
             for s in e.get("steps", []):
                 rnd = s["observation"]["public"].get("round")
                 seat = 0 if s["player"] == "player_0" else 1
-                tr[(rnd, seat)] = _trunc(_think(s), bool(s.get("invalid")))
+                thinking = _think(s)
+                th[(rnd, seat)] = thinking
+                pr[(rnd, seat)] = _input(s)
+                tr[(rnd, seat)] = _trunc(thinking, bool(s.get("invalid")))
             rounds = []
             for rh in e.get("round_history", []):
                 rounds.append({
@@ -243,6 +257,10 @@ def build_blotto():
                     "battlefields": rh["battlefields"],
                     "points_0": rh["points_0"], "points_1": rh["points_1"],
                     "cumulative": rh["cumulative"],
+                    "think_0": th.get((rh["round"], 0), ""),
+                    "think_1": th.get((rh["round"], 1), ""),
+                    "prompt_0": pr.get((rh["round"], 0), "") or None,
+                    "prompt_1": pr.get((rh["round"], 1), "") or None,
                     "trunc_0": tr.get((rh["round"], 0), False),
                     "trunc_1": tr.get((rh["round"], 1), False),
                 })
@@ -285,7 +303,7 @@ def build_blackjack():
                     "can_double": pub.get("can_double"),
                     "invalid": inv, "latency_ms": _meta(s, "latency_ms"),
                     "tokens": _meta(s, "completion_tokens"),
-                    "thinking": th, "trunc": _trunc(th, inv),
+                    "thinking": th, "prompt": _input(s) or None, "trunc": _trunc(th, inv),
                 })
             episodes.append({
                 "episode": e["episode"], "net": e["returns"].get("player_0"),

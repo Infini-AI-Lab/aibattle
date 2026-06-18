@@ -96,7 +96,7 @@ let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, 
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -124,7 +124,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const s = e.final_scores || {};
     const w = e.winner_name ? `${e.winner_name} wins ${s.player_0!=null?s.player_0:"?"}–${s.player_1!=null?s.player_1:"?"}` : "draw";
@@ -207,14 +207,20 @@ function renderMoveList(){
 function thinkBlock(r, pi){
   const name = ep.seat_assignment["player_"+pi];
   const th = r["think_"+pi];
+  const pr = r["prompt_"+pi];
   const tid = `think-${cursor}-${pi}`;
+  const iid = `input-${cursor}-${pi}`;
   const warn = r["trunc_"+pi]
     ? `<div class="warn">⚠ <div><b>${name}'s reasoning truncated</b> — the allocation may be arbitrary.</div></div>` : "";
   const inv = r["invalid_"+pi] ? ` <span class="invalid">⚠ invalid → fallback</span>` : "";
   const lat = r["latency_ms_"+pi] ? `⏱ ${(r["latency_ms_"+pi]/1000).toFixed(1)}s` : "";
-  if (!th) return warn + `<div class="hint">No reasoning recorded for ${name}.</div>`;
-  return warn +
-    `<div class="think2"><button class="thinkbtn" onclick="toggleOne('${tid}',this)">💭 ${name}${inv}</button>` +
+  const promptBtn = pr
+    ? `<button class="thinkbtn" onclick="toggleOne('${iid}',this)">📥 ${name} input</button>`
+      + `<pre class="think hidden" id="${iid}">${escapeHtml(pr)}</pre>`
+    : "";
+  if (!th) return warn + promptBtn + `<div class="hint">No reasoning recorded for ${name}.</div>`;
+  return warn + promptBtn +
+    `<div class="think2"><button class="thinkbtn" onclick="toggleOne('${tid}',this)">💭 ${name} reasoning${inv}</button>` +
     (r["tokens_"+pi]!=null ? `<span class="toktag">🧮 ${r["tokens_"+pi].toLocaleString()} tokens ${lat}</span>` : "") +
     `<pre class="think hidden" id="${tid}">${escapeHtml(th)}</pre></div>`;
 }

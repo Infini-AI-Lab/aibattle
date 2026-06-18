@@ -167,7 +167,12 @@ def render_match(rep: dict, title_meta: str) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/gpt-vs-claude/match<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Match · {title_meta}</div>
-  <a class="replaybtn" href="match_replay.html">▶ watch match replays</a>
+  <a class="replaybtn" href="match_replay.html?v=15">▶ watch match replays</a>
+
+  <div class="callout">Heads-up sit-and-go matches between the GPT and Claude families:
+    stacks carry across hands and the match winner is whoever busts the other (or leads
+    at the hand cap). Win-or-lose by design, so the <b>Elo rates match outcomes</b>,
+    opponent-adjusted.</div>
 
   <h2>🏆 Leaderboard</h2>
   <table>

@@ -59,11 +59,21 @@
   @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
 
   td.bucket { font-weight: 600; }
+  /* Style cell: label on its own line, behaviour tag(s) on a second line, always
+     two lines so the column never wraps mid-phrase. */
+  td.stylecell { white-space:nowrap; line-height:1.5; }
+  td.stylecell .stags { margin-top:2px; }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · 6 games · 100 hands each · 4 models · round-robin</div>
-  <a class="replaybtn" href="holdem_replay.html">▶ watch hand replays</a>
+  <a class="replaybtn" href="holdem_replay.html?v=15">▶ watch hand replays</a>
+
+  <div class="callout">Heads-up No-Limit Hold'em with each hand scored independently
+    (bb/100). An imperfect-information game with chance, so beyond results we profile
+    each model's <b>playing style</b> (VPIP / aggression) and rate skill with a
+    <b>chip-weighted, opponent-adjusted Elo</b> — rewarding how much you win, not just
+    how often.</div>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
@@ -72,7 +82,7 @@
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     <tr>
           <td>1</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.5</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
           <td><b>1519<div class='small'>±35</div></b></td>
           <td class='pos'>+374</td>
           <td class='pos'>+62.3</td>
@@ -87,7 +97,7 @@
           <td>238</td>
         </tr><tr>
           <td>2</td><td class='model'><span class='fam gpt'>GPT</span> gpt-5.4</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
           <td><b>1501<div class='small'>±35</div></b></td>
           <td class='neg'>-15</td>
           <td class='neg'>-2.5</td>
@@ -102,7 +112,7 @@
           <td>649</td>
         </tr><tr>
           <td>3</td><td class='model'><span class='fam claude'>Claude</span> claude-sonnet-4.6</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
           <td><b>1490<div class='small'>±39</div></b></td>
           <td class='neg'>-143</td>
           <td class='neg'>-23.8</td>
@@ -117,7 +127,7 @@
           <td>90</td>
         </tr><tr>
           <td>4</td><td class='model'><span class='fam claude'>Claude</span> claude-opus-4.8</td>
-          <td><b>Loose-Passive</b> <span class='tag'>calling station</span></td>
+          <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
           <td><b>1490<div class='small'>±37</div></b></td>
           <td class='neg'>-216</td>
           <td class='neg'>-36.0</td>

@@ -47,6 +47,18 @@ PLAYERS = ["player_0", "player_1"]
 PHASES = ["early", "mid", "late"]
 TITLE = {"connect4": "🔴 Connect Four", "gomoku": "⚫ Gomoku-Lite"}
 FAVICON = {"connect4": "🔴", "gomoku": "⚫"}
+# Short intro per game (shown as a callout under the header, like the Kuhn page).
+INTRO = {
+    "connect4": ("Connect Four is a <b>solved</b>, perfect-information game — drop "
+                 "discs to make four in a row. With no hidden information or chance, "
+                 "every position has a known best move, so beyond results we score "
+                 "<b>tactical accuracy</b>: taking immediate wins and blocking the "
+                 "opponent's immediate threats."),
+    "gomoku": ("Gomoku-Lite is a perfect-information game — place stones to make five "
+               "in a row on a 9×9 board. Like Connect Four it rewards reading immediate "
+               "threats, so we score <b>tactical accuracy</b> (win-take / block rate) "
+               "alongside head-to-head results."),
+}
 
 
 def _favicon(emoji: str) -> str:
@@ -426,7 +438,7 @@ def render_game(game: str, rep: dict) -> str:
 
     fpw = rep["first_player_win_rate"] * 100
     # Per-move replay viewer exists for both board games (reports/<game>_replay.html).
-    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html">'
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=15">'
                   f'▶ watch game replays</a>')
     # Emoji + plain name lead the subtitle; the h1 is the shell-prompt path.
     emoji, name = TITLE[game].split(" ", 1)
@@ -447,6 +459,8 @@ def render_game(game: str, rep: dict) -> str:
   <h1>$ ~/aibattle/{game}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
   {replay_btn}
+
+  <div class="callout">{INTRO[game]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>

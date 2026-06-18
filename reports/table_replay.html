@@ -20,16 +20,17 @@
   .stand.bust{opacity:.55;}
 
   /* 5-seat table */
-  .felt5{position:relative; display:grid; gap:10px; align-items:center;
-    grid-template-columns:1fr 1.5fr 1fr;
+  .felt5{position:relative; display:grid; gap:12px; align-items:center; justify-items:center;
+    grid-template-columns:1fr 1.6fr 1fr;
     grid-template-areas:"s2 top s3" "s1 mid s4" "bl s0 br";
-    background:#e7eee2; border:1px solid #b5c2a8; border-radius:88px/68px; padding:34px 30px;}
+    background:var(--faint); border:1px solid var(--line); border-radius:0; padding:26px 22px;}
   .slot0{grid-area:s0;} .slot1{grid-area:s1;} .slot2{grid-area:s2;}
   .slot3{grid-area:s3;} .slot4{grid-area:s4;}
   .center{grid-area:mid; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;}
 
-  .seat{display:flex; flex-direction:column; gap:7px; background:#fff; border:1px solid var(--line);
-    padding:9px 11px; position:relative;}
+  /* Fixed box so every seat is identical regardless of name length / status. */
+  .seat{display:flex; flex-direction:column; gap:7px; background:var(--panel); border:1px solid var(--line);
+    padding:9px 11px; position:relative; box-sizing:border-box; width:160px; min-height:94px;}
   .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
   .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
   .seat.folded{opacity:.45;}
@@ -49,7 +50,7 @@
   .ret{font-weight:700; font-size:13px;}
   .ret.pos{color:var(--green);} .ret.neg{color:var(--neg);}
   .bubble{position:absolute; right:10px; top:-11px; font-weight:700; font-size:10px;
-    padding:2px 8px; background:#fff; border:1px solid var(--red); color:var(--red); white-space:nowrap; z-index:2;}
+    padding:2px 8px; background:var(--panel); border:1px solid var(--red); color:var(--red); white-space:nowrap; z-index:2;}
   .bubble.fold{border-color:var(--dim); color:var(--dim);}
 
   .board{display:flex; gap:6px;}
@@ -120,14 +121,17 @@ const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
 // model is the same colour everywhere even though seats rotate across sessions.
 const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
                   "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
-function scol(seat){ return MODELCOL[session && session.seat_assignment[seat]] || "#94a3b8"; }
+// runs/ stores the raw "-coached" model names; strip the suffix for display
+// (and so the per-model colour lookup, keyed by bare name, resolves).
+function disp(n){ return (n||"").replace(/-coached$/,""); }
+function scol(seat){ return MODELCOL[disp(session && session.seat_assignment[seat])] || "#94a3b8"; }
 const SLOTS = ["player_0","player_1","player_2","player_3","player_4"];
 let manifest=null, session=null, hand=null, btnSeat=null,
-    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+    cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -159,7 +163,7 @@ async function init(){
 
 async function loadSession(i){
   const meta = manifest.sessions[i];
-  session = await (await fetch(BASE + meta.file)).json();
+  session = await (await fetch(BASE + meta.file + "?v=15")).json();
   $("handSel").innerHTML = session.hands.map((h,hidx) => {
     const wn = winnerNames(h).join(", ") || "—";
     return `<option value="${hidx}">Hand ${h.hand}/${session.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
@@ -197,7 +201,7 @@ function renderStandings(st){
     return `<div class="stand${bust?" bust":""}">` +
       `<span class="rk${i===0?" gold":""}">#${i+1}</span>` +
       `<span class="seatdot" style="background:${scol(seat)}"></span>` +
-      `<span class="nm">${session.seat_assignment[seat]}</span>` +
+      `<span class="nm">${disp(session.seat_assignment[seat])}</span>` +
       `<span class="fs">${stk!=null?stk:"—"}</span></div>`;
   }).join("");
 }
@@ -251,7 +255,7 @@ function actLabel(m){
 }
 
 function seatHTML(seat, st){
-  const agent = session.seat_assignment[seat] || seat;
+  const agent = disp(session.seat_assignment[seat] || seat);
   const info = (st.seats && st.seats[seat]) || {};
   let stack = info.stack;
   let status = info.status || "active";
@@ -346,6 +350,7 @@ function renderPanel(st){
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
+  const iid = "input-"+cursor;
   if (st.result) html += resultBlock();
   html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
     `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
@@ -353,6 +358,7 @@ function renderPanel(st){
     `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += (m.prompt ? `<button class="thinkbtn" onclick="toggleInput(this,'${iid}')">${showInput?"🙈 Hide":"📥 Show"} input</button>` + `<pre class="think ${showInput?"":"hidden"}" id="${iid}">${escapeHtml(m.prompt)}</pre>` : "");
   html += m.thinking
     ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
@@ -377,6 +383,12 @@ function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function toggleInput(btn, id){
+  showInput = !showInput;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showInput?"🙈 Hide":"📥 Show") + " input";
 }
 
 function step(d){

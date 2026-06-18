@@ -265,7 +265,7 @@ def render_html(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/kuhn<span class="cursor"></span></h1>
   <div class="sub">🃏 Kuhn Poker · {len(models)} models · round-robin · {rep['episodes_per_pair']} seat-swapped hands/pair · deck {{J,Q,K}}, ~2 decisions/hand</div>
-  <a class="replaybtn" href="kuhn_replay.html">▶ watch hand replays</a>
+  <a class="replaybtn" href="kuhn_replay.html?v=15">▶ watch hand replays</a>
 
   <div class="rules">
     <h3>How Kuhn Poker works</h3>

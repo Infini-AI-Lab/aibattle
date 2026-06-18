@@ -68,6 +68,27 @@ GAMES = {
     },
 }
 
+# Short intro per game (shown as a callout under the header, like the Kuhn page).
+INTRO = {
+    "independent_blackjack": (
+        "Each model plays the <b>same</b> hands against the built-in dealer "
+        "(hit / stand / double), scored by chip profit. The dealer's fixed house edge "
+        "means a negative field net is expected — the signal is who loses least and "
+        "plays soundest (bust / double / natural rates)."),
+    "leduc_poker": (
+        "Leduc Poker is a tiny <b>imperfect-information</b> poker — a 6-card deck and a "
+        "single public card. Small enough to reason about precisely, it tests bluffing "
+        "and value-betting under uncertainty; rated by a chip-weighted Elo like Hold'em."),
+    "repeated_colonel_blotto": (
+        "Repeated Colonel Blotto: each round, <b>simultaneously</b> allocate limited "
+        "troops across fronts — win the most fronts to win the round. No hidden state, "
+        "but simultaneous moves make it a game of strategic misdirection and adaptation."),
+    "othello_lite_6x6": (
+        "Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, "
+        "most discs at the end wins. Late-game swings make lookahead and stable-disc "
+        "control decisive."),
+}
+
 NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=15"></script>'
 
 
@@ -408,7 +429,8 @@ def render_versus(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['num_games']} games</div>
-  <a class="replaybtn" href="{cfg['replay']}">▶ watch {cfg['replay_verb']} replays</a>
+  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <div class="callout">{INTRO[rep['game']]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(elo[ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
@@ -526,7 +548,8 @@ def render_dealer(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['total_hands']} hands total</div>
-  <a class="replaybtn" href="{cfg['replay']}">▶ watch {cfg['replay_verb']} replays</a>
+  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <div class="callout">{INTRO[rep['game']]}</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">{pm[champ]['mean_per_hand']:+.3f}</div><div class="l">top mean/hand · {champ}</div></div>

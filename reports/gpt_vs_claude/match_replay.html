@@ -107,11 +107,11 @@ const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
                   "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
 function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
 let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
-    cursor=0, playing=false, timer=null, showThink=false, speedIdx=0;
+    cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -142,7 +142,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file)).json();
+  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
   $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
     const w = mt.winner_name || "—";
     return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
@@ -307,6 +307,7 @@ function renderPanel(st){
   const lat = m.latency_ms ? `${(m.latency_ms/1000).toFixed(1)}s` : "—";
   const inv = m.invalid ? ` · <span class="invalid">⚠ invalid → fallback</span>` : "";
   const tid = "think-"+cursor;
+  const iid = "input-"+cursor;
   if (st.result) html += resultBlock();
   html += `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${hand.moves.length}</span></div>` +
     `<div class="actor"><span class="who"><span class="seatdot" style="background:${scol(m.player)}"></span>${m.agent}</span>` +
@@ -314,6 +315,7 @@ function renderPanel(st){
     `<div class="meta">${m.street} · to call ${m.to_call} · pot ${m.pot} · ⏱ ${lat}${inv}</div>`;
   if (m.trunc) html += `<div class="warn">⚠ <div><b>Reasoning truncated.</b> This action hit the token limit mid-thought, ` +
     `so it may be arbitrary rather than the model's intended choice.</div></div>`;
+  html += (m.prompt ? `<button class="thinkbtn" onclick="toggleInput(this,'${iid}')">${showInput?"🙈 Hide":"📥 Show"} input</button>` + `<pre class="think ${showInput?"":"hidden"}" id="${iid}">${escapeHtml(m.prompt)}</pre>` : "");
   html += m.thinking
     ? `<button class="thinkbtn" onclick="toggleThink(this,'${tid}')">${showThink?"🙈 Hide":"💭 Show"} reasoning</button>` +
       (m.tokens!=null ? `<span class="toktag">🧮 ${m.tokens.toLocaleString()} tokens</span>` : "") +
@@ -338,6 +340,12 @@ function toggleThink(btn, id){
   showThink = !showThink;
   const el=$(id); if(el) el.classList.toggle("hidden");
   if(btn) btn.textContent = (showThink?"🙈 Hide":"💭 Show") + " reasoning";
+}
+
+function toggleInput(btn, id){
+  showInput = !showInput;
+  const el=$(id); if(el) el.classList.toggle("hidden");
+  if(btn) btn.textContent = (showInput?"🙈 Hide":"📥 Show") + " input";
 }
 
 function step(d){
