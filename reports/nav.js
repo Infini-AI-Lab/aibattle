@@ -30,7 +30,7 @@
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when pages are restyled. ACTIVE matching
   // uses the bare filename, so the query string never affects highlighting.
-  var V = "?v=13";
+  var V = "?v=23";
   function a(href, label, cls) {
     var on = href === active ? " active" : "";
     return '<a class="' + cls + on + '" href="' + href + V + '">' + label + "</a>";

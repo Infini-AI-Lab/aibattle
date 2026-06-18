@@ -387,10 +387,9 @@ def render_game(game: str, rep: dict) -> str:
     elo = rep["elo"]
     ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
 
-    # results / tactics table
+    # results / tactics table, ranked by Elo (opponent-adjusted)
     rows = ""
-    for i, m in enumerate(sorted(models, key=lambda x: pm[x]["net_per_game"],
-                                 reverse=True), 1):
+    for i, m in enumerate(ranked, 1):
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
@@ -581,6 +580,13 @@ def _index_card(entry: dict) -> str:
         </a>"""
 
 
+# Games that count toward the overall (cross-game) Arena Score. Every game still
+# gets its own report and landing-page card; these are just the ones averaged
+# into the headline ranking (a curated, comparable subset).
+ARENA_GAMES = {"connect4", "gomoku", "holdem", "match",
+               "repeated_colonel_blotto", "independent_blackjack"}
+
+
 def _arena_scores(entries: list) -> list:
     """Cross-game normalized model ranking.
 
@@ -616,10 +622,11 @@ def _arena_scores(entries: list) -> list:
 
 
 def _arena_board(entries: list) -> str:
-    rows = _arena_scores(entries)
+    arena_entries = [e for e in entries if e["key"] in ARENA_GAMES]
+    rows = _arena_scores(arena_entries)
     if not rows:
         return ""
-    total = len(entries)
+    total = len(arena_entries)
     body = ""
     for i, r in enumerate(rows, 1):
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
@@ -633,9 +640,10 @@ def _arena_board(entries: list) -> str:
     return f"""
   <section class="board">
     <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
-      <span class="arena-tag">normalized rank · all model-arena games</span></div>
-    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0)
-      across the games a model has entered. Coverage shows games played; treat low coverage as provisional.</div>
+      <span class="arena-tag">normalized rank · 6 core games</span></div>
+    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0) across six
+      core games: Connect Four, Gomoku, Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Blackjack.
+      Coverage shows how many of those a model has entered; treat low coverage as provisional.</div>
     <table class="lb">
       <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
         <th>coverage</th><th>best game</th></tr>

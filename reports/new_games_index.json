@@ -10,16 +10,17 @@
       "Stochastic"
     ],
     "ranking": [
-      "glm-5p1",
       "kimi-k2p6",
       "gpt-oss-120b",
+      "glm-5p1",
       "minimax-m2p7",
+      "glm-5p2",
       "minimax-m3",
-      "deepseek-v4-pro",
-      "qwen3p7-plus"
+      "qwen3p7-plus",
+      "deepseek-v4-pro"
     ],
-    "meta": "vs dealer \u00b7 100 hands/model \u00b7 chip profit",
-    "champ_line": "\ud83c\udfc6 glm-5p1 <span class='metric'>+14.0 profit</span>"
+    "meta": "vs dealer \u00b7 100 hands/model \u00b7 mean chips/hand",
+    "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>+0.075/hand</span>"
   },
   {
     "key": "leduc_poker",
@@ -33,15 +34,16 @@
     ],
     "ranking": [
       "qwen3p7-plus",
+      "glm-5p2",
       "deepseek-v4-pro",
-      "glm-5p1",
       "kimi-k2p6",
       "gpt-oss-120b",
+      "glm-5p1",
       "minimax-m3",
       "minimax-m2p7"
     ],
-    "meta": "900 games \u00b7 25 deals/pair \u00b7 first-mover 43%",
-    "champ_line": "\ud83c\udfc6 qwen3p7-plus <span class='metric'>Elo 1523</span>"
+    "meta": "1300 games \u00b7 25 deals/pair \u00b7 first-mover 42%",
+    "champ_line": "\ud83c\udfc6 qwen3p7-plus <span class='metric'>Elo 1519</span>"
   },
   {
     "key": "repeated_colonel_blotto",
@@ -56,13 +58,15 @@
     "ranking": [
       "deepseek-v4-pro",
       "kimi-k2p6",
+      "qwen3p7-plus",
+      "glm-5p2",
       "glm-5p1",
       "minimax-m3",
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
-    "meta": "300 games \u00b7 10 deals/pair \u00b7 first-mover 48%",
-    "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1803</span>"
+    "meta": "499 games \u00b7 10 deals/pair \u00b7 first-mover 48%",
+    "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1746</span>"
   },
   {
     "key": "othello_lite_6x6",
