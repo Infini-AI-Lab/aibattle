@@ -3,7 +3,7 @@
 <title>AI Battle Arena — ⚔️ Colonel Blotto</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -56,6 +56,26 @@
      24x24 with their own colors; size to the text and nudge onto the baseline. */
   .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
     flex:none; }
+  /* Click-to-open info popover (the ⓘ next to a column header). */
+  .hcell { position:relative; display:inline-block; }
+  .info { display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; margin-left:5px; padding:0; border:1px solid var(--line);
+    border-radius:50%; background:var(--panel); color:var(--red); font-size:10px;
+    font-weight:700; font-style:italic; line-height:1; cursor:pointer;
+    vertical-align:middle; font-family:inherit; }
+  .info:hover { border-color:var(--red); color:var(--fg); }
+  .infobox { position:absolute; z-index:60; top:calc(100% + 6px); left:50%;
+    transform:translateX(-50%); width:300px; max-width:78vw; text-align:left;
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; font-size:12px; font-weight:400; color:var(--fg); line-height:1.5;
+    box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
+  .infobox[hidden] { display:none; }
+  .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
+  /* Sortable leaderboard headers: click to re-rank; active column shows ▼. */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--fg); }
+  th.sortable .hcell::after { content:" ↕"; color:var(--dim); font-size:10px; font-style:normal; }
+  th.sortable.sorted .hcell::after { content:" ▼"; color:var(--red); }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -79,7 +99,7 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/blotto<span class="cursor"></span></h1>
   <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 515 games</div>
-  <a class="replaybtn" href="blotto_replay.html?v=15">▶ watch game replays</a>
+  <a class="replaybtn" href="blotto_replay.html?v=17">▶ watch game replays</a>
   <div class="rules"><h3>How Colonel Blotto works</h3>A two-player game of <b>simultaneous</b> resource allocation, played over <b>20 rounds</b>. Each round:<ul><li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs per round).</li><li>Allocations are revealed <b>at the same time</b> — neither sees the other's before committing.</li><li>On each battlefield the <b>larger force wins</b> that field's points; an exact tie awards the field to neither.</li><li>Whoever takes the <b>most points</b> wins the round; only resolved past rounds are shown to the opponent.</li></ul><div class="seq">After 20 rounds the <b>higher cumulative score wins</b> (equal totals draw). No hidden cards or chance — the difficulty is purely strategic: spread thin to grab the cheap fields, or stack up to guarantee the expensive ones, while reading and misdirecting the opponent across rounds.</div></div>
 
   <div class="kpis">

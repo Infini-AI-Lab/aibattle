@@ -1,10 +1,10 @@
 // Site navbar (left sidebar). ONE dir-aware file shared by the base arena
 // (reports/*.html) and the GPT-vs-Claude pages (reports/gpt_vs_claude/*.html):
 // a copy is shipped into that subdir so each page's relative <script src="nav.js">
-// loads it. Three top classes — overview, gpt-vs-claude, open-source model elo —
-// the latter two split into perfect-/imperfect-info. Each link is rewritten with
-// a directory prefix so it resolves from either location; replay pages map back
-// to their parent report for highlighting.
+// loads it. The main arena lists a single set of games split into perfect-/
+// imperfect-info groups (the gvc subpages keep their own section logic). Each
+// link is rewritten with a directory prefix so it resolves from either
+// location; replay pages map back to their parent report for highlighting.
 (function () {
   var path = location.pathname;
   var inGvc = path.indexOf("/gpt_vs_claude/") !== -1;
@@ -20,6 +20,7 @@
   var ACTIVE = {
     oss: {
       "index.html": "index.html",
+      "methodology.html": "methodology.html",
       "connect4_report.html": "connect4_report.html",
       "connect4_replay.html": "connect4_report.html",
       "gomoku_report.html": "gomoku_report.html",
@@ -57,7 +58,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=15";
+  var V = "?v=27";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -65,31 +66,20 @@
 
   var html =
     '<a class="brand" href="' + P.oss + 'index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
-    a("index.html", "overview", "nav navtop", "oss") +
+    a("index.html", "Overview", "nav navtop", "oss") +
 
-    // ── GPT vs Claude (coached head-to-head) ───────────────────────────────
-    a("index.html", "gpt-vs-claude", "nav navtop", "gvc") +
-    '<span class="navclust">perfect-info/</span>' +
-    a("connect4_report.html", "connect4", "nav navsub", "gvc") +
-    a("gomoku_report.html", "gomoku", "nav navsub", "gvc") +
-    '<span class="navclust">imperfect-info/</span>' +
-    a("holdem_1hand_report.html", "holdem 1hand", "nav navsub", "gvc") +
-    a("holdem_match_report.html", "holdem match", "nav navsub", "gvc") +
-
-    // ── Open-source model Elo (the base arena) ─────────────────────────────
-    '<span class="navtop">open-source model elo</span>' +
-    '<span class="navclust">perfect-info/</span>' +
-    a("connect4_report.html", "connect4", "nav navsub", "oss") +
-    a("gomoku_report.html", "gomoku", "nav navsub", "oss") +
-    a("othello_report.html", "othello", "nav navsub", "oss") +
-    '<span class="navclust">imperfect-info/</span>' +
-    a("kuhn_tournament_report.html", "kuhn", "nav navsub", "oss") +
-    a("holdem_tournament_report.html", "holdem 1hand", "nav navsub", "oss") +
-    a("match_tournament_report.html", "holdem match", "nav navsub", "oss") +
-    a("table_tournament_report.html", "holdem table", "nav navsub", "oss") +
-    a("leduc_report.html", "leduc", "nav navsub", "oss") +
-    a("blotto_report.html", "blotto", "nav navsub", "oss") +
-    a("blackjack_report.html", "blackjack", "nav navsub", "oss");
+    // Single arena now — perfect- and imperfect-info game groups, no top label.
+    '<span class="navclust">Perfect-info/</span>' +
+    a("connect4_report.html", "Connect4", "nav navsub", "oss") +
+    a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
+    '<span class="navclust">Imperfect-info/</span>' +
+    a("holdem_tournament_report.html", "Holdem 1hand", "nav navsub", "oss") +
+    a("match_tournament_report.html", "Holdem Match", "nav navsub", "oss") +
+    a("table_tournament_report.html", "Holdem Table", "nav navsub", "oss") +
+    a("leduc_report.html", "Leduc Holdem", "nav navsub", "oss") +
+    a("kuhn_tournament_report.html", "Kuhn", "nav navsub", "oss") +
+    a("blotto_report.html", "Blotto", "nav navsub", "oss") +
+    a("blackjack_report.html", "Blackjack", "nav navsub", "oss");
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

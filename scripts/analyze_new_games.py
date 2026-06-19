@@ -141,7 +141,7 @@ INTRO = {
         "control decisive."),
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
 
 
 def _intro_html(game: str) -> str:
@@ -487,7 +487,7 @@ def render_versus(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['num_games']} games</div>
-  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <a class="replaybtn" href="{cfg['replay']}?v=17">▶ watch {cfg['replay_verb']} replays</a>
   {_intro_html(rep['game'])}
 
   <div class="kpis">
@@ -608,7 +608,7 @@ def render_dealer(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['total_hands']} hands total</div>
-  <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
+  <a class="replaybtn" href="{cfg['replay']}?v=17">▶ watch {cfg['replay_verb']} replays</a>
   {_intro_html(rep['game'])}
 
   <div class="kpis">

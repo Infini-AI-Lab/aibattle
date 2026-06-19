@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🎴 Leduc Holdem</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -56,6 +56,26 @@
      24x24 with their own colors; size to the text and nudge onto the baseline. */
   .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
     flex:none; }
+  /* Click-to-open info popover (the ⓘ next to a column header). */
+  .hcell { position:relative; display:inline-block; }
+  .info { display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; margin-left:5px; padding:0; border:1px solid var(--line);
+    border-radius:50%; background:var(--panel); color:var(--red); font-size:10px;
+    font-weight:700; font-style:italic; line-height:1; cursor:pointer;
+    vertical-align:middle; font-family:inherit; }
+  .info:hover { border-color:var(--red); color:var(--fg); }
+  .infobox { position:absolute; z-index:60; top:calc(100% + 6px); left:50%;
+    transform:translateX(-50%); width:300px; max-width:78vw; text-align:left;
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; font-size:12px; font-weight:400; color:var(--fg); line-height:1.5;
+    box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
+  .infobox[hidden] { display:none; }
+  .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
+  /* Sortable leaderboard headers: click to re-rank; active column shows ▼. */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--fg); }
+  th.sortable .hcell::after { content:" ↕"; color:var(--dim); font-size:10px; font-style:normal; }
+  th.sortable.sorted .hcell::after { content:" ▼"; color:var(--red); }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -79,7 +99,7 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/leduc<span class="cursor"></span></h1>
   <div class="sub">🎴 Leduc Holdem · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 1300 games</div>
-  <a class="replaybtn" href="leduc_replay.html?v=15">▶ watch hand replays</a>
+  <a class="replaybtn" href="leduc_replay.html?v=17">▶ watch hand replays</a>
   <div class="rules"><h3>How Leduc Holdem works</h3>A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of <span class="card">J</span><span class="card">Q</span><span class="card">K</span> (J &lt; Q &lt; K). Heads-up, two betting rounds:<ul><li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li><li><b>Round 1 (pre-flop):</b> players bet on their private card alone. Actions are <code>check</code>/<code>bet</code> and <code>call</code>/<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li><li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li><li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li><li>At <b>showdown</b>, pairing your private card with the public card wins; otherwise the <b>higher card</b> wins. A fold concedes the pot.</li></ul><div class="seq">Small enough to reason about precisely, yet it has genuine bluffing, value-betting and pot odds — pairing the board is the nuts, and a lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so the size of pots won/lost matters, not just who won the hand.</div></div>
 
   <div class="kpis">

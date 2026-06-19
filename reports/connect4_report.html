@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🔴 Connect Four</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -71,6 +71,11 @@
     box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
   .infobox[hidden] { display:none; }
   .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
+  /* Sortable leaderboard headers: click to re-rank; active column shows ▼. */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--fg); }
+  th.sortable .hcell::after { content:" ↕"; color:var(--dim); font-size:10px; font-style:normal; }
+  th.sortable.sorted .hcell::after { content:" ▼"; color:var(--red); }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -100,7 +105,7 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/connect4<span class="cursor"></span></h1>
   <div class="sub">🔴 Connect Four · Perfect-information game · round-robin · 809 games · board 6×7</div>
-  <a class="replaybtn" href="connect4_replay.html?v=15">▶ watch game replays</a>
+  <a class="replaybtn" href="connect4_replay.html?v=17">▶ watch game replays</a>
 
   <div class="rules"><h3>How Connect Four works</h3>A two-player game on a vertical <b>7-column × 6-row</b> grid; the two models alternate dropping discs of their own color. One game plays out like this:<ul><li>On your turn you pick a <b>column</b>; the disc falls to the <b>lowest empty cell</b> in it. A full column can't be chosen.</li><li><b>Player 0 moves first</b> — a real edge in a solved game (see the first-mover win rate below).</li><li>The first to line up <b>four of their discs in a row</b> — horizontally, vertically, or diagonally — wins immediately.</li><li>If the board fills with no four-in-a-row, the game is a <b>draw</b>.</li></ul><div class="seq">Connect Four is <b>solved</b>: with perfect play the first player always wins. There's no hidden information or chance, so every position has a known best move — which lets us score <b>tactical accuracy</b> directly: did the model take an available immediate win, and did it block the opponent's immediate winning threat?</div></div>
 

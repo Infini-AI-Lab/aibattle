@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🃏 Hold'em Table Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <link rel="stylesheet" href="replay.css?v=3">
 <style>
   .stage{grid-template-columns:minmax(420px,1fr) minmax(300px,380px);}
@@ -131,7 +131,7 @@ let manifest=null, session=null, hand=null, btnSeat=null,
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=17")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -163,7 +163,7 @@ async function init(){
 
 async function loadSession(i){
   const meta = manifest.sessions[i];
-  session = await (await fetch(BASE + meta.file + "?v=15")).json();
+  session = await (await fetch(BASE + meta.file + "?v=17")).json();
   $("handSel").innerHTML = session.hands.map((h,hidx) => {
     const wn = winnerNames(h).join(", ") || "—";
     return `<option value="${hidx}">Hand ${h.hand}/${session.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;

@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🎴 Leduc Holdem Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <link rel="stylesheet" href="replay.css?v=3">
 <style>
   .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
@@ -94,7 +94,7 @@ let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, 
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=17")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -122,7 +122,7 @@ async function init(){
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file + "?v=15")).json();
+  pairData = await (await fetch(BASE + p.file + "?v=17")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "split pot";
     const n = e.moves.length;

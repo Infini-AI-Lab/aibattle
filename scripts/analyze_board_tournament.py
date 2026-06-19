@@ -109,7 +109,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
 
 
 def _other(p):
@@ -476,7 +476,7 @@ def render_game(game: str, rep: dict) -> str:
 
     fpw = rep["first_player_win_rate"] * 100
     # Per-move replay viewer exists for both board games (reports/<game>_replay.html).
-    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=15">'
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=17">'
                   f'▶ watch game replays</a>')
     # Emoji + plain name lead the subtitle; the h1 is the shell-prompt path.
     emoji, name = TITLE[game].split(" ", 1)
@@ -721,8 +721,9 @@ def _arena_board(entries: list) -> str:
         ae = elo.get(r["model"], {})
         ae_disp = (f"{ae['arena_elo']}<div class='small'>{ae['z']:+.2f} SD</div>"
                    if ae else "—")
+        ae_elo = ae.get("arena_elo", "") if ae else ""
         body += (
-            f"<tr><td class='rk'>{medal}</td>"
+            f"<tr data-score='{r['score']}' data-elo='{ae_elo}'><td class='rk'>{medal}</td>"
             f"<td class='model'>{model_cell(r['model'])}</td>"
             f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
             f"<span class='sval'>{r['score']:.0f}</span></td>"
@@ -732,20 +733,22 @@ def _arena_board(entries: list) -> str:
     return f"""
   <section class="board">
     <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
-      <span class="arena-tag">6 core games · ranked by Arena Rank Score</span></div>
+      <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
     <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click the <b>ⓘ</b> on each column
-      for how it's computed. Coverage = games a model has entered (treat low coverage as provisional).</div>
+      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
+      low coverage as provisional).</div>
     <table class="lb">
+      <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
-        <th><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
+        <th class="sortable sorted" data-sort="score"><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
           aria-label="How Arena Rank Score is calculated">i</button>
           <span class="infobox" id="info-score" hidden><b>Arena Rank Score — ordinal.</b>
           In each game a model's finish becomes a 0–1 score, evenly spaced
           (1st&nbsp;=&nbsp;1.0, last&nbsp;=&nbsp;0.0) via <code>(N−1−rank)/(N−1)</code> where N is the
           field size. The score is the mean of those across the games played, ×100. It ignores
           <i>margin</i> — winning by a mile or a hair both score 1.0.</span></span></th>
-        <th><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
+        <th class="sortable" data-sort="elo"><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
           aria-label="How Arena Elo is calculated">i</button>
           <span class="infobox" id="info-elo" hidden><b>Arena Elo — margin-aware.</b>
           Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
@@ -754,7 +757,8 @@ def _arena_board(entries: list) -> str:
           score it rewards <i>how much</i> you win by. Built from the six head-to-head games only —
           Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
         <th>coverage</th><th>best game</th></tr>
-      {body}
+      </thead>
+      <tbody>{body}</tbody>
     </table>
   </section>"""
 
@@ -947,6 +951,37 @@ def render_index(reps: dict) -> str:
     if (e.key === 'Escape')
       document.querySelectorAll('.infobox').forEach(function (b) {{ b.setAttribute('hidden', ''); }});
   }});
+
+  // Click a score column header to re-rank the leaderboard by it (desc). The
+  // rank column (medals) is renumbered to match.
+  (function () {{
+    var table = document.querySelector('table.lb');
+    if (!table || !table.tBodies.length) return;
+    var tbody = table.tBodies[0];
+    var ths = table.querySelectorAll('th[data-sort]');
+    var MEDALS = ['🥇', '🥈', '🥉'];
+    function sortBy(key) {{
+      var rows = Array.prototype.slice.call(tbody.rows);
+      rows.sort(function (a, b) {{
+        var x = parseFloat(a.dataset[key]), y = parseFloat(b.dataset[key]);
+        if (isNaN(x)) return 1;
+        if (isNaN(y)) return -1;
+        return y - x;
+      }});
+      rows.forEach(function (r, i) {{
+        var rk = r.querySelector('.rk');
+        if (rk) rk.textContent = i < 3 ? MEDALS[i] : (i + 1);
+        tbody.appendChild(r);
+      }});
+      ths.forEach(function (th) {{ th.classList.toggle('sorted', th.dataset.sort === key); }});
+    }}
+    ths.forEach(function (th) {{
+      th.addEventListener('click', function (e) {{
+        if (e.target.closest('.info')) return;  // let the ⓘ open its popover
+        sortBy(th.dataset.sort);
+      }});
+    }});
+  }})();
 </script>
 </body></html>"""
 

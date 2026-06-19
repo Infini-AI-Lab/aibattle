@@ -80,6 +80,11 @@ BASE_CSS = """
     box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
   .infobox[hidden] { display:none; }
   .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
+  /* Sortable leaderboard headers: click to re-rank; active column shows ▼. */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--fg); }
+  th.sortable .hcell::after { content:" ↕"; color:var(--dim); font-size:10px; font-style:normal; }
+  th.sortable.sorted .hcell::after { content:" ▼"; color:var(--red); }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */

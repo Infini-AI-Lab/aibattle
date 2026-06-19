@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -69,6 +69,11 @@
     box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
   .infobox[hidden] { display:none; }
   .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
+  /* Sortable leaderboard headers: click to re-rank; active column shows ▼. */
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--fg); }
+  th.sortable .hcell::after { content:" ↕"; color:var(--dim); font-size:10px; font-style:normal; }
+  th.sortable.sorted .hcell::after { content:" ▼"; color:var(--red); }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -132,20 +137,22 @@
   
   <section class="board">
     <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
-      <span class="arena-tag">6 core games · ranked by Arena Rank Score</span></div>
+      <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
     <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click the <b>ⓘ</b> on each column
-      for how it's computed. Coverage = games a model has entered (treat low coverage as provisional).</div>
+      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
+      low coverage as provisional).</div>
     <table class="lb">
+      <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
-        <th><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
+        <th class="sortable sorted" data-sort="score"><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
           aria-label="How Arena Rank Score is calculated">i</button>
           <span class="infobox" id="info-score" hidden><b>Arena Rank Score — ordinal.</b>
           In each game a model's finish becomes a 0–1 score, evenly spaced
           (1st&nbsp;=&nbsp;1.0, last&nbsp;=&nbsp;0.0) via <code>(N−1−rank)/(N−1)</code> where N is the
           field size. The score is the mean of those across the games played, ×100. It ignores
           <i>margin</i> — winning by a mile or a hair both score 1.0.</span></span></th>
-        <th><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
+        <th class="sortable" data-sort="elo"><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
           aria-label="How Arena Elo is calculated">i</button>
           <span class="infobox" id="info-elo" hidden><b>Arena Elo — margin-aware.</b>
           Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
@@ -154,7 +161,8 @@
           score it rewards <i>how much</i> you win by. Built from the six head-to-head games only —
           Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
         <th>coverage</th><th>best game</th></tr>
-      <tr><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:80.4%'></span><span class='sval'>80</span></td><td><b>1612<div class='small'>+0.75 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:75.7%'></span><span class='sval'>76</span></td><td><b>1635<div class='small'>+0.90 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:73.8%'></span><span class='sval'>74</span></td><td><b>1610<div class='small'>+0.74 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:63.8%'></span><span class='sval'>64</span></td><td><b>1583<div class='small'>+0.55 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:54.5%'></span><span class='sval'>54</span></td><td><b>1517<div class='small'>+0.11 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:52.8%'></span><span class='sval'>53</span></td><td><b>1528<div class='small'>+0.18 SD</div></b></td><td class='cov'>4/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:47.2%'></span><span class='sval'>47</span></td><td><b>1514<div class='small'>+0.09 SD</div></b></td><td class='cov'>4/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td class='scorecell'><span class='bar' style='width:26.2%'></span><span class='sval'>26</span></td><td><b>1379<div class='small'>-0.81 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:16.4%'></span><span class='sval'>16</span></td><td><b>1345<div class='small'>-1.03 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚔️ Colonel Blotto</td></tr><tr><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:9.3%'></span><span class='sval'>9</span></td><td><b>1291<div class='small'>-1.39 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr>
+      </thead>
+      <tbody><tr data-score='80.4' data-elo='1612'><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:80.4%'></span><span class='sval'>80</span></td><td><b>1612<div class='small'>+0.75 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='75.7' data-elo='1635'><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:75.7%'></span><span class='sval'>76</span></td><td><b>1635<div class='small'>+0.90 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr data-score='73.8' data-elo='1610'><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:73.8%'></span><span class='sval'>74</span></td><td><b>1610<div class='small'>+0.74 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='63.8' data-elo='1583'><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:63.8%'></span><span class='sval'>64</span></td><td><b>1583<div class='small'>+0.55 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='54.5' data-elo='1517'><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:54.5%'></span><span class='sval'>54</span></td><td><b>1517<div class='small'>+0.11 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='52.8' data-elo='1528'><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:52.8%'></span><span class='sval'>53</span></td><td><b>1528<div class='small'>+0.18 SD</div></b></td><td class='cov'>4/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='47.2' data-elo='1514'><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:47.2%'></span><span class='sval'>47</span></td><td><b>1514<div class='small'>+0.09 SD</div></b></td><td class='cov'>4/6</td><td class='best'>🔴 Connect Four</td></tr><tr data-score='26.2' data-elo='1379'><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td class='scorecell'><span class='bar' style='width:26.2%'></span><span class='sval'>26</span></td><td><b>1379<div class='small'>-0.81 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='16.4' data-elo='1345'><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:16.4%'></span><span class='sval'>16</span></td><td><b>1345<div class='small'>-1.03 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚔️ Colonel Blotto</td></tr><tr data-score='9.3' data-elo='1291'><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:9.3%'></span><span class='sval'>9</span></td><td><b>1291<div class='small'>-1.39 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr></tbody>
     </table>
   </section>
 
@@ -268,5 +276,36 @@
     if (e.key === 'Escape')
       document.querySelectorAll('.infobox').forEach(function (b) { b.setAttribute('hidden', ''); });
   });
+
+  // Click a score column header to re-rank the leaderboard by it (desc). The
+  // rank column (medals) is renumbered to match.
+  (function () {
+    var table = document.querySelector('table.lb');
+    if (!table || !table.tBodies.length) return;
+    var tbody = table.tBodies[0];
+    var ths = table.querySelectorAll('th[data-sort]');
+    var MEDALS = ['🥇', '🥈', '🥉'];
+    function sortBy(key) {
+      var rows = Array.prototype.slice.call(tbody.rows);
+      rows.sort(function (a, b) {
+        var x = parseFloat(a.dataset[key]), y = parseFloat(b.dataset[key]);
+        if (isNaN(x)) return 1;
+        if (isNaN(y)) return -1;
+        return y - x;
+      });
+      rows.forEach(function (r, i) {
+        var rk = r.querySelector('.rk');
+        if (rk) rk.textContent = i < 3 ? MEDALS[i] : (i + 1);
+        tbody.appendChild(r);
+      });
+      ths.forEach(function (th) { th.classList.toggle('sorted', th.dataset.sort === key); });
+    }
+    ths.forEach(function (th) {
+      th.addEventListener('click', function (e) {
+        if (e.target.closest('.info')) return;  // let the ⓘ open its popover
+        sortBy(th.dataset.sort);
+      });
+    });
+  })();
 </script>
 </body></html>

@@ -41,7 +41,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # this page includes those two files in <head> via NAV_HEAD and the bar is
 # injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
 
 _STYLE = BASE_CSS + """
   a { text-decoration:none; } a:hover { text-decoration:underline; }
@@ -265,7 +265,7 @@ def render_html(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/kuhn<span class="cursor"></span></h1>
   <div class="sub">🃏 Kuhn Poker · {len(models)} models · round-robin · {rep['episodes_per_pair']} seat-swapped hands/pair · deck {{J,Q,K}}, ~2 decisions/hand</div>
-  <a class="replaybtn" href="kuhn_replay.html?v=15">▶ watch hand replays</a>
+  <a class="replaybtn" href="kuhn_replay.html?v=17">▶ watch hand replays</a>
 
   <div class="rules">
     <h3>How Kuhn Poker works</h3>
