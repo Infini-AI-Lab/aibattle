@@ -30,6 +30,7 @@ import os
 from collections import defaultdict
 
 from elo_util import bootstrap_elo, wld_from_records, gross_from_records
+from model_names import display_name
 from report_theme import BASE_CSS, CHART_SETUP
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
@@ -46,7 +47,7 @@ GAMES = {
         "blurb": "Model vs the built-in dealer · hit/stand/double · scored by chip profit",
     },
     "leduc_poker": {
-        "dir": "new_games_experiment/leduc_poker", "kind": "versus", "title": "🎴 Leduc Poker", "emoji": "🎴",
+        "dir": "new_games_experiment/leduc_poker", "kind": "versus", "title": "🎴 Leduc Holdem", "emoji": "🎴",
         "href": "leduc_report.html", "area": "leduc", "replay": "leduc_replay.html", "replay_verb": "hand", "group": "imperfect",
         "badges": ["Imperfect info", "Heads-up", "Stochastic"],
         "blurb": "Imperfect-information poker · 6-card deck · round-robin, seat-swapped",
@@ -71,25 +72,82 @@ GAMES = {
 # Short intro per game (shown as a callout under the header, like the Kuhn page).
 INTRO = {
     "independent_blackjack": (
-        "Each model plays the <b>same</b> hands against the built-in dealer "
-        "(hit / stand / double), scored by chip profit. The dealer's fixed house edge "
-        "means a negative field net is expected — the signal is who loses least and "
-        "plays soundest (bust / double / natural rates)."),
+        '<div class="rules">'
+        "<h3>Setup — Blackjack</h3>"
+        "Standard "
+        '<a href="https://en.wikipedia.org/wiki/Blackjack" target="_blank" rel="noopener">blackjack</a>'
+        " against a fixed house dealer (full rules on Wikipedia); this is a "
+        "solitaire-style benchmark, <b>not</b> model-vs-model:"
+        "<ul>"
+        "<li><b>Model vs the built-in dealer</b>, which plays the fixed house line "
+        "(hits until 17, then stands). Player actions are <b>hit / stand / double</b> — "
+        "no split or insurance.</li>"
+        "<li><b>500 hands per model</b>, each from a fresh shuffle. Deals are "
+        "<b>independent</b> — not shared across models — so the luck of the cards "
+        "differs from model to model.</li>"
+        "<li><b>Flat 1-unit bet</b> per hand (2 units on a double); a natural pays "
+        "<b>3:2</b>.</li>"
+        "</ul>"
+        '<div class="seq">Because deals aren\'t shared and the dealer keeps a fixed house '
+        "edge, a <b>negative field net is expected</b> and short runs are luck-heavy — so "
+        "models are ranked by <b>mean profit per hand</b>, not total. Bust / double / "
+        "natural rates show how soundly each one plays.</div>"
+        "</div>"),
     "leduc_poker": (
-        "Leduc Poker is a tiny <b>imperfect-information</b> poker — a 6-card deck and a "
-        "single public card. Small enough to reason about precisely, it tests bluffing "
-        "and value-betting under uncertainty; rated by a chip-weighted Elo like Hold'em."),
+        '<div class="rules">'
+        "<h3>How Leduc Holdem works</h3>"
+        "A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of "
+        '<span class="card">J</span><span class="card">Q</span><span class="card">K</span> '
+        "(J &lt; Q &lt; K). Heads-up, two betting rounds:"
+        "<ul>"
+        "<li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li>"
+        "<li><b>Round 1 (pre-flop):</b> players bet on their private card alone. "
+        "Actions are <code>check</code>/<code>bet</code> and <code>call</code>/"
+        "<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li>"
+        "<li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li>"
+        "<li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li>"
+        "<li>At <b>showdown</b>, pairing your private card with the public card wins; "
+        "otherwise the <b>higher card</b> wins. A fold concedes the pot.</li>"
+        "</ul>"
+        '<div class="seq">Small enough to reason about precisely, yet it has genuine '
+        "bluffing, value-betting and pot odds — pairing the board is the nuts, and a "
+        "lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so "
+        "the size of pots won/lost matters, not just who won the hand.</div>"
+        "</div>"),
     "repeated_colonel_blotto": (
-        "Repeated Colonel Blotto: each round, <b>simultaneously</b> allocate limited "
-        "troops across fronts — win the most fronts to win the round. No hidden state, "
-        "but simultaneous moves make it a game of strategic misdirection and adaptation."),
+        '<div class="rules">'
+        "<h3>How Colonel Blotto works</h3>"
+        "A two-player game of <b>simultaneous</b> resource allocation, played over "
+        "<b>20 rounds</b>. Each round:"
+        "<ul>"
+        "<li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 "
+        "battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs "
+        "per round).</li>"
+        "<li>Allocations are revealed <b>at the same time</b> — neither sees the other's "
+        "before committing.</li>"
+        "<li>On each battlefield the <b>larger force wins</b> that field's points; an "
+        "exact tie awards the field to neither.</li>"
+        "<li>Whoever takes the <b>most points</b> wins the round; only resolved past "
+        "rounds are shown to the opponent.</li>"
+        "</ul>"
+        '<div class="seq">After 20 rounds the <b>higher cumulative score wins</b> '
+        "(equal totals draw). No hidden cards or chance — the difficulty is purely "
+        "strategic: spread thin to grab the cheap fields, or stack up to guarantee the "
+        "expensive ones, while reading and misdirecting the opponent across rounds.</div>"
+        "</div>"),
     "othello_lite_6x6": (
         "Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, "
         "most discs at the end wins. Late-game swings make lookahead and stable-disc "
         "control decisive."),
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
+
+
+def _intro_html(game: str) -> str:
+    """Structured .rules block as-is, else wrap the plain blurb in a .callout."""
+    body = INTRO[game]
+    return body if body.lstrip().startswith("<") else f'<div class="callout">{body}</div>'
 
 
 def _favicon(emoji: str) -> str:
@@ -389,7 +447,7 @@ def render_versus(rep: dict) -> str:
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
+          <td>{i}</td><td class='model'>{display_name(m)}</td>
           <td>{_elo_cell(m)}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
@@ -398,9 +456,9 @@ def render_versus(rep: dict) -> str:
           <td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td>
         </tr>"""
 
-    hh = "<tr><th></th>" + "".join(f"<th>{m}</th>" for m in models) + "</tr>"
+    hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{a}</th>"
+        hh += f"<tr><th class='model'>{display_name(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -430,7 +488,7 @@ def render_versus(rep: dict) -> str:
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['num_games']} games</div>
   <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
-  <div class="callout">{INTRO[rep['game']]}</div>
+  {_intro_html(rep['game'])}
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(elo[ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
@@ -465,6 +523,8 @@ def render_versus(rep: dict) -> str:
 <script>
 const R = {payload};
 const pm=R.per_model, M=R.models;
+const DN = {json.dumps({m: display_name(m) for m in models})};
+const dn = m => DN[m] || m;
 {CHART_SETUP}
 const COLORS=PALETTE;
 const eloRanked=[...M].filter(m=>R.elo[m]!=null).sort((a,b)=>R.elo[b]-R.elo[a]);
@@ -486,14 +546,14 @@ const eloWhiskers = {{ id:'eloWhiskers', afterDatasetsDraw(c) {{
   ctx.restore();
 }} }};
 new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:ACCENT,
+  data:{{ labels:eloRanked.map(dn), datasets:[{{label:'Elo', backgroundColor:ACCENT,
     data:eloRanked.map(m=>R.elo[m])}}]}},
   options:{{ indexAxis:'y',
     scales:{{x:{{min:eloRanked.length?Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20:0}}}},
     plugins:{{legend:{{display:false}}}} }}, plugins:[eloWhiskers] }});
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
+  data:{{ labels:M.map(dn), datasets:[
     {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)}},
     {{label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)}},
     {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)}},
@@ -501,7 +561,7 @@ new Chart(document.getElementById('wdl'), {{ type:'bar',
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 new Chart(document.getElementById('net'), {{ type:'bar',
-  data:{{ labels:M, datasets:[{{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),
+  data:{{ labels:M.map(dn), datasets:[{{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),
     data:M.map(m=>pm[m].net_per_game)}}]}},
   options:{{ plugins:{{legend:{{display:false}}}} }} }});
 
@@ -527,7 +587,7 @@ def render_dealer(rep: dict) -> str:
         s = pm[m]
         pcls = "pos" if s["mean_per_hand"] > 0 else ("neg" if s["mean_per_hand"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
+          <td>{i}</td><td class='model'>{display_name(m)}</td>
           <td class='{pcls}'>{s['mean_per_hand']:+.3f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['push_rate']*100:.0f}%</td>
           <td>{s['loss_rate']*100:.0f}%</td>
@@ -549,7 +609,7 @@ def render_dealer(rep: dict) -> str:
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['total_hands']} hands total</div>
   <a class="replaybtn" href="{cfg['replay']}?v=15">▶ watch {cfg['replay_verb']} replays</a>
-  <div class="callout">{INTRO[rep['game']]}</div>
+  {_intro_html(rep['game'])}
 
   <div class="kpis">
     <div class="kpi"><div class="v">{pm[champ]['mean_per_hand']:+.3f}</div><div class="l">top mean/hand · {champ}</div></div>
@@ -581,6 +641,8 @@ def render_dealer(rep: dict) -> str:
 <script>
 const R = {payload};
 const pm=R.per_model, M=R.models;
+const DN = {json.dumps({m: display_name(m) for m in models})};
+const dn = m => DN[m] || m;
 {CHART_SETUP}
 const ranked=[...M].sort((a,b)=>pm[b].mean_per_hand-pm[a].mean_per_hand);
 
@@ -590,7 +652,7 @@ new Chart(document.getElementById('profit'), {{ type:'bar',
   options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
 
 new Chart(document.getElementById('wpl'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
+  data:{{ labels:M.map(dn), datasets:[
     {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].win_rate*100)}},
     {{label:'push', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].push_rate*100)}},
     {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].loss_rate*100)}},
@@ -598,7 +660,7 @@ new Chart(document.getElementById('wpl'), {{ type:'bar',
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 new Chart(document.getElementById('style'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
+  data:{{ labels:M.map(dn), datasets:[
     {{label:'bust %', backgroundColor:'#f87171', data:M.map(m=>pm[m].bust_rate*100)}},
     {{label:'double %', backgroundColor:'#fbbf24', data:M.map(m=>pm[m].double_rate*100)}},
     {{label:'natural %', backgroundColor:'#60a5fa', data:M.map(m=>pm[m].natural_rate*100)}},

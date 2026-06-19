@@ -14,7 +14,7 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 from report_theme import BASE_CSS
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
@@ -26,7 +26,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -60,7 +60,8 @@ def analyze(data: dict) -> dict:
 
 def render_html(rep: dict, beh: dict) -> str:
     n = rep["num_players"]; lb = rep["leaderboard"]
-    labels = [r["model"] for r in lb]
+    labels = [r["model"] for r in lb]          # slugs — key behavior stats / colors
+    disp_labels = [display_name(m) for m in labels]   # official names for chart axes
     avg_rank = [r["avg_rank"] for r in lb]
     top1 = [round(r["top1_rate"] * 100, 1) for r in lb]
     cols = pb.colors_for(labels)
@@ -72,7 +73,7 @@ def render_html(rep: dict, beh: dict) -> str:
     for i, r in enumerate(lb, 1):
         rd = r["rank_distribution"]
         rc = "".join(f"<td>{rd.get(str(k),0)}</td>" for k in range(1, n + 1))
-        trows += (f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+        trows += (f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
                   f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>{rc}</tr>")
     return f"""<!DOCTYPE html>
@@ -83,9 +84,25 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · {n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   {replay_btn}
-  <div class="callout">5-handed ring games scored by <b>average finishing rank</b>.
-    Multi-way play adds position and bubble dynamics, so models are ranked by consistent
-    finishes rather than raw chip swings (top-1 rate over-rewards high-variance play).</div>
+  <div class="rules">
+    <h3>Setup — Hold'em Table</h3>
+    Standard No-Limit
+    <a href="https://en.wikipedia.org/wiki/Texas_hold_%27em" target="_blank" rel="noopener">Texas Hold'em</a>
+    (full rules on Wikipedia); here it's a multi-way <b>ring game</b> rather than
+    heads-up:
+    <ul>
+      <li><b>{n}-handed table:</b> {n} models sit at one table, each starting with
+        <b>200 chips</b> (blinds <b>1 / 2</b>), and play a full sit-and-go.</li>
+      <li><b>{rep['sessions']} sessions</b> of <b>up to {rep['max_hands']} hands</b>;
+        within a session stacks carry and busted players are out — so finishing
+        <b>place</b> (1st…{n}th) is what's recorded.</li>
+      <li>Multi-way play adds position, bubble pressure and bust risk that heads-up
+        doesn't have.</li>
+    </ul>
+    <div class="seq">Ranked by <b>average finishing rank</b> (lower is better), which
+    rewards consistent finishes; top-1 rate is shown alongside but over-rewards
+    high-variance, boom-or-bust play.</div>
+  </div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>
@@ -100,10 +117,10 @@ def render_html(rep: dict, beh: dict) -> str:
   <script>
   const axc={{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}};
   new Chart(document.getElementById('ar'),{{type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'avg rank',data:{json.dumps(avg_rank)},backgroundColor:{json.dumps(cols)}}}]}},
+    data:{{labels:{json.dumps(disp_labels)},datasets:[{{label:'avg rank',data:{json.dumps(avg_rank)},backgroundColor:{json.dumps(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,max:{n},...axc}},x:axc}}}}}});
   new Chart(document.getElementById('t1'),{{type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'top-1 %',data:{json.dumps(top1)},backgroundColor:{json.dumps(cols)}}}]}},
+    data:{{labels:{json.dumps(disp_labels)},datasets:[{{label:'top-1 %',data:{json.dumps(top1)},backgroundColor:{json.dumps(cols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},scales:{{y:{{beginAtZero:true,max:100,...axc}},x:axc}}}}}});
   </script>
 </div></body></html>"""

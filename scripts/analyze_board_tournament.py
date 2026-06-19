@@ -33,7 +33,7 @@ from collections import defaultdict
 
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 from elo_util import bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -47,18 +47,56 @@ PLAYERS = ["player_0", "player_1"]
 PHASES = ["early", "mid", "late"]
 TITLE = {"connect4": "🔴 Connect Four", "gomoku": "⚫ Gomoku-Lite"}
 FAVICON = {"connect4": "🔴", "gomoku": "⚫"}
-# Short intro per game (shown as a callout under the header, like the Kuhn page).
+# Short intro per game (shown under the header). A value that begins with "<"
+# is emitted as-is (a structured .rules block, like the Kuhn page); a plain
+# string is wrapped in a .callout.
 INTRO = {
-    "connect4": ("Connect Four is a <b>solved</b>, perfect-information game — drop "
-                 "discs to make four in a row. With no hidden information or chance, "
-                 "every position has a known best move, so beyond results we score "
-                 "<b>tactical accuracy</b>: taking immediate wins and blocking the "
-                 "opponent's immediate threats."),
-    "gomoku": ("Gomoku-Lite is a perfect-information game — place stones to make five "
-               "in a row on a 9×9 board. Like Connect Four it rewards reading immediate "
-               "threats, so we score <b>tactical accuracy</b> (win-take / block rate) "
-               "alongside head-to-head results."),
+    "connect4": (
+        '<div class="rules">'
+        "<h3>How Connect Four works</h3>"
+        "A two-player game on a vertical <b>7-column × 6-row</b> grid; the two models "
+        "alternate dropping discs of their own color. One game plays out like this:"
+        "<ul>"
+        "<li>On your turn you pick a <b>column</b>; the disc falls to the "
+        "<b>lowest empty cell</b> in it. A full column can't be chosen.</li>"
+        "<li><b>Player 0 moves first</b> — a real edge in a solved game (see the "
+        "first-mover win rate below).</li>"
+        "<li>The first to line up <b>four of their discs in a row</b> — horizontally, "
+        "vertically, or diagonally — wins immediately.</li>"
+        "<li>If the board fills with no four-in-a-row, the game is a <b>draw</b>.</li>"
+        "</ul>"
+        '<div class="seq">Connect Four is <b>solved</b>: with perfect play the first '
+        "player always wins. There's no hidden information or chance, so every position "
+        "has a known best move — which lets us score <b>tactical accuracy</b> directly: "
+        "did the model take an available immediate win, and did it block the opponent's "
+        "immediate winning threat?</div>"
+        "</div>"),
+    "gomoku": (
+        '<div class="rules">'
+        "<h3>How Gomoku-Lite works</h3>"
+        "A two-player game on a <b>9×9</b> board (columns A–I, rows 1–9). The two models "
+        "alternate placing one stone of their own color on any empty cell:"
+        "<ul>"
+        "<li>On your turn, name an empty cell — e.g. <code>E5</code> — and a stone is "
+        "placed there.</li>"
+        "<li><b>Player 0 moves first.</b></li>"
+        "<li>The first to make <b>five of their stones in a row</b> — horizontally, "
+        "vertically, or diagonally — wins immediately.</li>"
+        "<li>If the board fills with no five-in-a-row, the game is a <b>draw</b> (rare "
+        "on 9×9).</li>"
+        "</ul>"
+        '<div class="seq">Free-style Gomoku — no forbidden-move restrictions — and like '
+        "Connect Four there's no hidden information or chance, so we score "
+        "<b>tactical accuracy</b>: did the model complete an available five (win-take) "
+        "and block the opponent's immediate five-threat (block rate)?</div>"
+        "</div>"),
 }
+
+
+def _intro_html(game: str) -> str:
+    """Structured .rules block as-is, else wrap the plain blurb in a .callout."""
+    body = INTRO[game]
+    return body if body.lstrip().startswith("<") else f'<div class="callout">{body}</div>'
 
 
 def _favicon(emoji: str) -> str:
@@ -71,7 +109,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
 
 
 def _other(p):
@@ -405,7 +443,7 @@ def render_game(game: str, rep: dict) -> str:
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
+          <td>{i}</td><td class='model'>{display_name(m)}</td>
           <td>{_elo_cell(rep['elo'][m], rep.get('elo_ci', {}).get(m))}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
@@ -418,9 +456,9 @@ def render_game(game: str, rep: dict) -> str:
         </tr>"""
 
     # head-to-head
-    hh = "<tr><th></th>" + "".join(f"<th>{m}</th>" for m in models) + "</tr>"
+    hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{a}</th>"
+        hh += f"<tr><th class='model'>{display_name(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -433,7 +471,7 @@ def render_game(game: str, rep: dict) -> str:
     # heatmaps
     heat_cards = ""
     for m in models:
-        heat_cards += (f"<div class='heatcard'><div class='hlabel'>{m}</div>"
+        heat_cards += (f"<div class='heatcard'><div class='hlabel'>{display_name(m)}</div>"
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
@@ -460,7 +498,7 @@ def render_game(game: str, rep: dict) -> str:
   <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
   {replay_btn}
 
-  <div class="callout">{INTRO[game]}</div>
+  {_intro_html(game)}
 
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
@@ -507,6 +545,8 @@ def render_game(game: str, rep: dict) -> str:
 <script>
 const R = {payload};
 const pm=R.per_model, M=R.models;
+const DN = {json.dumps({m: display_name(m) for m in models})};
+const dn = m => DN[m] || m;
 {CHART_SETUP}
 const COLORS=PALETTE;
 const ranked=[...M].sort((a,b)=>R.elo[b]-R.elo[a]);
@@ -530,14 +570,14 @@ const eloWhiskers = {{ id:'eloWhiskers', afterDatasetsDraw(c) {{
   ctx.restore();
 }} }};
 new Chart(document.getElementById('elo'), {{ type:'bar',
-  data:{{ labels:eloRanked, datasets:[{{label:'Elo', backgroundColor:ACCENT,
+  data:{{ labels:eloRanked.map(dn), datasets:[{{label:'Elo', backgroundColor:ACCENT,
     data:eloRanked.map(m=>R.elo[m])}}]}},
   options:{{ indexAxis:'y',
     scales:{{x:{{min:Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20}}}},
     plugins:{{legend:{{display:false}}}} }}, plugins:[eloWhiskers] }});
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
+  data:{{ labels:M.map(dn), datasets:[
     {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)}},
     {{label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)}},
     {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)}},
@@ -545,7 +585,7 @@ new Chart(document.getElementById('wdl'), {{ type:'bar',
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 new Chart(document.getElementById('tac'), {{ type:'bar',
-  data:{{ labels:M, datasets:[
+  data:{{ labels:M.map(dn), datasets:[
     {{label:'win-take %', backgroundColor:'#4ade80', data:M.map(m=>pm[m].win_take_rate*100)}},
     {{label:'block %', backgroundColor:'#60a5fa', data:M.map(m=>pm[m].block_rate*100)}},
   ]}},
@@ -645,7 +685,7 @@ def _arena_board(entries: list) -> str:
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
         body += (
             f"<tr><td class='rk'>{medal}</td>"
-            f"<td class='model'>{r['model']}</td>"
+            f"<td class='model'>{display_name(r['model'])}</td>"
             f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
             f"<span class='sval'>{r['score']:.0f}</span></td>"
             f"<td class='cov'>{r['games']}/{total}</td>"
@@ -808,7 +848,7 @@ def render_index(reps: dict) -> str:
 <body><div class="wrap">
   <h1>$ ai-battle-arena -<span class="cursor"></span></h1>
   <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
-    identical pipeline; <b>Agentic Arena</b> is open to any model + any scaffolding.</div>
+    identical pipeline; <b>Harness Arena</b> is open to any model + any scaffolding.</div>
 
   <a href="gpt_vs_claude/index.html" style="display:flex;align-items:center;justify-content:space-between;
     gap:16px;flex-wrap:wrap;text-decoration:none;color:inherit;margin-top:8px;
@@ -836,13 +876,8 @@ def render_index(reps: dict) -> str:
   </section>
 
   <section class="arena" id="agentic">
-    <div class="arena-head"><h2>🛠️ Agentic Arena</h2>
-      <span class="arena-tag">open · any model · any pipeline</span></div>
-    <div class="note">Bring your own scaffolding — tools, search, memory, self-play. Ranked
-      on the same games; uplift over the underlying model is the headline metric.</div>
+    <div class="arena-head"><h2>🛠️ Harness Arena</h2></div>
     <div class="cta">
-      <div class="ctatext"><b>Open for submissions →</b>
-        <div>No agents entered yet. Wire one up via the external-agent (HTTP) interface.</div></div>
       <span class="pill">Coming soon</span>
     </div>
   </section>

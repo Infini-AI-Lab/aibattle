@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -50,6 +50,19 @@
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Structured rules box (matches the Kuhn page): heading + bullet list + a
+     dimmed sequence/footnote line. .rules .card is a scoped inline chip and
+     does not clash with the global overview .card. */
+  .rules { background:var(--faint); border:1px solid var(--line);
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:var(--fg); line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; }
+  .rules h3::before { content:""; }
+  .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
+  .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
+    background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
+    text-align:center; vertical-align:middle; line-height:1.4; }
+  .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
+  .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
   /* Replay button: the one place a non-token link color is used (indigo),
      per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
@@ -95,7 +108,7 @@
 <body><div class="wrap">
   <h1>$ ai-battle-arena -<span class="cursor"></span></h1>
   <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
-    identical pipeline; <b>Agentic Arena</b> is open to any model + any scaffolding.</div>
+    identical pipeline; <b>Harness Arena</b> is open to any model + any scaffolding.</div>
 
   <a href="gpt_vs_claude/index.html" style="display:flex;align-items:center;justify-content:space-between;
     gap:16px;flex-wrap:wrap;text-decoration:none;color:inherit;margin-top:8px;
@@ -117,7 +130,7 @@
     <table class="lb">
       <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
         <th>coverage</th><th>best game</th></tr>
-      <tr><td class='rk'>🥇</td><td class='model'>glm-5p1</td><td class='scorecell'><span class='bar' style='width:70.9%'></span><span class='sval'>71</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>🥈</td><td class='model'>glm-5p2</td><td class='scorecell'><span class='bar' style='width:69.0%'></span><span class='sval'>69</span></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr><td class='rk'>🥉</td><td class='model'>kimi-k2p6</td><td class='scorecell'><span class='bar' style='width:68.5%'></span><span class='sval'>68</span></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>4</td><td class='model'>deepseek-v4-pro</td><td class='scorecell'><span class='bar' style='width:68.5%'></span><span class='sval'>68</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>5</td><td class='model'>claude-sonnet-4.6</td><td class='scorecell'><span class='bar' style='width:52.8%'></span><span class='sval'>53</span></td><td class='cov'>4/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>6</td><td class='model'>claude-opus-4.8</td><td class='scorecell'><span class='bar' style='width:47.2%'></span><span class='sval'>47</span></td><td class='cov'>4/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>7</td><td class='model'>qwen3p7-plus</td><td class='scorecell'><span class='bar' style='width:45.0%'></span><span class='sval'>45</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr><td class='rk'>8</td><td class='model'>gpt-oss-120b</td><td class='scorecell'><span class='bar' style='width:33.3%'></span><span class='sval'>33</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr><tr><td class='rk'>9</td><td class='model'>minimax-m2p7</td><td class='scorecell'><span class='bar' style='width:25.9%'></span><span class='sval'>26</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr><tr><td class='rk'>10</td><td class='model'>minimax-m3</td><td class='scorecell'><span class='bar' style='width:18.8%'></span><span class='sval'>19</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr>
+      <tr><td class='rk'>🥇</td><td class='model'>GLM-5.1</td><td class='scorecell'><span class='bar' style='width:70.9%'></span><span class='sval'>71</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>🥈</td><td class='model'>GLM-5.2</td><td class='scorecell'><span class='bar' style='width:69.0%'></span><span class='sval'>69</span></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr><td class='rk'>🥉</td><td class='model'>Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:68.5%'></span><span class='sval'>68</span></td><td class='cov'>6/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>4</td><td class='model'>DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:68.5%'></span><span class='sval'>68</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>5</td><td class='model'>Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:52.8%'></span><span class='sval'>53</span></td><td class='cov'>4/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr><td class='rk'>6</td><td class='model'>Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:47.2%'></span><span class='sval'>47</span></td><td class='cov'>4/6</td><td class='best'>🔴 Connect Four</td></tr><tr><td class='rk'>7</td><td class='model'>Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:45.0%'></span><span class='sval'>45</span></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr><td class='rk'>8</td><td class='model'>GPT-OSS 120B</td><td class='scorecell'><span class='bar' style='width:33.3%'></span><span class='sval'>33</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr><tr><td class='rk'>9</td><td class='model'>MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:25.9%'></span><span class='sval'>26</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr><tr><td class='rk'>10</td><td class='model'>MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:18.8%'></span><span class='sval'>19</span></td><td class='cov'>6/6</td><td class='best'>🂡 Blackjack</td></tr>
     </table>
   </section>
 
@@ -189,7 +202,7 @@
           <div class="cgo">View analysis →</div>
         </a>
         <a class="card" href="leduc_report.html">
-          <div class="ctitle">🎴 Leduc Poker</div>
+          <div class="ctitle">🎴 Leduc Holdem</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Stochastic</span></div>
           <div class="cmeta">1300 games · 25 deals/pair · first-mover 42%</div>
           <div class="champ">🏆 qwen3p7-plus <span class='metric'>Elo 1519</span></div>
@@ -205,13 +218,8 @@
   </section>
 
   <section class="arena" id="agentic">
-    <div class="arena-head"><h2>🛠️ Agentic Arena</h2>
-      <span class="arena-tag">open · any model · any pipeline</span></div>
-    <div class="note">Bring your own scaffolding — tools, search, memory, self-play. Ranked
-      on the same games; uplift over the underlying model is the headline metric.</div>
+    <div class="arena-head"><h2>🛠️ Harness Arena</h2></div>
     <div class="cta">
-      <div class="ctatext"><b>Open for submissions →</b>
-        <div>No agents entered yet. Wire one up via the external-agent (HTTP) interface.</div></div>
       <span class="pill">Coming soon</span>
     </div>
   </section>

@@ -57,7 +57,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=19";
+  var V = "?v=25";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -71,13 +71,12 @@
     '<span class="navclust">Perfect-info/</span>' +
     a("connect4_report.html", "Connect4", "nav navsub", "oss") +
     a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
-    a("othello_report.html", "Othello", "nav navsub", "oss") +
     '<span class="navclust">Imperfect-info/</span>' +
-    a("kuhn_tournament_report.html", "Kuhn", "nav navsub", "oss") +
     a("holdem_tournament_report.html", "Holdem 1hand", "nav navsub", "oss") +
-    a("match_tournament_report.html", "Holdem match", "nav navsub", "oss") +
-    a("table_tournament_report.html", "Holdem table", "nav navsub", "oss") +
-    a("leduc_report.html", "Leduc", "nav navsub", "oss") +
+    a("match_tournament_report.html", "Holdem Match", "nav navsub", "oss") +
+    a("table_tournament_report.html", "Holdem Table", "nav navsub", "oss") +
+    a("leduc_report.html", "Leduc Holdem", "nav navsub", "oss") +
+    a("kuhn_tournament_report.html", "Kuhn", "nav navsub", "oss") +
     a("blotto_report.html", "Blotto", "nav navsub", "oss") +
     a("blackjack_report.html", "Blackjack", "nav navsub", "oss");
 

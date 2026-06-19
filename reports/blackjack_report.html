@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🂡 Blackjack</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🂡</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -52,6 +52,19 @@
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Structured rules box (matches the Kuhn page): heading + bullet list + a
+     dimmed sequence/footnote line. .rules .card is a scoped inline chip and
+     does not clash with the global overview .card. */
+  .rules { background:var(--faint); border:1px solid var(--line);
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:var(--fg); line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; }
+  .rules h3::before { content:""; }
+  .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
+  .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
+    background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
+    text-align:center; vertical-align:middle; line-height:1.4; }
+  .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
+  .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
   /* Replay button: the one place a non-token link color is used (indigo),
      per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
@@ -63,7 +76,7 @@
   <h1>$ ~/aibattle/blackjack<span class="cursor"></span></h1>
   <div class="sub">🂡 Blackjack · Model vs the built-in dealer · hit/stand/double · scored by chip profit · 4000 hands total</div>
   <a class="replaybtn" href="blackjack_replay.html?v=15">▶ watch hand replays</a>
-  <div class="callout">Each model plays the <b>same</b> hands against the built-in dealer (hit / stand / double), scored by chip profit. The dealer's fixed house edge means a negative field net is expected — the signal is who loses least and plays soundest (bust / double / natural rates).</div>
+  <div class="rules"><h3>Setup — Blackjack</h3>Standard <a href="https://en.wikipedia.org/wiki/Blackjack" target="_blank" rel="noopener">blackjack</a> against a fixed house dealer (full rules on Wikipedia); this is a solitaire-style benchmark, <b>not</b> model-vs-model:<ul><li><b>Model vs the built-in dealer</b>, which plays the fixed house line (hits until 17, then stands). Player actions are <b>hit / stand / double</b> — no split or insurance.</li><li><b>500 hands per model</b>, each from a fresh shuffle. Deals are <b>independent</b> — not shared across models — so the luck of the cards differs from model to model.</li><li><b>Flat 1-unit bet</b> per hand (2 units on a double); a natural pays <b>3:2</b>.</li></ul><div class="seq">Because deals aren't shared and the dealer keeps a fixed house edge, a <b>negative field net is expected</b> and short runs are luck-heavy — so models are ranked by <b>mean profit per hand</b>, not total. Bust / double / natural rates show how soundly each one plays.</div></div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">+0.041</div><div class="l">top mean/hand · minimax-m2p7</div></div>
@@ -77,7 +90,7 @@
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
         <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
     <tr>
-          <td>1</td><td class='model'>minimax-m2p7</td>
+          <td>1</td><td class='model'>MiniMax-M2.7</td>
           <td class='pos'>+0.041</td>
           <td>46%</td><td>9%</td>
           <td>45%</td>
@@ -86,7 +99,7 @@
           <td>0.0%</td>
           <td>500</td><td>38.8s</td>
         </tr><tr>
-          <td>2</td><td class='model'>gpt-oss-120b</td>
+          <td>2</td><td class='model'>GPT-OSS 120B</td>
           <td class='pos'>+0.033</td>
           <td>45%</td><td>8%</td>
           <td>47%</td>
@@ -95,7 +108,7 @@
           <td>0.0%</td>
           <td>500</td><td>1.5s</td>
         </tr><tr>
-          <td>3</td><td class='model'>glm-5p1</td>
+          <td>3</td><td class='model'>GLM-5.1</td>
           <td class='pos'>+0.029</td>
           <td>45%</td><td>6%</td>
           <td>49%</td>
@@ -104,7 +117,7 @@
           <td>0.0%</td>
           <td>500</td><td>13.1s</td>
         </tr><tr>
-          <td>4</td><td class='model'>glm-5p2</td>
+          <td>4</td><td class='model'>GLM-5.2</td>
           <td class='neg'>-0.002</td>
           <td>44%</td><td>8%</td>
           <td>48%</td>
@@ -113,7 +126,7 @@
           <td>0.0%</td>
           <td>500</td><td>24.4s</td>
         </tr><tr>
-          <td>5</td><td class='model'>qwen3p7-plus</td>
+          <td>5</td><td class='model'>Qwen3.7 Plus</td>
           <td class='neg'>-0.006</td>
           <td>43%</td><td>7%</td>
           <td>49%</td>
@@ -122,7 +135,7 @@
           <td>0.0%</td>
           <td>500</td><td>7.4s</td>
         </tr><tr>
-          <td>6</td><td class='model'>minimax-m3</td>
+          <td>6</td><td class='model'>MiniMax-M3</td>
           <td class='neg'>-0.042</td>
           <td>44%</td><td>7%</td>
           <td>49%</td>
@@ -131,7 +144,7 @@
           <td>0.0%</td>
           <td>500</td><td>7.9s</td>
         </tr><tr>
-          <td>7</td><td class='model'>kimi-k2p6</td>
+          <td>7</td><td class='model'>Kimi K2.6</td>
           <td class='neg'>-0.045</td>
           <td>42%</td><td>8%</td>
           <td>49%</td>
@@ -140,7 +153,7 @@
           <td>0.0%</td>
           <td>500</td><td>99.8s</td>
         </tr><tr>
-          <td>8</td><td class='model'>deepseek-v4-pro</td>
+          <td>8</td><td class='model'>DeepSeek V4 Pro</td>
           <td class='neg'>-0.113</td>
           <td>38%</td><td>12%</td>
           <td>51%</td>
@@ -167,6 +180,8 @@
 <script>
 const R = {"game": "independent_blackjack", "kind": "dealer", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b", "minimax-m3", "glm-5p2", "qwen3p7-plus"], "per_model": {"kimi-k2p6": {"hands": 500, "profit": -22.5, "mean_per_hand": -0.045, "win_rate": 0.424, "loss_rate": 0.494, "push_rate": 0.082, "bust_rate": 0.15, "double_rate": 0.096, "natural_rate": 0.05, "invalid_rate": 0.0, "avg_latency_s": 99.8}, "deepseek-v4-pro": {"hands": 500, "profit": -56.5, "mean_per_hand": -0.113, "win_rate": 0.376, "loss_rate": 0.506, "push_rate": 0.118, "bust_rate": 0.164, "double_rate": 0.098, "natural_rate": 0.034, "invalid_rate": 0.0, "avg_latency_s": 10.5}, "glm-5p1": {"hands": 500, "profit": 14.5, "mean_per_hand": 0.029, "win_rate": 0.452, "loss_rate": 0.488, "push_rate": 0.06, "bust_rate": 0.148, "double_rate": 0.112, "natural_rate": 0.07, "invalid_rate": 0.0, "avg_latency_s": 13.1}, "minimax-m2p7": {"hands": 500, "profit": 20.5, "mean_per_hand": 0.041, "win_rate": 0.462, "loss_rate": 0.452, "push_rate": 0.086, "bust_rate": 0.136, "double_rate": 0.116, "natural_rate": 0.042, "invalid_rate": 0.0, "avg_latency_s": 38.8}, "gpt-oss-120b": {"hands": 500, "profit": 16.5, "mean_per_hand": 0.033, "win_rate": 0.454, "loss_rate": 0.47, "push_rate": 0.076, "bust_rate": 0.168, "double_rate": 0.132, "natural_rate": 0.062, "invalid_rate": 0.0, "avg_latency_s": 1.5}, "minimax-m3": {"hands": 500, "profit": -21.0, "mean_per_hand": -0.042, "win_rate": 0.438, "loss_rate": 0.494, "push_rate": 0.068, "bust_rate": 0.19, "double_rate": 0.084, "natural_rate": 0.026, "invalid_rate": 0.0, "avg_latency_s": 7.9}, "glm-5p2": {"hands": 500, "profit": -1.0, "mean_per_hand": -0.002, "win_rate": 0.436, "loss_rate": 0.482, "push_rate": 0.082, "bust_rate": 0.152, "double_rate": 0.1, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 24.4}, "qwen3p7-plus": {"hands": 500, "profit": -3.0, "mean_per_hand": -0.006, "win_rate": 0.434, "loss_rate": 0.492, "push_rate": 0.074, "bust_rate": 0.174, "double_rate": 0.116, "natural_rate": 0.04, "invalid_rate": 0.0, "avg_latency_s": 7.4}}, "total_hands": 4000, "field_profit": -52.5};
 const pm=R.per_model, M=R.models;
+const DN = {"kimi-k2p6": "Kimi K2.6", "deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "minimax-m2p7": "MiniMax-M2.7", "gpt-oss-120b": "GPT-OSS 120B", "minimax-m3": "MiniMax-M3", "glm-5p2": "GLM-5.2", "qwen3p7-plus": "Qwen3.7 Plus"};
+const dn = m => DN[m] || m;
 
 Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';
 Chart.defaults.font.family='ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
@@ -181,7 +196,7 @@ new Chart(document.getElementById('profit'), { type:'bar',
   options:{ indexAxis:'y', plugins:{legend:{display:false}} } });
 
 new Chart(document.getElementById('wpl'), { type:'bar',
-  data:{ labels:M, datasets:[
+  data:{ labels:M.map(dn), datasets:[
     {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].win_rate*100)},
     {label:'push', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].push_rate*100)},
     {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].loss_rate*100)},
@@ -189,7 +204,7 @@ new Chart(document.getElementById('wpl'), { type:'bar',
   options:{ scales:{x:{stacked:true},y:{stacked:true,max:100}}, plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('style'), { type:'bar',
-  data:{ labels:M, datasets:[
+  data:{ labels:M.map(dn), datasets:[
     {label:'bust %', backgroundColor:'#f87171', data:M.map(m=>pm[m].bust_rate*100)},
     {label:'double %', backgroundColor:'#fbbf24', data:M.map(m=>pm[m].double_rate*100)},
     {label:'natural %', backgroundColor:'#60a5fa', data:M.map(m=>pm[m].natural_rate*100)},

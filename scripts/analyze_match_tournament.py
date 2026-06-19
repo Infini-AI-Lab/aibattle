@@ -15,7 +15,7 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -28,7 +28,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -97,7 +97,8 @@ def analyze(data: dict) -> dict:
 
 def render_html(rep: dict, beh: dict) -> str:
     models = rep["models"]; lb = rep["leaderboard"]
-    labels = [r["model"] for r in lb]
+    labels = [r["model"] for r in lb]          # slugs — key behavior stats / colors
+    disp_labels = [display_name(m) for m in labels]   # official names for chart axis
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
@@ -112,12 +113,12 @@ def render_html(rep: dict, beh: dict) -> str:
             elo_disp = f"{r['elo']}<div class='small'>±{r['elo_sd']:.0f}</div>"
         else:
             elo_disp = str(r["elo"])
-        trows += (f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+        trows += (f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
                   f"<td><b>{elo_disp}</b></td>"
                   f"<td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}/{r['matches']}</td>"
                   f"<td>{r['draws']}</td><td>{r['busted_out_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td></tr>")
-    head = "".join(f"<th>{m.split('-')[0]}</th>" for m in models)
+    head = "".join(f"<th>{display_name(m)}</th>" for m in models)
     grid = ""
     for a in models:
         cells = ""
@@ -136,7 +137,7 @@ def render_html(rep: dict, beh: dict) -> str:
             rgb = "34,197,94" if pct >= 50 else "244,63,94"
             cells += (f"<td class='hh' style='background:rgba({rgb},{alpha})'>"
                       f"{pct:.0f}%<span class='rec'>{w}/{pl}</span></td>")
-        grid += f"<tr><td class='model'>{a}</td>{cells}</tr>"
+        grid += f"<tr><td class='model'>{display_name(a)}</td>{cells}</tr>"
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Match Mode</title>
@@ -146,10 +147,25 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/match<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Match · Heads-up · {rep['episodes_per_pair']} matches/pair · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
   {replay_btn}
-  <div class="callout">Heads-up sit-and-go matches: stacks carry across hands and the
-    match winner is whoever busts the other (or leads at the hand cap). Win-or-lose by
-    design — chips don't count past the match outcome — so the <b>Elo rates match
-    wins/losses</b>, opponent-adjusted.</div>
+  <div class="rules">
+    <h3>Setup — Hold'em Match</h3>
+    Standard heads-up No-Limit
+    <a href="https://en.wikipedia.org/wiki/Texas_hold_%27em" target="_blank" rel="noopener">Texas Hold'em</a>
+    (full rules on Wikipedia); the difference from 1-Hand is that here a whole
+    <b>sit-and-go match</b> is the unit, not a single hand:
+    <ul>
+      <li><b>Heads-up sit-and-go:</b> both start with <b>200 chips</b> (blinds
+        <b>1 / 2</b>) and play until one is busted, or until a cap of <b>up to
+        {rep['max_hands']} hands</b>.</li>
+      <li><b>Stacks carry across hands</b> within a match — winning chips early creates a
+        real lead, so position and stack pressure matter.</li>
+      <li><b>{rep['episodes_per_pair']} matches per pair</b>, seats swapped; the
+        <b>match winner</b> is whoever busts the other (or leads at the cap).</li>
+    </ul>
+    <div class="seq">Win-or-lose by design — chips don't count past the match outcome —
+    so the <b>Elo rates match wins/losses</b>, opponent-adjusted. Match win rate is the
+    headline metric.</div>
+  </div>
   <h2>Match win rate</h2>
   <canvas id="wr"></canvas>
   <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>
@@ -168,7 +184,7 @@ def render_html(rep: dict, beh: dict) -> str:
   <script>
   new Chart(document.getElementById('wr'), {{
     type:'bar',
-    data:{{labels:{json.dumps(labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:{json.dumps(wincols)}}}]}},
+    data:{{labels:{json.dumps(disp_labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:{json.dumps(wincols)}}}]}},
     options:{{plugins:{{legend:{{display:false}}}},
       scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}},
                x:{{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}}}}}}

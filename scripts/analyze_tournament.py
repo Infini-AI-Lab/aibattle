@@ -18,7 +18,7 @@ import json
 import os
 from collections import defaultdict
 
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 from elo_util import bradley_terry, elo_key, bootstrap_elo, gross_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -36,7 +36,7 @@ HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -447,7 +447,7 @@ def render_html(report: dict) -> str:
             elo_disp = str(s["elo"])
         tags = " ".join(f"<span class='tag'>{t}</span>" for t in s["style"]["tags"])
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{m}</td>
+          <td>{i}</td><td class='model'>{display_name(m)}</td>
           <td class='stylecell'><div class='slabel'><b>{s['style']['label']}</b></div><div class='stags'>{tags or '&nbsp;'}</div></td>
           <td><b>{elo_disp}</b></td>
           <td class='{chip_cls}'>{s['chips']:+.0f}</td>
@@ -465,9 +465,9 @@ def render_html(report: dict) -> str:
 
     # head-to-head matrix
     h2h = report["h2h"]
-    hh = "<tr><th></th>" + "".join(f"<th>{m}</th>" for m in models) + "</tr>"
+    hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{a}</th>"
+        hh += f"<tr><th class='model'>{display_name(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -482,7 +482,7 @@ def render_html(report: dict) -> str:
     for m in ranked:
         s = pm[m]
         pf_rows += (
-            f"<tr><td class='model'>{m}</td>"
+            f"<tr><td class='model'>{display_name(m)}</td>"
             f"<td>{s['cbet_rate']*100:.0f}%</td>"
             f"<td class='small'>{s['cbet_opps']}</td>"
             f"<td>{s['fold_to_cbet']*100:.0f}%</td>"
@@ -529,11 +529,26 @@ def render_html(report: dict) -> str:
   <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   {replay_btn}
 
-  <div class="callout">Heads-up No-Limit Hold'em with each hand scored independently
-    (bb/100). An imperfect-information game with chance, so beyond results we profile
-    each model's <b>playing style</b> (VPIP / aggression) and rate skill with a
+  <div class="rules">
+    <h3>Setup — Hold'em 1-Hand</h3>
+    Standard heads-up No-Limit
+    <a href="https://en.wikipedia.org/wiki/Texas_hold_%27em" target="_blank" rel="noopener">Texas Hold'em</a>
+    (full rules on Wikipedia); what defines this arena is how the hands are dealt and
+    scored:
+    <ul>
+      <li><b>Heads-up round-robin:</b> every pair of models plays, with seats/button
+        swapped so neither sits in a fixed position.</li>
+      <li><b>{report['hands_per_game']} hands per matchup, each scored on its own</b> —
+        stacks <b>reset to 200 chips</b> every hand (blinds <b>1 / 2</b>), so a single
+        cooler can't snowball and nobody busts out.</li>
+      <li>Win rate is reported as <b>bb/100</b> (big blinds won per 100 hands), the
+        standard yardstick that stays comparable across different hand counts.</li>
+    </ul>
+    <div class="seq">Imperfect information with chance, so beyond results we profile each
+    model's <b>playing style</b> (VPIP / aggression) and rate skill with a
     <b>chip-weighted, opponent-adjusted Elo</b> — rewarding how much you win, not just
     how often.</div>
+  </div>
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
@@ -587,7 +602,7 @@ def render_html(report: dict) -> str:
   <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
     bucket. A model that reads its cards opens premium ≫ trash.</div>
   <table>
-    <tr><th class='model'>bucket</th>{''.join(f"<th>{m}</th>" for m in models)}</tr>
+    <tr><th class='model'>bucket</th>{''.join(f"<th>{display_name(m)}</th>" for m in models)}</tr>
     {bucket_rows}
   </table>
 
@@ -612,6 +627,9 @@ def render_html(report: dict) -> str:
 <script>
 const R = {payload};
 const MODELS = R.models, PM = R.per_model;
+// Official display names; PM stays keyed by the slug, so dn() is display-only.
+const DN = {json.dumps({m: display_name(m) for m in models})};
+const dn = m => DN[m] || m;
 const COLORS = ['#60a5fa','#f472b6','#4ade80','#fbbf24','#a78bfa','#22d3ee'];
 const col = i => COLORS[i % COLORS.length];
 // stable per-model color, used everywhere a chart is keyed by model
@@ -622,7 +640,7 @@ const cssText = getComputedStyle(document.body).color;
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, {{ type:'scatter',
-  data:{{ datasets: MODELS.map(m=>({{ label:m,
+  data:{{ datasets: MODELS.map(m=>({{ label:dn(m),
       data:[{{x:PM[m].vpip*100, y:PM[m].agg_freq*100}}],
       backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 }})) }},
   options:{{ scales:{{ x:{{title:{{display:true,text:'VPIP % (loose →)'}},min:0,max:100}},
@@ -632,7 +650,7 @@ new Chart(scatter, {{ type:'scatter',
 // bb/100 bar — colored by model (sign shown by value direction)
 const ranked = [...MODELS].sort((a,b)=>PM[b].bb_per_100-PM[a].bb_per_100);
 new Chart(bbchart, {{ type:'bar',
-  data:{{ labels:ranked, datasets:[{{ data:ranked.map(m=>PM[m].bb_per_100),
+  data:{{ labels:ranked.map(dn), datasets:[{{ data:ranked.map(m=>PM[m].bb_per_100),
       backgroundColor:ranked.map(m=>mcol(m)) }}] }},
   options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
 
@@ -640,7 +658,7 @@ new Chart(bbchart, {{ type:'bar',
 const ACTS=['fold','check','call','bet','raise','all_in'];
 const ACOL={{fold:'#6b7280',check:'#94a3b8',call:'#38bdf8',bet:'#fbbf24',raise:'#fb923c',all_in:'#f87171'}};
 new Chart(actions, {{ type:'bar',
-  data:{{ labels:MODELS, datasets:ACTS.map(a=>({{ label:a, backgroundColor:ACOL[a],
+  data:{{ labels:MODELS.map(dn), datasets:ACTS.map(a=>({{ label:a, backgroundColor:ACOL[a],
       data:MODELS.map(m=>{{const mix=PM[m].action_mix;const tot=Object.values(mix).reduce((x,y)=>x+y,0)||1;
         return 100*mix[a]/tot;}}) }})) }},
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,title:{{display:true,text:'% of actions'}}}}}},
@@ -649,7 +667,7 @@ new Chart(actions, {{ type:'bar',
 // style radar (normalized 0-100)
 new Chart(radar, {{ type:'radar',
   data:{{ labels:['loose (VPIP)','PF raise','aggression','all-in','bet size','calls bets (1-fold)'],
-    datasets:MODELS.map(m=>({{label:m,borderColor:mcol(m),
+    datasets:MODELS.map(m=>({{label:dn(m),borderColor:mcol(m),
       backgroundColor:mcol(m)+'22',
       data:[PM[m].vpip*100,PM[m].pfr*100,PM[m].agg_freq*100,PM[m].allin_freq*100,
             Math.min(100,PM[m].avg_bet_xpot*50),(1-PM[m].fold_to_bet)*100]}})) }},
@@ -658,7 +676,7 @@ new Chart(radar, {{ type:'radar',
 
 // latency
 new Chart(latency, {{ type:'bar',
-  data:{{ labels:MODELS, datasets:[{{data:MODELS.map(m=>PM[m].avg_latency_s),
+  data:{{ labels:MODELS.map(dn), datasets:[{{data:MODELS.map(m=>PM[m].avg_latency_s),
       backgroundColor:MODELS.map(m=>mcol(m))}}] }},
   options:{{ plugins:{{legend:{{display:false}}}}, scales:{{y:{{title:{{display:true,text:'seconds / decision'}}}}}} }} }});
 
@@ -666,7 +684,7 @@ new Chart(latency, {{ type:'bar',
 const STREETS=['preflop','flop','turn','river'];
 new Chart(streetAgg, {{ type:'line',
   data:{{ labels:STREETS, datasets:MODELS.map(m=>({{
-      label:m, borderColor:mcol(m), backgroundColor:mcol(m),
+      label:dn(m), borderColor:mcol(m), backgroundColor:mcol(m),
       tension:0.25,
       data:STREETS.map(s=>PM[m].by_street[s].agg_freq*100) }})) }},
   options:{{ scales:{{y:{{title:{{display:true,text:'aggression %'}},min:0,max:100}}}},
@@ -676,7 +694,7 @@ new Chart(streetAgg, {{ type:'line',
 const BS=['small','medium','pot','over'];
 const BSC={{small:'#94a3b8',medium:'#38bdf8',pot:'#fbbf24',over:'#f87171'}};
 new Chart(betsize, {{ type:'bar',
-  data:{{ labels:MODELS, datasets:BS.map(b=>({{ label:b, backgroundColor:BSC[b],
+  data:{{ labels:MODELS.map(dn), datasets:BS.map(b=>({{ label:b, backgroundColor:BSC[b],
       data:MODELS.map(m=>PM[m].betsize_dist[b]*100) }})) }},
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100,
       title:{{display:true,text:'% of bets'}}}}}},
@@ -684,7 +702,7 @@ new Chart(betsize, {{ type:'bar',
 
 // latency vs bb/100 scatter
 new Chart(latVsWin, {{ type:'scatter',
-  data:{{ datasets:MODELS.map(m=>({{label:m,
+  data:{{ datasets:MODELS.map(m=>({{label:dn(m),
       data:[{{x:PM[m].avg_latency_s,y:PM[m].bb_per_100}}],
       backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 }})) }},
   options:{{ scales:{{
@@ -696,7 +714,7 @@ new Chart(latVsWin, {{ type:'scatter',
 const CATS=['high card','pair','two pair','trips','straight','flush','full house'];
 const CC=['#6b7280','#94a3b8','#38bdf8','#4ade80','#fbbf24','#a78bfa','#f472b6'];
 new Chart(madeHand, {{ type:'bar',
-  data:{{ labels:MODELS, datasets:CATS.map((c,j)=>({{ label:c, backgroundColor:CC[j],
+  data:{{ labels:MODELS.map(dn), datasets:CATS.map((c,j)=>({{ label:c, backgroundColor:CC[j],
       data:MODELS.map(m=>(PM[m].showdown_cats[c]||0)*100) }})) }},
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100,
       title:{{display:true,text:'% of showdowns'}}}}}},

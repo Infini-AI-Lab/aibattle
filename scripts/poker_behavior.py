@@ -16,7 +16,7 @@ import glob
 import json
 from collections import defaultdict
 
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 
 # One colour per model, used across ALL charts and replay viewers.
 MODEL_COLORS = {
@@ -208,7 +208,7 @@ def profile_table(beh: dict, models: list) -> str:
     for i, m in enumerate(models, 1):
         s = beh[m]
         rows += (
-            f"<tr><td>{i}</td><td class='model'>{_swatch(m)}{m}</td>"
+            f"<tr><td>{i}</td><td class='model'>{_swatch(m)}{display_name(m)}</td>"
             f"<td>{s['vpip']*100:.0f}%</td><td>{s['pfr']*100:.0f}%</td>"
             f"<td>{s['aggression']*100:.0f}%</td><td>{s['fold_to_bet']*100:.0f}%</td>"
             f"<td>{s['avg_betsize']:.2f}x</td><td>{s['allin_rate']*100:.0f}%</td>"
@@ -232,10 +232,10 @@ def behavior_charts(beh: dict, models: list) -> str:
     """Canvases + Chart.js init for the 4 shared behaviour charts. Returns a
     self-contained HTML block (model colours throughout)."""
     cols = [color_for(m) for m in models]
-    short = [m.split("-")[0] for m in models]
+    short = [display_name(m) for m in models]
     # style scatter: one single-point dataset per model so the legend is colour-keyed
     scatter_ds = [
-        {"label": m, "data": [{"x": round(beh[m]["vpip"] * 100, 1),
+        {"label": display_name(m), "data": [{"x": round(beh[m]["vpip"] * 100, 1),
                                "y": round(beh[m]["aggression"] * 100, 1)}],
          "backgroundColor": color_for(m), "pointRadius": 9, "pointHoverRadius": 11}
         for m in models]
@@ -244,7 +244,7 @@ def behavior_charts(beh: dict, models: list) -> str:
          "backgroundColor": ACTION_COLORS[a]}
         for a in ("fold", "check", "call", "bet", "raise", "all_in")]
     street_ds = [
-        {"label": m, "data": [round(beh[m]["street_aggr"][s] * 100, 1) for s in STREETS],
+        {"label": display_name(m), "data": [round(beh[m]["street_aggr"][s] * 100, 1) for s in STREETS],
          "borderColor": color_for(m), "backgroundColor": color_for(m),
          "tension": 0.3, "fill": False}
         for m in models]

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script><style>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script><style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
     --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
@@ -49,6 +49,19 @@
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Structured rules box (matches the Kuhn page): heading + bullet list + a
+     dimmed sequence/footnote line. .rules .card is a scoped inline chip and
+     does not clash with the global overview .card. */
+  .rules { background:var(--faint); border:1px solid var(--line);
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:var(--fg); line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; }
+  .rules h3::before { content:""; }
+  .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
+  .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
+    background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
+    text-align:center; vertical-align:middle; line-height:1.4; }
+  .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
+  .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
   /* Replay button: the one place a non-token link color is used (indigo),
      per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
@@ -60,9 +73,25 @@
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · 5-player table · 100 sessions · up to 40 hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   <a class="replaybtn" href="table_replay.html?v=15">▶ watch table replays</a>
-  <div class="callout">5-handed ring games scored by <b>average finishing rank</b>.
-    Multi-way play adds position and bubble dynamics, so models are ranked by consistent
-    finishes rather than raw chip swings (top-1 rate over-rewards high-variance play).</div>
+  <div class="rules">
+    <h3>Setup — Hold'em Table</h3>
+    Standard No-Limit
+    <a href="https://en.wikipedia.org/wiki/Texas_hold_%27em" target="_blank" rel="noopener">Texas Hold'em</a>
+    (full rules on Wikipedia); here it's a multi-way <b>ring game</b> rather than
+    heads-up:
+    <ul>
+      <li><b>5-handed table:</b> 5 models sit at one table, each starting with
+        <b>200 chips</b> (blinds <b>1 / 2</b>), and play a full sit-and-go.</li>
+      <li><b>100 sessions</b> of <b>up to 40 hands</b>;
+        within a session stacks carry and busted players are out — so finishing
+        <b>place</b> (1st…5th) is what's recorded.</li>
+      <li>Multi-way play adds position, bubble pressure and bust risk that heads-up
+        doesn't have.</li>
+    </ul>
+    <div class="seq">Ranked by <b>average finishing rank</b> (lower is better), which
+    rewards consistent finishes; top-1 rate is shown alongside but over-rewards
+    high-variance, boom-or-bust play.</div>
+  </div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>
     <div><h2>Top-1 rate</h2><canvas id="t1"></canvas></div>
@@ -71,12 +100,12 @@
   <table>
     <tr><th>#</th><th class='model'>model</th><th>avg rank</th><th>top-1%</th>
         <th>avg final stack</th><th>bust%</th><th>#1</th><th>#2</th><th>#3</th><th>#4</th><th>#5</th></tr>
-    <tr><td>1</td><td class='model'>kimi-k2p6</td><td>2.68</td><td>24%</td><td>227.4</td><td>16%</td><td>24</td><td>25</td><td>19</td><td>23</td><td>9</td></tr><tr><td>2</td><td class='model'>glm-5p1</td><td>2.81</td><td>22%</td><td>213.4</td><td>21%</td><td>22</td><td>20</td><td>26</td><td>19</td><td>13</td></tr><tr><td>3</td><td class='model'>deepseek-v4-pro</td><td>2.93</td><td>13%</td><td>200.9</td><td>19%</td><td>13</td><td>28</td><td>27</td><td>17</td><td>15</td></tr><tr><td>4</td><td class='model'>gpt-oss-120b</td><td>2.99</td><td>23%</td><td>207.4</td><td>20%</td><td>23</td><td>14</td><td>24</td><td>19</td><td>20</td></tr><tr><td>5</td><td class='model'>minimax-m2p7</td><td>3.59</td><td>18%</td><td>150.8</td><td>47%</td><td>18</td><td>13</td><td>4</td><td>22</td><td>43</td></tr>
+    <tr><td>1</td><td class='model'>Kimi K2.6</td><td>2.68</td><td>24%</td><td>227.4</td><td>16%</td><td>24</td><td>25</td><td>19</td><td>23</td><td>9</td></tr><tr><td>2</td><td class='model'>GLM-5.1</td><td>2.81</td><td>22%</td><td>213.4</td><td>21%</td><td>22</td><td>20</td><td>26</td><td>19</td><td>13</td></tr><tr><td>3</td><td class='model'>DeepSeek V4 Pro</td><td>2.93</td><td>13%</td><td>200.9</td><td>19%</td><td>13</td><td>28</td><td>27</td><td>17</td><td>15</td></tr><tr><td>4</td><td class='model'>GPT-OSS 120B</td><td>2.99</td><td>23%</td><td>207.4</td><td>20%</td><td>23</td><td>14</td><td>24</td><td>19</td><td>20</td></tr><tr><td>5</td><td class='model'>MiniMax-M2.7</td><td>3.59</td><td>18%</td><td>150.8</td><td>47%</td><td>18</td><td>13</td><td>4</td><td>22</td><td>43</td></tr>
   </table>
   <h2>🎭 Player behaviour profiles</h2>
 <table>
   <tr><th>#</th><th class='model'>model</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th><th>bet size</th><th>all-in%</th><th>WTSD</th><th>W@SD</th><th>hand-win</th><th>tokens/dec</th></tr>
-  <tr><td>1</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;margin-right:7px;vertical-align:middle'></span>kimi-k2p6</td><td>33%</td><td>22%</td><td>57%</td><td>62%</td><td>1.60x</td><td>1%</td><td>10%</td><td>58%</td><td>18%</td><td>10,548</td></tr><tr><td>2</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#fbbf24;margin-right:7px;vertical-align:middle'></span>glm-5p1</td><td>35%</td><td>19%</td><td>56%</td><td>61%</td><td>1.41x</td><td>1%</td><td>9%</td><td>52%</td><td>18%</td><td>7,342</td></tr><tr><td>3</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#60a5fa;margin-right:7px;vertical-align:middle'></span>deepseek-v4-pro</td><td>32%</td><td>20%</td><td>61%</td><td>64%</td><td>1.38x</td><td>1%</td><td>8%</td><td>61%</td><td>17%</td><td>2,037</td></tr><tr><td>4</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#f472b6;margin-right:7px;vertical-align:middle'></span>gpt-oss-120b</td><td>36%</td><td>20%</td><td>63%</td><td>62%</td><td>1.63x</td><td>2%</td><td>9%</td><td>50%</td><td>19%</td><td>829</td></tr><tr><td>5</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#a78bfa;margin-right:7px;vertical-align:middle'></span>minimax-m2p7</td><td>58%</td><td>23%</td><td>52%</td><td>40%</td><td>1.38x</td><td>2%</td><td>17%</td><td>35%</td><td>32%</td><td>9,246</td></tr>
+  <tr><td>1</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;margin-right:7px;vertical-align:middle'></span>Kimi K2.6</td><td>33%</td><td>22%</td><td>57%</td><td>62%</td><td>1.60x</td><td>1%</td><td>10%</td><td>58%</td><td>18%</td><td>10,548</td></tr><tr><td>2</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#fbbf24;margin-right:7px;vertical-align:middle'></span>GLM-5.1</td><td>35%</td><td>19%</td><td>56%</td><td>61%</td><td>1.41x</td><td>1%</td><td>9%</td><td>52%</td><td>18%</td><td>7,342</td></tr><tr><td>3</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#60a5fa;margin-right:7px;vertical-align:middle'></span>DeepSeek V4 Pro</td><td>32%</td><td>20%</td><td>61%</td><td>64%</td><td>1.38x</td><td>1%</td><td>8%</td><td>61%</td><td>17%</td><td>2,037</td></tr><tr><td>4</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#f472b6;margin-right:7px;vertical-align:middle'></span>GPT-OSS 120B</td><td>36%</td><td>20%</td><td>63%</td><td>62%</td><td>1.63x</td><td>2%</td><td>9%</td><td>50%</td><td>19%</td><td>829</td></tr><tr><td>5</td><td class='model'><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#a78bfa;margin-right:7px;vertical-align:middle'></span>MiniMax-M2.7</td><td>58%</td><td>23%</td><td>52%</td><td>40%</td><td>1.38x</td><td>2%</td><td>17%</td><td>35%</td><td>32%</td><td>9,246</td></tr>
 </table>
 <div class="note">VPIP = voluntarily entered the pot preflop (looseness). PFR = preflop raise. aggr = bet+raise share of bet/raise/call. fold→bet = folds when facing a bet. bet size = avg bet/raise as a multiple of the pot. WTSD = went to showdown; W@SD = won at showdown. hand-win = share of hands that netted chips. tokens/dec = avg reasoning tokens per decision.</div>
 
@@ -93,19 +122,19 @@
   {
   const AXC={grid:{color:'#e7e2d8'},ticks:{color:'#6b6b6b'}};
   new Chart(document.getElementById('behStyle'),{type:'scatter',
-    data:{datasets:[{"label": "kimi-k2p6", "data": [{"x": 33.2, "y": 57.5}], "backgroundColor": "#4ade80", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "glm-5p1", "data": [{"x": 35.3, "y": 56.4}], "backgroundColor": "#fbbf24", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "deepseek-v4-pro", "data": [{"x": 32.4, "y": 60.8}], "backgroundColor": "#60a5fa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "gpt-oss-120b", "data": [{"x": 36.4, "y": 62.8}], "backgroundColor": "#f472b6", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "minimax-m2p7", "data": [{"x": 57.7, "y": 51.9}], "backgroundColor": "#a78bfa", "pointRadius": 9, "pointHoverRadius": 11}]},
+    data:{datasets:[{"label": "Kimi K2.6", "data": [{"x": 33.2, "y": 57.5}], "backgroundColor": "#4ade80", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GLM-5.1", "data": [{"x": 35.3, "y": 56.4}], "backgroundColor": "#fbbf24", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "DeepSeek V4 Pro", "data": [{"x": 32.4, "y": 60.8}], "backgroundColor": "#60a5fa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GPT-OSS 120B", "data": [{"x": 36.4, "y": 62.8}], "backgroundColor": "#f472b6", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "MiniMax-M2.7", "data": [{"x": 57.7, "y": 51.9}], "backgroundColor": "#a78bfa", "pointRadius": 9, "pointHoverRadius": 11}]},
     options:{plugins:{legend:{position:'right',labels:{color:'#1c1c1c'}}},
       scales:{x:{title:{display:true,text:'VPIP %',color:'#6b6b6b'},min:0,max:100,...AXC},
                y:{title:{display:true,text:'aggression %',color:'#6b6b6b'},min:0,max:100,...AXC}}}});
   new Chart(document.getElementById('behTokens'),{type:'bar',
-    data:{labels:["kimi", "glm", "deepseek", "gpt", "minimax"],datasets:[{label:'tokens/decision',data:[10548, 7342, 2037, 829, 9246],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
+    data:{labels:["Kimi K2.6", "GLM-5.1", "DeepSeek V4 Pro", "GPT-OSS 120B", "MiniMax-M2.7"],datasets:[{label:'tokens/decision',data:[10548, 7342, 2037, 829, 9246],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
     options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,...AXC},x:AXC}}});
   new Chart(document.getElementById('behMix'),{type:'bar',
-    data:{labels:["kimi", "glm", "deepseek", "gpt", "minimax"],datasets:[{"label": "fold", "data": [45.4, 44.7, 46.7, 44.3, 25.9], "backgroundColor": "#fb7185"}, {"label": "check", "data": [19.5, 17.8, 18.5, 17.2, 19.4], "backgroundColor": "#64748b"}, {"label": "call", "data": [14.9, 16.4, 13.6, 14.3, 26.3], "backgroundColor": "#38bdf8"}, {"label": "bet", "data": [6.9, 9.1, 8.3, 10.7, 14.5], "backgroundColor": "#fbbf24"}, {"label": "raise", "data": [12.5, 11.3, 11.9, 12.0, 12.2], "backgroundColor": "#f97316"}, {"label": "all_in", "data": [0.8, 0.8, 0.9, 1.5, 1.8], "backgroundColor": "#a855f7"}]},
+    data:{labels:["Kimi K2.6", "GLM-5.1", "DeepSeek V4 Pro", "GPT-OSS 120B", "MiniMax-M2.7"],datasets:[{"label": "fold", "data": [45.4, 44.7, 46.7, 44.3, 25.9], "backgroundColor": "#fb7185"}, {"label": "check", "data": [19.5, 17.8, 18.5, 17.2, 19.4], "backgroundColor": "#64748b"}, {"label": "call", "data": [14.9, 16.4, 13.6, 14.3, 26.3], "backgroundColor": "#38bdf8"}, {"label": "bet", "data": [6.9, 9.1, 8.3, 10.7, 14.5], "backgroundColor": "#fbbf24"}, {"label": "raise", "data": [12.5, 11.3, 11.9, 12.0, 12.2], "backgroundColor": "#f97316"}, {"label": "all_in", "data": [0.8, 0.8, 0.9, 1.5, 1.8], "backgroundColor": "#a855f7"}]},
     options:{plugins:{legend:{labels:{color:'#1c1c1c'}}},
       scales:{x:{stacked:true,...AXC},y:{stacked:true,max:100,...AXC}}}});
   new Chart(document.getElementById('behStreet'),{type:'line',
-    data:{labels:["preflop", "flop", "turn", "river"],datasets:[{"label": "kimi-k2p6", "data": [20.7, 20.9, 20.3, 13.3], "borderColor": "#4ade80", "backgroundColor": "#4ade80", "tension": 0.3, "fill": false}, {"label": "glm-5p1", "data": [17.8, 26.5, 30.1, 20.5], "borderColor": "#fbbf24", "backgroundColor": "#fbbf24", "tension": 0.3, "fill": false}, {"label": "deepseek-v4-pro", "data": [19.2, 27.5, 23.7, 16.5], "borderColor": "#60a5fa", "backgroundColor": "#60a5fa", "tension": 0.3, "fill": false}, {"label": "gpt-oss-120b", "data": [20.0, 33.4, 29.9, 25.4], "borderColor": "#f472b6", "backgroundColor": "#f472b6", "tension": 0.3, "fill": false}, {"label": "minimax-m2p7", "data": [21.3, 36.2, 38.7, 30.0], "borderColor": "#a78bfa", "backgroundColor": "#a78bfa", "tension": 0.3, "fill": false}]},
+    data:{labels:["preflop", "flop", "turn", "river"],datasets:[{"label": "Kimi K2.6", "data": [20.7, 20.9, 20.3, 13.3], "borderColor": "#4ade80", "backgroundColor": "#4ade80", "tension": 0.3, "fill": false}, {"label": "GLM-5.1", "data": [17.8, 26.5, 30.1, 20.5], "borderColor": "#fbbf24", "backgroundColor": "#fbbf24", "tension": 0.3, "fill": false}, {"label": "DeepSeek V4 Pro", "data": [19.2, 27.5, 23.7, 16.5], "borderColor": "#60a5fa", "backgroundColor": "#60a5fa", "tension": 0.3, "fill": false}, {"label": "GPT-OSS 120B", "data": [20.0, 33.4, 29.9, 25.4], "borderColor": "#f472b6", "backgroundColor": "#f472b6", "tension": 0.3, "fill": false}, {"label": "MiniMax-M2.7", "data": [21.3, 36.2, 38.7, 30.0], "borderColor": "#a78bfa", "backgroundColor": "#a78bfa", "tension": 0.3, "fill": false}]},
     options:{plugins:{legend:{labels:{color:'#1c1c1c'}}},
       scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'aggression %',color:'#6b6b6b'},...AXC},x:AXC}}});
   }
@@ -114,10 +143,10 @@
   <script>
   const axc={grid:{color:'#e7e2d8'},ticks:{color:'#1c1c1c'}};
   new Chart(document.getElementById('ar'),{type:'bar',
-    data:{labels:["kimi-k2p6", "glm-5p1", "deepseek-v4-pro", "gpt-oss-120b", "minimax-m2p7"],datasets:[{label:'avg rank',data:[2.68, 2.81, 2.93, 2.99, 3.59],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
+    data:{labels:["Kimi K2.6", "GLM-5.1", "DeepSeek V4 Pro", "GPT-OSS 120B", "MiniMax-M2.7"],datasets:[{label:'avg rank',data:[2.68, 2.81, 2.93, 2.99, 3.59],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
     options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:5,...axc},x:axc}}});
   new Chart(document.getElementById('t1'),{type:'bar',
-    data:{labels:["kimi-k2p6", "glm-5p1", "deepseek-v4-pro", "gpt-oss-120b", "minimax-m2p7"],datasets:[{label:'top-1 %',data:[24.0, 22.0, 13.0, 23.0, 18.0],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
+    data:{labels:["Kimi K2.6", "GLM-5.1", "DeepSeek V4 Pro", "GPT-OSS 120B", "MiniMax-M2.7"],datasets:[{label:'top-1 %',data:[24.0, 22.0, 13.0, 23.0, 18.0],backgroundColor:["#4ade80", "#fbbf24", "#60a5fa", "#f472b6", "#a78bfa"]}]},
     options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100,...axc},x:axc}}});
   </script>
 </div></body></html>

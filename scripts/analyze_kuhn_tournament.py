@@ -29,7 +29,7 @@ import json
 import os
 from collections import defaultdict
 
-from model_names import strip_coached
+from model_names import strip_coached, display_name
 from elo_util import bradley_terry, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -41,7 +41,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # this page includes those two files in <head> via NAV_HEAD and the bar is
 # injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=25"></script>'
 
 _STYLE = BASE_CSS + """
   a { text-decoration:none; } a:hover { text-decoration:underline; }
@@ -185,7 +185,7 @@ def _cls(v, good, bad, invert=False):
 
 def render_html(rep: dict) -> str:
     models = rep["models"]; lb = rep["leaderboard"]
-    labels = [r["model"] for r in lb]
+    labels = [display_name(r["model"]) for r in lb]   # chart axis: official names
 
     def pct(v):
         return "—" if v is None else f"{v*100:.0f}%"
@@ -201,7 +201,7 @@ def render_html(rep: dict) -> str:
         else:
             elo_disp = str(r["elo"])
         lb_rows += (
-            f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+            f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
             f"<td><b>{elo_disp}</b></td>"
             f"<td class='{ncls}'>{r['net_per_hand']:+.3f}</td>"
             f"<td>{r['win_rate']*100:.0f}%</td>"
@@ -217,7 +217,7 @@ def render_html(rep: dict) -> str:
         kf = f"{r['k_folds']}/{r['k_fold_chances']}" if r["k_fold_chances"] else "0/0"
         jc = f"{r['j_calls']}/{r['j_call_chances']}" if r["j_call_chances"] else "0/0"
         fund_rows += (
-            f"<tr><td>{i}</td><td class='model'>{r['model']}</td>"
+            f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
             f"<td>{kf}</td><td>{jc}</td>"
             f"<td class='{bcls}'>{r['blunders']}/{r['blunder_spots']}"
             f" ({r['blunder_rate']*100:.0f}%)</td></tr>")
@@ -232,7 +232,7 @@ def render_html(rep: dict) -> str:
             bj = "good" if 0.15 <= r["bet_J"] <= 0.6 else "bad"
         bq = _cls(r["bet_Q"], 0.0, 0.5, invert=True)          # want low
         style_rows += (
-            f"<tr><td class='model'>{r['model']}</td>"
+            f"<tr><td class='model'>{display_name(r['model'])}</td>"
             f"<td class='{bk}'>{pct(r['bet_K'])}</td>"
             f"<td class='{bq}'>{pct(r['bet_Q'])}</td>"
             f"<td class='{bj}'>{pct(r['bet_J'])}</td></tr>")
@@ -243,7 +243,7 @@ def render_html(rep: dict) -> str:
     bet_j = [round((r["bet_J"] or 0) * 100, 1) for r in lb]
 
     # head-to-head net chips/hand grid
-    head = "".join(f"<th>{m.split('-')[0]}</th>" for m in models)
+    head = "".join(f"<th>{display_name(m)}</th>" for m in models)
     grid = ""
     for a in models:
         cells = ""
@@ -255,7 +255,7 @@ def render_html(rep: dict) -> str:
                 v = rep["h2h_net"][a][b] / n if n else 0.0
                 cls = "pos" if v >= 0 else "neg"
                 cells += f"<td class='{cls}'>{v:+.2f}</td>"
-        grid += f"<tr><td class='model'>{a}</td>{cells}</tr>"
+        grid += f"<tr><td class='model'>{display_name(a)}</td>{cells}</tr>"
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Kuhn Poker</title>

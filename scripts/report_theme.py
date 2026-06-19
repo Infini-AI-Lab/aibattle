@@ -61,6 +61,19 @@ BASE_CSS = """
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Structured rules box (matches the Kuhn page): heading + bullet list + a
+     dimmed sequence/footnote line. .rules .card is a scoped inline chip and
+     does not clash with the global overview .card. */
+  .rules { background:var(--faint); border:1px solid var(--line);
+    padding:18px 20px; margin:18px 0; font-size:13.5px; color:var(--fg); line-height:1.55; }
+  .rules h3 { margin:0 0 8px; font-size:15px; }
+  .rules h3::before { content:""; }
+  .rules ul { margin:6px 0 0; padding-left:20px; } .rules li { margin:3px 0; }
+  .rules .card { display:inline-block; min-width:16px; padding:1px 6px; margin:0 1px;
+    background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
+    text-align:center; vertical-align:middle; line-height:1.4; }
+  .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
+  .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
   /* Replay button: the one place a non-token link color is used (indigo),
      per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
