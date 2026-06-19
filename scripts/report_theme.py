@@ -65,6 +65,21 @@ BASE_CSS = """
      24x24 with their own colors; size to the text and nudge onto the baseline. */
   .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
     flex:none; }
+  /* Click-to-open info popover (the ⓘ next to a column header). */
+  .hcell { position:relative; display:inline-block; }
+  .info { display:inline-flex; align-items:center; justify-content:center;
+    width:15px; height:15px; margin-left:5px; padding:0; border:1px solid var(--line);
+    border-radius:50%; background:var(--panel); color:var(--red); font-size:10px;
+    font-weight:700; font-style:italic; line-height:1; cursor:pointer;
+    vertical-align:middle; font-family:inherit; }
+  .info:hover { border-color:var(--red); color:var(--fg); }
+  .infobox { position:absolute; z-index:60; top:calc(100% + 6px); left:50%;
+    transform:translateX(-50%); width:300px; max-width:78vw; text-align:left;
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:12px 14px; font-size:12px; font-weight:400; color:var(--fg); line-height:1.5;
+    box-shadow:0 6px 24px rgba(0,0,0,.14); white-space:normal; }
+  .infobox[hidden] { display:none; }
+  .infobox code { background:var(--faint); border:1px solid var(--line); padding:0 4px; }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */

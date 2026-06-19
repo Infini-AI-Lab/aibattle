@@ -635,9 +635,11 @@ def _index_card(entry: dict) -> str:
 
 # Games that count toward the overall (cross-game) Arena Score. Every game still
 # gets its own report and landing-page card; these are just the ones averaged
-# into the headline ranking (a curated, comparable subset).
+# into the headline ranking (a curated, comparable subset). Blackjack is excluded
+# — it's vs-dealer (no head-to-head Elo) and luck-dominated, so it would add noise
+# to both the rank score and the Elo composite.
 ARENA_GAMES = {"connect4", "gomoku", "holdem", "match",
-               "repeated_colonel_blotto", "independent_blackjack"}
+               "repeated_colonel_blotto", "leduc_poker"}
 
 
 def _arena_scores(entries: list) -> list:
@@ -674,31 +676,83 @@ def _arena_scores(entries: list) -> list:
     return rows
 
 
+def _arena_elo_scores(entries: list) -> dict:
+    """Cross-game Elo composite keyed by model.
+
+    Each game's native ratings (Bradley-Terry / chip-weighted Elo; for Blackjack,
+    mean chips/hand, which has no head-to-head Elo) live on different scales and
+    spreads, so we **z-score within each game** — (rating − field mean) / field
+    SD — then average a model's z across the games it played. That standardized
+    mean is rescaled to a 1500-centered, Elo-like number (±150 per SD) so it
+    reads next to the per-game Elos. Unlike the rank score it keeps *margin*:
+    winning a game by a mile beats winning by a hair.
+    """
+    per_model = {}  # model -> [z, ...]
+    for e in entries:
+        ratings = e.get("ratings") or {}
+        vals = [v for v in ratings.values() if v is not None]
+        if len(vals) < 2:
+            continue
+        mean = sum(vals) / len(vals)
+        sd = (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5
+        if sd == 0:
+            continue
+        for m, v in ratings.items():
+            if v is not None:
+                per_model.setdefault(m, []).append((v - mean) / sd)
+    out = {}
+    for m, zs in per_model.items():
+        mean_z = sum(zs) / len(zs)
+        out[m] = {"arena_elo": round(1500 + 150 * mean_z), "z": round(mean_z, 2),
+                  "games": len(zs)}
+    return out
+
+
 def _arena_board(entries: list) -> str:
     arena_entries = [e for e in entries if e["key"] in ARENA_GAMES]
     rows = _arena_scores(arena_entries)
     if not rows:
         return ""
+    elo = _arena_elo_scores(arena_entries)
     total = len(arena_entries)
     body = ""
     for i, r in enumerate(rows, 1):
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
+        ae = elo.get(r["model"], {})
+        ae_disp = (f"{ae['arena_elo']}<div class='small'>{ae['z']:+.2f} SD</div>"
+                   if ae else "—")
         body += (
             f"<tr><td class='rk'>{medal}</td>"
             f"<td class='model'>{model_cell(r['model'])}</td>"
             f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
             f"<span class='sval'>{r['score']:.0f}</span></td>"
+            f"<td><b>{ae_disp}</b></td>"
             f"<td class='cov'>{r['games']}/{total}</td>"
             f"<td class='best'>{r['best']}</td></tr>")
     return f"""
   <section class="board">
     <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
-      <span class="arena-tag">normalized rank · 6 core games</span></div>
-    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0) across six
-      core games: Connect Four, Gomoku, Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Blackjack.
-      Coverage shows how many of those a model has entered; treat low coverage as provisional.</div>
+      <span class="arena-tag">6 core games · ranked by Arena Rank Score</span></div>
+    <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
+      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click the <b>ⓘ</b> on each column
+      for how it's computed. Coverage = games a model has entered (treat low coverage as provisional).</div>
     <table class="lb">
-      <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
+      <tr><th class='rk'>#</th><th class='model'>Model</th>
+        <th><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
+          aria-label="How Arena Rank Score is calculated">i</button>
+          <span class="infobox" id="info-score" hidden><b>Arena Rank Score — ordinal.</b>
+          In each game a model's finish becomes a 0–1 score, evenly spaced
+          (1st&nbsp;=&nbsp;1.0, last&nbsp;=&nbsp;0.0) via <code>(N−1−rank)/(N−1)</code> where N is the
+          field size. The score is the mean of those across the games played, ×100. It ignores
+          <i>margin</i> — winning by a mile or a hair both score 1.0.</span></span></th>
+        <th><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
+          aria-label="How Arena Elo is calculated">i</button>
+          <span class="infobox" id="info-elo" hidden><b>Arena Elo — margin-aware.</b>
+          Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
+          <code>z = (rating − mean) / SD</code>. A model's z is averaged across games and rescaled to
+          <code>1500 + 150·z</code>, so a model one SD above the field reads as 1650. Unlike the rank
+          score it rewards <i>how much</i> you win by. Built from the six head-to-head games only —
+          Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
         <th>coverage</th><th>best game</th></tr>
       {body}
     </table>
@@ -726,7 +780,7 @@ def render_index(reps: dict) -> str:
             "meta": (f"{rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}"
                      f" · first-mover {rep['first_player_win_rate']*100:.0f}%"),
             "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>",
-            "ranking": ordered, **GAME_TAXONOMY[game],
+            "ranking": ordered, "ratings": dict(rep["elo"]), **GAME_TAXONOMY[game],
         })
 
     # Kuhn first inside the imperfect group: it is the simplest game (a solved,
@@ -759,7 +813,7 @@ def render_index(reps: dict) -> str:
             "meta": (f"heads-up · {h['num_games']} tables · {h['hands_per_game']} hands each"
                      f" · chip-weighted Elo"),
             "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(h['elo'][champ])}</span>",
-            "ranking": ordered, **GAME_TAXONOMY["holdem"],
+            "ranking": ordered, "ratings": dict(h["elo"]), **GAME_TAXONOMY["holdem"],
         })
 
     match_path = os.path.join(REPORT_DIR, "match_tournament_analysis.json")
@@ -773,7 +827,8 @@ def render_index(reps: dict) -> str:
             "meta": (f"heads-up · {m['episodes_per_pair']} matches/pair · up to "
                      f"{m['max_hands']} hands · stacks carried"),
             "champ_line": f"🏆 {champ['model']} <span class='metric'>Elo {_elo_txt(champ['elo'])}</span>",
-            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["match"],
+            "ranking": [r["model"] for r in lb],
+            "ratings": {r["model"]: r.get("elo") for r in lb}, **GAME_TAXONOMY["match"],
         })
 
     table_path = os.path.join(REPORT_DIR, "table_tournament_analysis.json")
@@ -850,16 +905,6 @@ def render_index(reps: dict) -> str:
   <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
     identical pipeline; <b>Harness Arena</b> is open to any model + any scaffolding.</div>
 
-  <a href="gpt_vs_claude/index.html" style="display:flex;align-items:center;justify-content:space-between;
-    gap:16px;flex-wrap:wrap;text-decoration:none;color:inherit;margin-top:8px;
-    border:1px solid var(--line);padding:18px 22px;background:var(--faint);transition:border-color .15s"
-    onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--line)'">
-    <div><b style="color:var(--red);font-size:15px">🥊 GPT vs Claude — coached head-to-head</b>
-      <div style="color:var(--dim);font-size:13px;margin-top:4px">gpt-5.5 / gpt-5.4 vs
-        claude-opus-4.8 / claude-sonnet-4.6 across four games · family scoreboard + per-game analysis</div></div>
-    <span style="font-size:13px;color:var(--panel);background:var(--red);font-weight:700;
-      padding:9px 16px;white-space:nowrap">View →</span>
-  </a>
   {board}
 
   <section class="arena" id="model">
@@ -881,7 +926,29 @@ def render_index(reps: dict) -> str:
       <span class="pill">Coming soon</span>
     </div>
   </section>
-</div></body></html>"""
+</div>
+<script>
+  // Click an .info button to open its popover (closing any other); click outside
+  // or press Escape to dismiss. No dependencies.
+  document.addEventListener('click', function (e) {{
+    var btn = e.target.closest('.info');
+    var boxes = document.querySelectorAll('.infobox');
+    if (btn) {{
+      var box = document.getElementById(btn.getAttribute('aria-controls'));
+      var wasHidden = box && box.hasAttribute('hidden');
+      boxes.forEach(function (b) {{ b.setAttribute('hidden', ''); }});
+      if (box && wasHidden) box.removeAttribute('hidden');
+      e.stopPropagation();
+    }} else if (!e.target.closest('.infobox')) {{
+      boxes.forEach(function (b) {{ b.setAttribute('hidden', ''); }});
+    }}
+  }});
+  document.addEventListener('keydown', function (e) {{
+    if (e.key === 'Escape')
+      document.querySelectorAll('.infobox').forEach(function (b) {{ b.setAttribute('hidden', ''); }});
+  }});
+</script>
+</body></html>"""
 
 
 def main():

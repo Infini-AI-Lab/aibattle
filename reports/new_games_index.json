@@ -19,6 +19,16 @@
       "kimi-k2p6",
       "deepseek-v4-pro"
     ],
+    "ratings": {
+      "kimi-k2p6": -0.045,
+      "deepseek-v4-pro": -0.113,
+      "glm-5p1": 0.029,
+      "minimax-m2p7": 0.041,
+      "gpt-oss-120b": 0.033,
+      "minimax-m3": -0.042,
+      "glm-5p2": -0.002,
+      "qwen3p7-plus": -0.006
+    },
     "meta": "vs dealer \u00b7 500 hands/model \u00b7 mean chips/hand",
     "champ_line": "\ud83c\udfc6 minimax-m2p7 <span class='metric'>+0.041/hand</span>"
   },
@@ -42,6 +52,16 @@
       "minimax-m3",
       "minimax-m2p7"
     ],
+    "ratings": {
+      "deepseek-v4-pro": 1507,
+      "glm-5p1": 1495,
+      "glm-5p2": 1511,
+      "gpt-oss-120b": 1500,
+      "minimax-m2p7": 1473,
+      "minimax-m3": 1489,
+      "qwen3p7-plus": 1519,
+      "kimi-k2p6": 1504
+    },
     "meta": "1300 games \u00b7 25 deals/pair \u00b7 first-mover 42%",
     "champ_line": "\ud83c\udfc6 qwen3p7-plus <span class='metric'>Elo 1519</span>"
   },
@@ -65,6 +85,16 @@
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
+    "ratings": {
+      "deepseek-v4-pro": 1766,
+      "glm-5p1": 1635,
+      "glm-5p2": 1644,
+      "gpt-oss-120b": 1110,
+      "minimax-m2p7": 1088,
+      "minimax-m3": 1363,
+      "qwen3p7-plus": 1670,
+      "kimi-k2p6": 1723
+    },
     "meta": "515 games \u00b7 10 deals/pair \u00b7 first-mover 49%",
     "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1766</span>"
   },
@@ -85,6 +115,13 @@
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
+    "ratings": {
+      "deepseek-v4-pro": 1616,
+      "glm-5p1": 1481,
+      "gpt-oss-120b": 1471,
+      "minimax-m2p7": 1287,
+      "kimi-k2p6": 1645
+    },
     "meta": "500 games \u00b7 25 deals/pair \u00b7 first-mover 47%",
     "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>Elo 1645</span>"
   }

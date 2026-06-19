@@ -684,6 +684,9 @@ def _index_entry(rep: dict) -> dict:
         deals = (rep["episodes_per_pair"] or 0) // 2
         base.update({
             "ranking": ranked,
+            # Per-model rating for the cross-game Elo composite (chip/Bradley-Terry
+            # Elo; None for unrated models is dropped when standardizing).
+            "ratings": {m: rep["elo"].get(m) for m in rep["models"]},
             "meta": (f"{rep['num_games']} games · {deals} deals/pair · "
                      f"first-mover {rep['first_player_win_rate']*100:.0f}%"),
             "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>",
@@ -694,6 +697,9 @@ def _index_entry(rep: dict) -> dict:
         per_model_hands = rep["per_model"][champ]["hands"]
         base.update({
             "ranking": ranked,
+            # Blackjack has no head-to-head Elo (it's vs the dealer), so the
+            # composite standardizes mean chips/hand instead.
+            "ratings": {m: pm[m]["mean_per_hand"] for m in rep["models"]},
             "meta": f"vs dealer · {per_model_hands} hands/model · mean chips/hand",
             "champ_line": f"🏆 {champ} <span class='metric'>{pm[champ]['mean_per_hand']:+.3f}/hand</span>",
         })
