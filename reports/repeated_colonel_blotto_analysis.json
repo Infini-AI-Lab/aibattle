@@ -13,54 +13,54 @@
   ],
   "per_model": {
     "deepseek-v4-pro": {
-      "games": 125,
-      "wins": 95,
-      "losses": 28,
-      "draws": 2,
-      "win_rate": 0.76,
-      "draw_rate": 0.016,
-      "net_per_game": 0.536,
-      "first_move_win_rate": 0.7258,
-      "invalid_rate": 0.0,
-      "decisions": 2500,
-      "avg_len": 40.0,
-      "avg_latency_s": 500.8,
-      "len_hist": [
-        125
-      ]
-    },
-    "glm-5p1": {
       "games": 138,
-      "wins": 84,
-      "losses": 48,
-      "draws": 6,
-      "win_rate": 0.6087,
-      "draw_rate": 0.0435,
-      "net_per_game": 0.2609,
-      "first_move_win_rate": 0.6143,
+      "wins": 106,
+      "losses": 30,
+      "draws": 2,
+      "win_rate": 0.7681,
+      "draw_rate": 0.0145,
+      "net_per_game": 0.5507,
+      "first_move_win_rate": 0.7536,
       "invalid_rate": 0.0,
       "decisions": 2760,
       "avg_len": 40.0,
-      "avg_latency_s": 333.1,
+      "avg_latency_s": 561.3,
       "len_hist": [
         138
       ]
     },
-    "glm-5p2": {
-      "games": 102,
-      "wins": 63,
-      "losses": 37,
-      "draws": 2,
-      "win_rate": 0.6176,
-      "draw_rate": 0.0196,
-      "net_per_game": 0.2549,
-      "first_move_win_rate": 0.5882,
+    "glm-5p1": {
+      "games": 139,
+      "wins": 84,
+      "losses": 49,
+      "draws": 6,
+      "win_rate": 0.6043,
+      "draw_rate": 0.0432,
+      "net_per_game": 0.2518,
+      "first_move_win_rate": 0.6143,
       "invalid_rate": 0.0,
-      "decisions": 2040,
+      "decisions": 2780,
       "avg_len": 40.0,
-      "avg_latency_s": 378.2,
+      "avg_latency_s": 332.9,
       "len_hist": [
-        102
+        139
+      ]
+    },
+    "glm-5p2": {
+      "games": 116,
+      "wins": 67,
+      "losses": 47,
+      "draws": 2,
+      "win_rate": 0.5776,
+      "draw_rate": 0.0172,
+      "net_per_game": 0.1724,
+      "first_move_win_rate": 0.5789,
+      "invalid_rate": 0.0,
+      "decisions": 2320,
+      "avg_len": 40.0,
+      "avg_latency_s": 385.5,
+      "len_hist": [
+        116
       ]
     },
     "gpt-oss-120b": {
@@ -98,37 +98,37 @@
       ]
     },
     "minimax-m3": {
-      "games": 139,
+      "games": 140,
       "wins": 46,
-      "losses": 92,
+      "losses": 93,
       "draws": 1,
-      "win_rate": 0.3309,
-      "draw_rate": 0.0072,
-      "net_per_game": -0.3309,
+      "win_rate": 0.3286,
+      "draw_rate": 0.0071,
+      "net_per_game": -0.3357,
       "first_move_win_rate": 0.3,
       "invalid_rate": 0.0,
-      "decisions": 2780,
+      "decisions": 2800,
       "avg_len": 40.0,
-      "avg_latency_s": 149.8,
+      "avg_latency_s": 149.9,
       "len_hist": [
-        139
+        140
       ]
     },
     "qwen3p7-plus": {
-      "games": 115,
-      "wins": 71,
-      "losses": 42,
+      "games": 118,
+      "wins": 72,
+      "losses": 44,
       "draws": 2,
-      "win_rate": 0.6174,
-      "draw_rate": 0.0174,
-      "net_per_game": 0.2522,
-      "first_move_win_rate": 0.625,
+      "win_rate": 0.6102,
+      "draw_rate": 0.0169,
+      "net_per_game": 0.2373,
+      "first_move_win_rate": 0.6102,
       "invalid_rate": 0.0,
-      "decisions": 2300,
+      "decisions": 2360,
       "avg_len": 40.0,
-      "avg_latency_s": 223.4,
+      "avg_latency_s": 227.7,
       "len_hist": [
-        115
+        118
       ]
     },
     "kimi-k2p6": {
@@ -157,8 +157,8 @@
         0
       ],
       "glm-5p2": [
-        6,
-        2,
+        16,
+        3,
         0
       ],
       "gpt-oss-120b": [
@@ -177,8 +177,8 @@
         0
       ],
       "qwen3p7-plus": [
-        8,
         9,
+        10,
         0
       ],
       "kimi-k2p6": [
@@ -195,7 +195,7 @@
       ],
       "glm-5p2": [
         7,
-        9,
+        10,
         2
       ],
       "gpt-oss-120b": [
@@ -226,12 +226,12 @@
     },
     "glm-5p2": {
       "deepseek-v4-pro": [
-        2,
-        6,
+        3,
+        16,
         0
       ],
       "glm-5p1": [
-        9,
+        10,
         7,
         2
       ],
@@ -246,12 +246,12 @@
         0
       ],
       "minimax-m3": [
-        18,
+        19,
         1,
         0
       ],
       "qwen3p7-plus": [
-        10,
+        11,
         8,
         0
       ],
@@ -348,7 +348,7 @@
       ],
       "glm-5p2": [
         1,
-        18,
+        19,
         0
       ],
       "gpt-oss-120b": [
@@ -374,8 +374,8 @@
     },
     "qwen3p7-plus": {
       "deepseek-v4-pro": [
+        10,
         9,
-        8,
         0
       ],
       "glm-5p1": [
@@ -385,7 +385,7 @@
       ],
       "glm-5p2": [
         8,
-        10,
+        11,
         0
       ],
       "gpt-oss-120b": [
@@ -448,62 +448,62 @@
     }
   },
   "elo": {
-    "deepseek-v4-pro": 1746,
-    "glm-5p1": 1638,
-    "glm-5p2": 1657,
-    "gpt-oss-120b": 1111,
-    "minimax-m2p7": 1089,
-    "minimax-m3": 1365,
-    "qwen3p7-plus": 1672,
-    "kimi-k2p6": 1722
+    "deepseek-v4-pro": 1766,
+    "glm-5p1": 1635,
+    "glm-5p2": 1644,
+    "gpt-oss-120b": 1110,
+    "minimax-m2p7": 1088,
+    "minimax-m3": 1363,
+    "qwen3p7-plus": 1670,
+    "kimi-k2p6": 1723
   },
   "elo_ci": {
     "deepseek-v4-pro": {
-      "sd": 41.6,
-      "lo": 1672,
-      "hi": 1845
+      "sd": 38.2,
+      "lo": 1706,
+      "hi": 1849
     },
     "glm-5p1": {
-      "sd": 36.0,
-      "lo": 1576,
-      "hi": 1712
+      "sd": 35.2,
+      "lo": 1577,
+      "hi": 1716
     },
     "glm-5p2": {
-      "sd": 35.5,
-      "lo": 1595,
-      "hi": 1728
+      "sd": 32.8,
+      "lo": 1581,
+      "hi": 1715
     },
     "gpt-oss-120b": {
-      "sd": 47.3,
-      "lo": 1005,
-      "hi": 1188
+      "sd": 44.9,
+      "lo": 1002,
+      "hi": 1184
     },
     "minimax-m2p7": {
-      "sd": 61.0,
-      "lo": 948,
-      "hi": 1197
+      "sd": 61.5,
+      "lo": 953,
+      "hi": 1191
     },
     "minimax-m3": {
-      "sd": 35.8,
-      "lo": 1290,
-      "hi": 1434
+      "sd": 37.9,
+      "lo": 1283,
+      "hi": 1428
     },
     "qwen3p7-plus": {
-      "sd": 38.8,
-      "lo": 1597,
-      "hi": 1750
+      "sd": 37.2,
+      "lo": 1602,
+      "hi": 1741
     },
     "kimi-k2p6": {
-      "sd": 37.8,
-      "lo": 1645,
-      "hi": 1792
+      "sd": 36.6,
+      "lo": 1665,
+      "hi": 1802
     }
   },
   "elo_basis": "wins",
   "len_bins": [
     "40\u201340"
   ],
-  "first_player_win_rate": 0.483,
-  "num_games": 499,
+  "first_player_win_rate": 0.4893,
+  "num_games": 515,
   "episodes_per_pair": 20
 }

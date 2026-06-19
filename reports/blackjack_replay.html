@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🎰 Blackjack Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=16"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=19"></script>
 <link rel="stylesheet" href="replay.css?v=3">
 <style>
   .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
@@ -36,6 +36,18 @@
   .mv .d.dealer{background:#9ca3af;}
   .seatdot{width:10px; height:10px; border-radius:50%; display:inline-block; flex:none;}
   .seatdot.player{background:#60a5fa;} .seatdot.dealer{background:#9ca3af;}
+
+  /* no-decision banner: explains why the hand had no choices */
+  #nobanner:empty{display:none;}
+  #nobanner{margin-bottom:12px; padding:11px 15px; border:1px solid var(--line);
+    border-left:4px solid var(--amber); background:var(--panel); font-size:13px; line-height:1.45;}
+  #nobanner b{font-weight:700;}
+  #nobanner.lose{border-left-color:var(--neg);}
+  #nobanner.win{border-left-color:var(--green);}
+  /* placeholder card shown when actual ranks weren't recorded (no-decision hands) */
+  .card.totalonly{display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:16px; color:var(--fg); background:#f3efe6;
+    border:1px dashed var(--line);}
 </style>
 </head>
 <body>
@@ -52,6 +64,7 @@
 
   <div class="stage">
     <div>
+      <div id="nobanner"></div>
       <div class="felt">
         <div id="seatDealer"></div>
         <div id="seatPlayer"></div>
@@ -90,7 +103,7 @@ let manifest=null, modelData=null, ep=null, cursor=0, playing=false, timer=null,
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=15")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=16")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -118,11 +131,15 @@ async function init(){
 
 async function loadModel(i){
   const m = manifest.models[i];
-  modelData = await (await fetch(BASE + m.file + "?v=15")).json();
+  modelData = await (await fetch(BASE + m.file + "?v=16")).json();
   $("epSel").innerHTML = modelData.episodes.map((e,idx) => {
     const r = e.net>0 ? `won ${fmt(e.net)}` : (e.net<0 ? `lost ${fmt(e.net)}` : "push");
     const n = e.moves.filter(m=>m.actor==="player").length;
-    const note = n===0 ? "no decisions" : `${n} decision${n===1?"":"s"}`;
+    const note = n===0
+      ? (e.player_natural ? "no decision · your blackjack"
+         : e.dealer_natural ? "no decision · dealer blackjack"
+         : "no decision")
+      : `${n} decision${n===1?"":"s"}`;
     return `<option value="${idx}">#${e.episode+1} · ${note} · ${r}</option>`;
   }).join("");
   selectEp(0);
@@ -178,9 +195,15 @@ function backCard(){ return `<div class="card back"></div>`; }
 function dealerHTML(st){
   const won = st.result && ep.net<0;
   const cls = "seat" + (st.acting==="dealer" && !st.result ? " acting" : "") + (won?" winner":"");
-  let cards = st.upcard ? rankCard(st.upcard) : unknownCard();
-  cards += st.result ? unknownCard() : backCard();
-  for (let i=0;i<st.dealerHits;i++) cards += st.result ? unknownCard() : backCard();
+  let cards;
+  if (!ep.moves.length){
+    // No-decision hand: card ranks weren't recorded, so show the known total.
+    cards = `<div class="card totalonly">${ep.dealer_total!=null?ep.dealer_total:"?"}</div>`;
+  } else {
+    cards = st.upcard ? rankCard(st.upcard) : unknownCard();
+    cards += st.result ? unknownCard() : backCard();
+    for (let i=0;i<st.dealerHits;i++) cards += st.result ? unknownCard() : backCard();
+  }
   const tags = (st.result && ep.dealer_natural ? `<span class="tag nat">NATURAL</span>` : "") +
                (st.result && ep.dealer_bust ? `<span class="tag bust">BUST</span>` : "");
   const total = st.result ? `<span class="total${ep.dealer_bust?" bust":""}">${ep.dealer_total}</span>` : `<span class="total">?</span>`;
@@ -197,8 +220,14 @@ function dealerHTML(st){
 function playerHTML(st){
   const won = st.result && ep.net>0;
   const cls = "seat" + (st.acting==="player" && !st.result ? " acting" : "") + (won?" winner":"");
-  let cards = (st.hand||[]).map(rankCard).join("");
-  for (let i=0;i<st.extraCards;i++) cards += unknownCard();
+  let cards;
+  if (!ep.moves.length){
+    // No-decision hand: card ranks weren't recorded, so show the known total.
+    cards = `<div class="card totalonly">${st.total!=null?st.total:"?"}</div>`;
+  } else {
+    cards = (st.hand||[]).map(rankCard).join("");
+    for (let i=0;i<st.extraCards;i++) cards += unknownCard();
+  }
   const tags = (st.result && ep.player_natural ? `<span class="tag nat">NATURAL</span>` : "") +
                (st.result && ep.doubled ? `<span class="tag dbl">DOUBLED</span>` : "") +
                (st.result && ep.player_bust ? `<span class="tag bust">BUST</span>` : "");
@@ -220,12 +249,35 @@ function render(){
   const st = stateAt(cursor);
   $("seatDealer").innerHTML = dealerHTML(st);
   $("seatPlayer").innerHTML = playerHTML(st);
+  renderBanner();
   $("slider").value = cursor;
   $("movecount").textContent = `action ${cursor} / ${ep.moves.length}`;
   $("prev").disabled = cursor===0;
   $("next").disabled = cursor===ep.moves.length;
   renderPanel(st);
   renderMoveList();
+}
+
+// Banner above the felt that names WHY a hand had no decisions (a natural, on
+// either side, settles the hand before the model acts). Empty for normal hands.
+function renderBanner(){
+  const b=$("nobanner");
+  if (ep.moves.length){ b.innerHTML=""; b.className=""; return; }
+  let msg;
+  if (ep.player_natural && ep.dealer_natural)
+    msg = `<b>No decision — both sides were dealt a natural 21.</b> ` +
+          `${modelData.model} and the dealer each have blackjack, so the hand pushes and the bet is returned.`;
+  else if (ep.player_natural)
+    msg = `<b>No decision — ${modelData.model} was dealt a natural blackjack (21).</b> ` +
+          `A two-card 21 wins automatically and pays 3:2 (${fmt(ep.net)}); there is nothing to hit or stand on.`;
+  else if (ep.dealer_natural)
+    msg = `<b>No decision — the dealer was dealt blackjack (21).</b> ` +
+          `A dealer natural ends the hand immediately, before ${modelData.model} (dealt ${ep.player_total}) ever acts, ` +
+          `so the bet is lost (${fmt(ep.net)}).`;
+  else
+    msg = `<b>No decision was recorded for this hand.</b> ${modelData.model} ${ep.player_total} vs dealer ${ep.dealer_total}.`;
+  b.className = ep.net>0 ? "win" : (ep.net<0 ? "lose" : "");
+  b.innerHTML = msg + ` <span class="hint">(Card faces aren’t recorded for no-decision hands — only the totals are shown below.)</span>`;
 }
 
 function jump(k){ stop(); cursor=k; render(); }

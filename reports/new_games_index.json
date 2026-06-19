@@ -65,8 +65,8 @@
       "gpt-oss-120b",
       "minimax-m2p7"
     ],
-    "meta": "499 games \u00b7 10 deals/pair \u00b7 first-mover 48%",
-    "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1746</span>"
+    "meta": "515 games \u00b7 10 deals/pair \u00b7 first-mover 49%",
+    "champ_line": "\ud83c\udfc6 deepseek-v4-pro <span class='metric'>Elo 1766</span>"
   },
   {
     "key": "othello_lite_6x6",
