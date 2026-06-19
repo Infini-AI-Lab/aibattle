@@ -18,7 +18,7 @@ import json
 import os
 from collections import defaultdict
 
-from model_names import strip_coached, display_name
+from model_names import strip_coached, display_name, model_cell
 from elo_util import bradley_terry, elo_key, bootstrap_elo, gross_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -447,7 +447,7 @@ def render_html(report: dict) -> str:
             elo_disp = str(s["elo"])
         tags = " ".join(f"<span class='tag'>{t}</span>" for t in s["style"]["tags"])
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{display_name(m)}</td>
+          <td>{i}</td><td class='model'>{model_cell(m)}</td>
           <td class='stylecell'><div class='slabel'><b>{s['style']['label']}</b></div><div class='stags'>{tags or '&nbsp;'}</div></td>
           <td><b>{elo_disp}</b></td>
           <td class='{chip_cls}'>{s['chips']:+.0f}</td>
@@ -467,7 +467,7 @@ def render_html(report: dict) -> str:
     h2h = report["h2h"]
     hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{display_name(a)}</th>"
+        hh += f"<tr><th class='model'>{model_cell(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -482,7 +482,7 @@ def render_html(report: dict) -> str:
     for m in ranked:
         s = pm[m]
         pf_rows += (
-            f"<tr><td class='model'>{display_name(m)}</td>"
+            f"<tr><td class='model'>{model_cell(m)}</td>"
             f"<td>{s['cbet_rate']*100:.0f}%</td>"
             f"<td class='small'>{s['cbet_opps']}</td>"
             f"<td>{s['fold_to_cbet']*100:.0f}%</td>"

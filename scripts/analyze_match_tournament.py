@@ -15,7 +15,7 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
-from model_names import strip_coached, display_name
+from model_names import strip_coached, display_name, model_cell
 from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -113,7 +113,7 @@ def render_html(rep: dict, beh: dict) -> str:
             elo_disp = f"{r['elo']}<div class='small'>±{r['elo_sd']:.0f}</div>"
         else:
             elo_disp = str(r["elo"])
-        trows += (f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
+        trows += (f"<tr><td>{i}</td><td class='model'>{model_cell(r['model'])}</td>"
                   f"<td><b>{elo_disp}</b></td>"
                   f"<td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}/{r['matches']}</td>"
                   f"<td>{r['draws']}</td><td>{r['busted_out_rate']*100:.0f}%</td>"
@@ -137,7 +137,7 @@ def render_html(rep: dict, beh: dict) -> str:
             rgb = "34,197,94" if pct >= 50 else "244,63,94"
             cells += (f"<td class='hh' style='background:rgba({rgb},{alpha})'>"
                       f"{pct:.0f}%<span class='rec'>{w}/{pl}</span></td>")
-        grid += f"<tr><td class='model'>{display_name(a)}</td>{cells}</tr>"
+        grid += f"<tr><td class='model'>{model_cell(a)}</td>{cells}</tr>"
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Match Mode</title>

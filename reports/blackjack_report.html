@@ -52,6 +52,10 @@
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Company logo before a model name in leaderboard cells. The brand SVGs are
+     24x24 with their own colors; size to the text and nudge onto the baseline. */
+  .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
+    flex:none; }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -90,7 +94,7 @@
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
         <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
     <tr>
-          <td>1</td><td class='model'>MiniMax-M2.7</td>
+          <td>1</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
           <td class='pos'>+0.041</td>
           <td>46%</td><td>9%</td>
           <td>45%</td>
@@ -99,7 +103,7 @@
           <td>0.0%</td>
           <td>500</td><td>38.8s</td>
         </tr><tr>
-          <td>2</td><td class='model'>GPT-OSS 120B</td>
+          <td>2</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
           <td class='pos'>+0.033</td>
           <td>45%</td><td>8%</td>
           <td>47%</td>
@@ -108,7 +112,7 @@
           <td>0.0%</td>
           <td>500</td><td>1.5s</td>
         </tr><tr>
-          <td>3</td><td class='model'>GLM-5.1</td>
+          <td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
           <td class='pos'>+0.029</td>
           <td>45%</td><td>6%</td>
           <td>49%</td>
@@ -117,7 +121,7 @@
           <td>0.0%</td>
           <td>500</td><td>13.1s</td>
         </tr><tr>
-          <td>4</td><td class='model'>GLM-5.2</td>
+          <td>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
           <td class='neg'>-0.002</td>
           <td>44%</td><td>8%</td>
           <td>48%</td>
@@ -126,7 +130,7 @@
           <td>0.0%</td>
           <td>500</td><td>24.4s</td>
         </tr><tr>
-          <td>5</td><td class='model'>Qwen3.7 Plus</td>
+          <td>5</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
           <td class='neg'>-0.006</td>
           <td>43%</td><td>7%</td>
           <td>49%</td>
@@ -135,7 +139,7 @@
           <td>0.0%</td>
           <td>500</td><td>7.4s</td>
         </tr><tr>
-          <td>6</td><td class='model'>MiniMax-M3</td>
+          <td>6</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
           <td class='neg'>-0.042</td>
           <td>44%</td><td>7%</td>
           <td>49%</td>
@@ -144,7 +148,7 @@
           <td>0.0%</td>
           <td>500</td><td>7.9s</td>
         </tr><tr>
-          <td>7</td><td class='model'>Kimi K2.6</td>
+          <td>7</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
           <td class='neg'>-0.045</td>
           <td>42%</td><td>8%</td>
           <td>49%</td>
@@ -153,7 +157,7 @@
           <td>0.0%</td>
           <td>500</td><td>99.8s</td>
         </tr><tr>
-          <td>8</td><td class='model'>DeepSeek V4 Pro</td>
+          <td>8</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
           <td class='neg'>-0.113</td>
           <td>38%</td><td>12%</td>
           <td>51%</td>

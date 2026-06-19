@@ -33,7 +33,7 @@ from collections import defaultdict
 
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
-from model_names import strip_coached, display_name
+from model_names import strip_coached, display_name, model_cell
 from elo_util import bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 
@@ -443,7 +443,7 @@ def render_game(game: str, rep: dict) -> str:
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{display_name(m)}</td>
+          <td>{i}</td><td class='model'>{model_cell(m)}</td>
           <td>{_elo_cell(rep['elo'][m], rep.get('elo_ci', {}).get(m))}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
@@ -458,7 +458,7 @@ def render_game(game: str, rep: dict) -> str:
     # head-to-head
     hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{display_name(a)}</th>"
+        hh += f"<tr><th class='model'>{model_cell(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -685,7 +685,7 @@ def _arena_board(entries: list) -> str:
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
         body += (
             f"<tr><td class='rk'>{medal}</td>"
-            f"<td class='model'>{display_name(r['model'])}</td>"
+            f"<td class='model'>{model_cell(r['model'])}</td>"
             f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
             f"<span class='sval'>{r['score']:.0f}</span></td>"
             f"<td class='cov'>{r['games']}/{total}</td>"

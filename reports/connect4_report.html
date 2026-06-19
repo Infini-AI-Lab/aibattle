@@ -52,6 +52,10 @@
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Company logo before a model name in leaderboard cells. The brand SVGs are
+     24x24 with their own colors; size to the text and nudge onto the baseline. */
+  .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
+    flex:none; }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */
@@ -97,7 +101,7 @@
         <th>draw%</th><th>1st-move win%</th><th>win-take</th><th>block</th>
         <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     <tr>
-          <td>1</td><td class='model'>Claude Opus 4.8</td>
+          <td>1</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
           <td>1729<div class='small'>±26</div></td>
           <td class='pos'>+0.54</td>
           <td>76%</td><td>2%</td>
@@ -108,7 +112,7 @@
           <td>0.0%</td>
           <td>15.6</td><td>59.2s</td>
         </tr><tr>
-          <td>2</td><td class='model'>Kimi K2.6</td>
+          <td>2</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
           <td>1687<div class='small'>±31</div></td>
           <td class='pos'>+0.37</td>
           <td>68%</td><td>1%</td>
@@ -119,7 +123,7 @@
           <td>0.0%</td>
           <td>15.2</td><td>550.0s</td>
         </tr><tr>
-          <td>3</td><td class='model'>DeepSeek V4 Pro</td>
+          <td>3</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
           <td>1594<div class='small'>±26</div></td>
           <td class='pos'>+0.14</td>
           <td>56%</td><td>1%</td>
@@ -130,7 +134,7 @@
           <td>0.0%</td>
           <td>14.2</td><td>341.4s</td>
         </tr><tr>
-          <td>4</td><td class='model'>GLM-5.1</td>
+          <td>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
           <td>1556<div class='small'>±28</div></td>
           <td class='pos'>+0.04</td>
           <td>51%</td><td>2%</td>
@@ -141,7 +145,7 @@
           <td>0.0%</td>
           <td>17.4</td><td>180.0s</td>
         </tr><tr>
-          <td>5</td><td class='model'>GLM-5.2</td>
+          <td>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
           <td>1517<div class='small'>±47</div></td>
           <td class='pos'>+0.07</td>
           <td>52%</td><td>3%</td>
@@ -152,7 +156,7 @@
           <td>0.0%</td>
           <td>19.2</td><td>406.0s</td>
         </tr><tr>
-          <td>6</td><td class='model'>Claude Sonnet 4.6</td>
+          <td>6</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
           <td>1467<div class='small'>±24</div></td>
           <td class='neg'>-0.18</td>
           <td>40%</td><td>1%</td>
@@ -163,7 +167,7 @@
           <td>0.0%</td>
           <td>13.9</td><td>122.1s</td>
         </tr><tr>
-          <td>7</td><td class='model'>Qwen3.7 Plus</td>
+          <td>7</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
           <td>1410<div class='small'>±44</div></td>
           <td class='neg'>-0.25</td>
           <td>37%</td><td>2%</td>
@@ -174,7 +178,7 @@
           <td>0.0%</td>
           <td>15.9</td><td>66.6s</td>
         </tr><tr>
-          <td>8</td><td class='model'>MiniMax-M3</td>
+          <td>8</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
           <td>1359<div class='small'>±44</div></td>
           <td class='neg'>-0.33</td>
           <td>33%</td><td>1%</td>
@@ -185,7 +189,7 @@
           <td>0.0%</td>
           <td>15.9</td><td>112.5s</td>
         </tr><tr>
-          <td>9</td><td class='model'>GPT-OSS 120B</td>
+          <td>9</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
           <td>1341<div class='small'>±30</div></td>
           <td class='neg'>-0.49</td>
           <td>25%</td><td>1%</td>
@@ -196,7 +200,7 @@
           <td>0.0%</td>
           <td>15.3</td><td>18.3s</td>
         </tr><tr>
-          <td>10</td><td class='model'>MiniMax-M2.7</td>
+          <td>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
           <td>1339<div class='small'>±33</div></td>
           <td class='neg'>-0.52</td>
           <td>23%</td><td>1%</td>
@@ -230,7 +234,7 @@
   </div>
 
   <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'><tr><th></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>GLM-5.2</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr><tr><th class='model'>Claude Opus 4.8</th><td class='diag'>—</td><td class='pos'>40-8<div class='small'>2d</div></td><td class='pos'>36-14<div class='small'>0d</div></td><td class='pos'>40-10<div class='small'>0d</div></td><td class='pos'>44-5<div class='small'>1d</div></td><td class='pos'>26-23<div class='small'>0d</div></td><td class='pos'>41-7<div class='small'>2d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'>Claude Sonnet 4.6</th><td class='neg'>8-40<div class='small'>2d</div></td><td class='diag'>—</td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>21-28<div class='small'>1d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class='neg'>9-41<div class='small'>0d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'>DeepSeek V4 Pro</th><td class='neg'>14-36<div class='small'>0d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>5-4<div class='small'>1d</div></td><td class='pos'>9-1<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>10-0<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'>GLM-5.1</th><td class='neg'>10-40<div class='small'>0d</div></td><td class='pos'>28-21<div class='small'>1d</div></td><td class='neg'>4-5<div class='small'>1d</div></td><td class='diag'>—</td><td class='pos'>9-0<div class='small'>1d</div></td><td class='pos'>6-3<div class='small'>1d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'>GPT-OSS 120B</th><td class='neg'>5-44<div class='small'>1d</div></td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>1-9<div class='small'>0d</div></td><td class='neg'>0-9<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>0-10<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='neg'>4-6<div class='small'>0d</div></td></tr><tr><th class='model'>Kimi K2.6</th><td class='neg'>23-26<div class='small'>0d</div></td><td class='pos'>41-9<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='pos'>10-0<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>9-1<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'>MiniMax-M2.7</th><td class='neg'>7-41<div class='small'>2d</div></td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>0-10<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='neg'>1-9<div class='small'>0d</div></td><td class='diag'>—</td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'>GLM-5.2</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>6-3<div class='small'>1d</div></td><td class='pos'>6-3<div class='small'>1d</div></td></tr><tr><th class='model'>MiniMax-M3</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>3-7<div class='small'>0d</div></td></tr><tr><th class='model'>Qwen3.7 Plus</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>6-4<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
+  <table class='h2h'><tr><th></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>GLM-5.2</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</th><td class='diag'>—</td><td class='pos'>40-8<div class='small'>2d</div></td><td class='pos'>36-14<div class='small'>0d</div></td><td class='pos'>40-10<div class='small'>0d</div></td><td class='pos'>44-5<div class='small'>1d</div></td><td class='pos'>26-23<div class='small'>0d</div></td><td class='pos'>41-7<div class='small'>2d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</th><td class='neg'>8-40<div class='small'>2d</div></td><td class='diag'>—</td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>21-28<div class='small'>1d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class='neg'>9-41<div class='small'>0d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='neg'>14-36<div class='small'>0d</div></td><td class='pos'>33-17<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>5-4<div class='small'>1d</div></td><td class='pos'>9-1<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>10-0<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='neg'>10-40<div class='small'>0d</div></td><td class='pos'>28-21<div class='small'>1d</div></td><td class='neg'>4-5<div class='small'>1d</div></td><td class='diag'>—</td><td class='pos'>9-0<div class='small'>1d</div></td><td class='pos'>6-3<div class='small'>1d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='neg'>5-44<div class='small'>1d</div></td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>1-9<div class='small'>0d</div></td><td class='neg'>0-9<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>0-10<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='neg'>4-6<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='neg'>23-26<div class='small'>0d</div></td><td class='pos'>41-9<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='pos'>10-0<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>9-1<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td><td class='pos'>8-2<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class='neg'>7-41<div class='small'>2d</div></td><td class='neg'>17-33<div class='small'>0d</div></td><td class='neg'>0-10<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='neg'>1-9<div class='small'>0d</div></td><td class='diag'>—</td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class=''>5-5<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>6-3<div class='small'>1d</div></td><td class='pos'>6-3<div class='small'>1d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='neg'>3-7<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>3-7<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class='pos'>6-4<div class='small'>0d</div></td><td class='neg'>2-8<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>3-6<div class='small'>1d</div></td><td class='pos'>7-3<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
 
   <h2>🗺️ Move-location heatmap</h2>
   <div class="note">Where each model places pieces (brighter = more frequent). Reveals

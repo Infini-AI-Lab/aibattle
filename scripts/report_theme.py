@@ -61,6 +61,10 @@ BASE_CSS = """
   canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
+  /* Company logo before a model name in leaderboard cells. The brand SVGs are
+     24x24 with their own colors; size to the text and nudge onto the baseline. */
+  .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px;
+    flex:none; }
   /* Structured rules box (matches the Kuhn page): heading + bullet list + a
      dimmed sequence/footnote line. .rules .card is a scoped inline chip and
      does not clash with the global overview .card. */

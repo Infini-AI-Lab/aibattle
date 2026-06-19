@@ -39,6 +39,46 @@ def display_name(model):
     return DISPLAY_NAMES.get(slug, slug)
 
 
+# Maker (company) per model, with the brand-logo file under reports/logos/.
+# Logos are the brand SVGs from the LobeHub AI icon set; the company keeps the
+# trademark, used here nominatively to identify each model's maker.
+COMPANIES = {
+    "glm-5p1": ("Z.ai", "zai.svg"),
+    "glm-5p2": ("Z.ai", "zai.svg"),
+    "kimi-k2p6": ("Moonshot AI", "moonshot.svg"),
+    "minimax-m2p7": ("MiniMax", "minimax.svg"),
+    "minimax-m3": ("MiniMax", "minimax.svg"),
+    "deepseek-v4-pro": ("DeepSeek", "deepseek.svg"),
+    "qwen3p7-plus": ("Alibaba", "alibaba.svg"),
+    "gpt-oss-120b": ("OpenAI", "openai.svg"),
+    "claude-opus-4.8": ("Anthropic", "anthropic.svg"),
+    "claude-sonnet-4.6": ("Anthropic", "anthropic.svg"),
+}
+
+
+def _company(model):
+    if not isinstance(model, str):
+        return None
+    slug = model[: -len(_SUFFIX)] if model.endswith(_SUFFIX) else model
+    return COMPANIES.get(slug)
+
+
+def logo_img(model, base=""):
+    """An inline <img> for the model's company logo, or "" if unknown. ``base``
+    prefixes the src for pages served from a subdirectory (e.g. "../")."""
+    c = _company(model)
+    if not c:
+        return ""
+    name, fname = c
+    return (f'<img class="mlogo" src="{base}logos/{fname}" '
+            f'alt="{name}" title="{name}">')
+
+
+def model_cell(model, base=""):
+    """Logo + official display name, for a leaderboard model cell."""
+    return f"{logo_img(model, base)}{display_name(model)}"
+
+
 def strip_coached(obj):
     """Recursively strip a trailing ``-coached`` from every string in a loaded
     JSON structure. Only model-name ids end with that suffix in the run data

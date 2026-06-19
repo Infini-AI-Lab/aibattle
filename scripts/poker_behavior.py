@@ -16,7 +16,7 @@ import glob
 import json
 from collections import defaultdict
 
-from model_names import strip_coached, display_name
+from model_names import strip_coached, display_name, logo_img
 
 # One colour per model, used across ALL charts and replay viewers.
 MODEL_COLORS = {
@@ -208,7 +208,7 @@ def profile_table(beh: dict, models: list) -> str:
     for i, m in enumerate(models, 1):
         s = beh[m]
         rows += (
-            f"<tr><td>{i}</td><td class='model'>{_swatch(m)}{display_name(m)}</td>"
+            f"<tr><td>{i}</td><td class='model'>{logo_img(m)}{_swatch(m)}{display_name(m)}</td>"
             f"<td>{s['vpip']*100:.0f}%</td><td>{s['pfr']*100:.0f}%</td>"
             f"<td>{s['aggression']*100:.0f}%</td><td>{s['fold_to_bet']*100:.0f}%</td>"
             f"<td>{s['avg_betsize']:.2f}x</td><td>{s['allin_rate']*100:.0f}%</td>"

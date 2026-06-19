@@ -30,7 +30,7 @@ import os
 from collections import defaultdict
 
 from elo_util import bootstrap_elo, wld_from_records, gross_from_records
-from model_names import display_name
+from model_names import display_name, model_cell
 from report_theme import BASE_CSS, CHART_SETUP
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
@@ -447,7 +447,7 @@ def render_versus(rep: dict) -> str:
         s = pm[m]
         net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{display_name(m)}</td>
+          <td>{i}</td><td class='model'>{model_cell(m)}</td>
           <td>{_elo_cell(m)}</td>
           <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
@@ -458,7 +458,7 @@ def render_versus(rep: dict) -> str:
 
     hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
     for a in models:
-        hh += f"<tr><th class='model'>{display_name(a)}</th>"
+        hh += f"<tr><th class='model'>{model_cell(a)}</th>"
         for b in models:
             if a == b:
                 hh += "<td class='diag'>—</td>"
@@ -587,7 +587,7 @@ def render_dealer(rep: dict) -> str:
         s = pm[m]
         pcls = "pos" if s["mean_per_hand"] > 0 else ("neg" if s["mean_per_hand"] < 0 else "")
         rows += f"""<tr>
-          <td>{i}</td><td class='model'>{display_name(m)}</td>
+          <td>{i}</td><td class='model'>{model_cell(m)}</td>
           <td class='{pcls}'>{s['mean_per_hand']:+.3f}</td>
           <td>{s['win_rate']*100:.0f}%</td><td>{s['push_rate']*100:.0f}%</td>
           <td>{s['loss_rate']*100:.0f}%</td>

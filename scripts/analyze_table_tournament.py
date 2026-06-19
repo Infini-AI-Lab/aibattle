@@ -14,7 +14,7 @@ import os
 from collections import defaultdict
 
 import poker_behavior as pb
-from model_names import strip_coached, display_name
+from model_names import strip_coached, display_name, model_cell
 from report_theme import BASE_CSS
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
@@ -73,7 +73,7 @@ def render_html(rep: dict, beh: dict) -> str:
     for i, r in enumerate(lb, 1):
         rd = r["rank_distribution"]
         rc = "".join(f"<td>{rd.get(str(k),0)}</td>" for k in range(1, n + 1))
-        trows += (f"<tr><td>{i}</td><td class='model'>{display_name(r['model'])}</td>"
+        trows += (f"<tr><td>{i}</td><td class='model'>{model_cell(r['model'])}</td>"
                   f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>{rc}</tr>")
     return f"""<!DOCTYPE html>
