@@ -13,33 +13,33 @@
   ],
   "per_model": {
     "claude-opus-4.8": {
-      "hands": 600,
-      "decisions": 1712,
-      "chips": -1157.0,
-      "bb_per_100": -96.42,
-      "win_rate": 0.535,
-      "wins": 321,
-      "losses": 268,
+      "hands": 518,
+      "decisions": 1481,
+      "chips": -1031.0,
+      "bb_per_100": -99.52,
+      "win_rate": 0.5367,
+      "wins": 278,
+      "losses": 229,
       "ties": 11,
-      "showdown_wins": 71,
-      "fold_wins": 250,
-      "vpip": 0.68,
-      "pfr": 0.255,
-      "agg_freq": 0.2707,
-      "agg_factor": 0.86,
-      "fold_to_bet": 0.2068,
-      "allin_freq": 0.0035,
-      "avg_bet_xpot": 1.061,
-      "avg_latency_s": 4.9,
-      "avg_comp_tokens": 37,
+      "showdown_wins": 62,
+      "fold_wins": 216,
+      "vpip": 0.6892,
+      "pfr": 0.2606,
+      "agg_freq": 0.2725,
+      "agg_factor": 0.878,
+      "fold_to_bet": 0.2009,
+      "allin_freq": 0.0041,
+      "avg_bet_xpot": 1.083,
+      "avg_latency_s": 5.3,
+      "avg_comp_tokens": 36,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 164,
-        "check": 649,
-        "call": 480,
-        "bet": 269,
-        "raise": 144,
+        "fold": 138,
+        "check": 567,
+        "call": 410,
+        "bet": 226,
+        "raise": 134,
         "all_in": 6
       },
       "style": {
@@ -50,115 +50,115 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 611,
-          "agg_freq": 0.2875,
-          "fold_share": 0.0949,
+          "decisions": 529,
+          "agg_freq": 0.295,
+          "fold_share": 0.0964,
           "mix": {
-            "fold": 58,
-            "check": 95,
-            "call": 299,
-            "bet": 36,
-            "raise": 122,
+            "fold": 51,
+            "check": 78,
+            "call": 259,
+            "bet": 27,
+            "raise": 113,
             "all_in": 1
           }
         },
         "flop": {
-          "decisions": 520,
-          "agg_freq": 0.3551,
-          "fold_share": 0.1173,
+          "decisions": 444,
+          "agg_freq": 0.3595,
+          "fold_share": 0.1104,
           "mix": {
-            "fold": 61,
-            "check": 218,
-            "call": 78,
-            "bet": 143,
-            "raise": 17,
+            "fold": 49,
+            "check": 188,
+            "call": 65,
+            "bet": 123,
+            "raise": 16,
             "all_in": 3
           }
         },
         "turn": {
-          "decisions": 330,
-          "agg_freq": 0.1914,
-          "fold_share": 0.0818,
+          "decisions": 285,
+          "agg_freq": 0.1787,
+          "fold_share": 0.0772,
           "mix": {
-            "fold": 27,
-            "check": 184,
-            "call": 61,
-            "bet": 57,
+            "fold": 22,
+            "check": 163,
+            "call": 53,
+            "bet": 46,
             "raise": 1,
             "all_in": 0
           }
         },
         "river": {
-          "decisions": 251,
-          "agg_freq": 0.1674,
+          "decisions": 223,
+          "agg_freq": 0.1739,
           "fold_share": 0.0717,
           "mix": {
-            "fold": 18,
-            "check": 152,
-            "call": 42,
-            "bet": 33,
+            "fold": 16,
+            "check": 138,
+            "call": 33,
+            "bet": 30,
             "raise": 4,
             "all_in": 2
           }
         }
       },
-      "cbet_rate": 0.6786,
-      "cbet_opps": 84,
-      "fold_to_cbet": 0.1857,
-      "facing_cbet": 70,
-      "wtsd": 0.31,
-      "wsd": 0.3817,
-      "saw_showdown": 186,
-      "won_showdown": 71,
+      "cbet_rate": 0.6667,
+      "cbet_opps": 75,
+      "fold_to_cbet": 0.1905,
+      "facing_cbet": 63,
+      "wtsd": 0.3166,
+      "wsd": 0.378,
+      "saw_showdown": 164,
+      "won_showdown": 62,
       "pf_bucket": {
         "premium": {
-          "hands": 39,
+          "hands": 33,
           "open_rate": 1.0,
           "call_rate": 0.0,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 52,
-          "open_rate": 0.8269,
-          "call_rate": 0.1154,
+          "hands": 48,
+          "open_rate": 0.8125,
+          "call_rate": 0.125,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 132,
-          "open_rate": 0.4697,
-          "call_rate": 0.4167,
+          "hands": 112,
+          "open_rate": 0.5,
+          "call_rate": 0.4018,
           "fold_rate": 0.0
         },
         "marginal": {
-          "hands": 118,
-          "open_rate": 0.0763,
-          "call_rate": 0.6441,
-          "fold_rate": 0.0424
+          "hands": 101,
+          "open_rate": 0.0693,
+          "call_rate": 0.6238,
+          "fold_rate": 0.0495
         },
         "trash": {
-          "hands": 203,
+          "hands": 176,
           "open_rate": 0.0,
-          "call_rate": 0.5813,
-          "fold_rate": 0.1773
+          "call_rate": 0.6136,
+          "fold_rate": 0.1705
         }
       },
       "betsize_dist": {
-        "small": 0.0143,
-        "medium": 0.5274,
-        "pot": 0.136,
-        "over": 0.3222
+        "small": 0.0164,
+        "medium": 0.5137,
+        "pot": 0.1284,
+        "over": 0.3415
       },
       "showdown_cats": {
-        "high card": 0.2419,
-        "pair": 0.4892,
-        "two pair": 0.1667,
-        "trips": 0.0323,
-        "straight": 0.0376,
-        "flush": 0.0215,
-        "full house": 0.0108
+        "high card": 0.2378,
+        "pair": 0.5061,
+        "two pair": 0.1585,
+        "trips": 0.0244,
+        "straight": 0.0366,
+        "flush": 0.0244,
+        "full house": 0.0122
       },
-      "elo": 1446,
-      "elo_sd": 34.6
+      "elo": 1451,
+      "elo_sd": 35.7
     },
     "claude-sonnet-4.6": {
       "hands": 600,
@@ -305,8 +305,8 @@
         "flush": 0.0074,
         "full house": 0.0296
       },
-      "elo": 1505,
-      "elo_sd": 33.7
+      "elo": 1506,
+      "elo_sd": 36.7
     },
     "deepseek-v4-pro": {
       "hands": 900,
@@ -454,7 +454,7 @@
         "full house": 0.02
       },
       "elo": 1526,
-      "elo_sd": 30.7
+      "elo_sd": 29.5
     },
     "glm-5p1": {
       "hands": 900,
@@ -602,7 +602,7 @@
         "full house": 0.0139
       },
       "elo": 1537,
-      "elo_sd": 24.1
+      "elo_sd": 23.0
     },
     "gpt-oss-120b": {
       "hands": 900,
@@ -749,8 +749,8 @@
         "flush": 0.0274,
         "full house": 0.0274
       },
-      "elo": 1459,
-      "elo_sd": 27.4
+      "elo": 1460,
+      "elo_sd": 27.9
     },
     "kimi-k2p6": {
       "hands": 900,
@@ -898,36 +898,36 @@
         "full house": 0.0168
       },
       "elo": 1526,
-      "elo_sd": 22.9
+      "elo_sd": 23.5
     },
     "minimax-m2p7": {
-      "hands": 900,
-      "decisions": 2339,
-      "chips": -675.0,
-      "bb_per_100": -37.5,
-      "win_rate": 0.5289,
-      "wins": 476,
-      "losses": 415,
+      "hands": 818,
+      "decisions": 2111,
+      "chips": -801.0,
+      "bb_per_100": -48.96,
+      "win_rate": 0.5342,
+      "wins": 437,
+      "losses": 372,
       "ties": 9,
-      "showdown_wins": 102,
-      "fold_wins": 374,
-      "vpip": 0.5833,
-      "pfr": 0.1711,
-      "agg_freq": 0.319,
-      "agg_factor": 1.098,
-      "fold_to_bet": 0.2771,
-      "allin_freq": 0.0056,
-      "avg_bet_xpot": 1.35,
-      "avg_latency_s": 36.5,
-      "avg_comp_tokens": 6937,
+      "showdown_wins": 89,
+      "fold_wins": 348,
+      "vpip": 0.5868,
+      "pfr": 0.1699,
+      "agg_freq": 0.3173,
+      "agg_factor": 1.081,
+      "fold_to_bet": 0.2687,
+      "allin_freq": 0.0062,
+      "avg_bet_xpot": 1.412,
+      "avg_latency_s": 37.8,
+      "avg_comp_tokens": 7165,
       "invalid_actions": 0,
       "invalid_amounts": 0,
       "action_mix": {
-        "fold": 289,
-        "check": 812,
-        "call": 584,
-        "bet": 478,
-        "raise": 163,
+        "fold": 255,
+        "check": 734,
+        "call": 533,
+        "bet": 422,
+        "raise": 154,
         "all_in": 13
       },
       "style": {
@@ -938,115 +938,115 @@
       },
       "by_street": {
         "preflop": {
-          "decisions": 874,
-          "agg_freq": 0.2158,
-          "fold_share": 0.1728,
+          "decisions": 788,
+          "agg_freq": 0.2156,
+          "fold_share": 0.1701,
           "mix": {
-            "fold": 151,
-            "check": 139,
-            "call": 428,
-            "bet": 41,
-            "raise": 114,
+            "fold": 134,
+            "check": 120,
+            "call": 393,
+            "bet": 33,
+            "raise": 107,
             "all_in": 1
           }
         },
         "flop": {
-          "decisions": 686,
-          "agg_freq": 0.4019,
-          "fold_share": 0.0933,
+          "decisions": 614,
+          "agg_freq": 0.4014,
+          "fold_share": 0.0912,
           "mix": {
-            "fold": 64,
-            "check": 285,
-            "call": 87,
-            "bet": 211,
-            "raise": 34,
+            "fold": 56,
+            "check": 258,
+            "call": 76,
+            "bet": 187,
+            "raise": 32,
             "all_in": 5
           }
         },
         "turn": {
-          "decisions": 468,
-          "agg_freq": 0.3822,
-          "fold_share": 0.1111,
+          "decisions": 423,
+          "agg_freq": 0.3852,
+          "fold_share": 0.104,
           "mix": {
-            "fold": 52,
-            "check": 209,
-            "call": 48,
-            "bet": 147,
+            "fold": 44,
+            "check": 188,
+            "call": 45,
+            "bet": 134,
             "raise": 8,
             "all_in": 4
           }
         },
         "river": {
-          "decisions": 311,
-          "agg_freq": 0.308,
-          "fold_share": 0.0707,
+          "decisions": 286,
+          "agg_freq": 0.2943,
+          "fold_share": 0.0734,
           "mix": {
-            "fold": 22,
-            "check": 179,
-            "call": 21,
-            "bet": 79,
+            "fold": 21,
+            "check": 168,
+            "call": 19,
+            "bet": 68,
             "raise": 7,
             "all_in": 3
           }
         }
       },
-      "cbet_rate": 0.7,
-      "cbet_opps": 90,
-      "fold_to_cbet": 0.1011,
-      "facing_cbet": 89,
-      "wtsd": 0.2633,
-      "wsd": 0.4304,
-      "saw_showdown": 237,
-      "won_showdown": 102,
+      "cbet_rate": 0.7273,
+      "cbet_opps": 77,
+      "fold_to_cbet": 0.1098,
+      "facing_cbet": 82,
+      "wtsd": 0.2628,
+      "wsd": 0.414,
+      "saw_showdown": 215,
+      "won_showdown": 89,
       "pf_bucket": {
         "premium": {
-          "hands": 46,
-          "open_rate": 0.913,
-          "call_rate": 0.087,
+          "hands": 39,
+          "open_rate": 0.8974,
+          "call_rate": 0.1026,
           "fold_rate": 0.0
         },
         "strong": {
-          "hands": 85,
-          "open_rate": 0.5412,
-          "call_rate": 0.3765,
+          "hands": 81,
+          "open_rate": 0.5556,
+          "call_rate": 0.3704,
           "fold_rate": 0.0
         },
         "playable": {
-          "hands": 174,
-          "open_rate": 0.2816,
-          "call_rate": 0.4828,
-          "fold_rate": 0.046
+          "hands": 154,
+          "open_rate": 0.2857,
+          "call_rate": 0.4935,
+          "fold_rate": 0.039
         },
         "marginal": {
-          "hands": 188,
-          "open_rate": 0.0851,
-          "call_rate": 0.5904,
-          "fold_rate": 0.133
+          "hands": 170,
+          "open_rate": 0.0824,
+          "call_rate": 0.6,
+          "fold_rate": 0.1294
         },
         "trash": {
-          "hands": 298,
-          "open_rate": 0.0034,
-          "call_rate": 0.4698,
-          "fold_rate": 0.3154
+          "hands": 270,
+          "open_rate": 0.0037,
+          "call_rate": 0.4778,
+          "fold_rate": 0.3185
         }
       },
       "betsize_dist": {
-        "small": 0.078,
-        "medium": 0.552,
-        "pot": 0.2217,
-        "over": 0.1483
+        "small": 0.0798,
+        "medium": 0.5484,
+        "pot": 0.2207,
+        "over": 0.1511
       },
       "showdown_cats": {
-        "high card": 0.2489,
-        "pair": 0.4008,
-        "two pair": 0.2068,
-        "trips": 0.0422,
-        "straight": 0.0506,
-        "flush": 0.0295,
-        "full house": 0.0211
+        "high card": 0.2512,
+        "pair": 0.414,
+        "two pair": 0.2047,
+        "trips": 0.0372,
+        "straight": 0.0419,
+        "flush": 0.0326,
+        "full house": 0.0186
       },
-      "elo": 1470,
-      "elo_sd": 25.6
+      "elo": 1466,
+      "elo_sd": 27.1
     },
     "glm-5p2": {
       "hands": 700,
@@ -1194,7 +1194,7 @@
         "full house": 0.0373
       },
       "elo": 1557,
-      "elo_sd": 27.4
+      "elo_sd": 28.2
     },
     "minimax-m3": {
       "hands": 700,
@@ -1342,7 +1342,7 @@
         "full house": 0.0153
       },
       "elo": 1433,
-      "elo_sd": 27.2
+      "elo_sd": 26.0
     },
     "qwen3p7-plus": {
       "hands": 700,
@@ -1489,8 +1489,8 @@
         "flush": 0.0092,
         "full house": 0.0184
       },
-      "elo": 1540,
-      "elo_sd": 29.3
+      "elo": 1539,
+      "elo_sd": 28.4
     }
   },
   "h2h": {
@@ -1500,7 +1500,7 @@
       "glm-5p1": -471.0,
       "gpt-oss-120b": -23.0,
       "kimi-k2p6": -183.0,
-      "minimax-m2p7": -303.0,
+      "minimax-m2p7": -177.0,
       "glm-5p2": 0.0,
       "minimax-m3": 0.0,
       "qwen3p7-plus": 0.0
@@ -1561,7 +1561,7 @@
       "qwen3p7-plus": -86.0
     },
     "minimax-m2p7": {
-      "claude-opus-4.8": 303.0,
+      "claude-opus-4.8": 177.0,
       "claude-sonnet-4.6": -148.0,
       "deepseek-v4-pro": -164.0,
       "glm-5p1": -198.0,
@@ -1606,66 +1606,66 @@
     }
   },
   "elo": {
-    "claude-opus-4.8": 1446,
-    "claude-sonnet-4.6": 1505,
+    "claude-opus-4.8": 1451,
+    "claude-sonnet-4.6": 1506,
     "deepseek-v4-pro": 1526,
     "glm-5p1": 1537,
-    "gpt-oss-120b": 1459,
+    "gpt-oss-120b": 1460,
     "kimi-k2p6": 1526,
-    "minimax-m2p7": 1470,
+    "minimax-m2p7": 1466,
     "glm-5p2": 1557,
     "minimax-m3": 1433,
-    "qwen3p7-plus": 1540
+    "qwen3p7-plus": 1539
   },
   "elo_ci": {
     "claude-opus-4.8": {
-      "sd": 34.6,
-      "lo": 1383,
-      "hi": 1510
+      "sd": 35.7,
+      "lo": 1378,
+      "hi": 1517
     },
     "claude-sonnet-4.6": {
-      "sd": 33.7,
-      "lo": 1437,
-      "hi": 1567
+      "sd": 36.7,
+      "lo": 1434,
+      "hi": 1578
     },
     "deepseek-v4-pro": {
-      "sd": 30.7,
-      "lo": 1462,
-      "hi": 1577
+      "sd": 29.5,
+      "lo": 1464,
+      "hi": 1585
     },
     "glm-5p1": {
-      "sd": 24.1,
-      "lo": 1487,
-      "hi": 1581
+      "sd": 23.0,
+      "lo": 1489,
+      "hi": 1578
     },
     "gpt-oss-120b": {
-      "sd": 27.4,
-      "lo": 1408,
-      "hi": 1512
+      "sd": 27.9,
+      "lo": 1411,
+      "hi": 1517
     },
     "kimi-k2p6": {
-      "sd": 22.9,
-      "lo": 1479,
-      "hi": 1569
+      "sd": 23.5,
+      "lo": 1481,
+      "hi": 1576
     },
     "minimax-m2p7": {
-      "sd": 25.6,
-      "lo": 1421,
-      "hi": 1526
+      "sd": 27.1,
+      "lo": 1410,
+      "hi": 1516
     },
     "glm-5p2": {
-      "sd": 27.4,
-      "lo": 1504,
-      "hi": 1614
+      "sd": 28.2,
+      "lo": 1502,
+      "hi": 1605
     },
     "minimax-m3": {
-      "sd": 27.2,
-      "lo": 1377,
-      "hi": 1486
+      "sd": 26.0,
+      "lo": 1384,
+      "hi": 1484
     },
     "qwen3p7-plus": {
-      "sd": 29.3,
-      "lo": 1477,
+      "sd": 28.4,
+      "lo": 1486,
       "hi": 1592
     }
   },

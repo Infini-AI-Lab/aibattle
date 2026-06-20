@@ -30,37 +30,37 @@
       ]
     },
     "glm-5p1": {
-      "games": 139,
-      "wins": 84,
+      "games": 140,
+      "wins": 85,
       "losses": 49,
       "draws": 6,
-      "win_rate": 0.6043,
-      "draw_rate": 0.0432,
-      "net_per_game": 0.2518,
+      "win_rate": 0.6071,
+      "draw_rate": 0.0429,
+      "net_per_game": 0.2571,
       "first_move_win_rate": 0.6143,
       "invalid_rate": 0.0,
-      "decisions": 2780,
+      "decisions": 2800,
       "avg_len": 40.0,
-      "avg_latency_s": 332.9,
+      "avg_latency_s": 332.5,
       "len_hist": [
-        139
+        140
       ]
     },
     "glm-5p2": {
-      "games": 116,
-      "wins": 67,
-      "losses": 47,
+      "games": 118,
+      "wins": 68,
+      "losses": 48,
       "draws": 2,
-      "win_rate": 0.5776,
-      "draw_rate": 0.0172,
-      "net_per_game": 0.1724,
-      "first_move_win_rate": 0.5789,
+      "win_rate": 0.5763,
+      "draw_rate": 0.0169,
+      "net_per_game": 0.1695,
+      "first_move_win_rate": 0.569,
       "invalid_rate": 0.0,
-      "decisions": 2320,
+      "decisions": 2360,
       "avg_len": 40.0,
-      "avg_latency_s": 385.5,
+      "avg_latency_s": 385.4,
       "len_hist": [
-        116
+        118
       ]
     },
     "gpt-oss-120b": {
@@ -115,20 +115,20 @@
       ]
     },
     "qwen3p7-plus": {
-      "games": 118,
+      "games": 119,
       "wins": 72,
-      "losses": 44,
+      "losses": 45,
       "draws": 2,
-      "win_rate": 0.6102,
-      "draw_rate": 0.0169,
-      "net_per_game": 0.2373,
-      "first_move_win_rate": 0.6102,
+      "win_rate": 0.605,
+      "draw_rate": 0.0168,
+      "net_per_game": 0.2269,
+      "first_move_win_rate": 0.6,
       "invalid_rate": 0.0,
-      "decisions": 2360,
+      "decisions": 2380,
       "avg_len": 40.0,
-      "avg_latency_s": 227.7,
+      "avg_latency_s": 227.0,
       "len_hist": [
-        118
+        119
       ]
     },
     "kimi-k2p6": {
@@ -194,7 +194,7 @@
         0
       ],
       "glm-5p2": [
-        7,
+        8,
         10,
         2
       ],
@@ -232,7 +232,7 @@
       ],
       "glm-5p1": [
         10,
-        7,
+        8,
         2
       ],
       "gpt-oss-120b": [
@@ -251,7 +251,7 @@
         0
       ],
       "qwen3p7-plus": [
-        11,
+        12,
         8,
         0
       ],
@@ -385,7 +385,7 @@
       ],
       "glm-5p2": [
         8,
-        11,
+        12,
         0
       ],
       "gpt-oss-120b": [
@@ -449,61 +449,61 @@
   },
   "elo": {
     "deepseek-v4-pro": 1766,
-    "glm-5p1": 1635,
+    "glm-5p1": 1638,
     "glm-5p2": 1644,
     "gpt-oss-120b": 1110,
     "minimax-m2p7": 1088,
     "minimax-m3": 1363,
-    "qwen3p7-plus": 1670,
+    "qwen3p7-plus": 1667,
     "kimi-k2p6": 1723
   },
   "elo_ci": {
     "deepseek-v4-pro": {
-      "sd": 38.2,
-      "lo": 1706,
-      "hi": 1849
+      "sd": 41.2,
+      "lo": 1703,
+      "hi": 1858
     },
     "glm-5p1": {
-      "sd": 35.2,
-      "lo": 1577,
-      "hi": 1716
+      "sd": 32.4,
+      "lo": 1580,
+      "hi": 1701
     },
     "glm-5p2": {
-      "sd": 32.8,
-      "lo": 1581,
+      "sd": 33.5,
+      "lo": 1587,
       "hi": 1715
     },
     "gpt-oss-120b": {
-      "sd": 44.9,
-      "lo": 1002,
-      "hi": 1184
+      "sd": 47.4,
+      "lo": 1003,
+      "hi": 1181
     },
     "minimax-m2p7": {
-      "sd": 61.5,
-      "lo": 953,
-      "hi": 1191
+      "sd": 68.0,
+      "lo": 931,
+      "hi": 1201
     },
     "minimax-m3": {
-      "sd": 37.9,
-      "lo": 1283,
-      "hi": 1428
+      "sd": 41.1,
+      "lo": 1279,
+      "hi": 1433
     },
     "qwen3p7-plus": {
-      "sd": 37.2,
-      "lo": 1602,
+      "sd": 36.7,
+      "lo": 1600,
       "hi": 1741
     },
     "kimi-k2p6": {
-      "sd": 36.6,
-      "lo": 1665,
-      "hi": 1802
+      "sd": 38.8,
+      "lo": 1654,
+      "hi": 1811
     }
   },
   "elo_basis": "wins",
   "len_bins": [
     "40\u201340"
   ],
-  "first_player_win_rate": 0.4893,
-  "num_games": 515,
+  "first_player_win_rate": 0.4874,
+  "num_games": 517,
   "episodes_per_pair": 20
 }
