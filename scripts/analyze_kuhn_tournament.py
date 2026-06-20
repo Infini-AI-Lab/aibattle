@@ -32,6 +32,7 @@ from collections import defaultdict
 from model_names import strip_coached, display_name, model_cell
 from elo_util import bradley_terry, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
+from report_legends import legend as _legend
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/kuhn_poker/kuhn_data.json"
@@ -304,6 +305,7 @@ def render_html(rep: dict) -> str:
         <th>call J vs bet</th><th>total blunders</th></tr>
     {fund_rows}
   </table>
+  {_legend('kuhn')}
 
   <h2>Betting style <span class="note">(bet % by card, first to act · GTO: K 100% / Q 0% / J ~33%)</span></h2>
   <table>

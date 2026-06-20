@@ -18,6 +18,7 @@ import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
 from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
+from report_legends import legend as _legend
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_match/match_data.json"
@@ -174,6 +175,7 @@ def render_html(rep: dict, beh: dict) -> str:
         <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th></tr>
     {trows}
   </table>
+  {_legend('match')}
   <div class="note"><b>Elo</b> = Bradley-Terry rating (field mean 1500) over match win/loss results.
     Match mode is win-or-lose — chips don't count past who took the match — so the rating uses match
     outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within

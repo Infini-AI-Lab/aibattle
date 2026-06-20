@@ -16,6 +16,7 @@ from collections import defaultdict
 import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
 from report_theme import BASE_CSS
+from report_legends import legend as _legend
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_table/table_data.json"
@@ -113,6 +114,7 @@ def render_html(rep: dict, beh: dict) -> str:
         <th>avg final stack</th><th>bust%</th>{rankhdr}</tr>
     {trows}
   </table>
+  {_legend('table')}
   {beh_html}
   <script>
   const axc={{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}};

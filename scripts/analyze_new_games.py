@@ -32,6 +32,7 @@ from collections import defaultdict
 from elo_util import bootstrap_elo, wld_from_records, gross_from_records
 from model_names import display_name, model_cell
 from report_theme import BASE_CSS, CHART_SETUP
+from report_legends import legend as _legend
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
@@ -503,6 +504,7 @@ def render_versus(rep: dict) -> str:
         <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     {rows}
   </table>
+  {_legend('versus')}
   <div class="note">{elo_desc} ± is one bootstrap SD (resampling games 300×); ratings within ±1
     of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
     shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
@@ -624,6 +626,7 @@ def render_dealer(rep: dict) -> str:
         <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
     {rows}
   </table>
+  {_legend('blackjack')}
   <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
     inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
     (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;

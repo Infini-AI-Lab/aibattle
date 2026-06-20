@@ -36,8 +36,24 @@ from aibattle.games.gomoku import coord_to_rc
 from model_names import strip_coached, display_name, model_cell
 from elo_util import bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
+from report_legends import legend as _legend
 
 GAMES = ["connect4", "gomoku"]
+
+# Hand-authored "Result analysis" sections (spec sheet, defense table, threat-axis
+# miss-rate tables) folded into the board reports — originally pasted in by hand
+# (PR #7). They are a pinned narrative/data snapshot, kept in editable HTML files
+# under scripts/board_analysis/<game>.html so re-running the pipeline reproduces
+# them. The leaderboard above is data-driven; these blocks are not.
+_ANALYSIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "board_analysis")
+
+
+def _result_analysis(game: str) -> str:
+    path = os.path.join(_ANALYSIS_DIR, f"{game}.html")
+    if not os.path.exists(path):
+        return ""
+    with open(path, encoding="utf-8") as fh:
+        return "\n  " + fh.read().strip()
 NEED = {"connect4": 4, "gomoku": 5}
 # Coached is now the canonical (and only) run set. connect4 and gomoku each live
 # in their own per-game folder (runs/connect4, runs/gomoku) holding
@@ -513,6 +529,7 @@ def render_game(game: str, rep: dict) -> str:
         <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
     {rows}
   </table>
+  {_legend('board')}
   <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
     A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
     win-take = took an immediate win when one existed; block = removed an opponent's immediate
@@ -605,6 +622,7 @@ new Chart(document.getElementById('len'), {{ type:'bar',
   options:{{ scales:{{y:{{title:{{display:true,text:'games'}}}}}},
     plugins:{{legend:{{position:'bottom'}}}} }} }});
 </script>
+{_result_analysis(game)}
 </div></body></html>"""
 
 

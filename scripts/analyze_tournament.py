@@ -21,6 +21,7 @@ from collections import defaultdict
 from model_names import strip_coached, display_name, model_cell
 from elo_util import bradley_terry, elo_key, bootstrap_elo, gross_from_records
 from report_theme import BASE_CSS, CHART_SETUP
+from report_legends import legend as _legend
 
 # Coached is now the canonical (and only) run set; data lives in per-game folders.
 DATA = "runs/holdem_1hand/tournament_data.json"
@@ -557,6 +558,7 @@ def render_html(report: dict) -> str:
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
     {rows}
   </table>
+  {_legend('holdem')}
   <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
     fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
     win and adjusts for opponent strength — the fair comparison when models faced different opponents.
