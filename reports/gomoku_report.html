@@ -329,4 +329,93 @@ new Chart(document.getElementById('len'), { type:'bar',
   options:{ scales:{y:{title:{display:true,text:'games'}}},
     plugins:{legend:{position:'bottom'}} } });
 </script>
+
+  <h2>📊 Result analysis</h2>
+
+  <h3>🧬 Model spec sheet &amp; what predicts skill</h3>
+  <div class="callout">The ten leaderboard models, with size and release facts. Anthropic does not publish
+    parameter counts, so Claude rows are <code>undisclosed</code>. Ordered by active parameters.</div>
+  <table>
+    <tr><th class='model'>model</th><th>params (total)</th><th>active params</th><th>released</th><th>context</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek">DeepSeek V4 Pro</td><td>1.6T</td><td>49B</td><td>2026-04-24</td><td>1M</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.1</td><td>754B</td><td>40B</td><td>2026-04-07</td><td>203K</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.2</td><td>744B</td><td>40B</td><td>2026-06-13</td><td>1M</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>1T</td><td>32B</td><td>2026-04-20</td><td>256K</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>230B</td><td>10B</td><td>2026-03-18</td><td>200K</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M3</td><td>428B</td><td>23B</td><td>2026-06-01</td><td>1M</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>117B</td><td>5.1B</td><td>2025-07-22</td><td>128K</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Opus 4.8</td><td class='diag'>undisclosed</td><td class='diag'>undisclosed</td><td>2026-05-28</td><td>1M</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Sonnet 4.6</td><td class='diag'>undisclosed</td><td class='diag'>undisclosed</td><td>2026-02-17</td><td>1M</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba">Qwen3.7 Plus</td><td class='diag'>undisclosed</td><td class='diag'>undisclosed</td><td>2026-06-01</td><td>1M</td></tr>
+  </table>
+  <div class="callout"><b>Active parameters set a floor, not a ceiling.</b> The three weakest models in both
+    games — GPT-OSS 120B (5.1B active), MiniMax-M2.7 (10B) and MiniMax-M3 (23B) — are also the
+    smallest-active; the strong tier all sits at ≥32B active. Above ~30B, training and reasoning (not raw
+    count) decide the order — Kimi K2.6 (32B) outranks DeepSeek V4 Pro (49B&nbsp;/&nbsp;1.6T). Context length
+    and release date <b>don't</b> predict board skill: these games run under 20 moves, so 1M-context models
+    gain nothing.</div>
+
+  <h3>🛡️ Defense, not offense, decides games</h3>
+  <div class="callout">Completing an available five (<b>win-take</b>) is near-saturated for everyone — it doesn't
+    separate the field. The spread is all in <b>defense</b> (blocking the opponent's immediate five-threat)
+    and in <b>late-game blunders</b>: every model plays the opening cleanly, so skill is just not collapsing
+    once threats pile up. Gomoku's bigger 9×9 board makes defense harder, so block% sits lower than in
+    Connect Four across the board.</div>
+  <table>
+    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-phase blunder %</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.2</td><td>92</td><td>70</td><td>24</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>100</td><td>74</td><td>19</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.1</td><td>94</td><td>67</td><td>31</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek">DeepSeek V4 Pro</td><td>100</td><td>63</td><td>32</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Sonnet 4.6</td><td>97</td><td>61</td><td>41</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Opus 4.8</td><td>90</td><td>58</td><td>43</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba">Qwen3.7 Plus</td><td>93</td><td>53</td><td class='neg'>51</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M3</td><td>92</td><td>49</td><td class='neg'>60</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>86</td><td>47</td><td class='neg'>65</td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>90</td><td>47</td><td class='neg'>70</td></tr>
+  </table>
+  <div class="callout">win-take clusters at 86–100% (offense solved); block% and late-blunder% fan out across
+    the whole field and track the Elo order almost monotonically. Claude is the standout anomaly — strong in
+    Connect Four but its late-blunder rate balloons to ~43% here on the sparse 9×9 board.</div>
+
+  <h3>🎯 The decisive test: miss-rate by threat axis</h3>
+  <div class="callout">Boards are sent as <b>space-separated text</b>, read row by row (<code> X . O . .</code>). The cost of this
+    format is <b>flattening a 2-D grid into a 1-D line of text</b>: a horizontal line is contiguous in the text; a
+    vertical line is strided across rows; a diagonal is scattered furthest. Miss-rate climbs in exactly that
+    order. (Single, blockable immediate-loss threats only; unblockable double threats excluded.)</div>
+  <table>
+    <tr><th class='model'>threat axis</th><th>faced</th><th>missed</th><th>miss-rate</th></tr>
+    <tr><td class='model'>horizontal <span class="small">(contiguous in text)</span></td><td>428</td><td>24</td><td class='pos'>5.6%</td></tr>
+    <tr><td class='model'>vertical <span class="small">(strided across rows)</span></td><td>401</td><td>49</td><td>12.2%</td></tr>
+    <tr><td class='model'>diagonal ↘ <span class="small">(down-right)</span></td><td>284</td><td>43</td><td>15.1%</td></tr>
+    <tr><td class='model'>diagonal ↙ <span class="small">(down-left)</span></td><td>231</td><td>56</td><td class='neg'>24.2%</td></tr>
+    <tr><td class='model'><b>diagonal (both)</b></td><td>515</td><td>99</td><td>19.2%</td></tr>
+    <tr><td class='model'><b>all axes</b></td><td>1344</td><td>172</td><td>12.8%</td></tr>
+  </table>
+  <div class="callout"><b>Horizontal threats — laid out contiguously in the text — are the <i>easiest</i> to
+    defend (5.6%), while ↙ diagonals are missed 4× as often (24.2%).</b> This points to 2-D spatial
+    reconstruction from row-major text as the bottleneck. The effect is sharper here than in Connect Four:
+    the 9×9 gravity-free board leans entirely on reading lines out of the text.</div>
+
+  <h3>↘ vs ↙ : why the two diagonals differ</h3>
+  <div class="callout">The game is left-right symmetric, so an asymmetry between the two diagonals can't come
+    from the rules — it must come from the <b>text representation</b>. Following a diagonal means tracking a
+    row and a column index together: the <b>↘ main diagonal</b> increments both indices in lockstep and flows
+    <i>with</i> the top-to-bottom, left-to-right reading order; the <b>↙ anti-diagonal</b> increments the row
+    but <i>decrements</i> the column — two counters moving in opposite directions, against the reading
+    gradient — so it's missed more.</div>
+  <table>
+    <tr><th class='model'>model</th><th>↘ down-right</th><th>↙ down-left</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Opus 4.8</td><td>21% <span class="small">n=63</span></td><td>34% <span class="small">n=47</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Sonnet 4.6</td><td>10% <span class="small">n=52</span></td><td>12% <span class="small">n=43</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek">DeepSeek V4 Pro</td><td>6% <span class="small">n=32</span></td><td>25% <span class="small">n=28</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>23% <span class="small">n=30</span></td><td>30% <span class="small">n=23</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>15% <span class="small">n=27</span></td><td>29% <span class="small">n=24</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>16% <span class="small">n=32</span></td><td>26% <span class="small">n=19</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.1</td><td>12% <span class="small">n=25</span></td><td>14% <span class="small">n=21</span></td></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M3</td><td>20% <span class="small">n=10</span></td><td>42% <span class="small">n=12</span></td></tr>
+  </table>
+  <div class="callout">Pooled over both games: <b>↘ 13.3% vs ↙ 19.0%</b> (z=2.65, p=0.004). The direction is
+    <b>unanimous in Gomoku — every one of the eight models above misses ↙ more than ↘</b> — which is strong
+    evidence the asymmetry is systematic, not noise.</div>
 </div></body></html>
