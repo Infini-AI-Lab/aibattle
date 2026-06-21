@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🎴 Leduc Holdem</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -98,88 +98,96 @@
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/leduc<span class="cursor"></span></h1>
-  <div class="sub">🎴 Leduc Holdem · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 1300 games</div>
+  <div class="sub">🎴 Leduc Holdem · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 2350 games</div>
   <a class="replaybtn" href="leduc_replay.html?v=17">▶ watch hand replays</a>
   <div class="rules"><h3>How Leduc Holdem works</h3>A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of <span class="card">J</span><span class="card">Q</span><span class="card">K</span> (J &lt; Q &lt; K). Heads-up, two betting rounds:<ul><li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li><li><b>Round 1 (pre-flop):</b> players bet on their private card alone. Actions are <code>check</code>/<code>bet</code> and <code>call</code>/<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li><li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li><li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li><li>At <b>showdown</b>, pairing your private card with the public card wins; otherwise the <b>higher card</b> wins. A fold concedes the pot.</li></ul><div class="seq">Small enough to reason about precisely, yet it has genuine bluffing, value-betting and pot odds — pairing the board is the nuts, and a lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so the size of pots won/lost matters, not just who won the hand.</div></div>
 
   <div class="kpis">
-    <div class="kpi"><div class="v">1519</div><div class="l">top Elo · qwen3p7-plus</div></div>
-    <div class="kpi"><div class="v">42%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">1300</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">25</div><div class="l">deals/pair (seat-swapped)</div></div>
+    <div class="kpi"><div class="v">1509</div><div class="l">top Elo · qwen3p7-plus</div></div>
+    <div class="kpi"><div class="v">40%</div><div class="l">first-mover win rate</div></div>
+    <div class="kpi"><div class="v">2350</div><div class="l">games played</div></div>
+    <div class="kpi"><div class="v">50</div><div class="l">deals/pair (seat-swapped)</div></div>
   </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th></tr>
     <tr>
           <td>1</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
-          <td>1519<div class='small'>±27</div></td>
-          <td class='pos'>+0.11</td>
-          <td>40%</td><td>14%</td>
-          <td>39%</td>
+          <td>1509<div class='small'>±20</div></td>
+          <td class='pos'>+0.03</td>
+          <td>39%</td><td>18%</td>
+          <td>37%</td>
           <td>0.0%</td>
-          <td>4.1</td><td>33.3s</td>
+          <td>4.0</td><td>25.7s</td>
+          <td>600</td>
         </tr><tr>
-          <td>2</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
-          <td>1511<div class='small'>±27</div></td>
+          <td>2</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
+          <td>1508<div class='small'>±18</div></td>
           <td class='pos'>+0.05</td>
-          <td>43%</td><td>18%</td>
+          <td>41%</td><td>16%</td>
+          <td>41%</td>
+          <td>0.0%</td>
+          <td>3.9</td><td>117.6s</td>
+          <td>650</td>
+        </tr><tr>
+          <td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
+          <td>1506<div class='small'>±18</div></td>
+          <td class='pos'>+0.02</td>
+          <td>41%</td><td>20%</td>
+          <td>38%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>60.7s</td>
+          <td>600</td>
+        </tr><tr>
+          <td>4</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
+          <td>1505<div class='small'>±18</div></td>
+          <td class='pos'>+0.03</td>
+          <td>44%</td><td>14%</td>
           <td>43%</td>
           <td>0.0%</td>
-          <td>4.1</td><td>62.6s</td>
-        </tr><tr>
-          <td>3</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
-          <td>1507<div class='small'>±24</div></td>
-          <td class='pos'>+0.05</td>
-          <td>40%</td><td>19%</td>
-          <td>43%</td>
-          <td>0.0%</td>
-          <td>4.1</td><td>34.9s</td>
-        </tr><tr>
-          <td>4</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
-          <td>1504<div class='small'>±25</div></td>
-          <td class='pos'>+0.04</td>
-          <td>42%</td><td>14%</td>
-          <td>44%</td>
-          <td>0.0%</td>
-          <td>3.9</td><td>123.1s</td>
+          <td>3.9</td><td>19.3s</td>
+          <td>650</td>
         </tr><tr>
           <td>5</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
-          <td>1500<div class='small'>±24</div></td>
-          <td class=''>+0.00</td>
-          <td>45%</td><td>12%</td>
-          <td>47%</td>
-          <td>0.0%</td>
-          <td>3.9</td><td>8.7s</td>
-        </tr><tr>
-          <td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
-          <td>1495<div class='small'>±26</div></td>
-          <td class='neg'>-0.03</td>
-          <td>39%</td><td>23%</td>
-          <td>34%</td>
-          <td>0.0%</td>
-          <td>4.1</td><td>28.7s</td>
-        </tr><tr>
-          <td>7</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
-          <td>1489<div class='small'>±26</div></td>
-          <td class='neg'>-0.07</td>
-          <td>43%</td><td>15%</td>
+          <td>1501<div class='small'>±19</div></td>
+          <td class='neg'>-0.00</td>
+          <td>44%</td><td>14%</td>
           <td>45%</td>
           <td>0.0%</td>
-          <td>3.9</td><td>17.3s</td>
+          <td>3.9</td><td>8.4s</td>
+          <td>650</td>
+        </tr><tr>
+          <td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
+          <td>1499<div class='small'>±19</div></td>
+          <td class='neg'>-0.01</td>
+          <td>40%</td><td>23%</td>
+          <td>35%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>27.8s</td>
+          <td>650</td>
+        </tr><tr>
+          <td>7</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
+          <td>1496<div class='small'>±20</div></td>
+          <td class='neg'>-0.04</td>
+          <td>40%</td><td>20%</td>
+          <td>41%</td>
+          <td>0.0%</td>
+          <td>4.1</td><td>40.1s</td>
+          <td>650</td>
         </tr><tr>
           <td>8</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
-          <td>1473<div class='small'>±31</div></td>
+          <td>1476<div class='small'>±30</div></td>
           <td class='neg'>-0.18</td>
           <td>42%</td><td>15%</td>
           <td>40%</td>
           <td>0.0%</td>
           <td>4.0</td><td>81.5s</td>
+          <td>250</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision</div>
+  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>
   <div class="note"><b>Elo</b> is a chip-weighted Bradley-Terry rating (field mean 1500) — fed the chips won in each matchup rather than win counts, so it rewards <i>how much</i> you win, like Hold'em. <b>The leaderboard is ranked by Elo.</b> ± is one bootstrap SD (resampling games 300×); ratings within ±1
     of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
     shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
@@ -195,10 +203,10 @@
   </div>
 
   <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'><tr><th></th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT-OSS 120B</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th><th>Kimi K2.6</th></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='diag'>—</td><td class='neg'>18-20<div class='small'>12d</div></td><td class='neg'>17-19<div class='small'>14d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>21-22<div class='small'>7d</div></td><td class='pos'>25-19<div class='small'>6d</div></td><td class=''>17-17<div class='small'>16d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='pos'>20-18<div class='small'>12d</div></td><td class='diag'>—</td><td class='neg'>20-22<div class='small'>8d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class='pos'>18-16<div class='small'>16d</div></td><td class='pos'>20-19<div class='small'>11d</div></td><td class='pos'>20-17<div class='small'>13d</div></td><td class=''>18-18<div class='small'>14d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='pos'>19-17<div class='small'>14d</div></td><td class='pos'>22-20<div class='small'>8d</div></td><td class='diag'>—</td><td class='pos'>22-19<div class='small'>9d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>21-19<div class='small'>10d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class='pos'>22-20<div class='small'>8d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='pos'>24-21<div class='small'>5d</div></td><td class='pos'>22-20<div class='small'>8d</div></td><td class='neg'>19-22<div class='small'>9d</div></td><td class='diag'>—</td><td class='pos'>24-21<div class='small'>5d</div></td><td class=''>22-22<div class='small'>6d</div></td><td class='pos'>24-19<div class='small'>7d</div></td><td class=''>24-24<div class='small'>2d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>16-18<div class='small'>16d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class='diag'>—</td><td class='neg'>21-23<div class='small'>6d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>25-23<div class='small'>2d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='pos'>22-21<div class='small'>7d</div></td><td class='neg'>19-20<div class='small'>11d</div></td><td class='neg'>19-21<div class='small'>10d</div></td><td class=''>22-22<div class='small'>6d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class='diag'>—</td><td class='pos'>22-20<div class='small'>8d</div></td><td class='pos'>23-21<div class='small'>6d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='neg'>19-25<div class='small'>6d</div></td><td class='neg'>17-20<div class='small'>13d</div></td><td class='neg'>21-23<div class='small'>6d</div></td><td class='neg'>19-24<div class='small'>7d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class='diag'>—</td><td class=''>24-24<div class='small'>2d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class=''>17-17<div class='small'>16d</div></td><td class=''>18-18<div class='small'>14d</div></td><td class='neg'>20-22<div class='small'>8d</div></td><td class=''>24-24<div class='small'>2d</div></td><td class='neg'>23-25<div class='small'>2d</div></td><td class='neg'>21-23<div class='small'>6d</div></td><td class=''>24-24<div class='small'>2d</div></td><td class='diag'>—</td></tr></table>
+  <table class='h2h'><tr><th></th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT-OSS 120B</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th><th>Kimi K2.6</th></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='diag'>—</td><td class='neg'>36-40<div class='small'>24d</div></td><td class='neg'>36-40<div class='small'>24d</div></td><td class='neg'>41-44<div class='small'>15d</div></td><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>42-43<div class='small'>15d</div></td><td class='pos'>45-37<div class='small'>18d</div></td><td class='neg'>36-38<div class='small'>26d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='pos'>40-36<div class='small'>24d</div></td><td class='diag'>—</td><td class='neg'>36-40<div class='small'>24d</div></td><td class='neg'>42-43<div class='small'>15d</div></td><td class='pos'>18-16<div class='small'>16d</div></td><td class='neg'>39-40<div class='small'>21d</div></td><td class='pos'>42-33<div class='small'>25d</div></td><td class='pos'>40-38<div class='small'>22d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='pos'>40-36<div class='small'>24d</div></td><td class='pos'>40-36<div class='small'>24d</div></td><td class='diag'>—</td><td class='neg'>39-42<div class='small'>19d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>46-40<div class='small'>14d</div></td><td class='pos'>41-39<div class='small'>20d</div></td><td class=''>41-41<div class='small'>18d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='pos'>44-41<div class='small'>15d</div></td><td class='pos'>43-42<div class='small'>15d</div></td><td class='pos'>42-39<div class='small'>19d</div></td><td class='diag'>—</td><td class='pos'>24-21<div class='small'>5d</div></td><td class='neg'>44-47<div class='small'>9d</div></td><td class='pos'>44-38<div class='small'>18d</div></td><td class='pos'>47-43<div class='small'>10d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class=''>21-21<div class='small'>8d</div></td><td class='neg'>16-18<div class='small'>16d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>21-24<div class='small'>5d</div></td><td class='diag'>—</td><td class='neg'>21-23<div class='small'>6d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>25-23<div class='small'>2d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='pos'>43-42<div class='small'>15d</div></td><td class='pos'>40-39<div class='small'>21d</div></td><td class='neg'>40-46<div class='small'>14d</div></td><td class='pos'>47-44<div class='small'>9d</div></td><td class='pos'>23-21<div class='small'>6d</div></td><td class='diag'>—</td><td class='pos'>45-40<div class='small'>15d</div></td><td class='pos'>45-43<div class='small'>12d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='neg'>37-45<div class='small'>18d</div></td><td class='neg'>33-42<div class='small'>25d</div></td><td class='neg'>39-41<div class='small'>20d</div></td><td class='neg'>38-44<div class='small'>18d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>40-45<div class='small'>15d</div></td><td class='diag'>—</td><td class='pos'>45-43<div class='small'>12d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='pos'>38-36<div class='small'>26d</div></td><td class='neg'>38-40<div class='small'>22d</div></td><td class=''>41-41<div class='small'>18d</div></td><td class='neg'>43-47<div class='small'>10d</div></td><td class='neg'>23-25<div class='small'>2d</div></td><td class='neg'>43-45<div class='small'>12d</div></td><td class='neg'>43-45<div class='small'>12d</div></td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"game": "leduc_poker", "kind": "versus", "models": ["deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-oss-120b", "minimax-m2p7", "minimax-m3", "qwen3p7-plus", "kimi-k2p6"], "per_model": {"deepseek-v4-pro": {"games": 350, "wins": 140, "losses": 142, "draws": 68, "win_rate": 0.4, "draw_rate": 0.1943, "net_per_game": 0.0514, "first_move_win_rate": 0.4343, "invalid_rate": 0.0, "decisions": 730, "avg_len": 4.14, "avg_latency_s": 34.9, "len_hist": [36, 51, 127, 104, 29, 3]}, "glm-5p1": {"games": 350, "wins": 136, "losses": 132, "draws": 82, "win_rate": 0.3886, "draw_rate": 0.2343, "net_per_game": -0.0286, "first_move_win_rate": 0.3371, "invalid_rate": 0.0, "decisions": 734, "avg_len": 4.13, "avg_latency_s": 28.7, "len_hist": [40, 51, 118, 105, 36, 0]}, "glm-5p2": {"games": 300, "wins": 129, "losses": 116, "draws": 55, "win_rate": 0.43, "draw_rate": 0.1833, "net_per_game": 0.05, "first_move_win_rate": 0.4267, "invalid_rate": 0.0, "decisions": 604, "avg_len": 4.1, "avg_latency_s": 62.6, "len_hist": [45, 43, 82, 96, 34, 0]}, "gpt-oss-120b": {"games": 350, "wins": 159, "losses": 149, "draws": 42, "win_rate": 0.4543, "draw_rate": 0.12, "net_per_game": 0.0, "first_move_win_rate": 0.4743, "invalid_rate": 0.0, "decisions": 658, "avg_len": 3.89, "avg_latency_s": 8.7, "len_hist": [68, 66, 96, 81, 36, 3]}, "minimax-m2p7": {"games": 250, "wins": 104, "losses": 109, "draws": 37, "win_rate": 0.416, "draw_rate": 0.148, "net_per_game": -0.18, "first_move_win_rate": 0.4, "invalid_rate": 0.0, "decisions": 498, "avg_len": 4.01, "avg_latency_s": 81.5, "len_hist": [38, 40, 84, 63, 19, 6]}, "minimax-m3": {"games": 350, "wins": 150, "losses": 146, "draws": 54, "win_rate": 0.4286, "draw_rate": 0.1543, "net_per_game": -0.0743, "first_move_win_rate": 0.4514, "invalid_rate": 0.0, "decisions": 678, "avg_len": 3.87, "avg_latency_s": 17.3, "len_hist": [66, 56, 117, 83, 26, 2]}, "qwen3p7-plus": {"games": 300, "wins": 120, "losses": 138, "draws": 42, "win_rate": 0.4, "draw_rate": 0.14, "net_per_game": 0.1133, "first_move_win_rate": 0.3933, "invalid_rate": 0.0, "decisions": 612, "avg_len": 4.06, "avg_latency_s": 33.3, "len_hist": [34, 57, 92, 91, 26, 0]}, "kimi-k2p6": {"games": 350, "wins": 147, "losses": 153, "draws": 50, "win_rate": 0.42, "draw_rate": 0.1429, "net_per_game": 0.04, "first_move_win_rate": 0.44, "invalid_rate": 0.0, "decisions": 694, "avg_len": 3.88, "avg_latency_s": 123.1, "len_hist": [67, 54, 110, 95, 22, 2]}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": [18, 20, 12], "glm-5p2": [17, 19, 14], "gpt-oss-120b": [21, 24, 5], "minimax-m2p7": [21, 21, 8], "minimax-m3": [21, 22, 7], "qwen3p7-plus": [25, 19, 6], "kimi-k2p6": [17, 17, 16]}, "glm-5p1": {"deepseek-v4-pro": [20, 18, 12], "glm-5p2": [20, 22, 8], "gpt-oss-120b": [20, 22, 8], "minimax-m2p7": [18, 16, 16], "minimax-m3": [20, 19, 11], "qwen3p7-plus": [20, 17, 13], "kimi-k2p6": [18, 18, 14]}, "glm-5p2": {"deepseek-v4-pro": [19, 17, 14], "glm-5p1": [22, 20, 8], "gpt-oss-120b": [22, 19, 9], "minimax-m2p7": [0, 0, 0], "minimax-m3": [21, 19, 10], "qwen3p7-plus": [23, 21, 6], "kimi-k2p6": [22, 20, 8]}, "gpt-oss-120b": {"deepseek-v4-pro": [24, 21, 5], "glm-5p1": [22, 20, 8], "glm-5p2": [19, 22, 9], "minimax-m2p7": [24, 21, 5], "minimax-m3": [22, 22, 6], "qwen3p7-plus": [24, 19, 7], "kimi-k2p6": [24, 24, 2]}, "minimax-m2p7": {"deepseek-v4-pro": [21, 21, 8], "glm-5p1": [16, 18, 16], "glm-5p2": [0, 0, 0], "gpt-oss-120b": [21, 24, 5], "minimax-m3": [21, 23, 6], "qwen3p7-plus": [0, 0, 0], "kimi-k2p6": [25, 23, 2]}, "minimax-m3": {"deepseek-v4-pro": [22, 21, 7], "glm-5p1": [19, 20, 11], "glm-5p2": [19, 21, 10], "gpt-oss-120b": [22, 22, 6], "minimax-m2p7": [23, 21, 6], "qwen3p7-plus": [22, 20, 8], "kimi-k2p6": [23, 21, 6]}, "qwen3p7-plus": {"deepseek-v4-pro": [19, 25, 6], "glm-5p1": [17, 20, 13], "glm-5p2": [21, 23, 6], "gpt-oss-120b": [19, 24, 7], "minimax-m2p7": [0, 0, 0], "minimax-m3": [20, 22, 8], "kimi-k2p6": [24, 24, 2]}, "kimi-k2p6": {"deepseek-v4-pro": [17, 17, 16], "glm-5p1": [18, 18, 14], "glm-5p2": [20, 22, 8], "gpt-oss-120b": [24, 24, 2], "minimax-m2p7": [23, 25, 2], "minimax-m3": [21, 23, 6], "qwen3p7-plus": [24, 24, 2]}}, "elo": {"deepseek-v4-pro": 1507, "glm-5p1": 1495, "glm-5p2": 1511, "gpt-oss-120b": 1500, "minimax-m2p7": 1473, "minimax-m3": 1489, "qwen3p7-plus": 1519, "kimi-k2p6": 1504}, "elo_ci": {"deepseek-v4-pro": {"sd": 24.4, "lo": 1452, "hi": 1555}, "glm-5p1": {"sd": 25.8, "lo": 1442, "hi": 1546}, "glm-5p2": {"sd": 26.8, "lo": 1460, "hi": 1564}, "gpt-oss-120b": {"sd": 24.3, "lo": 1452, "hi": 1543}, "minimax-m2p7": {"sd": 31.3, "lo": 1414, "hi": 1539}, "minimax-m3": {"sd": 26.1, "lo": 1436, "hi": 1541}, "qwen3p7-plus": {"sd": 26.9, "lo": 1462, "hi": 1568}, "kimi-k2p6": {"sd": 25.2, "lo": 1449, "hi": 1555}}, "elo_basis": "chips", "len_bins": ["2\u20133", "3\u20134", "4\u20135", "5\u20136", "6\u20137", "7\u20137"], "first_player_win_rate": 0.4208, "num_games": 1300, "episodes_per_pair": 50};
+const R = {"game": "leduc_poker", "kind": "versus", "models": ["deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-oss-120b", "minimax-m2p7", "minimax-m3", "qwen3p7-plus", "kimi-k2p6"], "per_model": {"deepseek-v4-pro": {"games": 650, "wins": 257, "losses": 263, "draws": 130, "win_rate": 0.3954, "draw_rate": 0.2, "net_per_game": -0.0369, "first_move_win_rate": 0.4092, "invalid_rate": 0.0, "decisions": 1340, "avg_len": 4.1, "avg_latency_s": 40.1, "len_hist": [65, 102, 238, 197, 44, 4]}, "glm-5p1": {"games": 650, "wins": 257, "losses": 246, "draws": 147, "win_rate": 0.3954, "draw_rate": 0.2262, "net_per_game": -0.0108, "first_move_win_rate": 0.3538, "invalid_rate": 0.0, "decisions": 1346, "avg_len": 4.09, "avg_latency_s": 27.8, "len_hist": [83, 88, 225, 195, 59, 0]}, "glm-5p2": {"games": 600, "wins": 247, "losses": 234, "draws": 119, "win_rate": 0.4117, "draw_rate": 0.1983, "net_per_game": 0.0183, "first_move_win_rate": 0.3767, "invalid_rate": 0.0, "decisions": 1207, "avg_len": 4.08, "avg_latency_s": 60.7, "len_hist": [80, 104, 176, 170, 70, 0]}, "gpt-oss-120b": {"games": 650, "wins": 288, "losses": 271, "draws": 91, "win_rate": 0.4431, "draw_rate": 0.14, "net_per_game": -0.0046, "first_move_win_rate": 0.4492, "invalid_rate": 0.0, "decisions": 1218, "avg_len": 3.87, "avg_latency_s": 8.4, "len_hist": [126, 126, 186, 137, 69, 6]}, "minimax-m2p7": {"games": 250, "wins": 104, "losses": 109, "draws": 37, "win_rate": 0.416, "draw_rate": 0.148, "net_per_game": -0.18, "first_move_win_rate": 0.4, "invalid_rate": 0.0, "decisions": 498, "avg_len": 4.01, "avg_latency_s": 81.5, "len_hist": [38, 40, 84, 63, 19, 6]}, "minimax-m3": {"games": 650, "wins": 283, "losses": 275, "draws": 92, "win_rate": 0.4354, "draw_rate": 0.1415, "net_per_game": 0.0277, "first_move_win_rate": 0.4308, "invalid_rate": 0.0, "decisions": 1271, "avg_len": 3.89, "avg_latency_s": 19.3, "len_hist": [121, 111, 202, 153, 61, 2]}, "qwen3p7-plus": {"games": 600, "wins": 232, "losses": 260, "draws": 108, "win_rate": 0.3867, "draw_rate": 0.18, "net_per_game": 0.0333, "first_move_win_rate": 0.3667, "invalid_rate": 0.0, "decisions": 1202, "avg_len": 3.98, "avg_latency_s": 25.7, "len_hist": [81, 111, 192, 169, 46, 1]}, "kimi-k2p6": {"games": 650, "wins": 269, "losses": 279, "draws": 102, "win_rate": 0.4138, "draw_rate": 0.1569, "net_per_game": 0.0462, "first_move_win_rate": 0.4062, "invalid_rate": 0.0, "decisions": 1292, "avg_len": 3.91, "avg_latency_s": 117.6, "len_hist": [110, 112, 203, 180, 42, 3]}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": [36, 40, 24], "glm-5p2": [36, 40, 24], "gpt-oss-120b": [41, 44, 15], "minimax-m2p7": [21, 21, 8], "minimax-m3": [42, 43, 15], "qwen3p7-plus": [45, 37, 18], "kimi-k2p6": [36, 38, 26]}, "glm-5p1": {"deepseek-v4-pro": [40, 36, 24], "glm-5p2": [36, 40, 24], "gpt-oss-120b": [42, 43, 15], "minimax-m2p7": [18, 16, 16], "minimax-m3": [39, 40, 21], "qwen3p7-plus": [42, 33, 25], "kimi-k2p6": [40, 38, 22]}, "glm-5p2": {"deepseek-v4-pro": [40, 36, 24], "glm-5p1": [40, 36, 24], "gpt-oss-120b": [39, 42, 19], "minimax-m2p7": [0, 0, 0], "minimax-m3": [46, 40, 14], "qwen3p7-plus": [41, 39, 20], "kimi-k2p6": [41, 41, 18]}, "gpt-oss-120b": {"deepseek-v4-pro": [44, 41, 15], "glm-5p1": [43, 42, 15], "glm-5p2": [42, 39, 19], "minimax-m2p7": [24, 21, 5], "minimax-m3": [44, 47, 9], "qwen3p7-plus": [44, 38, 18], "kimi-k2p6": [47, 43, 10]}, "minimax-m2p7": {"deepseek-v4-pro": [21, 21, 8], "glm-5p1": [16, 18, 16], "glm-5p2": [0, 0, 0], "gpt-oss-120b": [21, 24, 5], "minimax-m3": [21, 23, 6], "qwen3p7-plus": [0, 0, 0], "kimi-k2p6": [25, 23, 2]}, "minimax-m3": {"deepseek-v4-pro": [43, 42, 15], "glm-5p1": [40, 39, 21], "glm-5p2": [40, 46, 14], "gpt-oss-120b": [47, 44, 9], "minimax-m2p7": [23, 21, 6], "qwen3p7-plus": [45, 40, 15], "kimi-k2p6": [45, 43, 12]}, "qwen3p7-plus": {"deepseek-v4-pro": [37, 45, 18], "glm-5p1": [33, 42, 25], "glm-5p2": [39, 41, 20], "gpt-oss-120b": [38, 44, 18], "minimax-m2p7": [0, 0, 0], "minimax-m3": [40, 45, 15], "kimi-k2p6": [45, 43, 12]}, "kimi-k2p6": {"deepseek-v4-pro": [38, 36, 26], "glm-5p1": [38, 40, 22], "glm-5p2": [41, 41, 18], "gpt-oss-120b": [43, 47, 10], "minimax-m2p7": [23, 25, 2], "minimax-m3": [43, 45, 12], "qwen3p7-plus": [43, 45, 12]}}, "elo": {"deepseek-v4-pro": 1496, "glm-5p1": 1499, "glm-5p2": 1506, "gpt-oss-120b": 1501, "minimax-m2p7": 1476, "minimax-m3": 1505, "qwen3p7-plus": 1509, "kimi-k2p6": 1508}, "elo_ci": {"deepseek-v4-pro": {"sd": 19.7, "lo": 1461, "hi": 1539}, "glm-5p1": {"sd": 18.6, "lo": 1460, "hi": 1534}, "glm-5p2": {"sd": 18.3, "lo": 1467, "hi": 1545}, "gpt-oss-120b": {"sd": 19.1, "lo": 1464, "hi": 1535}, "minimax-m2p7": {"sd": 29.5, "lo": 1416, "hi": 1537}, "minimax-m3": {"sd": 17.7, "lo": 1470, "hi": 1539}, "qwen3p7-plus": {"sd": 19.6, "lo": 1469, "hi": 1543}, "kimi-k2p6": {"sd": 17.9, "lo": 1474, "hi": 1544}}, "elo_basis": "chips", "len_bins": ["2\u20133", "3\u20134", "4\u20135", "5\u20136", "6\u20137", "7\u20137"], "first_player_win_rate": 0.3996, "num_games": 2350, "episodes_per_pair": 100};
 const pm=R.per_model, M=R.models;
 const DN = {"deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "glm-5p2": "GLM-5.2", "gpt-oss-120b": "GPT-OSS 120B", "minimax-m2p7": "MiniMax-M2.7", "minimax-m3": "MiniMax-M3", "qwen3p7-plus": "Qwen3.7 Plus", "kimi-k2p6": "Kimi K2.6"};
 const dn = m => DN[m] || m;

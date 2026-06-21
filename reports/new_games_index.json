@@ -44,26 +44,26 @@
     ],
     "ranking": [
       "qwen3p7-plus",
-      "glm-5p2",
-      "deepseek-v4-pro",
       "kimi-k2p6",
+      "glm-5p2",
+      "minimax-m3",
       "gpt-oss-120b",
       "glm-5p1",
-      "minimax-m3",
+      "deepseek-v4-pro",
       "minimax-m2p7"
     ],
     "ratings": {
-      "deepseek-v4-pro": 1507,
-      "glm-5p1": 1495,
-      "glm-5p2": 1511,
-      "gpt-oss-120b": 1500,
-      "minimax-m2p7": 1473,
-      "minimax-m3": 1489,
-      "qwen3p7-plus": 1519,
-      "kimi-k2p6": 1504
+      "deepseek-v4-pro": 1496,
+      "glm-5p1": 1499,
+      "glm-5p2": 1506,
+      "gpt-oss-120b": 1501,
+      "minimax-m2p7": 1476,
+      "minimax-m3": 1505,
+      "qwen3p7-plus": 1509,
+      "kimi-k2p6": 1508
     },
-    "meta": "1300 games \u00b7 25 deals/pair \u00b7 first-mover 42%",
-    "champ_line": "\ud83c\udfc6 qwen3p7-plus <span class='metric'>Elo 1519</span>"
+    "meta": "2350 games \u00b7 50 deals/pair \u00b7 first-mover 40%",
+    "champ_line": "\ud83c\udfc6 qwen3p7-plus <span class='metric'>Elo 1509</span>"
   },
   {
     "key": "repeated_colonel_blotto",

@@ -58,7 +58,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=27";
+  var V = "?v=29";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";

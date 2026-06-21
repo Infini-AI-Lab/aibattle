@@ -3,7 +3,7 @@
 <title>AI Battle Arena — ⚫ Othello 6×6</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -112,7 +112,7 @@
   <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th></tr>
     <tr>
           <td>1</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
           <td>1645<div class='small'>±22</div></td>
@@ -121,6 +121,7 @@
           <td>71%</td>
           <td>0.0%</td>
           <td>33.0</td><td>404.9s</td>
+          <td>200</td>
         </tr><tr>
           <td>2</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
           <td>1616<div class='small'>±22</div></td>
@@ -129,6 +130,7 @@
           <td>64%</td>
           <td>0.0%</td>
           <td>33.1</td><td>372.7s</td>
+          <td>200</td>
         </tr><tr>
           <td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
           <td>1481<div class='small'>±20</div></td>
@@ -137,6 +139,7 @@
           <td>44%</td>
           <td>0.0%</td>
           <td>32.8</td><td>268.6s</td>
+          <td>200</td>
         </tr><tr>
           <td>4</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
           <td>1471<div class='small'>±22</div></td>
@@ -145,6 +148,7 @@
           <td>39%</td>
           <td>0.0%</td>
           <td>32.7</td><td>22.4s</td>
+          <td>200</td>
         </tr><tr>
           <td>5</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
           <td>1287<div class='small'>±23</div></td>
@@ -153,9 +157,10 @@
           <td>15%</td>
           <td>0.0%</td>
           <td>33.0</td><td>133.5s</td>
+          <td>200</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision</div>
+  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>
   <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500). ± is one bootstrap SD (resampling games 300×); ratings within ±1
     of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
     shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within

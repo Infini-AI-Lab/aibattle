@@ -40,20 +40,13 @@ from report_legends import legend as _legend
 
 GAMES = ["connect4", "gomoku"]
 
-# Hand-authored "Result analysis" sections (spec sheet, defense table, threat-axis
-# miss-rate tables) folded into the board reports — originally pasted in by hand
-# (PR #7). They are a pinned narrative/data snapshot, kept in editable HTML files
-# under scripts/board_analysis/<game>.html so re-running the pipeline reproduces
-# them. The leaderboard above is data-driven; these blocks are not.
+# Hand-authored "Why win / why lose" analysis block (defense table, threat-axis
+# miss-rate, ↘/↙ diagonals) folded into the board reports — originally added by
+# hand (PR #7). Kept as an editable HTML file under
+# scripts/board_analysis/<game>_why.html so re-running the pipeline reproduces it.
+# The leaderboard/charts above are data-driven; this block is a pinned snapshot.
 _ANALYSIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "board_analysis")
 
-
-def _result_analysis(game: str) -> str:
-    path = os.path.join(_ANALYSIS_DIR, f"{game}.html")
-    if not os.path.exists(path):
-        return ""
-    with open(path, encoding="utf-8") as fh:
-        return "\n  " + fh.read().strip()
 NEED = {"connect4": 4, "gomoku": 5}
 # Coached is now the canonical (and only) run set. connect4 and gomoku each live
 # in their own per-game folder (runs/connect4, runs/gomoku) holding
@@ -125,7 +118,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 
 
 def _other(p):
@@ -188,6 +181,7 @@ def _blank(size):
         "games": 0, "wins": 0, "losses": 0, "draws": 0, "net": 0.0,
         "decisions": 0, "invalid": 0,
         "first_moves": 0, "first_move_wins": 0,
+        "second_moves": 0, "second_move_wins": 0,
         "win_opps": 0, "win_takes": 0,           # had an immediate win / took it
         "block_opps": 0, "blocks": 0,            # forced to defend / defended
         "lengths": [], "latencies": [],
@@ -315,6 +309,12 @@ def analyze_game(game: str, data: dict) -> dict:
                 if winner_name == fm:
                     stats[fm]["first_move_wins"] += 1
                     fp_wins += 1
+                # the other seat is the second mover
+                sm = next((nm for nm in seat_name.values() if nm != fm), None)
+                if sm is not None:
+                    stats[sm]["second_moves"] += 1
+                    if winner_name == sm:
+                        stats[sm]["second_move_wins"] += 1
 
             for idx, s in enumerate(steps):
                 nm = s["agent_name"]
@@ -383,6 +383,8 @@ def analyze_game(game: str, data: dict) -> dict:
             "net_per_game": round(st["net"] / n, 4),
             "first_move_win_rate": round(
                 st["first_move_wins"] / max(st["first_moves"], 1), 4),
+            "second_move_win_rate": round(
+                st["second_move_wins"] / max(st["second_moves"], 1), 4),
             "win_take_rate": round(st["win_takes"] / max(st["win_opps"], 1), 4),
             "win_opps": st["win_opps"],
             "block_rate": round(st["blocks"] / max(st["block_opps"], 1), 4),
@@ -446,125 +448,40 @@ def _elo_cell(e, ci):
     return f"{e}<div class='small'>±{sd:.0f}</div>"
 
 
-def render_game(game: str, rep: dict) -> str:
-    payload = json.dumps(rep)
-    pm = rep["per_model"]
-    models = rep["models"]
-    elo = rep["elo"]
-    ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
-
-    # results / tactics table, ranked by Elo (opponent-adjusted)
-    rows = ""
-    for i, m in enumerate(ranked, 1):
-        s = pm[m]
-        net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
-        rows += f"""<tr>
-          <td>{i}</td><td class='model'>{model_cell(m)}</td>
-          <td>{_elo_cell(rep['elo'][m], rep.get('elo_ci', {}).get(m))}</td>
-          <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
-          <td>{s['win_rate']*100:.0f}%</td><td>{s['draw_rate']*100:.0f}%</td>
-          <td>{s['first_move_win_rate']*100:.0f}%</td>
-          <td>{s['win_take_rate']*100:.0f}%<div class='small'>n={s['win_opps']}</div></td>
-          <td>{s['block_rate']*100:.0f}%<div class='small'>n={s['block_opps']}</div></td>
-          <td>{s['missed_wins']}/{s['allowed_losses']}</td>
-          <td>{s['invalid_rate']*100:.1f}%</td>
-          <td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td>
-        </tr>"""
-
-    # head-to-head
-    hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
-    for a in models:
-        hh += f"<tr><th class='model'>{model_cell(a)}</th>"
-        for b in models:
-            if a == b:
-                hh += "<td class='diag'>—</td>"
-            else:
-                w, l, d = rep["h2h"][a][b]
-                cls = "pos" if w > l else ("neg" if l > w else "")
-                hh += f"<td class='{cls}'>{w}-{l}<div class='small'>{d}d</div></td>"
-        hh += "</tr>"
-
-    # heatmaps
-    heat_cards = ""
-    for m in models:
-        heat_cards += (f"<div class='heatcard'><div class='hlabel'>{display_name(m)}</div>"
-                       f"{_heat_html(pm[m]['heat'])}</div>")
-
-    fpw = rep["first_player_win_rate"] * 100
-    # Per-move replay viewer exists for both board games (reports/<game>_replay.html).
-    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=17">'
-                  f'▶ watch game replays</a>')
-    # Emoji + plain name lead the subtitle; the h1 is the shell-prompt path.
-    emoji, name = TITLE[game].split(" ", 1)
-    return f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<title>AI Battle Arena — {TITLE[game]}</title>
-{_favicon(FAVICON[game])}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-{NAV_HEAD}
-<style>{BASE_CSS}
-  .heatwrap {{ display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; }}
-  .heatcard {{ text-align:center; }}
-  .hlabel {{ font-size:11px; color:var(--dim); margin-bottom:6px; }}
-  .board {{ display:grid; gap:1px; background:var(--line); padding:1px; }}
-  .cell {{ width:14px; height:14px; }}
-</style></head>
-<body><div class="wrap">
-  <h1>$ ~/aibattle/{game}<span class="cursor"></span></h1>
-  <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
-  {replay_btn}
-
-  {_intro_html(game)}
-
-  <div class="kpis">
-    <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
-    <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
-  </div>
-
-  <h2>🏆 Leaderboard &amp; tactical accuracy</h2>
-  <table>
-    <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>win-take</th><th>block</th>
-        <th>miss/allow</th><th>invalid%</th><th>plies</th><th>think</th></tr>
-    {rows}
-  </table>
-  {_legend('board')}
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
-    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
-    win-take = took an immediate win when one existed; block = removed an opponent's immediate
-    winning threat; miss/allow = missed wins / allowed losses (blunders). These are objective
-    tactical-accuracy measures read from the board.</div>
-
-  <div class="grid2">
-    <div><h3>Elo rating</h3><canvas id="elo"></canvas>
-      <div class="note">Whiskers show ±1 bootstrap SD (resampling games 300×) — wider bars mean
-        fewer/less-decisive games, so ratings that are within a whisker of each other are a near tie.</div></div>
-    <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
-  </div>
-  <div class="grid2">
-    <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
-    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
-  </div>
-  <div class="grid2">
-    <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
-    <div></div>
-  </div>
-
-  <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'>{hh}</table>
-
-  <h2>🗺️ Move-location heatmap</h2>
-  <div class="note">Where each model places pieces (brighter = more frequent). Reveals
-    center-control bias and opening preferences.</div>
-  <div class="heatwrap">{heat_cards}</div>
-
-<script>
+def _charts_js(payload: str, models: list, wdl_pct: bool = False) -> str:
+    """The Chart.js init block shared by both report layouts. Charts bind to
+    canvases by id, so the canvases may live in any section of the page as long
+    as this script runs once after them. wdl_pct renders win/draw/loss as a
+    100%-stacked share (comparable across models with unequal game counts)
+    instead of raw counts."""
+    dn_map = json.dumps({m: display_name(m) for m in models})
+    # The win/draw/loss chart (built as a plain string so the False branch stays
+    # byte-identical to the original count-based chart).
+    if wdl_pct:
+        pct_helper = ("const wpct=(m,k)=>{const t=pm[m].wins+pm[m].draws+pm[m].losses;"
+                      " return t?100*pm[m][k]/t:0;};\n")
+        wdl_chart = """new Chart(document.getElementById('wdl'), { type:'bar',
+  data:{ labels:M.map(dn), datasets:[
+    {label:'win %', backgroundColor:'#4ade80', data:M.map(m=>wpct(m,'wins'))},
+    {label:'draw %', backgroundColor:'#94a3b8', data:M.map(m=>wpct(m,'draws'))},
+    {label:'loss %', backgroundColor:'#f87171', data:M.map(m=>wpct(m,'losses'))},
+  ]},
+  options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'% of games'}}}, plugins:{legend:{position:'bottom'}} } });"""
+    else:
+        pct_helper = ""
+        wdl_chart = """new Chart(document.getElementById('wdl'), { type:'bar',
+  data:{ labels:M.map(dn), datasets:[
+    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
+    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
+    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+  ]},
+  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });"""
+    return f"""<script>
 const R = {payload};
 const pm=R.per_model, M=R.models;
-const DN = {json.dumps({m: display_name(m) for m in models})};
+const DN = {dn_map};
 const dn = m => DN[m] || m;
-{CHART_SETUP}
+{pct_helper}{CHART_SETUP}
 const COLORS=PALETTE;
 const ranked=[...M].sort((a,b)=>R.elo[b]-R.elo[a]);
 const eloRanked=ranked.filter(m=>R.elo[m]!=null);  // unrated (—) models omitted from the chart
@@ -593,13 +510,7 @@ new Chart(document.getElementById('elo'), {{ type:'bar',
     scales:{{x:{{min:Math.min(...eloRanked.map(m=>R.elo[m]-(ELO_CI[m]?.sd||0)))-20}}}},
     plugins:{{legend:{{display:false}}}} }}, plugins:[eloWhiskers] }});
 
-new Chart(document.getElementById('wdl'), {{ type:'bar',
-  data:{{ labels:M.map(dn), datasets:[
-    {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)}},
-    {{label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)}},
-    {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)}},
-  ]}},
-  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
+{wdl_chart}
 
 new Chart(document.getElementById('tac'), {{ type:'bar',
   data:{{ labels:M.map(dn), datasets:[
@@ -621,8 +532,130 @@ new Chart(document.getElementById('len'), {{ type:'bar',
     backgroundColor:COLORS[i%COLORS.length], data:pm[m].len_hist}}))}},
   options:{{ scales:{{y:{{title:{{display:true,text:'games'}}}}}},
     plugins:{{legend:{{position:'bottom'}}}} }} }});
-</script>
-{_result_analysis(game)}
+</script>"""
+
+
+def _why_analysis(game: str) -> str:
+    """The 'why win / why lose' static block (defense + threat-axis + diagonals)
+    shown in section 2, kept in editable HTML under
+    scripts/board_analysis/<game>_why.html."""
+    path = os.path.join(_ANALYSIS_DIR, f"{game}_why.html")
+    if not os.path.exists(path):
+        return ""
+    with open(path, encoding="utf-8") as fh:
+        return fh.read().strip()
+
+
+def render_game(game: str, rep: dict) -> str:
+    """Conclusion-first layout in three sections: (1) Results — who won,
+    (2) Why — what separates them, (3) Additional analysis."""
+    payload = json.dumps(rep)
+    pm = rep["per_model"]
+    models = rep["models"]
+    elo = rep["elo"]
+    ranked = sorted(models, key=lambda m: _elo_key(elo, m), reverse=True)
+
+    # Slim "who won" table: outcomes only (Elo, net/game, win%, 1st/2nd-move).
+    rows = ""
+    for i, m in enumerate(ranked, 1):
+        s = pm[m]
+        net_cls = "pos" if s["net_per_game"] > 0 else ("neg" if s["net_per_game"] < 0 else "")
+        rows += f"""<tr>
+          <td>{i}</td><td class='model'>{model_cell(m)}</td>
+          <td>{_elo_cell(rep['elo'][m], rep.get('elo_ci', {}).get(m))}</td>
+          <td class='{net_cls}'>{s['net_per_game']:+.2f}</td>
+          <td>{s['win_rate']*100:.0f}%</td>
+          <td>{s['first_move_win_rate']*100:.0f}%</td>
+          <td>{s['second_move_win_rate']*100:.0f}%</td>
+          <td>{s['games']}</td>
+        </tr>"""
+
+    # head-to-head
+    hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
+    for a in models:
+        hh += f"<tr><th class='model'>{model_cell(a)}</th>"
+        for b in models:
+            if a == b:
+                hh += "<td class='diag'>—</td>"
+            else:
+                w, l, d = rep["h2h"][a][b]
+                cls = "pos" if w > l else ("neg" if l > w else "")
+                hh += f"<td class='{cls}'>{w}-{l}<div class='small'>{d}d</div></td>"
+        hh += "</tr>"
+
+    # heatmaps
+    heat_cards = ""
+    for m in models:
+        heat_cards += (f"<div class='heatcard'><div class='hlabel'>{display_name(m)}</div>"
+                       f"{_heat_html(pm[m]['heat'])}</div>")
+
+    fpw = rep["first_player_win_rate"] * 100
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=17">'
+                  f'▶ watch game replays</a>')
+    emoji, name = TITLE[game].split(" ", 1)
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>AI Battle Arena — {TITLE[game]}</title>
+{_favicon(FAVICON[game])}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+{NAV_HEAD}
+<style>{BASE_CSS}
+  .heatwrap {{ display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; }}
+  .heatcard {{ text-align:center; }}
+  .hlabel {{ font-size:11px; color:var(--dim); margin-bottom:6px; }}
+  .board {{ display:grid; gap:1px; background:var(--line); padding:1px; }}
+  .cell {{ width:14px; height:14px; }}
+  /* Prominent dividers for the three top-level sections (Results / Why / More). */
+  h2.section {{ font-size:23px; margin:56px 0 18px; padding-top:16px;
+    border-top:3px solid var(--red); color:var(--red); letter-spacing:.01em; }}
+  h2.section:first-of-type {{ margin-top:32px; }}
+</style></head>
+<body><div class="wrap">
+  <h1>$ ~/aibattle/{game}<span class="cursor"></span></h1>
+  <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
+  {replay_btn}
+
+  {_intro_html(game)}
+
+  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
+    <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
+    <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
+  </div>
+  <table>
+    <tr><th>#</th><th class='model'>Model</th><th>Elo</th><th>Net/game</th><th>Win%</th>
+        <th>1st-move win%</th><th>2nd-move win%</th><th>Games</th></tr>
+    {rows}
+  </table>
+  {_legend('board_results')}
+  <div class="grid2">
+    <div><h3>Elo rating</h3><canvas id="elo"></canvas>
+      <div class="note">Whiskers show ±1 bootstrap SD (resampling games 300×) — wider bars mean
+        fewer/less-decisive games, so ratings within a whisker of each other are a near tie.</div></div>
+    <div><h3>Win / draw / loss</h3><canvas id="wdl"></canvas></div>
+  </div>
+  <h3>⚔️ Head-to-head (row wins–losses vs column)</h3>
+  <table class='h2h'>{hh}</table>
+
+  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
+  <div class="grid2">
+    <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
+    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
+  </div>
+  {_why_analysis(game)}
+
+  <h2 class="section">3 · 🔬 Additional analysis</h2>
+  <div class="grid2">
+    <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
+    <div></div>
+  </div>
+  <h3>🗺️ Move-location heatmap</h3>
+  <div class="note">Where each model places pieces (brighter = more frequent). Reveals
+    center-control bias and opening preferences.</div>
+  <div class="heatwrap">{heat_cards}</div>
+
+{_charts_js(payload, models, wdl_pct=True)}
 </div></body></html>"""
 
 
@@ -750,7 +783,7 @@ def _arena_board(entries: list) -> str:
             f"<td class='best'>{r['best']}</td></tr>")
     return f"""
   <section class="board">
-    <div class="arena-head"><h2>🏅 Cross-game model leaderboard</h2>
+    <div class="arena-head"><h2>🏅 Model leaderboard</h2>
       <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
     <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
       Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to

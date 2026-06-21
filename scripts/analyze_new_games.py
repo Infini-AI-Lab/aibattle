@@ -142,7 +142,7 @@ INTRO = {
         "control decisive."),
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 
 
 def _intro_html(game: str) -> str:
@@ -455,6 +455,7 @@ def render_versus(rep: dict) -> str:
           <td>{s['first_move_win_rate']*100:.0f}%</td>
           <td>{s['invalid_rate']*100:.1f}%</td>
           <td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td>
+          <td>{s['games']}</td>
         </tr>"""
 
     hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
@@ -501,7 +502,7 @@ def render_versus(rep: dict) -> str:
   <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th></tr>
+        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th></tr>
     {rows}
   </table>
   {_legend('versus')}

@@ -19,7 +19,7 @@ from model_names import display_name
 from report_theme import BASE_CSS
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 
 # The six games that feed the cross-game ranking (must match
 # analyze_board_tournament.ARENA_GAMES), with a friendly title and the sample-size

@@ -37,7 +37,7 @@ HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -462,6 +462,7 @@ def render_html(report: dict) -> str:
           <td>{s['avg_bet_xpot']:.2f}x</td>
           <td>{s['avg_latency_s']:.1f}s</td>
           <td>{s['avg_comp_tokens']:,}</td>
+          <td>{s['hands']}</td>
         </tr>"""
 
     # head-to-head matrix
@@ -555,7 +556,7 @@ def render_html(report: dict) -> str:
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
-        <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th></tr>
+        <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
     {rows}
   </table>
   {_legend('holdem')}

@@ -27,7 +27,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -74,9 +74,11 @@ def render_html(rep: dict, beh: dict) -> str:
     for i, r in enumerate(lb, 1):
         rd = r["rank_distribution"]
         rc = "".join(f"<td>{rd.get(str(k),0)}</td>" for k in range(1, n + 1))
+        tables = sum(rd.get(str(k), 0) for k in range(1, n + 1))
         trows += (f"<tr><td>{i}</td><td class='model'>{model_cell(r['model'])}</td>"
                   f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
-                  f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>{rc}</tr>")
+                  f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>"
+                  f"<td>{tables}</td>{rc}</tr>")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -111,7 +113,7 @@ def render_html(rep: dict, beh: dict) -> str:
   <h2>Leaderboard <span class="note">(+ finishing-place distribution)</span></h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>avg rank</th><th>top-1%</th>
-        <th>avg final stack</th><th>bust%</th>{rankhdr}</tr>
+        <th>avg final stack</th><th>bust%</th><th>tables</th>{rankhdr}</tr>
     {trows}
   </table>
   {_legend('table')}

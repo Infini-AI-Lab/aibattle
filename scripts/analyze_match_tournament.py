@@ -29,7 +29,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -118,7 +118,8 @@ def render_html(rep: dict, beh: dict) -> str:
                   f"<td><b>{elo_disp}</b></td>"
                   f"<td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}/{r['matches']}</td>"
                   f"<td>{r['draws']}</td><td>{r['busted_out_rate']*100:.0f}%</td>"
-                  f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td></tr>")
+                  f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td>"
+                  f"<td>{r['matches']}</td></tr>")
     head = "".join(f"<th>{display_name(m)}</th>" for m in models)
     grid = ""
     for a in models:
@@ -172,7 +173,7 @@ def render_html(rep: dict, beh: dict) -> str:
   <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
-        <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th></tr>
+        <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th><th>matches</th></tr>
     {trows}
   </table>
   {_legend('match')}
