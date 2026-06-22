@@ -1,0 +1,51 @@
+# A/B: does estimate->act scaffolding beat a single-call model on Hold'em?
+# Both seats wrap the SAME model (glm-5p2); the only difference is the harness,
+# so any chip-delta is attributable to the scaffolding. seat_swap cancels
+# position/button bias. Needs a Fireworks key: export FIREWORKS_API_KEY=$(cat .fireworks)
+game:
+  name: holdem
+  version: "1.0.0"
+  params: { starting_stack: 200 }
+
+players:
+  player_0:
+    agent:
+      type: model                      # baseline: one call per decision
+      name: glm5p2-plain
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+  player_1:
+    agent:
+      type: local                      # estimate -> act
+      harness: holdem_estimate_act
+      name: glm5p2-estimate-act
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+
+run:
+  episodes: 40
+  seed: 17
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 16
+
+output:
+  dir: ./experiments/holdem_estimate_act_ab
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

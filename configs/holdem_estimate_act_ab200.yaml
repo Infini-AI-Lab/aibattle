@@ -1,0 +1,50 @@
+# A/B (200 hands): plain coached vs estimate->act, same GLM-5.2.
+# Only difference is the harness; seat_swap mirrors each deal to cancel
+# card/position luck. Output goes to ./run-harness (agent-testing, not runs/).
+game:
+  name: holdem
+  version: "1.0.0"
+  params: { starting_stack: 200 }
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: glm5p2-plain
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+  player_1:
+    agent:
+      type: local
+      harness: holdem_estimate_act
+      name: glm5p2-estimate-act
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+
+run:
+  episodes: 200
+  seed: 100
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 64
+
+output:
+  dir: ./run-harness/holdem_estimate_act_ab_200
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

@@ -1,0 +1,49 @@
+# A/B (200 hands) on kimi-k2p6: plain coached vs estimate->act.
+# Same structure/seed as the glm-5p2 A/B so the two models face identical deals.
+game:
+  name: holdem
+  version: "1.0.0"
+  params: { starting_stack: 200 }
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: kimi-k2p6-plain
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/kimi-k2p6
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+  player_1:
+    agent:
+      type: local
+      harness: holdem_estimate_act
+      name: kimi-k2p6-estimate-act
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/kimi-k2p6
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+
+run:
+  episodes: 200
+  seed: 100
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 64
+
+output:
+  dir: ./run-harness/holdem_estimate_act_ab_200_kimi
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

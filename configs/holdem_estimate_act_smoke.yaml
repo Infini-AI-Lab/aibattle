@@ -1,0 +1,49 @@
+# Smoke test: plain coached agent vs estimate->act, same GLM-5.2, 5 hands.
+# Verifies the pipeline end-to-end and gives a first qualitative read.
+game:
+  name: holdem
+  version: "1.0.0"
+  params: { starting_stack: 200 }
+
+players:
+  player_0:
+    agent:
+      type: model
+      name: glm5p2-plain
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+  player_1:
+    agent:
+      type: local
+      harness: holdem_estimate_act
+      name: glm5p2-estimate-act
+      coached: true
+      model:
+        provider: fireworks
+        model_id: accounts/fireworks/models/glm-5p2
+        api_key_env: FIREWORKS_API_KEY
+        temperature: 0.6
+        max_tokens: 131072
+        timeout_s: 900
+      max_retries: 2
+
+run:
+  episodes: 5
+  seed: 23
+  seat_swap: true
+  on_invalid_action: fallback
+  max_concurrency: 10
+
+output:
+  dir: ./experiments/holdem_estimate_act_smoke
+  save_full_log: true
+  save_summary: true
+  save_trajectories: true
+  save_transcripts: true

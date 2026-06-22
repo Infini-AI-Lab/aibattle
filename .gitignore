@@ -40,6 +40,10 @@ runs/
 reports/runs
 runs_pre_merge_bak/
 
+# Agent-testing run outputs (not production)
+run-harness/
+experiments/
+
 # Debug heartbeat logs (per-move progress traces)
 data-log/
 
