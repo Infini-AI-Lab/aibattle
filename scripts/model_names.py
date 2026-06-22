@@ -25,6 +25,8 @@ DISPLAY_NAMES = {
     "deepseek-v4-pro": "DeepSeek V4 Pro",
     "qwen3p7-plus": "Qwen3.7 Plus",
     "gpt-oss-120b": "GPT-OSS 120B",
+    "gpt-5.4": "GPT 5.4",
+    "gpt-5.5": "GPT 5.5",
     "claude-opus-4.8": "Claude Opus 4.8",
     "claude-sonnet-4.6": "Claude Sonnet 4.6",
 }
@@ -51,6 +53,8 @@ COMPANIES = {
     "deepseek-v4-pro": ("DeepSeek", "deepseek.svg"),
     "qwen3p7-plus": ("Alibaba", "alibaba.svg"),
     "gpt-oss-120b": ("OpenAI", "openai.svg"),
+    "gpt-5.4": ("OpenAI", "openai.svg"),
+    "gpt-5.5": ("OpenAI", "openai.svg"),
     "claude-opus-4.8": ("Anthropic", "anthropic.svg"),
     "claude-sonnet-4.6": ("Anthropic", "anthropic.svg"),
 }
