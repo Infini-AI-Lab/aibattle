@@ -138,6 +138,7 @@ def analyze(data: dict) -> dict:
     # how often (winning big pots > winning many tiny ones), while staying on the
     # 1500 scale and adjusting for who each model actually played.
     h2h_gross = defaultdict(lambda: defaultdict(float))
+    h2h_hands = defaultdict(lambda: defaultdict(int))  # hands played each direction
     elo_records = []  # per-hand (a, b, chips_a, chips_b) for the Elo bootstrap
     pair_games = defaultdict(int)
 
@@ -166,6 +167,8 @@ def analyze(data: dict) -> dict:
             ra, rb = returns[name_seat[a]], returns[name_seat[b]]
             h2h[a][b] += ra
             h2h[b][a] += rb
+            h2h_hands[a][b] += 1
+            h2h_hands[b][a] += 1
             # gross chips each side extracted this hand (the chip-weighted "score")
             h2h_gross[a][b] += max(ra, 0.0)
             h2h_gross[b][a] += max(rb, 0.0)
@@ -353,6 +356,7 @@ def analyze(data: dict) -> dict:
         out_models[m] = {
             "hands": st["hands"], "decisions": st["decisions"],
             "chips": round(st["chips"], 1),
+            "chips_per_hand": round(st["chips"] / n, 3),
             "bb_per_100": round((st["chips"] / n) / BB * 100, 2),
             "win_rate": round(st["wins"] / n, 4),
             "wins": st["wins"], "losses": st["losses"], "ties": st["ties"],
@@ -388,7 +392,10 @@ def analyze(data: dict) -> dict:
             "betsize_dist": betsize_dist,
             "showdown_cats": showdown_cat_dist,
         }
-    h2h_out = {a: {b: round(h2h[a][b], 1) for b in models if b != a} for a in models}
+    # Per-hand net chips (hand counts differ across pairs once the field is
+    # assembled in waves, so totals aren't comparable — normalize by hands played).
+    h2h_out = {a: {b: round(h2h[a][b] / max(h2h_hands[a][b], 1), 3)
+                   for b in models if b != a} for a in models}
     # Chip-weighted Elo: a Bradley-Terry fit fed each pair's gross chips won in
     # each direction (instead of hand counts). Magnitude counts — a model that
     # wins big pots outrates one that wins more small ones — and the fit adjusts
@@ -451,7 +458,7 @@ def render_html(report: dict) -> str:
           <td>{i}</td><td class='model'>{model_cell(m)}</td>
           <td class='stylecell'><div class='slabel'><b>{s['style']['label']}</b></div><div class='stags'>{tags or '&nbsp;'}</div></td>
           <td><b>{elo_disp}</b></td>
-          <td class='{chip_cls}'>{s['chips']:+.0f}</td>
+          <td class='{chip_cls}'>{s['chips_per_hand']:+.2f}</td>
           <td class='{chip_cls}'>{s['bb_per_100']:+.1f}</td>
           <td>{s['win_rate']*100:.0f}%</td>
           <td>{s['vpip']*100:.0f}%</td>
@@ -476,7 +483,7 @@ def render_html(report: dict) -> str:
             else:
                 v = h2h[a].get(b, 0)
                 cls = "pos" if v > 0 else ("neg" if v < 0 else "")
-                hh += f"<td class='{cls}' style='--v:{v}'>{v:+.0f}</td>"
+                hh += f"<td class='{cls}' style='--v:{v}'>{v:+.2f}</td>"
         hh += "</tr>"
 
     # postflop / showdown table
@@ -554,7 +561,7 @@ def render_html(report: dict) -> str:
 
   <h2>🏆 Leaderboard &amp; player profiles</h2>
   <table>
-    <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips</th><th>bb/100</th>
+    <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips/hand</th><th>bb/100</th>
         <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
         <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
     {rows}
@@ -624,7 +631,8 @@ def render_html(report: dict) -> str:
     (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
 
   <h2>⚔️ Head-to-head chip results</h2>
-  <div class="sub">Net chips the row model won against the column model (sums to zero per pair).</div>
+  <div class="sub">Net chips <b>per hand</b> the row model won against the column model
+    (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
   <table class="h2h">{hh}</table>
 
 <script>
