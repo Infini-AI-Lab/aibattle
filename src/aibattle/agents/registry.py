@@ -72,7 +72,7 @@ def _build_local_agent(cfg: dict, game_name: str) -> Agent:
                          "two_stage, self_refine)")
     model_cfg = cfg.get("model") or {}
     client = make_client(model_cfg)
-    template = make_template(game_name)
+    template = make_template(game_name, coached=bool(cfg.get("coached", False)))
     return make_harness(
         harness,
         client=client,
