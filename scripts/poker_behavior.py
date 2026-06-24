@@ -25,6 +25,13 @@ MODEL_COLORS = {
     "kimi-k2p6":       "#4ade80",  # green
     "glm-5p1":         "#fbbf24",  # amber
     "minimax-m2p7":    "#a78bfa",  # purple
+    "minimax-m3":      "#fb7185",  # rose
+    "glm-5p2":         "#22c55e",  # emerald
+    "qwen3p7-plus":    "#14b8a6",  # teal
+    "gpt-5.4":         "#2563eb",  # royal blue
+    "gpt-5.5":         "#7c3aed",  # violet
+    "claude-opus-4.8": "#f97316",  # orange
+    "claude-sonnet-4.6": "#d97706",  # ochre
 }
 DEFAULT_COLOR = "#94a3b8"
 STREETS = ["preflop", "flop", "turn", "river"]
@@ -171,10 +178,14 @@ def _finalize(st: dict) -> dict:
     }
 
 
-def behavior(ep_glob: str, hand_key: str, models: list) -> dict:
-    """Return {model: finalized behavior stats} over all ep files in ``ep_glob``."""
+def behavior(ep_glob: str | list[str], hand_key: str, models: list) -> dict:
+    """Return {model: finalized behavior stats} over all matching ep files."""
     stats = {m: _blank() for m in models}
-    for path in sorted(glob.glob(ep_glob)):
+    patterns = [ep_glob] if isinstance(ep_glob, str) else ep_glob
+    paths = []
+    for pattern in patterns:
+        paths.extend(glob.glob(pattern))
+    for path in sorted(set(paths)):
         try:
             ep = strip_coached(json.load(open(path, encoding="utf-8")))
         except (OSError, json.JSONDecodeError):

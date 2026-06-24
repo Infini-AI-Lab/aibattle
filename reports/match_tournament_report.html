@@ -99,11 +99,38 @@
   h2.section:first-of-type { margin-top:32px; }
   td.hh { font-weight:700; }
   td.hh .rec { display:block; font-weight:400; font-size:11px; color:var(--dim); margin-top:1px; }
+  .strategy-intro { background:var(--faint); border:1px solid var(--line);
+    padding:14px 16px; margin:8px 0 18px; }
+  .strategy-glossary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px 16px; margin-top:12px; }
+  .strategy-gloss { border-top:1px solid var(--line); padding-top:7px; }
+  .strategy-gloss b { display:block; color:var(--fg); }
+  .strategy-gloss span { display:block; color:var(--fg); }
+  .strategy-gloss em { display:block; color:var(--dim); font-style:normal; font-size:11px; }
+  .strategy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px; align-items:start; }
+  .strategy-card { border:1px solid var(--line); background:var(--panel);
+    padding:16px; }
+  .strategy-head { display:flex; justify-content:space-between; gap:12px;
+    align-items:flex-start; margin-bottom:8px; }
+  .strategy-head h3 { margin-bottom:4px; }
+  .strategy-kpi { text-align:right; font-weight:700; font-size:18px; white-space:nowrap; }
+  .strategy-kpi span { display:block; color:var(--dim); font-size:10px; font-weight:400; }
+  .strategy-card canvas { max-height:230px; margin:4px 0 10px; }
+  .strategy-cases { margin:6px 0 0; padding-left:22px; font-size:12px; line-height:1.45; }
+  .strategy-cases li { margin:8px 0; }
+  .case-title { font-weight:700; }
+  .case-signal { color:var(--fg); margin-top:2px; }
+  .case-meta { color:var(--dim); font-size:11px; margin-top:2px; }
+  .case-link { display:inline-block; margin-top:5px; border:1px solid var(--line);
+    padding:3px 8px; color:#4338ca; text-decoration:none; }
+  .case-link:hover { border-color:var(--red); color:var(--fg); }
+  @media (max-width:860px) { .strategy-grid, .strategy-glossary { grid-template-columns:1fr; } }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/match<span class="cursor"></span></h1>
-  <div class="sub">🃏 Hold'em Match · Heads-up · 60 matches/pair · up to 30 hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
-  <a class="replaybtn" href="match_replay.html?v=17">▶ watch match replays</a>
+  <div class="sub">🃏 Hold'em Match · Heads-up · 20-60 matches/pair · 96 pair logs · 3640 total matches · up to 30 hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
+  <a class="replaybtn" href="match_replay.html?v=18&cacheBust=18">▶ watch match replays</a>
   <div class="rules">
     <h3>Setup — Hold'em Match</h3>
     Standard heads-up No-Limit
@@ -116,7 +143,7 @@
         30 hands</b>.</li>
       <li><b>Stacks carry across hands</b> within a match — winning chips early creates a
         real lead, so position and stack pressure matter.</li>
-      <li><b>60 matches per pair</b>, seats swapped; the
+      <li><b>20-60 matches/pair</b>, seats swapped where available; the
         <b>match winner</b> is whoever busts the other (or leads at the cap).</li>
     </ul>
     <div class="seq">Win-or-lose by design — chips don't count past the match outcome —
@@ -130,7 +157,7 @@
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
         <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th><th>matches</th></tr>
-    <tr><td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td><b>1608<div class='small'>±18</div></b></td><td>65%</td><td>235/360</td><td>0</td><td>17%</td><td>26.9</td><td>138.2</td><td>360</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td><b>1580<div class='small'>±18</div></b></td><td>61%</td><td>220/360</td><td>0</td><td>12%</td><td>28.0</td><td>124.4</td><td>360</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td><b>1536<div class='small'>±13</div></b></td><td>56%</td><td>338/600</td><td>0</td><td>9%</td><td>28.6</td><td>117.8</td><td>600</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td><b>1533<div class='small'>±14</div></b></td><td>56%</td><td>335/600</td><td>1</td><td>11%</td><td>27.4</td><td>149.4</td><td>600</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td><b>1517<div class='small'>±14</div></b></td><td>53%</td><td>320/600</td><td>0</td><td>5%</td><td>28.9</td><td>109.0</td><td>600</td></tr><tr><td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td><b>1499<div class='small'>±14</div></b></td><td>50%</td><td>293/580</td><td>0</td><td>9%</td><td>28.3</td><td>144.4</td><td>580</td></tr><tr><td>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td><b>1494<div class='small'>±14</div></b></td><td>48%</td><td>208/430</td><td>0</td><td>15%</td><td>26.7</td><td>181.8</td><td>430</td></tr><tr><td>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td><b>1491<div class='small'>±16</div></b></td><td>51%</td><td>234/460</td><td>4</td><td>9%</td><td>27.0</td><td>192.4</td><td>460</td></tr><tr><td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td><b>1444<div class='small'>±17</div></b></td><td>41%</td><td>175/430</td><td>1</td><td>13%</td><td>26.3</td><td>209.4</td><td>430</td></tr><tr><td>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td><b>1439<div class='small'>±14</div></b></td><td>41%</td><td>238/580</td><td>2</td><td>11%</td><td>27.6</td><td>193.7</td><td>580</td></tr><tr><td>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td><b>1435<div class='small'>±17</div></b></td><td>42%</td><td>193/460</td><td>3</td><td>13%</td><td>27.9</td><td>166.0</td><td>460</td></tr><tr><td>12</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td><b>1423<div class='small'>±14</div></b></td><td>39%</td><td>224/580</td><td>3</td><td>6%</td><td>28.9</td><td>146.0</td><td>580</td></tr>
+    <tr><td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td><b>1608<div class='small'>±16</div></b></td><td>65%</td><td>273/420</td><td>0</td><td>18%</td><td>26.7</td><td>143.7</td><td>420</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td><b>1579<div class='small'>±16</div></b></td><td>60%</td><td>254/420</td><td>0</td><td>14%</td><td>27.6</td><td>132.0</td><td>420</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td><b>1535<div class='small'>±12</div></b></td><td>56%</td><td>417/740</td><td>0</td><td>9%</td><td>28.4</td><td>124.5</td><td>740</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td><b>1531<div class='small'>±12</div></b></td><td>56%</td><td>412/740</td><td>1</td><td>11%</td><td>27.3</td><td>155.0</td><td>740</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td><b>1512<div class='small'>±11</div></b></td><td>53%</td><td>390/740</td><td>0</td><td>5%</td><td>29.0</td><td>109.0</td><td>740</td></tr><tr><td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td><b>1499<div class='small'>±14</div></b></td><td>50%</td><td>293/580</td><td>0</td><td>9%</td><td>28.3</td><td>144.4</td><td>580</td></tr><tr><td>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td><b>1499<div class='small'>±13</div></b></td><td>49%</td><td>323/660</td><td>0</td><td>17%</td><td>26.2</td><td>188.6</td><td>660</td></tr><tr><td>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td><b>1496<div class='small'>±14</div></b></td><td>51%</td><td>298/580</td><td>5</td><td>9%</td><td>27.0</td><td>192.1</td><td>580</td></tr><tr><td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td><b>1455<div class='small'>±13</div></b></td><td>42%</td><td>276/660</td><td>2</td><td>15%</td><td>25.9</td><td>218.8</td><td>660</td></tr><tr><td>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td><b>1438<div class='small'>±14</div></b></td><td>41%</td><td>238/580</td><td>2</td><td>11%</td><td>27.6</td><td>193.7</td><td>580</td></tr><tr><td>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td><b>1426<div class='small'>±13</div></b></td><td>40%</td><td>233/580</td><td>5</td><td>13%</td><td>27.9</td><td>166.0</td><td>580</td></tr><tr><td>12</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td><b>1423<div class='small'>±14</div></b></td><td>39%</td><td>224/580</td><td>3</td><td>6%</td><td>28.9</td><td>146.0</td><td>580</td></tr>
   </table>
   <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating · <b>win%</b> matches won · <b>wins/matches</b> matches won / played · <b>draws</b> matches drawn · <b>bust-out%</b> share of matches where the model lost all its chips · <b>hands/match</b> average hands per match · <b>avg win margin</b> average chip margin in matches it won · <b>matches</b> total matches played (sample size — varies because the field was assembled in waves)</div>
   <div class="note"><b>Elo</b> = Bradley-Terry rating (field mean 1500) over match win/loss results.
@@ -138,12 +165,12 @@
     outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within
     ±1 of each other are a statistical tie. win% and the rest are raw, unadjusted metrics.</div>
   <h3>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h3>
-  <table><tr><th class='model'></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>14/40</span></td><td class='hh' style='background:rgba(244,63,94,0.048)'>46%<span class='rec'>23/50</span></td><td class='hh' style='background:rgba(244,63,94,0.216)'>32%<span class='rec'>16/50</span></td><td class='hh' style='background:rgba(244,63,94,0.3)'>25%<span class='rec'>10/40</span></td><td class='hh' style='background:rgba(244,63,94,0.09)'>42%<span class='rec'>17/40</span></td><td class='hh' style='background:rgba(244,63,94,0.3)'>25%<span class='rec'>10/40</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>10/20</span></td><td class='hh' style='background:rgba(244,63,94,0.048)'>46%<span class='rec'>23/50</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>10/20</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>24/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>26/40</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.048)'>46%<span class='rec'>23/50</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>25/50</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>11/40</span></td><td class='hh' style='background:rgba(244,63,94,0.21)'>32%<span class='rec'>13/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>11/20</span></td><td class='hh' style='background:rgba(244,63,94,0.096)'>42%<span class='rec'>21/50</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>14/20</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td><td class='hh' style='background:rgba(34,197,94,0.21)'>68%<span class='rec'>27/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='hh' style='background:rgba(34,197,94,0.048)'>54%<span class='rec'>27/50</span></td><td class='hh' style='background:rgba(34,197,94,0.048)'>54%<span class='rec'>27/50</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.08)'>57%<span class='rec'>34/60</span></td><td class='hh' style='background:rgba(244,63,94,0.33)'>22%<span class='rec'>9/40</span></td><td class='hh' style='background:rgba(244,63,94,0.33)'>22%<span class='rec'>9/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(244,63,94,0.04)'>47%<span class='rec'>28/60</span></td><td class='hh' style='background:rgba(34,197,94,0.32)'>77%<span class='rec'>46/60</span></td><td class='hh' style='background:rgba(34,197,94,0.02)'>52%<span class='rec'>31/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='hh' style='background:rgba(34,197,94,0.216)'>68%<span class='rec'>34/50</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>25/50</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.14)'>62%<span class='rec'>37/60</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>16/40</span></td><td class='hh' style='background:rgba(244,63,94,0.15)'>38%<span class='rec'>15/40</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.04)'>53%<span class='rec'>32/60</span></td><td class='hh' style='background:rgba(34,197,94,0.28)'>73%<span class='rec'>44/60</span></td><td class='hh' style='background:rgba(34,197,94,0.2)'>67%<span class='rec'>40/60</span></td><td class='hh' style='background:rgba(34,197,94,0.1)'>58%<span class='rec'>35/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='hh' style='background:rgba(34,197,94,0.3)'>75%<span class='rec'>30/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td><td class='hh' style='background:rgba(244,63,94,0.14)'>38%<span class='rec'>23/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>11/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(34,197,94,0.2)'>67%<span class='rec'>40/60</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>36/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='hh' style='background:rgba(34,197,94,0.09)'>58%<span class='rec'>23/40</span></td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>29/40</span></td><td class='hh' style='background:rgba(34,197,94,0.33)'>78%<span class='rec'>31/40</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>24/40</span></td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>29/40</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(244,63,94,0.09)'>42%<span class='rec'>17/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>28/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='hh' style='background:rgba(34,197,94,0.3)'>75%<span class='rec'>30/40</span></td><td class='hh' style='background:rgba(34,197,94,0.21)'>68%<span class='rec'>27/40</span></td><td class='hh' style='background:rgba(34,197,94,0.33)'>78%<span class='rec'>31/40</span></td><td class='hh' style='background:rgba(34,197,94,0.15)'>62%<span class='rec'>25/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='diag'>—</td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>29/40</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>28/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>10/20</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>9/20</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh'>—</td><td class='hh'>—</td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>36/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='hh' style='background:rgba(34,197,94,0.048)'>54%<span class='rec'>27/50</span></td><td class='hh' style='background:rgba(34,197,94,0.096)'>58%<span class='rec'>29/50</span></td><td class='hh' style='background:rgba(34,197,94,0.04)'>53%<span class='rec'>32/60</span></td><td class='hh' style='background:rgba(244,63,94,0.04)'>47%<span class='rec'>28/60</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(34,197,94,0.09)'>58%<span class='rec'>23/40</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.08)'>57%<span class='rec'>34/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>39/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>9/20</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>6/20</span></td><td class='hh' style='background:rgba(244,63,94,0.32)'>23%<span class='rec'>14/60</span></td><td class='hh' style='background:rgba(244,63,94,0.28)'>27%<span class='rec'>16/60</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh'>—</td><td class='hh'>—</td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>39/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>16/40</span></td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh' style='background:rgba(244,63,94,0.02)'>48%<span class='rec'>29/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>11/40</span></td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>21/60</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.02)'>48%<span class='rec'>29/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(244,63,94,0.21)'>32%<span class='rec'>13/40</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='hh' style='background:rgba(244,63,94,0.1)'>42%<span class='rec'>25/60</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>24/60</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>12/40</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>12/40</span></td><td class='hh' style='background:rgba(244,63,94,0.14)'>38%<span class='rec'>23/60</span></td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>21/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='diag'>—</td></tr></table>
+  <table><tr><th class='model'></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>GLM-5.2</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th><th>GPT 5.4</th><th>GPT 5.5</th></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.132)'>39%<span class='rec'>39/100</span></td><td class='hh' style='background:rgba(244,63,94,0.045)'>46%<span class='rec'>37/80</span></td><td class='hh' style='background:rgba(244,63,94,0.15)'>38%<span class='rec'>30/80</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>20/40</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>38/80</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>20/40</span></td><td class='hh' style='background:rgba(244,63,94,0.3)'>25%<span class='rec'>10/40</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>24/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>24/60</span></td><td class='hh' style='background:rgba(244,63,94,0.28)'>27%<span class='rec'>16/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='hh' style='background:rgba(34,197,94,0.132)'>61%<span class='rec'>61/100</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.09)'>42%<span class='rec'>34/80</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>40/80</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(244,63,94,0.075)'>44%<span class='rec'>35/80</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>28/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td><td class='hh' style='background:rgba(34,197,94,0.21)'>68%<span class='rec'>27/40</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>18/60</span></td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>21/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='hh' style='background:rgba(34,197,94,0.045)'>54%<span class='rec'>43/80</span></td><td class='hh' style='background:rgba(34,197,94,0.09)'>58%<span class='rec'>46/80</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>44/80</span></td><td class='hh' style='background:rgba(34,197,94,0.015)'>51%<span class='rec'>41/80</span></td><td class='hh' style='background:rgba(244,63,94,0.045)'>46%<span class='rec'>37/80</span></td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>58/80</span></td><td class='hh' style='background:rgba(34,197,94,0.08)'>57%<span class='rec'>34/60</span></td><td class='hh' style='background:rgba(34,197,94,0.02)'>52%<span class='rec'>31/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(244,63,94,0.33)'>22%<span class='rec'>9/40</span></td><td class='hh' style='background:rgba(244,63,94,0.33)'>22%<span class='rec'>9/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='hh' style='background:rgba(34,197,94,0.15)'>62%<span class='rec'>50/80</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>40/80</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>36/80</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.105)'>59%<span class='rec'>47/80</span></td><td class='hh' style='background:rgba(34,197,94,0.045)'>54%<span class='rec'>43/80</span></td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>58/80</span></td><td class='hh' style='background:rgba(34,197,94,0.14)'>62%<span class='rec'>37/60</span></td><td class='hh' style='background:rgba(34,197,94,0.2)'>67%<span class='rec'>40/60</span></td><td class='hh' style='background:rgba(34,197,94,0.1)'>58%<span class='rec'>35/60</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>16/40</span></td><td class='hh' style='background:rgba(244,63,94,0.15)'>38%<span class='rec'>15/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>20/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.015)'>49%<span class='rec'>39/80</span></td><td class='hh' style='background:rgba(244,63,94,0.105)'>41%<span class='rec'>33/80</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.09)'>42%<span class='rec'>34/80</span></td><td class='hh' style='background:rgba(34,197,94,0.105)'>59%<span class='rec'>47/80</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>36/60</span></td><td class='hh'>—</td><td class='hh'>—</td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>42/80</span></td><td class='hh' style='background:rgba(34,197,94,0.075)'>56%<span class='rec'>45/80</span></td><td class='hh' style='background:rgba(34,197,94,0.045)'>54%<span class='rec'>43/80</span></td><td class='hh' style='background:rgba(244,63,94,0.045)'>46%<span class='rec'>37/80</span></td><td class='hh' style='background:rgba(34,197,94,0.075)'>56%<span class='rec'>45/80</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>48/80</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='hh' style='background:rgba(34,197,94,0.16)'>63%<span class='rec'>38/60</span></td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>39/60</span></td><td class='hh' style='background:rgba(34,197,94,0.09)'>58%<span class='rec'>23/40</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>12/40</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>22/80</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>22/80</span></td><td class='hh' style='background:rgba(244,63,94,0.135)'>39%<span class='rec'>31/80</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>32/80</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>39/60</span></td><td class='hh'>—</td><td class='hh'>—</td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='hh' style='background:rgba(34,197,94,0.3)'>75%<span class='rec'>30/40</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td><td class='hh' style='background:rgba(244,63,94,0.14)'>38%<span class='rec'>23/60</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>27/60</span></td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>33/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(34,197,94,0.2)'>67%<span class='rec'>40/60</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>36/60</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>11/40</span></td><td class='hh' style='background:rgba(244,63,94,0.06)'>45%<span class='rec'>18/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>16/40</span></td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh' style='background:rgba(244,63,94,0.02)'>48%<span class='rec'>29/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>21/60</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.02)'>48%<span class='rec'>29/60</span></td><td class='hh' style='background:rgba(244,63,94,0.03)'>48%<span class='rec'>19/40</span></td><td class='hh' style='background:rgba(244,63,94,0.27)'>28%<span class='rec'>11/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(244,63,94,0.21)'>32%<span class='rec'>13/40</span></td><td class='hh' style='background:rgba(244,63,94,0.16)'>37%<span class='rec'>22/60</span></td><td class='hh' style='background:rgba(244,63,94,0.1)'>42%<span class='rec'>25/60</span></td><td class='hh' style='background:rgba(244,63,94,0.14)'>38%<span class='rec'>23/60</span></td><td class='hh' style='background:rgba(244,63,94,0.18)'>35%<span class='rec'>21/60</span></td><td class='hh' style='background:rgba(244,63,94,0.2)'>33%<span class='rec'>20/60</span></td><td class='hh' style='background:rgba(244,63,94,0.12)'>40%<span class='rec'>24/60</span></td><td class='hh' style='background:rgba(34,197,94,0.0)'>50%<span class='rec'>30/60</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>12/40</span></td><td class='hh' style='background:rgba(244,63,94,0.24)'>30%<span class='rec'>12/40</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>36/60</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>42/60</span></td><td class='hh' style='background:rgba(34,197,94,0.33)'>78%<span class='rec'>31/40</span></td><td class='hh' style='background:rgba(34,197,94,0.12)'>60%<span class='rec'>24/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(244,63,94,0.09)'>42%<span class='rec'>17/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>29/40</span></td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>28/40</span></td><td class='diag'>—</td><td class='hh' style='background:rgba(244,63,94,0.08)'>43%<span class='rec'>26/60</span></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='hh' style='background:rgba(34,197,94,0.28)'>73%<span class='rec'>44/60</span></td><td class='hh' style='background:rgba(34,197,94,0.18)'>65%<span class='rec'>39/60</span></td><td class='hh' style='background:rgba(34,197,94,0.33)'>78%<span class='rec'>31/40</span></td><td class='hh' style='background:rgba(34,197,94,0.15)'>62%<span class='rec'>25/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.03)'>52%<span class='rec'>21/40</span></td><td class='hh'>—</td><td class='hh' style='background:rgba(34,197,94,0.06)'>55%<span class='rec'>22/40</span></td><td class='hh' style='background:rgba(34,197,94,0.27)'>72%<span class='rec'>29/40</span></td><td class='hh' style='background:rgba(34,197,94,0.24)'>70%<span class='rec'>28/40</span></td><td class='hh' style='background:rgba(34,197,94,0.08)'>57%<span class='rec'>34/60</span></td><td class='diag'>—</td></tr></table>
   <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
   <h2>🎭 Player behaviour profiles</h2>
 <table>
   <tr><th>#</th><th class='model'>model</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th><th>bet size</th><th>all-in%</th><th>WTSD</th><th>W@SD</th><th>hand-win</th><th>tokens/dec</th></tr>
-  <tr><td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>GPT 5.5</td><td>76%</td><td>38%</td><td>61%</td><td>21%</td><td>1.09x</td><td>1%</td><td>27%</td><td>45%</td><td>59%</td><td>294</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>GPT 5.4</td><td>75%</td><td>44%</td><td>63%</td><td>23%</td><td>1.02x</td><td>0%</td><td>31%</td><td>48%</td><td>55%</td><td>905</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#fbbf24;margin-right:7px;vertical-align:middle'></span>GLM-5.1</td><td>61%</td><td>22%</td><td>49%</td><td>36%</td><td>1.08x</td><td>0%</td><td>28%</td><td>50%</td><td>40%</td><td>3,154</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;margin-right:7px;vertical-align:middle'></span>Kimi K2.6</td><td>60%</td><td>43%</td><td>63%</td><td>37%</td><td>1.26x</td><td>0%</td><td>28%</td><td>52%</td><td>41%</td><td>7,245</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#60a5fa;margin-right:7px;vertical-align:middle'></span>DeepSeek V4 Pro</td><td>51%</td><td>28%</td><td>59%</td><td>45%</td><td>1.26x</td><td>0%</td><td>24%</td><td>56%</td><td>37%</td><td>1,181</td></tr><tr><td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>GLM-5.2</td><td>68%</td><td>17%</td><td>47%</td><td>30%</td><td>1.20x</td><td>0%</td><td>30%</td><td>42%</td><td>44%</td><td>1,469</td></tr><tr><td>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>Claude Sonnet 4.6</td><td>68%</td><td>20%</td><td>51%</td><td>29%</td><td>1.01x</td><td>1%</td><td>29%</td><td>38%</td><td>45%</td><td>158</td></tr><tr><td>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#f472b6;margin-right:7px;vertical-align:middle'></span>GPT-OSS 120B</td><td>59%</td><td>37%</td><td>72%</td><td>42%</td><td>1.52x</td><td>2%</td><td>18%</td><td>48%</td><td>45%</td><td>844</td></tr><tr><td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>Claude Opus 4.8</td><td>74%</td><td>26%</td><td>46%</td><td>19%</td><td>1.10x</td><td>1%</td><td>42%</td><td>39%</td><td>48%</td><td>55</td></tr><tr><td>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>MiniMax-M3</td><td>61%</td><td>31%</td><td>52%</td><td>28%</td><td>1.27x</td><td>0%</td><td>34%</td><td>43%</td><td>44%</td><td>2,256</td></tr><tr><td>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#a78bfa;margin-right:7px;vertical-align:middle'></span>MiniMax-M2.7</td><td>64%</td><td>22%</td><td>55%</td><td>28%</td><td>1.10x</td><td>1%</td><td>28%</td><td>40%</td><td>48%</td><td>6,074</td></tr><tr><td>12</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:7px;vertical-align:middle'></span>Qwen3.7 Plus</td><td>64%</td><td>17%</td><td>34%</td><td>34%</td><td>1.11x</td><td>0%</td><td>36%</td><td>56%</td><td>36%</td><td>1,197</td></tr>
+  <tr><td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#7c3aed;margin-right:7px;vertical-align:middle'></span>GPT 5.5</td><td>76%</td><td>38%</td><td>60%</td><td>21%</td><td>1.09x</td><td>1%</td><td>27%</td><td>45%</td><td>58%</td><td>287</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#2563eb;margin-right:7px;vertical-align:middle'></span>GPT 5.4</td><td>75%</td><td>44%</td><td>63%</td><td>23%</td><td>1.02x</td><td>0%</td><td>31%</td><td>49%</td><td>55%</td><td>887</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#fbbf24;margin-right:7px;vertical-align:middle'></span>GLM-5.1</td><td>61%</td><td>20%</td><td>48%</td><td>35%</td><td>1.06x</td><td>0%</td><td>29%</td><td>50%</td><td>40%</td><td>2,694</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;margin-right:7px;vertical-align:middle'></span>Kimi K2.6</td><td>61%</td><td>44%</td><td>63%</td><td>36%</td><td>1.26x</td><td>0%</td><td>28%</td><td>52%</td><td>42%</td><td>6,841</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#60a5fa;margin-right:7px;vertical-align:middle'></span>DeepSeek V4 Pro</td><td>51%</td><td>27%</td><td>58%</td><td>44%</td><td>1.25x</td><td>0%</td><td>24%</td><td>57%</td><td>37%</td><td>1,105</td></tr><tr><td>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:7px;vertical-align:middle'></span>GLM-5.2</td><td>68%</td><td>17%</td><td>47%</td><td>30%</td><td>1.20x</td><td>0%</td><td>30%</td><td>42%</td><td>44%</td><td>1,469</td></tr><tr><td>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#d97706;margin-right:7px;vertical-align:middle'></span>Claude Sonnet 4.6</td><td>68%</td><td>20%</td><td>50%</td><td>29%</td><td>1.02x</td><td>1%</td><td>29%</td><td>39%</td><td>45%</td><td>153</td></tr><tr><td>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#f472b6;margin-right:7px;vertical-align:middle'></span>GPT-OSS 120B</td><td>58%</td><td>37%</td><td>72%</td><td>42%</td><td>1.52x</td><td>2%</td><td>18%</td><td>48%</td><td>45%</td><td>843</td></tr><tr><td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-right:7px;vertical-align:middle'></span>Claude Opus 4.8</td><td>74%</td><td>26%</td><td>45%</td><td>19%</td><td>1.10x</td><td>1%</td><td>41%</td><td>40%</td><td>48%</td><td>53</td></tr><tr><td>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#fb7185;margin-right:7px;vertical-align:middle'></span>MiniMax-M3</td><td>61%</td><td>31%</td><td>52%</td><td>28%</td><td>1.27x</td><td>0%</td><td>34%</td><td>43%</td><td>44%</td><td>2,256</td></tr><tr><td>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#a78bfa;margin-right:7px;vertical-align:middle'></span>MiniMax-M2.7</td><td>62%</td><td>21%</td><td>55%</td><td>29%</td><td>1.12x</td><td>1%</td><td>28%</td><td>42%</td><td>47%</td><td>5,604</td></tr><tr><td>12</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba"><span style='display:inline-block;width:10px;height:10px;border-radius:50%;background:#14b8a6;margin-right:7px;vertical-align:middle'></span>Qwen3.7 Plus</td><td>64%</td><td>17%</td><td>34%</td><td>34%</td><td>1.11x</td><td>0%</td><td>36%</td><td>56%</td><td>36%</td><td>1,197</td></tr>
 </table>
 <div class="note">VPIP = voluntarily entered the pot preflop (looseness). PFR = preflop raise. aggr = bet+raise share of bet/raise/call. fold→bet = folds when facing a bet. bet size = avg bet/raise as a multiple of the pot. WTSD = went to showdown; W@SD = won at showdown. hand-win = share of hands that netted chips. tokens/dec = avg reasoning tokens per decision.</div>
 
@@ -160,32 +187,418 @@
   {
   const AXC={grid:{color:'#e7e2d8'},ticks:{color:'#6b6b6b'}};
   new Chart(document.getElementById('behStyle'),{type:'scatter',
-    data:{datasets:[{"label": "GPT 5.5", "data": [{"x": 75.9, "y": 60.8}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GPT 5.4", "data": [{"x": 74.9, "y": 63.2}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GLM-5.1", "data": [{"x": 61.2, "y": 49.4}], "backgroundColor": "#fbbf24", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Kimi K2.6", "data": [{"x": 60.4, "y": 63.1}], "backgroundColor": "#4ade80", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "DeepSeek V4 Pro", "data": [{"x": 51.1, "y": 59.1}], "backgroundColor": "#60a5fa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GLM-5.2", "data": [{"x": 68.4, "y": 47.2}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Claude Sonnet 4.6", "data": [{"x": 68.0, "y": 50.8}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GPT-OSS 120B", "data": [{"x": 58.6, "y": 71.6}], "backgroundColor": "#f472b6", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Claude Opus 4.8", "data": [{"x": 74.2, "y": 45.7}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "MiniMax-M3", "data": [{"x": 61.1, "y": 51.8}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "MiniMax-M2.7", "data": [{"x": 63.7, "y": 55.2}], "backgroundColor": "#a78bfa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Qwen3.7 Plus", "data": [{"x": 64.1, "y": 33.8}], "backgroundColor": "#94a3b8", "pointRadius": 9, "pointHoverRadius": 11}]},
+    data:{datasets:[{"label": "GPT 5.5", "data": [{"x": 76.1, "y": 60.4}], "backgroundColor": "#7c3aed", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GPT 5.4", "data": [{"x": 74.8, "y": 62.8}], "backgroundColor": "#2563eb", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GLM-5.1", "data": [{"x": 61.0, "y": 48.1}], "backgroundColor": "#fbbf24", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Kimi K2.6", "data": [{"x": 60.8, "y": 63.2}], "backgroundColor": "#4ade80", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "DeepSeek V4 Pro", "data": [{"x": 51.3, "y": 57.8}], "backgroundColor": "#60a5fa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GLM-5.2", "data": [{"x": 68.4, "y": 47.2}], "backgroundColor": "#22c55e", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Claude Sonnet 4.6", "data": [{"x": 68.3, "y": 50.3}], "backgroundColor": "#d97706", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "GPT-OSS 120B", "data": [{"x": 58.3, "y": 71.8}], "backgroundColor": "#f472b6", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Claude Opus 4.8", "data": [{"x": 73.9, "y": 45.4}], "backgroundColor": "#f97316", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "MiniMax-M3", "data": [{"x": 61.1, "y": 51.8}], "backgroundColor": "#fb7185", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "MiniMax-M2.7", "data": [{"x": 61.6, "y": 54.8}], "backgroundColor": "#a78bfa", "pointRadius": 9, "pointHoverRadius": 11}, {"label": "Qwen3.7 Plus", "data": [{"x": 64.1, "y": 33.8}], "backgroundColor": "#14b8a6", "pointRadius": 9, "pointHoverRadius": 11}]},
     options:{plugins:{legend:{position:'right',labels:{color:'#1c1c1c'}}},
       scales:{x:{title:{display:true,text:'VPIP %',color:'#6b6b6b'},min:0,max:100,...AXC},
                y:{title:{display:true,text:'aggression %',color:'#6b6b6b'},min:0,max:100,...AXC}}}});
   new Chart(document.getElementById('behTokens'),{type:'bar',
-    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{label:'tokens/decision',data:[294, 905, 3154, 7245, 1181, 1469, 158, 844, 55, 2256, 6074, 1197],backgroundColor:["#94a3b8", "#94a3b8", "#fbbf24", "#4ade80", "#60a5fa", "#94a3b8", "#94a3b8", "#f472b6", "#94a3b8", "#94a3b8", "#a78bfa", "#94a3b8"]}]},
+    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{label:'tokens/decision',data:[287, 887, 2694, 6841, 1105, 1469, 153, 843, 53, 2256, 5604, 1197],backgroundColor:["#7c3aed", "#2563eb", "#fbbf24", "#4ade80", "#60a5fa", "#22c55e", "#d97706", "#f472b6", "#f97316", "#fb7185", "#a78bfa", "#14b8a6"]}]},
     options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,...AXC},x:AXC}}});
   new Chart(document.getElementById('behMix'),{type:'bar',
-    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{"label": "fold", "data": [9.0, 9.6, 16.6, 17.1, 20.9, 13.4, 12.7, 20.0, 8.0, 12.6, 12.3, 15.4], "backgroundColor": "#fb7185"}, {"label": "check", "data": [30.5, 33.0, 38.2, 39.2, 40.6, 35.6, 35.3, 30.3, 40.9, 40.9, 34.8, 46.3], "backgroundColor": "#64748b"}, {"label": "call", "data": [23.7, 21.1, 22.9, 16.1, 15.8, 26.9, 25.6, 14.1, 27.8, 22.4, 23.7, 25.3], "backgroundColor": "#38bdf8"}, {"label": "bet", "data": [25.9, 24.5, 15.3, 14.2, 12.7, 18.8, 20.8, 21.3, 16.4, 13.9, 20.5, 7.8], "backgroundColor": "#fbbf24"}, {"label": "raise", "data": [10.2, 11.2, 6.6, 13.1, 9.8, 4.9, 4.4, 12.6, 6.3, 9.7, 7.9, 5.0], "backgroundColor": "#f97316"}, {"label": "all_in", "data": [0.7, 0.5, 0.4, 0.3, 0.3, 0.4, 1.2, 1.7, 0.6, 0.4, 0.8, 0.2], "backgroundColor": "#a855f7"}]},
+    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{"label": "fold", "data": [9.1, 9.7, 16.1, 16.8, 20.5, 13.4, 12.7, 19.9, 8.4, 12.6, 13.0, 15.4], "backgroundColor": "#fb7185"}, {"label": "check", "data": [30.6, 33.1, 38.6, 39.5, 41.3, 35.6, 35.4, 30.6, 40.4, 40.9, 35.9, 46.3], "backgroundColor": "#64748b"}, {"label": "call", "data": [23.9, 21.2, 23.5, 16.1, 16.1, 26.9, 25.8, 13.9, 28.0, 22.4, 23.1, 25.3], "backgroundColor": "#38bdf8"}, {"label": "bet", "data": [25.6, 24.3, 15.3, 14.2, 12.5, 18.8, 20.4, 21.2, 16.2, 13.9, 19.4, 7.8], "backgroundColor": "#fbbf24"}, {"label": "raise", "data": [10.0, 11.1, 6.1, 13.0, 9.4, 4.9, 4.5, 12.5, 6.4, 9.7, 7.8, 5.0], "backgroundColor": "#f97316"}, {"label": "all_in", "data": [0.7, 0.5, 0.3, 0.4, 0.2, 0.4, 1.2, 1.9, 0.6, 0.4, 0.8, 0.2], "backgroundColor": "#a855f7"}]},
     options:{plugins:{legend:{labels:{color:'#1c1c1c'}}},
       scales:{x:{stacked:true,...AXC},y:{stacked:true,max:100,...AXC}}}});
   new Chart(document.getElementById('behStreet'),{type:'line',
-    data:{labels:["preflop", "flop", "turn", "river"],datasets:[{"label": "GPT 5.5", "data": [34.7, 42.4, 38.2, 27.1], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "GPT 5.4", "data": [40.7, 37.3, 35.9, 22.7], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "GLM-5.1", "data": [20.2, 25.1, 23.9, 20.4], "borderColor": "#fbbf24", "backgroundColor": "#fbbf24", "tension": 0.3, "fill": false}, {"label": "Kimi K2.6", "data": [40.9, 21.2, 19.0, 12.8], "borderColor": "#4ade80", "backgroundColor": "#4ade80", "tension": 0.3, "fill": false}, {"label": "DeepSeek V4 Pro", "data": [27.0, 21.9, 20.7, 13.2], "borderColor": "#60a5fa", "backgroundColor": "#60a5fa", "tension": 0.3, "fill": false}, {"label": "GLM-5.2", "data": [15.9, 32.2, 29.2, 22.1], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "Claude Sonnet 4.6", "data": [18.2, 33.5, 32.7, 24.6], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "GPT-OSS 120B", "data": [35.5, 37.3, 33.7, 34.8], "borderColor": "#f472b6", "backgroundColor": "#f472b6", "tension": 0.3, "fill": false}, {"label": "Claude Opus 4.8", "data": [24.1, 28.0, 19.0, 19.0], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "MiniMax-M3", "data": [28.7, 22.7, 22.7, 17.3], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}, {"label": "MiniMax-M2.7", "data": [20.5, 36.1, 35.8, 29.9], "borderColor": "#a78bfa", "backgroundColor": "#a78bfa", "tension": 0.3, "fill": false}, {"label": "Qwen3.7 Plus", "data": [15.9, 12.0, 11.2, 10.1], "borderColor": "#94a3b8", "backgroundColor": "#94a3b8", "tension": 0.3, "fill": false}]},
+    data:{labels:["preflop", "flop", "turn", "river"],datasets:[{"label": "GPT 5.5", "data": [34.5, 41.8, 37.4, 27.5], "borderColor": "#7c3aed", "backgroundColor": "#7c3aed", "tension": 0.3, "fill": false}, {"label": "GPT 5.4", "data": [40.6, 37.1, 35.2, 22.3], "borderColor": "#2563eb", "backgroundColor": "#2563eb", "tension": 0.3, "fill": false}, {"label": "GLM-5.1", "data": [18.8, 25.5, 23.3, 20.3], "borderColor": "#fbbf24", "backgroundColor": "#fbbf24", "tension": 0.3, "fill": false}, {"label": "Kimi K2.6", "data": [41.3, 21.5, 18.9, 12.3], "borderColor": "#4ade80", "backgroundColor": "#4ade80", "tension": 0.3, "fill": false}, {"label": "DeepSeek V4 Pro", "data": [25.9, 21.6, 20.3, 12.9], "borderColor": "#60a5fa", "backgroundColor": "#60a5fa", "tension": 0.3, "fill": false}, {"label": "GLM-5.2", "data": [15.9, 32.2, 29.2, 22.1], "borderColor": "#22c55e", "backgroundColor": "#22c55e", "tension": 0.3, "fill": false}, {"label": "Claude Sonnet 4.6", "data": [18.3, 33.0, 32.3, 24.2], "borderColor": "#d97706", "backgroundColor": "#d97706", "tension": 0.3, "fill": false}, {"label": "GPT-OSS 120B", "data": [35.5, 36.8, 33.5, 35.3], "borderColor": "#f472b6", "backgroundColor": "#f472b6", "tension": 0.3, "fill": false}, {"label": "Claude Opus 4.8", "data": [23.8, 28.1, 19.1, 18.5], "borderColor": "#f97316", "backgroundColor": "#f97316", "tension": 0.3, "fill": false}, {"label": "MiniMax-M3", "data": [28.7, 22.7, 22.7, 17.3], "borderColor": "#fb7185", "backgroundColor": "#fb7185", "tension": 0.3, "fill": false}, {"label": "MiniMax-M2.7", "data": [19.9, 34.5, 33.7, 29.1], "borderColor": "#a78bfa", "backgroundColor": "#a78bfa", "tension": 0.3, "fill": false}, {"label": "Qwen3.7 Plus", "data": [15.9, 12.0, 11.2, 10.1], "borderColor": "#14b8a6", "backgroundColor": "#14b8a6", "tension": 0.3, "fill": false}]},
     options:{plugins:{legend:{labels:{color:'#1c1c1c'}}},
       scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'aggression %',color:'#6b6b6b'},...AXC},x:AXC}}});
   }
   </script>
 
   <h2 class="section">3 · 🔬 Additional analysis</h2>
+  
+  <div class="strategy-intro">
+    <b>Match strategy radar:</b> each dimension counts triggered diagnostic signals.
+    Higher values mean more evidence to review, not better play. Hover a radar
+    point to see the signals behind that score.
+    <div class="strategy-glossary">
+      <div class="strategy-gloss">
+        <b>Stack pressure</b>
+        <span>Does the agent convert a chip lead into match wins instead of giving the lead back?</span>
+        <em>Signals: lead at checkpoint but lost, low bust-win share, small win margin</em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Recovery</b>
+        <span>Does it stabilize after falling behind, or does an early deficit become deterministic loss?</span>
+        <em>Signals: low comeback rate from &lt;=160 chips, poor deficit survival, high bust-out share</em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Volatility control</b>
+        <span>Does it avoid one-hand collapses that erase a whole match?</span>
+        <em>Signals: large losing hands, high max drawdown, bust-outs, high big-loss rate</em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Position use</b>
+        <span>Does it understand that BTN/SB should usually be the profitable, initiative seat heads-up?</span>
+        <em>Signals: negative button EV, BB outperforming button, weak button-vs-BB gap</em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Match pacing</b>
+        <span>Does the agent close when ahead and avoid late-match decay?</span>
+        <em>Signals: late net worse than early net, many max-hand wins/losses, low bust conversion</em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Adaptation</b>
+        <span>Does it change after the previous hand, or keep following a template through momentum shifts?</span>
+        <em>Signals: negative next-hand response after big losses, frequent lead changes, repeated losses</em>
+      </div>
+    </div>
+  </div>
+  <div class="strategy-grid">
+    
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>1. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</h3><div class="note">Main review area: Volatility control (3 signals).</div></div>
+        <div class="strategy-kpi pos">+0.2<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar1"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 27, next hand lost 4</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 5</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.5__closed_open_coached_tournament.json&amp;match=0&amp;hand=5&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 32 chips in hand 10</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 10</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.5__closed_open_coached_tournament.json&amp;match=0&amp;hand=10&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 32 chips in hand 21</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 21</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.5__closed_open_coached_tournament.json&amp;match=0&amp;hand=21&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>2. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</h3><div class="note">Main review area: Adaptation (3 signals).</div></div>
+        <div class="strategy-kpi pos">+0.0<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar2"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 32 chips in hand 15</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 15</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.4__closed_open_coached_tournament.json&amp;match=0&amp;hand=15&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 32, next hand lost 6</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 16</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.4__closed_open_coached_tournament.json&amp;match=0&amp;hand=16&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 74 chips in hand 22</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 1 · hand 22</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__gpt-5.4__closed_open_coached_tournament.json&amp;match=1&amp;hand=22&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>3. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</h3><div class="note">Main review area: Stack pressure (2 signals).</div></div>
+        <div class="strategy-kpi pos">+0.1<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar3"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 28, next hand lost 2</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 3 · hand 3</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=3&amp;hand=3&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 166 chips in hand 15</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 4 · hand 15</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=4&amp;hand=15&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 166, next hand lost 2</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 4 · hand 16</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=4&amp;hand=16&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>4. <img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</h3><div class="note">Main review area: Adaptation (2 signals).</div></div>
+        <div class="strategy-kpi pos">+0.3<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar4"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 40 chips in hand 1</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 1 · hand 1</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__kimi-k2p6.json&amp;match=1&amp;hand=1&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 48 chips in hand 3</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 6 · hand 3</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__kimi-k2p6.json&amp;match=6&amp;hand=3&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Stack pressure: lead did not convert</div>
+          <div class="case-signal">ahead 256 chips by hand 10, but lost the match</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 13 · hand 10</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__kimi-k2p6.json&amp;match=13&amp;hand=10&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>5. <img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</h3><div class="note">Main review area: Stack pressure (2 signals).</div></div>
+        <div class="strategy-kpi pos">+0.0<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar5"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 34 chips in hand 1</div>
+          <div class="case-meta">vs glm-5p1 · match 0 · hand 1</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=0&amp;hand=1&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 34 chips in hand 30</div>
+          <div class="case-meta">vs glm-5p1 · match 0 · hand 30</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=0&amp;hand=30&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 64 chips in hand 27</div>
+          <div class="case-meta">vs glm-5p1 · match 5 · hand 27</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__glm-5p1.json&amp;match=5&amp;hand=27&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>6. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</h3><div class="note">Main review area: Adaptation (3 signals).</div></div>
+        <div class="strategy-kpi pos">+0.0<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar6"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 90 chips in hand 4</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 4</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__glm-5p2__closed_open_coached_tournament.json&amp;match=0&amp;hand=4&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 90, next hand lost 2</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 5</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__glm-5p2__closed_open_coached_tournament.json&amp;match=0&amp;hand=5&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 48 chips in hand 10</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 10</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__glm-5p2__closed_open_coached_tournament.json&amp;match=0&amp;hand=10&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>7. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</h3><div class="note">Main review area: Volatility control (3 signals).</div></div>
+        <div class="strategy-kpi neg">-0.1<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar7"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Stack pressure: lead did not convert</div>
+          <div class="case-signal">ahead 263 chips by hand 10, but lost the match</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 2 · hand 10</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=2&amp;hand=10&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 138 chips in hand 13</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 2 · hand 13</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=2&amp;hand=13&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 60 chips in hand 9</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 3 · hand 9</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=3&amp;hand=9&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>8. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</h3><div class="note">Main review area: Position use (1 signals).</div></div>
+        <div class="strategy-kpi pos">+0.6<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar8"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 199 chips in hand 3</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 1 · hand 3</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__gpt-oss-120b.json&amp;match=1&amp;hand=3&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 30 chips in hand 22</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 2 · hand 22</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__gpt-oss-120b.json&amp;match=2&amp;hand=22&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 40 chips in hand 18</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 4 · hand 18</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__gpt-oss-120b.json&amp;match=4&amp;hand=18&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>9. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</h3><div class="note">Main review area: Volatility control (3 signals).</div></div>
+        <div class="strategy-kpi neg">-0.3<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar9"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 200 chips in hand 1</div>
+          <div class="case-meta">vs claude-sonnet-4.6 · match 0 · hand 1</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=0&amp;hand=1&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 92 chips in hand 24</div>
+          <div class="case-meta">vs claude-sonnet-4.6 · match 1 · hand 24</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=1&amp;hand=24&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 72 chips in hand 9</div>
+          <div class="case-meta">vs claude-sonnet-4.6 · match 2 · hand 9</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__claude-sonnet-4.6.json&amp;match=2&amp;hand=9&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>10. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</h3><div class="note">Main review area: Adaptation (2 signals).</div></div>
+        <div class="strategy-kpi neg">-0.2<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar10"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Stack pressure: lead did not convert</div>
+          <div class="case-signal">ahead 265 chips by hand 10, but lost the match</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 10</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__minimax-m3__closed_open_coached_tournament.json&amp;match=0&amp;hand=10&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 157 chips in hand 27</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 0 · hand 27</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__minimax-m3__closed_open_coached_tournament.json&amp;match=0&amp;hand=27&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 42 chips in hand 27</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 1 · hand 27</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__minimax-m3__closed_open_coached_tournament.json&amp;match=1&amp;hand=27&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>11. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</h3><div class="note">Main review area: Position use (2 signals).</div></div>
+        <div class="strategy-kpi neg">-0.4<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar11"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 46 chips in hand 19</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 0 · hand 19</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__minimax-m2p7.json&amp;match=0&amp;hand=19&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 110 chips in hand 29</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 1 · hand 29</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__minimax-m2p7.json&amp;match=1&amp;hand=29&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 54 chips in hand 5</div>
+          <div class="case-meta">vs deepseek-v4-pro · match 5 · hand 5</div>
+          <a class="case-link" href="match_replay.html?pair=match__deepseek-v4-pro__vs__minimax-m2p7.json&amp;match=5&amp;hand=5&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>12. <img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</h3><div class="note">Main review area: Position use (2 signals).</div></div>
+        <div class="strategy-kpi neg">-0.3<span>chips/hand</span></div>
+      </div>
+      <canvas id="matchStrategyRadar12"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 40 chips in hand 3</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 4 · hand 3</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__qwen3p7-plus__closed_open_coached_tournament.json&amp;match=4&amp;hand=3&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Adaptation: loss followed by another loss</div>
+          <div class="case-signal">after losing 40, next hand lost 2</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 4 · hand 4</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__qwen3p7-plus__closed_open_coached_tournament.json&amp;match=4&amp;hand=4&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li>
+        <li>
+          <div class="case-title">Volatility control: large single-hand loss</div>
+          <div class="case-signal">lost 102 chips in hand 21</div>
+          <div class="case-meta">vs claude-opus-4.8 · match 5 · hand 21</div>
+          <a class="case-link" href="match_replay.html?pair=match__claude-opus-4.8__vs__qwen3p7-plus__closed_open_coached_tournament.json&amp;match=5&amp;hand=21&amp;step=end&amp;cacheBust=18">watch replay</a>
+        </li></ol>
+    </article>
+  </div>
   <script>
   new Chart(document.getElementById('wr'), {
     type:'bar',
-    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{label:'win %',data:[65.3, 61.1, 56.3, 55.8, 53.3, 50.5, 48.4, 50.9, 40.7, 41.0, 42.0, 38.6],backgroundColor:["#94a3b8", "#94a3b8", "#fbbf24", "#4ade80", "#60a5fa", "#94a3b8", "#94a3b8", "#f472b6", "#94a3b8", "#94a3b8", "#a78bfa", "#94a3b8"]}]},
+    data:{labels:["GPT 5.5", "GPT 5.4", "GLM-5.1", "Kimi K2.6", "DeepSeek V4 Pro", "GLM-5.2", "Claude Sonnet 4.6", "GPT-OSS 120B", "Claude Opus 4.8", "MiniMax-M3", "MiniMax-M2.7", "Qwen3.7 Plus"],datasets:[{label:'win %',data:[65.0, 60.5, 56.4, 55.7, 52.7, 50.5, 48.9, 51.4, 41.8, 41.0, 40.2, 38.6],backgroundColor:["#7c3aed", "#2563eb", "#fbbf24", "#4ade80", "#60a5fa", "#22c55e", "#d97706", "#f472b6", "#f97316", "#fb7185", "#a78bfa", "#14b8a6"]}]},
     options:{plugins:{legend:{display:false}},
       scales:{y:{beginAtZero:true,max:100,grid:{color:'#e7e2d8'},ticks:{color:'#1c1c1c'}},
                x:{grid:{color:'#e7e2d8'},ticks:{color:'#1c1c1c'}}}}
   });
+  
+const MATCH_STRATEGY = [{"id": "matchStrategyRadar1", "label": "GPT 5.5", "model": "gpt-5.5", "color": "#7c3aed", "scores": [1, 1, 3, 1, 1, 3], "signals": {"Stack pressure": ["wins tend to reach cap instead of finishing"], "Recovery": ["high bust-out share: 18%"], "Volatility control": ["large-loss hand rate: 4%", "avg max drawdown: 85 chips", "more large losses than large wins"], "Position use": ["weak button advantage"], "Match pacing": ["low close-out rate: 17% bust wins"], "Adaptation": ["negative response after big losses: -0.4 chips", "frequent lead swings: 2.2/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar2", "label": "GPT 5.4", "model": "gpt-5.4", "color": "#2563eb", "scores": [2, 0, 1, 1, 1, 3], "signals": {"Stack pressure": ["low bust-win share: 13%", "wins tend to reach cap instead of finishing"], "Recovery": [], "Volatility control": ["more large losses than large wins"], "Position use": ["weak button advantage"], "Match pacing": ["low close-out rate: 13% bust wins"], "Adaptation": ["negative response after big losses: -1.1 chips", "frequent lead swings: 2.3/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar3", "label": "GLM-5.1", "model": "glm-5p1", "color": "#fbbf24", "scores": [2, 0, 0, 1, 1, 2], "signals": {"Stack pressure": ["low bust-win share: 15%", "wins tend to reach cap instead of finishing"], "Recovery": [], "Volatility control": [], "Position use": ["weak button advantage"], "Match pacing": ["low close-out rate: 15% bust wins"], "Adaptation": ["frequent lead swings: 2.0/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar4", "label": "Kimi K2.6", "model": "kimi-k2p6", "color": "#4ade80", "scores": [0, 0, 0, 1, 0, 2], "signals": {"Stack pressure": [], "Recovery": [], "Volatility control": [], "Position use": ["weak button advantage"], "Match pacing": [], "Adaptation": ["negative response after big losses: -1.2 chips", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar5", "label": "DeepSeek V4 Pro", "model": "deepseek-v4-pro", "color": "#60a5fa", "scores": [2, 1, 0, 1, 1, 0], "signals": {"Stack pressure": ["low bust-win share: 11%", "wins tend to reach cap instead of finishing"], "Recovery": ["deficit failure rate: 88%"], "Volatility control": [], "Position use": ["weak button advantage"], "Match pacing": ["low close-out rate: 11% bust wins"], "Adaptation": []}}, {"id": "matchStrategyRadar6", "label": "GLM-5.2", "model": "glm-5p2", "color": "#22c55e", "scores": [1, 0, 0, 1, 1, 3], "signals": {"Stack pressure": ["lead conversion failure: 26%"], "Recovery": [], "Volatility control": [], "Position use": ["weak button advantage"], "Match pacing": ["low close-out rate: 19% bust wins"], "Adaptation": ["negative response after big losses: -0.1 chips", "frequent lead swings: 2.1/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar7", "label": "Claude Sonnet 4.6", "model": "claude-sonnet-4.6", "color": "#d97706", "scores": [0, 2, 3, 1, 0, 0], "signals": {"Stack pressure": [], "Recovery": ["deficit failure rate: 87%", "high bust-out share: 17%"], "Volatility control": ["large-loss hand rate: 4%", "avg max drawdown: 88 chips", "more large losses than large wins"], "Position use": ["weak button advantage"], "Match pacing": [], "Adaptation": []}}, {"id": "matchStrategyRadar8", "label": "GPT-OSS 120B", "model": "gpt-oss-120b", "color": "#f472b6", "scores": [0, 0, 0, 1, 0, 1], "signals": {"Stack pressure": [], "Recovery": [], "Volatility control": [], "Position use": ["weak button advantage"], "Match pacing": [], "Adaptation": ["frequent lead swings: 2.3/match"]}}, {"id": "matchStrategyRadar9", "label": "Claude Opus 4.8", "model": "claude-opus-4.8", "color": "#f97316", "scores": [1, 1, 3, 0, 0, 2], "signals": {"Stack pressure": ["lead conversion failure: 31%"], "Recovery": ["high bust-out share: 15%"], "Volatility control": ["large-loss hand rate: 4%", "avg max drawdown: 98 chips", "more large losses than large wins"], "Position use": [], "Match pacing": [], "Adaptation": ["negative response after big losses: -0.1 chips", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar10", "label": "MiniMax-M3", "model": "minimax-m3", "color": "#fb7185", "scores": [0, 0, 1, 1, 0, 2], "signals": {"Stack pressure": [], "Recovery": [], "Volatility control": ["more large losses than large wins"], "Position use": ["weak button advantage"], "Match pacing": [], "Adaptation": ["frequent lead swings: 2.0/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar11", "label": "MiniMax-M2.7", "model": "minimax-m2p7", "color": "#a78bfa", "scores": [1, 0, 1, 2, 0, 2], "signals": {"Stack pressure": ["lead conversion failure: 26%"], "Recovery": [], "Volatility control": ["more large losses than large wins"], "Position use": ["negative BTN/SB EV: -0.2 chips/hand", "weak button advantage"], "Match pacing": [], "Adaptation": ["frequent lead swings: 2.1/match", "big losses do not trigger stabilization"]}}, {"id": "matchStrategyRadar12", "label": "Qwen3.7 Plus", "model": "qwen3p7-plus", "color": "#14b8a6", "scores": [0, 1, 1, 2, 1, 2], "signals": {"Stack pressure": [], "Recovery": ["deficit failure rate: 92%"], "Volatility control": ["more large losses than large wins"], "Position use": ["negative BTN/SB EV: -0.1 chips/hand", "weak button advantage"], "Match pacing": ["low close-out rate: 18% bust wins"], "Adaptation": ["negative response after big losses: -1.0 chips", "big losses do not trigger stabilization"]}}];
+const MATCH_STRATEGY_LABELS = ["Stack pressure", "Recovery", "Volatility control", "Position use", "Match pacing", "Adaptation"];
+MATCH_STRATEGY.forEach((card) => {
+  const el = document.getElementById(card.id);
+  if (!el) return;
+  new Chart(el, {
+    type:'radar',
+    data:{ labels:MATCH_STRATEGY_LABELS,
+      datasets:[{ label:card.label, data:card.scores,
+        borderColor:card.color, backgroundColor:card.color + '33',
+        pointBackgroundColor:card.color }] },
+    options:{ scales:{ r:{ beginAtZero:true, suggestedMax:4, ticks:{ stepSize:1 } } },
+      plugins:{ legend:{ display:false },
+        tooltip:{ callbacks:{ afterLabel(ctx) {
+          const dim = ctx.label;
+          const sigs = card.signals[dim] || [];
+          return sigs.length ? sigs.map(s => '• ' + s) : ['no signal triggered'];
+        } } } } } });
+});
+
   </script>
 </div></body></html>
