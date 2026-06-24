@@ -15,7 +15,9 @@ plus a head-to-head chip matrix.
 from __future__ import annotations
 
 import json
+import math
 import os
+import html as html_lib
 from collections import defaultdict
 
 from model_names import strip_coached, display_name, model_cell
@@ -432,6 +434,254 @@ def _style(vpip: float, agg: float, allin: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
+def _percentile(values, q):
+    vals = sorted(values)
+    if not vals:
+        return 0
+    k = (len(vals) - 1) * q
+    lo = int(k)
+    hi = min(lo + 1, len(vals) - 1)
+    if lo == hi:
+        return vals[lo]
+    return vals[lo] * (hi - k) + vals[hi] * (k - lo)
+
+
+def _bucket_vpip(s, bucket):
+    r = s["pf_bucket"][bucket]
+    return r["open_rate"] + r["call_rate"]
+
+
+def _street_aggr(s, street):
+    return s["by_street"][street]["agg_freq"]
+
+
+def _strategy_analysis(report: dict, ranked: list) -> tuple[str, str]:
+    """Signal-count model cards for the Additional analysis section.
+
+    Scores are diagnostic leak evidence: each triggered signal adds one point.
+    Higher values mean "more to review", not "better strategic skill".
+    """
+    models = report["models"]
+    pm = report["per_model"]
+    dims = [
+        ("hand", "Hand strength"),
+        ("call", "Call discipline"),
+        ("init", "Initiative"),
+        ("sizing", "Sizing"),
+        ("risk", "Big-pot risk"),
+        ("value", "Value extraction"),
+    ]
+    dim_help = {
+        "Hand strength": {
+            "meaning": "Does the model map private cards into sensible action?",
+            "signals": "trash/marginal VPIP, premium passivity, weak premium-vs-trash separation, low W$SD",
+        },
+        "Call discipline": {
+            "meaning": "Does it fold or continue correctly when facing pressure?",
+            "signals": "fold-to-bet, fold-to-cbet, WTSD with W$SD, weak-hand sticky calls",
+        },
+        "Initiative": {
+            "meaning": "Does it keep a coherent multi-street betting plan?",
+            "signals": "PFR vs c-bet gap, flop-to-turn drop, turn-to-river drop, low follow-through",
+        },
+        "Sizing": {
+            "meaning": "Does bet size adapt to the situation instead of using a template?",
+            "signals": "size concentration, overpot share, sizing entropy, extreme average bet size",
+        },
+        "Big-pot risk": {
+            "meaning": "Does it avoid building large pots with hands that cannot support them?",
+            "signals": "hand-win vs bb/100 mismatch, overpot-heavy losses, large sizing with poor chip EV",
+        },
+        "Value extraction": {
+            "meaning": "Does it earn enough when it has strong or showdown-winning hands?",
+            "signals": "high W$SD with mediocre EV, low strong-hand open, low river aggression, small sizing",
+        },
+    }
+    cases_path = os.path.join(REPORT_DIR, "holdem_strategy_cases.json")
+    strategy_cases = {}
+    if os.path.exists(cases_path):
+        try:
+            strategy_cases = json.load(open(cases_path, encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            strategy_cases = {}
+
+    trash = [_bucket_vpip(pm[m], "trash") for m in models]
+    marginal = [_bucket_vpip(pm[m], "marginal") for m in models]
+    folds = [pm[m]["fold_to_bet"] for m in models]
+    wtsd = [pm[m]["wtsd"] for m in models]
+    wsd = [pm[m]["wsd"] for m in models]
+    over = [pm[m]["betsize_dist"]["over"] for m in models]
+    river = [_street_aggr(pm[m], "river") for m in models]
+    bb100 = [pm[m]["bb_per_100"] for m in models]
+
+    t = {
+        "trash_hi": _percentile(trash, .75),
+        "marg_hi": _percentile(marginal, .75),
+        "fold_low": _percentile(folds, .25),
+        "wtsd_hi": _percentile(wtsd, .75),
+        "wsd_low": _percentile(wsd, .25),
+        "wsd_hi": _percentile(wsd, .75),
+        "over_hi": _percentile(over, .75),
+        "river_low": _percentile(river, .25),
+        "bb_med": _percentile(bb100, .50),
+    }
+
+    def add(signals, key, cond, msg):
+        if cond:
+            signals[key].append(msg)
+
+    cards = []
+    chart_payload = []
+    for rank, m in enumerate(ranked, 1):
+        s = pm[m]
+        signals = {k: [] for k, _ in dims}
+        trash_vpip = _bucket_vpip(s, "trash")
+        marginal_vpip = _bucket_vpip(s, "marginal")
+        premium_open = s["pf_bucket"]["premium"]["open_rate"]
+        strong_open = s["pf_bucket"]["strong"]["open_rate"]
+        sep = premium_open - s["pf_bucket"]["trash"]["open_rate"]
+        flop = _street_aggr(s, "flop")
+        turn = _street_aggr(s, "turn")
+        river_aggr = _street_aggr(s, "river")
+        dist = s["betsize_dist"]
+        entropy = -sum(v * math.log(v + 1e-9, 2) for v in dist.values()) / 2
+
+        add(signals, "hand", trash_vpip >= t["trash_hi"], f"high trash VPIP: {trash_vpip:.0%}")
+        add(signals, "hand", marginal_vpip >= t["marg_hi"], f"high marginal VPIP: {marginal_vpip:.0%}")
+        add(signals, "hand", sep < .88, f"weak premium-vs-trash separation: {sep:.0%}")
+        add(signals, "hand", premium_open < .95, f"premium open below 95%: {premium_open:.0%}")
+        add(signals, "hand", s["wsd"] <= t["wsd_low"], f"low W$SD: {s['wsd']:.0%}")
+
+        add(signals, "call", s["fold_to_bet"] <= t["fold_low"], f"low fold-to-bet: {s['fold_to_bet']:.0%}")
+        add(signals, "call", s["fold_to_cbet"] < .10, f"very low fold-to-cbet: {s['fold_to_cbet']:.0%}")
+        add(signals, "call", s["wtsd"] >= t["wtsd_hi"] and s["wsd"] <= t["wsd_low"],
+            f"high WTSD {s['wtsd']:.0%} with low W$SD {s['wsd']:.0%}")
+        add(signals, "call", trash_vpip >= t["trash_hi"] and s["fold_to_bet"] <= t["fold_low"],
+            "trash continues plus sticky facing bets")
+
+        add(signals, "init", s["pfr"] > .35 and s["cbet_rate"] < .58,
+            f"high PFR {s['pfr']:.0%} but low c-bet {s['cbet_rate']:.0%}")
+        add(signals, "init", flop - turn > .10, f"aggression drops flop to turn: {flop:.0%}->{turn:.0%}")
+        add(signals, "init", turn - river_aggr > .10, f"aggression drops turn to river: {turn:.0%}->{river_aggr:.0%}")
+        add(signals, "init", s["cbet_rate"] > .72 and river_aggr <= t["river_low"],
+            f"high c-bet but low river follow-through: {river_aggr:.0%}")
+
+        max_bucket = max(dist, key=dist.get)
+        add(signals, "sizing", dist[max_bucket] >= .55, f"concentrated sizing: {max_bucket} {dist[max_bucket]:.0%}")
+        add(signals, "sizing", dist["over"] >= t["over_hi"], f"high overpot share: {dist['over']:.0%}")
+        add(signals, "sizing", entropy < .72, f"low sizing entropy: {entropy:.2f}")
+        add(signals, "sizing", s["avg_bet_xpot"] > 1.15 or s["avg_bet_xpot"] < .92,
+            f"average size is extreme: {s['avg_bet_xpot']:.2f}x pot")
+
+        add(signals, "risk", s["win_rate"] > .52 and s["bb_per_100"] < 0,
+            f"wins hands but loses chips: {s['win_rate']:.0%}, {s['bb_per_100']:+.1f} bb/100")
+        add(signals, "risk", dist["over"] >= t["over_hi"] and s["bb_per_100"] < t["bb_med"],
+            "overpot-heavy with weak chip result")
+        add(signals, "risk", s["avg_bet_xpot"] > 1.15 and s["bb_per_100"] < t["bb_med"],
+            "large average sizing with poor bb/100")
+        add(signals, "risk", s["wtsd"] >= t["wtsd_hi"] and s["wsd"] <= _percentile(wsd, .50),
+            "many showdowns without enough wins")
+
+        add(signals, "value", s["wsd"] >= t["wsd_hi"] and s["bb_per_100"] < t["bb_med"],
+            f"high W$SD {s['wsd']:.0%} but mediocre chip EV")
+        add(signals, "value", strong_open < .65, f"low strong-hand open: {strong_open:.0%}")
+        add(signals, "value", river_aggr <= t["river_low"] and s["wsd"] >= _percentile(wsd, .50),
+            f"low river aggression {river_aggr:.0%} despite decent W$SD")
+        add(signals, "value", s["avg_bet_xpot"] < .92, f"small average bet size: {s['avg_bet_xpot']:.2f}x")
+
+        scores = [len(signals[k]) for k, _ in dims]
+        chart_payload.append({
+            "id": f"strategyRadar{rank}",
+            "label": display_name(m),
+            "scores": scores,
+            "signals": {label: signals[k] for k, label in dims},
+        })
+
+        leak_dims = sorted(
+            [(label, len(signals[k]), signals[k]) for k, label in dims if signals[k]],
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        if not leak_dims:
+            summary = "No strong aggregate leak signal in the current scoring pass."
+            cases = ["Audit largest losing pot", "Check thin-value river spots", "Review position split once position parser is wired"]
+        else:
+            summary = f"Main review area: {leak_dims[0][0]} ({leak_dims[0][1]} signals)."
+            cases = []
+            for label, _, sigs in leak_dims[:3]:
+                cases.append(f"{label}: {sigs[0]}")
+            while len(cases) < 3:
+                cases.append("Review largest losing hand for confirmation")
+
+        real_cases = strategy_cases.get(m) or []
+        if real_cases:
+            case_html = ""
+            for c in real_cases[:3]:
+                case_html += f"""
+        <li>
+          <div class="case-title">{html_lib.escape(c.get('dimension', 'Case'))}: {html_lib.escape(c.get('title', 'Review hand'))}</div>
+          <div class="case-signal">{html_lib.escape(c.get('signal', ''))}</div>
+          <div class="case-meta">vs {html_lib.escape(c.get('opponent', 'opponent'))} · ep {c.get('episode')} · action {c.get('step')}</div>
+          <a class="case-link" href="{html_lib.escape(c.get('href', 'holdem_replay.html?v=17'), quote=True)}">watch replay</a>
+        </li>"""
+        else:
+            case_html = "".join(f"<li><div class='case-title'>{html_lib.escape(c)}</div></li>" for c in cases[:3])
+        cards.append(f"""
+    <article class="strategy-card">
+      <div class="strategy-head">
+        <div><h3>{rank}. {model_cell(m)}</h3><div class="note">{html_lib.escape(summary)}</div></div>
+        <div class="strategy-kpi {'pos' if s['bb_per_100'] >= 0 else 'neg'}">{s['bb_per_100']:+.1f}<span>bb/100</span></div>
+      </div>
+      <canvas id="strategyRadar{rank}"></canvas>
+      <h3>Case studies</h3>
+      <ol class="strategy-cases">{case_html}</ol>
+    </article>""")
+
+    glossary = ""
+    for _, label in dims:
+        info = dim_help[label]
+        glossary += f"""
+      <div class="strategy-gloss">
+        <b>{html_lib.escape(label)}</b>
+        <span>{html_lib.escape(info['meaning'])}</span>
+        <em>Signals: {html_lib.escape(info['signals'])}</em>
+      </div>"""
+    html = f"""
+  <div class="strategy-intro">
+    <b>Strategy leak radar:</b> each dimension counts triggered diagnostic signals.
+    Higher values mean more evidence to review, not better play. Hover a radar
+    point to see the signals behind that score.
+    <div class="strategy-glossary">{glossary}
+    </div>
+  </div>
+  <div class="strategy-grid">
+    {''.join(cards)}
+  </div>"""
+    js = f"""
+const STRATEGY = {json.dumps(chart_payload)};
+const STRATEGY_LABELS = {json.dumps([label for _, label in dims])};
+STRATEGY.forEach((card, i) => {{
+  const el = document.getElementById(card.id);
+  if (!el) return;
+  new Chart(el, {{
+    type:'radar',
+    data:{{ labels:STRATEGY_LABELS,
+      datasets:[{{ label:card.label, data:card.scores,
+        borderColor:mcol(MODELS[i]), backgroundColor:mcol(MODELS[i]) + '33',
+        pointBackgroundColor:mcol(MODELS[i]) }}] }},
+    options:{{ scales:{{ r:{{ beginAtZero:true, suggestedMax:4, ticks:{{ stepSize:1 }} }} }},
+      plugins:{{ legend:{{ display:false }},
+        tooltip:{{ callbacks:{{ afterLabel(ctx) {{
+          const dim = ctx.label;
+          const sigs = card.signals[dim] || [];
+          return sigs.length ? sigs.map(s => '• ' + s) : ['no signal triggered'];
+        }} }} }} }} }} }});
+}});
+"""
+    return html, js
+
+
+# ---------------------------------------------------------------------------
 def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
@@ -443,6 +693,7 @@ def render_html(report: dict) -> str:
     elo = report.get("elo", {})
     ranked = sorted(models, key=lambda m: (elo_key(elo, m), pm[m]["bb_per_100"]),
                     reverse=True)
+    strategy_html, strategy_js = _strategy_analysis(report, ranked)
     rows = ""
     for i, m in enumerate(ranked, 1):
         s = pm[m]
@@ -461,12 +712,6 @@ def render_html(report: dict) -> str:
           <td class='{chip_cls}'>{s['chips_per_hand']:+.2f}</td>
           <td class='{chip_cls}'>{s['bb_per_100']:+.1f}</td>
           <td>{s['win_rate']*100:.0f}%</td>
-          <td>{s['vpip']*100:.0f}%</td>
-          <td>{s['pfr']*100:.0f}%</td>
-          <td>{s['agg_freq']*100:.0f}%</td>
-          <td>{s['fold_to_bet']*100:.0f}%</td>
-          <td>{s['allin_freq']*100:.0f}%</td>
-          <td>{s['avg_bet_xpot']:.2f}x</td>
           <td>{s['avg_latency_s']:.1f}s</td>
           <td>{s['avg_comp_tokens']:,}</td>
           <td>{s['hands']}</td>
@@ -528,10 +773,42 @@ def render_html(report: dict) -> str:
 {NAV_HEAD}
 <style>{BASE_CSS}
   td.bucket {{ font-weight: 600; }}
+  /* Prominent dividers for the three top-level sections (Results / Why / More). */
+  h2.section {{ font-size:23px; margin:56px 0 18px; padding-top:16px;
+    border-top:3px solid var(--red); color:var(--red); letter-spacing:.01em; }}
+  h2.section:first-of-type {{ margin-top:32px; }}
   /* Style cell: label on its own line, behaviour tag(s) on a second line, always
      two lines so the column never wraps mid-phrase. */
   td.stylecell {{ white-space:nowrap; line-height:1.5; }}
   td.stylecell .stags {{ margin-top:2px; }}
+  .strategy-intro {{ background:var(--faint); border:1px solid var(--line);
+    border-left:3px solid var(--red); padding:12px 14px; margin:12px 0 18px;
+    font-size:13px; line-height:1.55; }}
+  .strategy-glossary {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px 14px; margin-top:12px; }}
+  .strategy-gloss {{ border-top:1px solid var(--line); padding-top:7px; }}
+  .strategy-gloss b {{ display:block; color:var(--fg); }}
+  .strategy-gloss span {{ display:block; color:var(--fg); }}
+  .strategy-gloss em {{ display:block; color:var(--dim); font-style:normal; font-size:11px; }}
+  .strategy-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px; margin-top:14px; }}
+  .strategy-card {{ border:1px solid var(--line); background:var(--panel);
+    padding:14px; }}
+  .strategy-head {{ display:flex; justify-content:space-between; gap:12px;
+    align-items:flex-start; }}
+  .strategy-head h3 {{ margin-bottom:4px; }}
+  .strategy-kpi {{ text-align:right; font-weight:700; font-size:18px; white-space:nowrap; }}
+  .strategy-kpi span {{ display:block; color:var(--dim); font-size:10px; font-weight:400; }}
+  .strategy-card canvas {{ max-height:230px; margin:4px 0 10px; }}
+  .strategy-cases {{ margin:6px 0 0; padding-left:22px; font-size:12px; line-height:1.45; }}
+  .strategy-cases li {{ margin:8px 0; }}
+  .case-title {{ font-weight:700; }}
+  .case-signal {{ color:var(--fg); margin-top:2px; }}
+  .case-meta {{ color:var(--dim); font-size:11px; margin-top:2px; }}
+  .case-link {{ display:inline-block; margin-top:5px; border:1px solid var(--line);
+    background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }}
+  .case-link:hover {{ border-color:var(--red); color:var(--fg); }}
+  @media (max-width:860px) {{ .strategy-grid, .strategy-glossary {{ grid-template-columns:1fr; }} }}
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
@@ -559,11 +836,11 @@ def render_html(report: dict) -> str:
     how often.</div>
   </div>
 
-  <h2>🏆 Leaderboard &amp; player profiles</h2>
+  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <h3>Leaderboard</h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips/hand</th><th>bb/100</th>
-        <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
-        <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
+        <th>win%</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
     {rows}
   </table>
   {_legend('holdem')}
@@ -571,20 +848,25 @@ def render_html(report: dict) -> str:
     fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
     win and adjusts for opponent strength — the fair comparison when models faced different opponents.
     ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
-    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
-    (looseness). PFR = preflop raise %.
-    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
-    think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
+    chips / bb/100 / win% are raw, unadjusted metrics. think = avg seconds per decision.
+    tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
+
+  <h2>♟️ Action tendencies</h2>
+  <canvas id="actions"></canvas>
+  <div class="note">Share of each action across all the model's decisions.</div>
+
+  <h2>⚔️ Head-to-head chip results</h2>
+  <div class="sub">Net chips <b>per hand</b> the row model won against the column model
+    (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
+  <table class="h2h">{hh}</table>
+
+  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
 
   <div class="grid2">
     <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>
       <div class="note">x = looseness (VPIP), y = aggression. Upper-right = loose-aggressive (LAG), lower-left = nit.</div></div>
     <div><h2>💰 Win rate (bb / 100 hands)</h2><canvas id="bbchart"></canvas></div>
   </div>
-
-  <h2>♟️ Action tendencies</h2>
-  <canvas id="actions"></canvas>
-  <div class="note">Share of each action across all the model's decisions.</div>
 
   <div class="grid2">
     <div><h2>🧭 Style radar</h2><canvas id="radar"></canvas></div>
@@ -630,10 +912,8 @@ def render_html(report: dict) -> str:
   <div class="note">Share of the model's showdown hands that finished as each category
     (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
 
-  <h2>⚔️ Head-to-head chip results</h2>
-  <div class="sub">Net chips <b>per hand</b> the row model won against the column model
-    (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
-  <table class="h2h">{hh}</table>
+  <h2 class="section">3 · 🔬 Additional analysis</h2>
+  {strategy_html}
 
 <script>
 const R = {payload};
@@ -648,6 +928,7 @@ const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
 const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
 {CHART_SETUP}
+{strategy_js}
 
 // player-type scatter (VPIP x aggression)
 new Chart(scatter, {{ type:'scatter',

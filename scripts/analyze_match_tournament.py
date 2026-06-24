@@ -35,6 +35,10 @@ NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?
 EXTRA_CSS = ""
 
 _STYLE = BASE_CSS + """
+  /* Prominent dividers for the three top-level sections (Results / Why / More). */
+  h2.section { font-size:23px; margin:56px 0 18px; padding-top:16px;
+    border-top:3px solid var(--red); color:var(--red); letter-spacing:.01em; }
+  h2.section:first-of-type { margin-top:32px; }
   td.hh { font-weight:700; }
   td.hh .rec { display:block; font-weight:400; font-size:11px; color:var(--dim); margin-top:1px; }
 """
@@ -168,9 +172,10 @@ def render_html(rep: dict, beh: dict) -> str:
     so the <b>Elo rates match wins/losses</b>, opponent-adjusted. Match win rate is the
     headline metric.</div>
   </div>
-  <h2>Match win rate</h2>
+  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <h3>Match win rate</h3>
   <canvas id="wr"></canvas>
-  <h2>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h2>
+  <h3>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
         <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th><th>matches</th></tr>
@@ -181,9 +186,11 @@ def render_html(rep: dict, beh: dict) -> str:
     Match mode is win-or-lose — chips don't count past who took the match — so the rating uses match
     outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within
     ±1 of each other are a statistical tie. win% and the rest are raw, unadjusted metrics.</div>
-  <h2>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h2>
+  <h3>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h3>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
+  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
   {beh_html}
+  <h2 class="section">3 · 🔬 Additional analysis</h2>
   <script>
   new Chart(document.getElementById('wr'), {{
     type:'bar',

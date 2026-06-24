@@ -90,6 +90,7 @@ const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
 const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
 let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, showPrompt=false, speedIdx=0;
+const PARAMS = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
 
 async function init(){
@@ -116,18 +117,35 @@ async function init(){
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
   });
-  await loadPair(0);
+  let pairIdx = 0;
+  const pairParam = PARAMS.get("pair");
+  if (pairParam){
+    const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
+    if (found >= 0) pairIdx = found;
+  } else if (PARAMS.has("pairIndex")) {
+    pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+  }
+  await loadPair(pairIdx);
 }
 
 async function loadPair(i){
   const p = manifest.pairs[i];
+  $("pairSel").value = String(i);
   pairData = await (await fetch(BASE + p.file + "?v=17")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
     const n = e.moves.length;
     return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
   }).join("");
-  selectEp(0);
+  let epIdx = 0;
+  const epParam = PARAMS.get("ep");
+  if (epParam){
+    const found = pairData.episodes.findIndex(e => String(e.episode)===epParam || String(e.episode + 1)===epParam);
+    if (found >= 0) epIdx = found;
+  } else if (PARAMS.has("epIndex")) {
+    epIdx = Math.max(0, Math.min(pairData.episodes.length - 1, +PARAMS.get("epIndex") || 0));
+  }
+  selectEp(epIdx);
 }
 
 function fmt(n){ return (n>0?"+":"") + n; }
@@ -136,11 +154,15 @@ function other(p){ return p==="player_0" ? "player_1" : "player_0"; }
 function selectEp(idx){
   stop();
   ep = pairData.episodes[idx];
+  $("epSel").value = String(idx);
   cursor = 0;
   // dealer/button is whoever's observation says "button"
   btnSeat = null;
   for (const m of ep.moves){ if (m.pos && /button/i.test(m.pos)){ btnSeat = m.player; break; } }
   $("slider").max = ep.moves.length;
+  if (PARAMS.has("step")){
+    cursor = Math.max(0, Math.min(ep.moves.length, +PARAMS.get("step") || 0));
+  }
   render();
 }
 
