@@ -122,7 +122,11 @@
   .strategy-head h3 { margin-bottom:4px; }
   .strategy-kpi { text-align:right; font-weight:700; font-size:18px; white-space:nowrap; }
   .strategy-kpi span { display:block; color:var(--dim); font-size:10px; font-weight:400; }
-  .strategy-card canvas { max-height:230px; margin:4px 0 10px; }
+  .metric-profile-layout { display:block; margin-top:4px; }
+  .metric-profile-layout canvas { width:100% !important; max-height:230px; margin:0 0 10px; }
+  .profile-summary { margin:0; padding:10px 12px 10px 24px; background:var(--faint);
+    border:1px solid var(--line); color:var(--fg); font-size:12px; line-height:1.42; }
+  .profile-summary li { margin:5px 0; }
   .strategy-cases { margin:6px 0 0; padding-left:22px; font-size:12px; line-height:1.45; }
   .strategy-cases li { margin:8px 0; }
   .case-title { font-weight:700; }
@@ -131,7 +135,31 @@
   .case-link { display:inline-block; margin-top:5px; border:1px solid var(--line);
     background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }
   .case-link:hover { border-color:var(--red); color:var(--fg); }
+  .handeq-action-chart { border:1px solid var(--line); background:var(--panel); }
+  .handeq-action-row { display:grid; grid-template-columns:220px 1fr; border-top:1px solid var(--line); }
+  .handeq-action-row:first-child { border-top:0; }
+  .handeq-situation-label { padding:14px; border-right:1px solid var(--line); background:rgba(255,255,255,.35); }
+  .handeq-situation-label b { display:block; font-size:13px; }
+  .handeq-situation-label span { display:block; color:var(--dim); font-size:11px; margin-top:4px; }
+  .handeq-action-cells { display:grid; grid-template-columns:repeat(auto-fit,minmax(126px,1fr)); gap:8px; padding:10px; }
+  .handeq-action-cell { border:1px solid var(--line); padding:10px; min-height:94px; display:flex; flex-direction:column; justify-content:space-between; }
+  .handeq-action-name { font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; }
+  .handeq-action-lift { font-size:22px; font-weight:900; margin:2px 0; line-height:1; }
+  .handeq-action-meta { font-size:10px; color:var(--fg); line-height:1.25; }
+  .handeq-sample-track { height:5px; background:rgba(255,255,255,.5); border:1px solid rgba(0,0,0,.12); margin:5px 0 3px; }
+  .handeq-sample-track i { display:block; height:100%; background:rgba(28,28,28,.55); }
+  .wide-scroll { overflow-x:auto; border:1px solid var(--line); background:var(--panel); margin-top:14px; }
+  .handeq-model-table { min-width:1180px; border-collapse:separate; border-spacing:0; background:var(--panel); }
+  .handeq-model-table th { text-align:center; vertical-align:bottom; }
+  .handeq-model-table th span { display:block; max-width:140px; margin:0 auto; white-space:normal; line-height:1.25; }
+  .handeq-model-cell { min-width:148px; padding:10px; text-align:left; vertical-align:top; }
+  .handeq-cell-main { font-size:24px; line-height:1; font-weight:900; color:var(--fg); }
+  .handeq-cell-label { font-size:9px; color:var(--dim); margin-top:3px; text-transform:uppercase; font-weight:800; }
+  .handeq-cell-meta { font-size:10px; color:var(--fg); line-height:1.25; margin-top:8px; }
+  .handeq-cell-actions { display:flex; flex-wrap:wrap; gap:4px; margin-top:7px; min-height:18px; }
+  .handeq-cell-actions span { font-size:9px; line-height:1; padding:4px 5px; border:1px solid var(--line); background:rgba(255,255,255,.55); white-space:nowrap; }
   @media (max-width:860px) { .strategy-grid, .strategy-glossary { grid-template-columns:1fr; } }
+  @media (max-width:800px) { .handeq-action-row { grid-template-columns:1fr; } .handeq-situation-label { border-right:0; border-bottom:1px solid var(--line); } }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
@@ -304,22 +332,499 @@
   <table class="h2h"><tr><th></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</th><td class='diag'>—</td><td class='neg' style='--v:-4.34'>-4.34</td><td class='pos' style='--v:1.96'>+1.96</td><td class='neg' style='--v:-3.147'>-3.15</td><td class='pos' style='--v:1.05'>+1.05</td><td class='pos' style='--v:0.68'>+0.68</td><td class='neg' style='--v:-4.9'>-4.90</td><td class='neg' style='--v:-0.23'>-0.23</td><td class='neg' style='--v:-2.587'>-2.59</td><td class='neg' style='--v:-9.833'>-9.83</td><td class='pos' style='--v:1.06'>+1.06</td><td class='pos' style='--v:0.24'>+0.24</td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</th><td class='pos' style='--v:4.34'>+4.34</td><td class='diag'>—</td><td class='pos' style='--v:1.113'>+1.11</td><td class='neg' style='--v:-3.22'>-3.22</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='pos' style='--v:3.9'>+3.90</td><td class='pos' style='--v:1.62'>+1.62</td><td class='pos' style='--v:0.67'>+0.67</td><td class='neg' style='--v:-2.413'>-2.41</td><td class='pos' style='--v:1.48'>+1.48</td><td class='neg' style='--v:-0.46'>-0.46</td><td class='pos' style='--v:0.03'>+0.03</td></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='neg' style='--v:-1.96'>-1.96</td><td class='neg' style='--v:-1.113'>-1.11</td><td class='diag'>—</td><td class='pos' style='--v:0.38'>+0.38</td><td class='neg' style='--v:-0.6'>-0.60</td><td class='neg' style='--v:-2.45'>-2.45</td><td class='pos' style='--v:0.87'>+0.87</td><td class='pos' style='--v:0.88'>+0.88</td><td class='pos' style='--v:2.14'>+2.14</td><td class='pos' style='--v:1.64'>+1.64</td><td class='pos' style='--v:2.28'>+2.28</td><td class='pos' style='--v:2.74'>+2.74</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='pos' style='--v:3.147'>+3.15</td><td class='pos' style='--v:3.22'>+3.22</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='diag'>—</td><td class='neg' style='--v:-2.18'>-2.18</td><td class='neg' style='--v:-0.83'>-0.83</td><td class='neg' style='--v:-1.23'>-1.23</td><td class='pos' style='--v:1.61'>+1.61</td><td class='pos' style='--v:0.46'>+0.46</td><td class='pos' style='--v:1.98'>+1.98</td><td class='pos' style='--v:1.63'>+1.63</td><td class='neg' style='--v:-1.2'>-1.20</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='neg' style='--v:-1.05'>-1.05</td><td class='pos' style='--v:0.67'>+0.67</td><td class='pos' style='--v:0.6'>+0.60</td><td class='pos' style='--v:2.18'>+2.18</td><td class='diag'>—</td><td class='neg' style='--v:-2.78'>-2.78</td><td class='neg' style='--v:-0.92'>-0.92</td><td class='pos' style='--v:0.29'>+0.29</td><td class='pos' style='--v:1.42'>+1.42</td><td class='pos' style='--v:1.56'>+1.56</td><td class='pos' style='--v:1.05'>+1.05</td><td class='pos' style='--v:0.38'>+0.38</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</th><td class='neg' style='--v:-0.68'>-0.68</td><td class='neg' style='--v:-3.9'>-3.90</td><td class='pos' style='--v:2.45'>+2.45</td><td class='pos' style='--v:0.83'>+0.83</td><td class='pos' style='--v:2.78'>+2.78</td><td class='diag'>—</td><td class='neg' style='--v:-2.08'>-2.08</td><td class='' style='--v:0.0'>+0.00</td><td class='neg' style='--v:-1.58'>-1.58</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:0.56'>+0.56</td><td class='pos' style='--v:1.17'>+1.17</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</th><td class='pos' style='--v:4.9'>+4.90</td><td class='neg' style='--v:-1.62'>-1.62</td><td class='neg' style='--v:-0.87'>-0.87</td><td class='pos' style='--v:1.23'>+1.23</td><td class='pos' style='--v:0.92'>+0.92</td><td class='pos' style='--v:2.08'>+2.08</td><td class='diag'>—</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:2.07'>+2.07</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:1.76'>+1.76</td><td class='pos' style='--v:3.99'>+3.99</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='pos' style='--v:0.23'>+0.23</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='neg' style='--v:-0.88'>-0.88</td><td class='neg' style='--v:-1.61'>-1.61</td><td class='neg' style='--v:-0.29'>-0.29</td><td class='' style='--v:0.0'>+0.00</td><td class='' style='--v:0.0'>+0.00</td><td class='diag'>—</td><td class='neg' style='--v:-0.8'>-0.80</td><td class='neg' style='--v:-4.11'>-4.11</td><td class='pos' style='--v:1.09'>+1.09</td><td class='pos' style='--v:0.45'>+0.45</td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='pos' style='--v:2.587'>+2.59</td><td class='pos' style='--v:2.413'>+2.41</td><td class='neg' style='--v:-2.14'>-2.14</td><td class='neg' style='--v:-0.46'>-0.46</td><td class='neg' style='--v:-1.42'>-1.42</td><td class='pos' style='--v:1.58'>+1.58</td><td class='neg' style='--v:-2.07'>-2.07</td><td class='pos' style='--v:0.8'>+0.80</td><td class='diag'>—</td><td class='pos' style='--v:1.19'>+1.19</td><td class='pos' style='--v:5.93'>+5.93</td><td class='neg' style='--v:-0.86'>-0.86</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class='pos' style='--v:9.833'>+9.83</td><td class='neg' style='--v:-1.48'>-1.48</td><td class='neg' style='--v:-1.64'>-1.64</td><td class='neg' style='--v:-1.98'>-1.98</td><td class='neg' style='--v:-1.56'>-1.56</td><td class='' style='--v:0.0'>+0.00</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:4.11'>+4.11</td><td class='neg' style='--v:-1.19'>-1.19</td><td class='diag'>—</td><td class='neg' style='--v:-2.06'>-2.06</td><td class='neg' style='--v:-3.98'>-3.98</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='neg' style='--v:-1.06'>-1.06</td><td class='pos' style='--v:0.46'>+0.46</td><td class='neg' style='--v:-2.28'>-2.28</td><td class='neg' style='--v:-1.63'>-1.63</td><td class='neg' style='--v:-1.05'>-1.05</td><td class='neg' style='--v:-0.56'>-0.56</td><td class='neg' style='--v:-1.76'>-1.76</td><td class='neg' style='--v:-1.09'>-1.09</td><td class='neg' style='--v:-5.93'>-5.93</td><td class='pos' style='--v:2.06'>+2.06</td><td class='diag'>—</td><td class='neg' style='--v:-3.14'>-3.14</td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='neg' style='--v:-0.24'>-0.24</td><td class='neg' style='--v:-0.03'>-0.03</td><td class='neg' style='--v:-2.74'>-2.74</td><td class='pos' style='--v:1.2'>+1.20</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='neg' style='--v:-1.17'>-1.17</td><td class='neg' style='--v:-3.99'>-3.99</td><td class='neg' style='--v:-0.45'>-0.45</td><td class='pos' style='--v:0.86'>+0.86</td><td class='pos' style='--v:3.98'>+3.98</td><td class='pos' style='--v:3.14'>+3.14</td><td class='diag'>—</td></tr></table>
 
   <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
+    <div class="callout"><b>Hand-equity preview.</b> This section asks whether each model's action choices line up with the hand-equity signal available at the moment of decision. A positive lift means the chosen action's average equity was higher than the alternative observed actions in the same situation; it is evidence, not a claim of perfect poker optimality.</div>
+<h2>Action quality by situation</h2>
+  <div class="note">Each row is a strategic situation found during the hand. Each cell is an action observed in that situation. Quality change = that action's average hand equity minus the average hand equity of the other observed actions in the same situation.</div>
+  <div class="handeq-action-chart">
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>Preflop weak/marginal hand</b>
+        <span>avg EQ 44% · n=9192</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.198)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-12.4pp</div><div class='handeq-action-meta'>EQ 33% · base 45%</div><div class='handeq-sample-track'><i style='width:13.0%'></i></div><div class='handeq-action-meta'>sample 13% · n=1193</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.086)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>+5.4pp</div><div class='handeq-action-meta'>EQ 48% · base 42%</div><div class='handeq-sample-track'><i style='width:24.4%'></i></div><div class='handeq-action-meta'>sample 24% · n=2242</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.031)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-1.9pp</div><div class='handeq-action-meta'>EQ 43% · base 45%</div><div class='handeq-sample-track'><i style='width:50.7%'></i></div><div class='handeq-action-meta'>sample 51% · n=4658</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.287)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+17.9pp</div><div class='handeq-action-meta'>EQ 61% · base 44%</div><div class='handeq-sample-track'><i style='width:1.2%'></i></div><div class='handeq-action-meta'>sample 1% · n=111</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.111)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+6.9pp</div><div class='handeq-action-meta'>EQ 50% · base 43%</div><div class='handeq-sample-track'><i style='width:10.7%'></i></div><div class='handeq-action-meta'>sample 11% · n=986</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.145)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+9.1pp</div><div class='handeq-action-meta'>EQ 53% · base 44%</div><div class='handeq-sample-track'><i style='width:0.0%'></i></div><div class='handeq-action-meta'>sample 0% · n=2</div></div></div>
+    </section>
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>Preflop premium/strong hand</b>
+        <span>avg EQ 63% · n=3066</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.041)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>-2.6pp</div><div class='handeq-action-meta'>EQ 61% · base 63%</div><div class='handeq-sample-track'><i style='width:3.2%'></i></div><div class='handeq-action-meta'>sample 3% · n=99</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.198)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-12.4pp</div><div class='handeq-action-meta'>EQ 52% · base 65%</div><div class='handeq-sample-track'><i style='width:12.1%'></i></div><div class='handeq-action-meta'>sample 12% · n=370</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.098)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+6.1pp</div><div class='handeq-action-meta'>EQ 68% · base 62%</div><div class='handeq-sample-track'><i style='width:21.3%'></i></div><div class='handeq-action-meta'>sample 21% · n=652</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.025)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+1.5pp</div><div class='handeq-action-meta'>EQ 64% · base 62%</div><div class='handeq-sample-track'><i style='width:63.4%'></i></div><div class='handeq-action-meta'>sample 63% · n=1943</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.201)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+12.5pp</div><div class='handeq-action-meta'>EQ 76% · base 63%</div><div class='handeq-sample-track'><i style='width:0.1%'></i></div><div class='handeq-action-meta'>sample 0% · n=2</div></div></div>
+    </section>
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>BTN/SB first decision</b>
+        <span>avg EQ 52% · n=8132</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.195)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-12.2pp</div><div class='handeq-action-meta'>EQ 46% · base 58%</div><div class='handeq-sample-track'><i style='width:50.2%'></i></div><div class='handeq-action-meta'>sample 50% · n=4082</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.195)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+12.2pp</div><div class='handeq-action-meta'>EQ 58% · base 46%</div><div class='handeq-sample-track'><i style='width:49.8%'></i></div><div class='handeq-action-meta'>sample 50% · n=4047</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.220)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+13.7pp</div><div class='handeq-action-meta'>EQ 65% · base 52%</div><div class='handeq-sample-track'><i style='width:0.0%'></i></div><div class='handeq-action-meta'>sample 0% · n=3</div></div></div>
+    </section>
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>Flop as preflop raiser</b>
+        <span>avg EQ 63% · n=2193</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.255)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>-16.0pp</div><div class='handeq-action-meta'>EQ 52% · base 68%</div><div class='handeq-sample-track'><i style='width:29.1%'></i></div><div class='handeq-action-meta'>sample 29% · n=638</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.245)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+15.3pp</div><div class='handeq-action-meta'>EQ 68% · base 52%</div><div class='handeq-sample-track'><i style='width:70.6%'></i></div><div class='handeq-action-meta'>sample 71% · n=1548</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.565)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+35.3pp</div><div class='handeq-action-meta'>EQ 98% · base 63%</div><div class='handeq-sample-track'><i style='width:0.3%'></i></div><div class='handeq-action-meta'>sample 0% · n=7</div></div></div>
+    </section>
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>Turn/river facing bet</b>
+        <span>avg EQ 31% · n=3999</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.270)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-16.9pp</div><div class='handeq-action-meta'>EQ 22% · base 39%</div><div class='handeq-sample-track'><i style='width:46.6%'></i></div><div class='handeq-action-meta'>sample 47% · n=1862</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.192)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>+12.0pp</div><div class='handeq-action-meta'>EQ 37% · base 25%</div><div class='handeq-sample-track'><i style='width:49.6%'></i></div><div class='handeq-action-meta'>sample 50% · n=1985</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.485)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+30.3pp</div><div class='handeq-action-meta'>EQ 60% · base 30%</div><div class='handeq-sample-track'><i style='width:3.1%'></i></div><div class='handeq-action-meta'>sample 3% · n=124</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.676)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+42.3pp</div><div class='handeq-action-meta'>EQ 73% · base 31%</div><div class='handeq-sample-track'><i style='width:0.7%'></i></div><div class='handeq-action-meta'>sample 1% · n=28</div></div></div>
+    </section>
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>Large pot decision</b>
+        <span>avg EQ 38% · n=905</span>
+      </div>
+      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.460)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-28.8pp</div><div class='handeq-action-meta'>EQ 18% · base 47%</div><div class='handeq-sample-track'><i style='width:28.7%'></i></div><div class='handeq-action-meta'>sample 29% · n=260</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.019)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>+1.2pp</div><div class='handeq-action-meta'>EQ 39% · base 38%</div><div class='handeq-sample-track'><i style='width:20.6%'></i></div><div class='handeq-action-meta'>sample 21% · n=186</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.018)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-1.1pp</div><div class='handeq-action-meta'>EQ 38% · base 39%</div><div class='handeq-sample-track'><i style='width:31.4%'></i></div><div class='handeq-action-meta'>sample 31% · n=284</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.643)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+40.2pp</div><div class='handeq-action-meta'>EQ 74% · base 33%</div><div class='handeq-sample-track'><i style='width:12.3%'></i></div><div class='handeq-action-meta'>sample 12% · n=111</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.168)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+10.5pp</div><div class='handeq-action-meta'>EQ 49% · base 38%</div><div class='handeq-sample-track'><i style='width:3.8%'></i></div><div class='handeq-action-meta'>sample 4% · n=34</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.617)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+38.5pp</div><div class='handeq-action-meta'>EQ 76% · base 37%</div><div class='handeq-sample-track'><i style='width:3.3%'></i></div><div class='handeq-action-meta'>sample 3% · n=30</div></div></div>
+    </section></div>
+<h2>Model situation exposure × quality-aligned choice rate</h2>
+  <div class="note">Y-axis is model; X-axis is situation. The large number is the share of choices assigned to actions whose hand-equity lift is positive within that situation. Cell color uses 50% as the white midpoint: greener above, redder below.</div>
+  <div class="wide-scroll"><table class="handeq-model-table">
+    <tr><th class="model">model</th><th><span>Preflop weak/marginal</span></th><th><span>Preflop premium/strong</span></th><th><span>BTN/SB first</span></th><th><span>Flop after PFR</span></th><th><span>Turn/river facing bet</span></th><th><span>Large pot</span></th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.139)">
+          <div class="handeq-cell-main">40%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 35% · n=672</div>
+          <div class="handeq-cell-actions"><span>call 53%</span><span>check 22%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.598)">
+          <div class="handeq-cell-main">92%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 10% · n=189</div>
+          <div class="handeq-cell-actions"><span>raise 63%</span><span>bet 29%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.091)">
+          <div class="handeq-cell-main">56%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 31% · n=600</div>
+          <div class="handeq-cell-actions"><span>raise 56%</span><span>call 44%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.603)">
+          <div class="handeq-cell-main">92%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 9% · n=184</div>
+          <div class="handeq-cell-actions"><span>bet 92%</span><span>check 8%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.275)">
+          <div class="handeq-cell-main">69%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=233</div>
+          <div class="handeq-cell-actions"><span>call 64%</span><span>fold 31%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.045)">
+          <div class="handeq-cell-main">47%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=64</div>
+          <div class="handeq-cell-actions"><span>call 34%</span><span>check 28%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.056)">
+          <div class="handeq-cell-main">54%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 32% · n=859</div>
+          <div class="handeq-cell-actions"><span>call 31%</span><span>check 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.573)">
+          <div class="handeq-cell-main">90%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 11% · n=293</div>
+          <div class="handeq-cell-actions"><span>raise 61%</span><span>bet 29%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.405)">
+          <div class="handeq-cell-main">78%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 28% · n=749</div>
+          <div class="handeq-cell-actions"><span>raise 78%</span><span>call 22%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.096)">
+          <div class="handeq-cell-main">43%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=316</div>
+          <div class="handeq-cell-actions"><span>check 57%</span><span>bet 43%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.080)">
+          <div class="handeq-cell-main">56%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 14% · n=378</div>
+          <div class="handeq-cell-actions"><span>call 54%</span><span>fold 44%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.375)">
+          <div class="handeq-cell-main">24%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 4% · n=96</div>
+          <div class="handeq-cell-actions"><span>call 48%</span><span>fold 28%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.226)">
+          <div class="handeq-cell-main">34%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 33% · n=894</div>
+          <div class="handeq-cell-actions"><span>call 48%</span><span>check 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.398)">
+          <div class="handeq-cell-main">78%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=326</div>
+          <div class="handeq-cell-actions"><span>raise 62%</span><span>bet 15%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.156)">
+          <div class="handeq-cell-main">39%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 30% · n=804</div>
+          <div class="handeq-cell-actions"><span>call 61%</span><span>raise 39%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.390)">
+          <div class="handeq-cell-main">77%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 6% · n=170</div>
+          <div class="handeq-cell-actions"><span>bet 75%</span><span>check 23%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.090)">
+          <div class="handeq-cell-main">44%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 15% · n=407</div>
+          <div class="handeq-cell-actions"><span>fold 56%</span><span>call 42%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.214)">
+          <div class="handeq-cell-main">35%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=94</div>
+          <div class="handeq-cell-actions"><span>fold 36%</span><span>call 29%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.368)">
+          <div class="handeq-cell-main">24%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 35% · n=1183</div>
+          <div class="handeq-cell-actions"><span>call 66%</span><span>check 24%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.547)">
+          <div class="handeq-cell-main">88%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=416</div>
+          <div class="handeq-cell-actions"><span>raise 62%</span><span>bet 26%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.271)">
+          <div class="handeq-cell-main">31%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 31% · n=1058</div>
+          <div class="handeq-cell-actions"><span>call 69%</span><span>raise 31%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.502)">
+          <div class="handeq-cell-main">85%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 5% · n=172</div>
+          <div class="handeq-cell-actions"><span>bet 83%</span><span>check 15%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.035)">
+          <div class="handeq-cell-main">48%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 14% · n=469</div>
+          <div class="handeq-cell-actions"><span>fold 52%</span><span>call 42%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.088)">
+          <div class="handeq-cell-main">56%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=114</div>
+          <div class="handeq-cell-actions"><span>check 23%</span><span>fold 22%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.374)">
+          <div class="handeq-cell-main">24%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 34% · n=528</div>
+          <div class="handeq-cell-actions"><span>call 58%</span><span>check 23%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.368)">
+          <div class="handeq-cell-main">76%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=184</div>
+          <div class="handeq-cell-actions"><span>raise 59%</span><span>call 18%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.284)">
+          <div class="handeq-cell-main">30%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 31% · n=469</div>
+          <div class="handeq-cell-actions"><span>call 70%</span><span>raise 30%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.392)">
+          <div class="handeq-cell-main">77%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 5% · n=79</div>
+          <div class="handeq-cell-actions"><span>bet 77%</span><span>check 23%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.080)">
+          <div class="handeq-cell-main">56%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 15% · n=225</div>
+          <div class="handeq-cell-actions"><span>call 53%</span><span>fold 44%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.125)">
+          <div class="handeq-cell-main">41%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=46</div>
+          <div class="handeq-cell-actions"><span>fold 30%</span><span>call 28%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.106)">
+          <div class="handeq-cell-main">43%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 31% · n=781</div>
+          <div class="handeq-cell-actions"><span>call 35%</span><span>check 26%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.553)">
+          <div class="handeq-cell-main">88%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 14% · n=337</div>
+          <div class="handeq-cell-actions"><span>raise 69%</span><span>bet 19%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.287)">
+          <div class="handeq-cell-main">70%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 30% · n=748</div>
+          <div class="handeq-cell-actions"><span>raise 70%</span><span>call 30%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.148)">
+          <div class="handeq-cell-main">60%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 11% · n=262</div>
+          <div class="handeq-cell-actions"><span>bet 60%</span><span>check 40%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.125)">
+          <div class="handeq-cell-main">41%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 11% · n=276</div>
+          <div class="handeq-cell-actions"><span>fold 59%</span><span>call 34%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.360)">
+          <div class="handeq-cell-main">25%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=76</div>
+          <div class="handeq-cell-actions"><span>fold 43%</span><span>call 32%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.075)">
+          <div class="handeq-cell-main">55%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 33% · n=694</div>
+          <div class="handeq-cell-actions"><span>call 41%</span><span>raise 31%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.606)">
+          <div class="handeq-cell-main">92%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 9% · n=190</div>
+          <div class="handeq-cell-actions"><span>raise 64%</span><span>bet 28%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.329)">
+          <div class="handeq-cell-main">73%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 28% · n=600</div>
+          <div class="handeq-cell-actions"><span>raise 73%</span><span>call 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.567)">
+          <div class="handeq-cell-main">89%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=254</div>
+          <div class="handeq-cell-actions"><span>bet 89%</span><span>check 11%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.071)">
+          <div class="handeq-cell-main">55%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 14% · n=306</div>
+          <div class="handeq-cell-actions"><span>call 53%</span><span>fold 45%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.108)">
+          <div class="handeq-cell-main">43%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 4% · n=87</div>
+          <div class="handeq-cell-actions"><span>call 31%</span><span>fold 26%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.372)">
+          <div class="handeq-cell-main">24%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 33% · n=534</div>
+          <div class="handeq-cell-actions"><span>call 61%</span><span>check 22%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.329)">
+          <div class="handeq-cell-main">73%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=195</div>
+          <div class="handeq-cell-actions"><span>raise 62%</span><span>call 14%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.263)">
+          <div class="handeq-cell-main">32%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 30% · n=492</div>
+          <div class="handeq-cell-actions"><span>call 68%</span><span>raise 32%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.333)">
+          <div class="handeq-cell-main">73%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 6% · n=93</div>
+          <div class="handeq-cell-actions"><span>bet 73%</span><span>check 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.028)">
+          <div class="handeq-cell-main">52%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 18% · n=287</div>
+          <div class="handeq-cell-actions"><span>call 51%</span><span>fold 48%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.175)">
+          <div class="handeq-cell-main">38%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 2% · n=37</div>
+          <div class="handeq-cell-actions"><span>call 41%</span><span>check 27%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.327)">
+          <div class="handeq-cell-main">27%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 34% · n=1228</div>
+          <div class="handeq-cell-actions"><span>call 66%</span><span>check 25%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.589)">
+          <div class="handeq-cell-main">91%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 10% · n=351</div>
+          <div class="handeq-cell-actions"><span>raise 68%</span><span>bet 23%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.197)">
+          <div class="handeq-cell-main">36%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 30% · n=1082</div>
+          <div class="handeq-cell-actions"><span>call 64%</span><span>raise 36%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.435)">
+          <div class="handeq-cell-main">80%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 6% · n=227</div>
+          <div class="handeq-cell-actions"><span>bet 80%</span><span>check 20%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.205)">
+          <div class="handeq-cell-main">64%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 17% · n=638</div>
+          <div class="handeq-cell-actions"><span>call 60%</span><span>fold 36%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.095)">
+          <div class="handeq-cell-main">43%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 4% · n=136</div>
+          <div class="handeq-cell-actions"><span>call 33%</span><span>fold 24%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.022)">
+          <div class="handeq-cell-main">48%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 34% · n=642</div>
+          <div class="handeq-cell-actions"><span>call 28%</span><span>check 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.635)">
+          <div class="handeq-cell-main">94%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=219</div>
+          <div class="handeq-cell-actions"><span>raise 70%</span><span>bet 24%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.314)">
+          <div class="handeq-cell-main">72%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 28% · n=522</div>
+          <div class="handeq-cell-actions"><span>raise 72%</span><span>call 28%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.117)">
+          <div class="handeq-cell-main">58%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 12% · n=215</div>
+          <div class="handeq-cell-actions"><span>bet 58%</span><span>check 42%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.358)">
+          <div class="handeq-cell-main">25%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 11% · n=211</div>
+          <div class="handeq-cell-actions"><span>fold 75%</span><span>call 20%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.196)">
+          <div class="handeq-cell-main">36%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=55</div>
+          <div class="handeq-cell-actions"><span>fold 47%</span><span>check 18%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.325)">
+          <div class="handeq-cell-main">27%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 36% · n=678</div>
+          <div class="handeq-cell-actions"><span>call 58%</span><span>check 24%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.296)">
+          <div class="handeq-cell-main">71%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 11% · n=214</div>
+          <div class="handeq-cell-actions"><span>raise 56%</span><span>call 25%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.263)">
+          <div class="handeq-cell-main">32%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 31% · n=576</div>
+          <div class="handeq-cell-actions"><span>call 68%</span><span>raise 31%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.330)">
+          <div class="handeq-cell-main">73%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 5% · n=85</div>
+          <div class="handeq-cell-actions"><span>bet 73%</span><span>check 27%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.063)">
+          <div class="handeq-cell-main">54%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 14% · n=261</div>
+          <div class="handeq-cell-actions"><span>fold 46%</span><span>call 44%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.044)">
+          <div class="handeq-cell-main">47%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=49</div>
+          <div class="handeq-cell-actions"><span>fold 29%</span><span>check 29%</span></div>
+        </td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.123)">
+          <div class="handeq-cell-main">41%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 32% · n=499</div>
+          <div class="handeq-cell-actions"><span>call 50%</span><span>check 24%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.341)">
+          <div class="handeq-cell-main">74%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 10% · n=152</div>
+          <div class="handeq-cell-actions"><span>raise 60%</span><span>call 18%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.190)">
+          <div class="handeq-cell-main">63%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 27% · n=432</div>
+          <div class="handeq-cell-actions"><span>raise 63%</span><span>call 37%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.222)">
+          <div class="handeq-cell-main">65%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 9% · n=136</div>
+          <div class="handeq-cell-actions"><span>bet 65%</span><span>check 35%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.234)">
+          <div class="handeq-cell-main">66%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 20% · n=308</div>
+          <div class="handeq-cell-actions"><span>call 66%</span><span>fold 34%</span></div>
+        </td>
+        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.155)">
+          <div class="handeq-cell-main">39%</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share 3% · n=51</div>
+          <div class="handeq-cell-actions"><span>call 37%</span><span>check 27%</span></div>
+        </td></tr>
+  </table></div>
 
-  <div class="grid2">
-    <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>
-      <div class="note">x = looseness (VPIP), y = aggression. Upper-right = loose-aggressive (LAG), lower-left = nit.</div></div>
-    <div><h2>💰 Win rate (bb / 100 hands)</h2><canvas id="bbchart"></canvas></div>
-  </div>
 
-  <div class="grid2">
-    <div><h2>🧭 Style radar</h2><canvas id="radar"></canvas></div>
-    <div><h2>⏱️ Avg thinking time</h2><canvas id="latency"></canvas></div>
-  </div>
-
-  <h2>📈 Aggression by street</h2>
-  <canvas id="streetAgg"></canvas>
-  <div class="note">Share of each model's actions on that street that were a bet/raise/all-in.
-    A model that c-bets but then check-folds turn/river will dip from flop → river.</div>
+  <h2>🃏 Preflop open-rate by hand strength</h2>
+  <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
+    bucket. A model that reads its cards opens premium ≫ trash.</div>
+  <table>
+    <tr><th class='model'>bucket</th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr>
+    <tr><th class='model'>premium</th><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=69</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=66</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=78</div></td><td style='background:rgba(143,29,29,0.96);color:#fbfbf8'>96%<div class='small' style='color:#f1d9d9'>n=79</div></td><td style='background:rgba(143,29,29,0.96);color:#fbfbf8'>96%<div class='small' style='color:#f1d9d9'>n=76</div></td><td style='background:rgba(143,29,29,0.98);color:#fbfbf8'>98%<div class='small' style='color:#f1d9d9'>n=43</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=44</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=45</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=82</div></td><td style='background:rgba(143,29,29,0.90);color:#fbfbf8'>90%<div class='small' style='color:#f1d9d9'>n=39</div></td><td style='background:rgba(143,29,29,0.95);color:#fbfbf8'>95%<div class='small' style='color:#f1d9d9'>n=56</div></td><td style='background:rgba(143,29,29,0.95);color:#fbfbf8'>95%<div class='small' style='color:#f1d9d9'>n=79</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(143,29,29,0.83);color:#fbfbf8'>83%<div class='small' style='color:#f1d9d9'>n=111</div></td><td style='background:rgba(143,29,29,0.81);color:#fbfbf8'>81%<div class='small' style='color:#f1d9d9'>n=149</div></td><td style='background:rgba(143,29,29,0.80);color:#fbfbf8'>80%<div class='small' style='color:#f1d9d9'>n=145</div></td><td style='background:rgba(143,29,29,0.64);color:#fbfbf8'>64%<div class='small' style='color:#f1d9d9'>n=128</div></td><td style='background:rgba(143,29,29,0.57);color:#fbfbf8'>57%<div class='small' style='color:#f1d9d9'>n=115</div></td><td style='background:rgba(143,29,29,0.88);color:#fbfbf8'>88%<div class='small' style='color:#f1d9d9'>n=103</div></td><td style='background:rgba(143,29,29,0.86);color:#fbfbf8'>86%<div class='small' style='color:#f1d9d9'>n=88</div></td><td style='background:rgba(143,29,29,0.86);color:#fbfbf8'>86%<div class='small' style='color:#f1d9d9'>n=78</div></td><td style='background:rgba(143,29,29,0.81);color:#fbfbf8'>81%<div class='small' style='color:#f1d9d9'>n=116</div></td><td style='background:rgba(143,29,29,0.56);color:#fbfbf8'>56%<div class='small' style='color:#f1d9d9'>n=81</div></td><td style='background:rgba(143,29,29,0.61);color:#fbfbf8'>61%<div class='small' style='color:#f1d9d9'>n=98</div></td><td style='background:rgba(143,29,29,0.56);color:#fbfbf8'>56%<div class='small' style='color:#f1d9d9'>n=119</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(143,29,29,0.49);color:#1c1c1c'>49%<div class='small' style='color:#6b6b6b'>n=263</div></td><td style='background:rgba(143,29,29,0.41);color:#1c1c1c'>41%<div class='small' style='color:#6b6b6b'>n=311</div></td><td style='background:rgba(143,29,29,0.60);color:#fbfbf8'>60%<div class='small' style='color:#f1d9d9'>n=282</div></td><td style='background:rgba(143,29,29,0.35);color:#1c1c1c'>35%<div class='small' style='color:#6b6b6b'>n=265</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=252</div></td><td style='background:rgba(143,29,29,0.85);color:#fbfbf8'>85%<div class='small' style='color:#f1d9d9'>n=198</div></td><td style='background:rgba(143,29,29,0.74);color:#fbfbf8'>74%<div class='small' style='color:#f1d9d9'>n=214</div></td><td style='background:rgba(143,29,29,0.66);color:#fbfbf8'>66%<div class='small' style='color:#f1d9d9'>n=208</div></td><td style='background:rgba(143,29,29,0.65);color:#fbfbf8'>65%<div class='small' style='color:#f1d9d9'>n=306</div></td><td style='background:rgba(143,29,29,0.29);color:#1c1c1c'>29%<div class='small' style='color:#6b6b6b'>n=154</div></td><td style='background:rgba(143,29,29,0.45);color:#1c1c1c'>45%<div class='small' style='color:#6b6b6b'>n=277</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=240</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=246</div></td><td style='background:rgba(143,29,29,0.01);color:#1c1c1c'>1%<div class='small' style='color:#6b6b6b'>n=264</div></td><td style='background:rgba(143,29,29,0.26);color:#1c1c1c'>26%<div class='small' style='color:#6b6b6b'>n=276</div></td><td style='background:rgba(143,29,29,0.14);color:#1c1c1c'>14%<div class='small' style='color:#6b6b6b'>n=274</div></td><td style='background:rgba(143,29,29,0.02);color:#1c1c1c'>2%<div class='small' style='color:#6b6b6b'>n=249</div></td><td style='background:rgba(143,29,29,0.47);color:#1c1c1c'>47%<div class='small' style='color:#6b6b6b'>n=222</div></td><td style='background:rgba(143,29,29,0.37);color:#1c1c1c'>37%<div class='small' style='color:#6b6b6b'>n=199</div></td><td style='background:rgba(143,29,29,0.27);color:#1c1c1c'>27%<div class='small' style='color:#6b6b6b'>n=203</div></td><td style='background:rgba(143,29,29,0.34);color:#1c1c1c'>34%<div class='small' style='color:#6b6b6b'>n=257</div></td><td style='background:rgba(143,29,29,0.08);color:#1c1c1c'>8%<div class='small' style='color:#6b6b6b'>n=170</div></td><td style='background:rgba(143,29,29,0.25);color:#1c1c1c'>25%<div class='small' style='color:#6b6b6b'>n=228</div></td><td style='background:rgba(143,29,29,0.04);color:#1c1c1c'>4%<div class='small' style='color:#6b6b6b'>n=243</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=396</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=389</div></td><td style='background:rgba(143,29,29,0.05);color:#1c1c1c'>5%<div class='small' style='color:#6b6b6b'>n=358</div></td><td style='background:rgba(143,29,29,0.07);color:#1c1c1c'>7%<div class='small' style='color:#6b6b6b'>n=363</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=315</div></td><td style='background:rgba(143,29,29,0.22);color:#1c1c1c'>22%<div class='small' style='color:#6b6b6b'>n=264</div></td><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=280</div></td><td style='background:rgba(143,29,29,0.08);color:#1c1c1c'>8%<div class='small' style='color:#6b6b6b'>n=305</div></td><td style='background:rgba(143,29,29,0.11);color:#1c1c1c'>11%<div class='small' style='color:#6b6b6b'>n=366</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=270</div></td><td style='background:rgba(143,29,29,0.05);color:#1c1c1c'>5%<div class='small' style='color:#6b6b6b'>n=349</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=329</div></td></tr>
+  </table>
 
   <h2>🎯 Postflop &amp; showdown stats</h2>
   <table>
@@ -333,23 +838,6 @@
     <b>W$SD</b> = won at showdown (of showdowns seen).
   </div>
 
-  <h2>🃏 Preflop open-rate by hand strength</h2>
-  <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
-    bucket. A model that reads its cards opens premium ≫ trash.</div>
-  <table>
-    <tr><th class='model'>bucket</th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr>
-    <tr><th class='model'>premium</th><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=69</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=66</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=78</div></td><td style='background:rgba(143,29,29,0.96);color:#fbfbf8'>96%<div class='small' style='color:#f1d9d9'>n=79</div></td><td style='background:rgba(143,29,29,0.96);color:#fbfbf8'>96%<div class='small' style='color:#f1d9d9'>n=76</div></td><td style='background:rgba(143,29,29,0.98);color:#fbfbf8'>98%<div class='small' style='color:#f1d9d9'>n=43</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=44</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=45</div></td><td style='background:rgba(143,29,29,1.00);color:#fbfbf8'>100%<div class='small' style='color:#f1d9d9'>n=82</div></td><td style='background:rgba(143,29,29,0.90);color:#fbfbf8'>90%<div class='small' style='color:#f1d9d9'>n=39</div></td><td style='background:rgba(143,29,29,0.95);color:#fbfbf8'>95%<div class='small' style='color:#f1d9d9'>n=56</div></td><td style='background:rgba(143,29,29,0.95);color:#fbfbf8'>95%<div class='small' style='color:#f1d9d9'>n=79</div></td></tr><tr><th class='model'>strong</th><td style='background:rgba(143,29,29,0.83);color:#fbfbf8'>83%<div class='small' style='color:#f1d9d9'>n=111</div></td><td style='background:rgba(143,29,29,0.81);color:#fbfbf8'>81%<div class='small' style='color:#f1d9d9'>n=149</div></td><td style='background:rgba(143,29,29,0.80);color:#fbfbf8'>80%<div class='small' style='color:#f1d9d9'>n=145</div></td><td style='background:rgba(143,29,29,0.64);color:#fbfbf8'>64%<div class='small' style='color:#f1d9d9'>n=128</div></td><td style='background:rgba(143,29,29,0.57);color:#fbfbf8'>57%<div class='small' style='color:#f1d9d9'>n=115</div></td><td style='background:rgba(143,29,29,0.88);color:#fbfbf8'>88%<div class='small' style='color:#f1d9d9'>n=103</div></td><td style='background:rgba(143,29,29,0.86);color:#fbfbf8'>86%<div class='small' style='color:#f1d9d9'>n=88</div></td><td style='background:rgba(143,29,29,0.86);color:#fbfbf8'>86%<div class='small' style='color:#f1d9d9'>n=78</div></td><td style='background:rgba(143,29,29,0.81);color:#fbfbf8'>81%<div class='small' style='color:#f1d9d9'>n=116</div></td><td style='background:rgba(143,29,29,0.56);color:#fbfbf8'>56%<div class='small' style='color:#f1d9d9'>n=81</div></td><td style='background:rgba(143,29,29,0.61);color:#fbfbf8'>61%<div class='small' style='color:#f1d9d9'>n=98</div></td><td style='background:rgba(143,29,29,0.56);color:#fbfbf8'>56%<div class='small' style='color:#f1d9d9'>n=119</div></td></tr><tr><th class='model'>playable</th><td style='background:rgba(143,29,29,0.49);color:#1c1c1c'>49%<div class='small' style='color:#6b6b6b'>n=263</div></td><td style='background:rgba(143,29,29,0.41);color:#1c1c1c'>41%<div class='small' style='color:#6b6b6b'>n=311</div></td><td style='background:rgba(143,29,29,0.60);color:#fbfbf8'>60%<div class='small' style='color:#f1d9d9'>n=282</div></td><td style='background:rgba(143,29,29,0.35);color:#1c1c1c'>35%<div class='small' style='color:#6b6b6b'>n=265</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=252</div></td><td style='background:rgba(143,29,29,0.85);color:#fbfbf8'>85%<div class='small' style='color:#f1d9d9'>n=198</div></td><td style='background:rgba(143,29,29,0.74);color:#fbfbf8'>74%<div class='small' style='color:#f1d9d9'>n=214</div></td><td style='background:rgba(143,29,29,0.66);color:#fbfbf8'>66%<div class='small' style='color:#f1d9d9'>n=208</div></td><td style='background:rgba(143,29,29,0.65);color:#fbfbf8'>65%<div class='small' style='color:#f1d9d9'>n=306</div></td><td style='background:rgba(143,29,29,0.29);color:#1c1c1c'>29%<div class='small' style='color:#6b6b6b'>n=154</div></td><td style='background:rgba(143,29,29,0.45);color:#1c1c1c'>45%<div class='small' style='color:#6b6b6b'>n=277</div></td><td style='background:rgba(143,29,29,0.21);color:#1c1c1c'>21%<div class='small' style='color:#6b6b6b'>n=240</div></td></tr><tr><th class='model'>marginal</th><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=246</div></td><td style='background:rgba(143,29,29,0.01);color:#1c1c1c'>1%<div class='small' style='color:#6b6b6b'>n=264</div></td><td style='background:rgba(143,29,29,0.26);color:#1c1c1c'>26%<div class='small' style='color:#6b6b6b'>n=276</div></td><td style='background:rgba(143,29,29,0.14);color:#1c1c1c'>14%<div class='small' style='color:#6b6b6b'>n=274</div></td><td style='background:rgba(143,29,29,0.02);color:#1c1c1c'>2%<div class='small' style='color:#6b6b6b'>n=249</div></td><td style='background:rgba(143,29,29,0.47);color:#1c1c1c'>47%<div class='small' style='color:#6b6b6b'>n=222</div></td><td style='background:rgba(143,29,29,0.37);color:#1c1c1c'>37%<div class='small' style='color:#6b6b6b'>n=199</div></td><td style='background:rgba(143,29,29,0.27);color:#1c1c1c'>27%<div class='small' style='color:#6b6b6b'>n=203</div></td><td style='background:rgba(143,29,29,0.34);color:#1c1c1c'>34%<div class='small' style='color:#6b6b6b'>n=257</div></td><td style='background:rgba(143,29,29,0.08);color:#1c1c1c'>8%<div class='small' style='color:#6b6b6b'>n=170</div></td><td style='background:rgba(143,29,29,0.25);color:#1c1c1c'>25%<div class='small' style='color:#6b6b6b'>n=228</div></td><td style='background:rgba(143,29,29,0.04);color:#1c1c1c'>4%<div class='small' style='color:#6b6b6b'>n=243</div></td></tr><tr><th class='model'>trash</th><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=396</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=389</div></td><td style='background:rgba(143,29,29,0.05);color:#1c1c1c'>5%<div class='small' style='color:#6b6b6b'>n=358</div></td><td style='background:rgba(143,29,29,0.07);color:#1c1c1c'>7%<div class='small' style='color:#6b6b6b'>n=363</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=315</div></td><td style='background:rgba(143,29,29,0.22);color:#1c1c1c'>22%<div class='small' style='color:#6b6b6b'>n=264</div></td><td style='background:rgba(143,29,29,0.06);color:#1c1c1c'>6%<div class='small' style='color:#6b6b6b'>n=280</div></td><td style='background:rgba(143,29,29,0.08);color:#1c1c1c'>8%<div class='small' style='color:#6b6b6b'>n=305</div></td><td style='background:rgba(143,29,29,0.11);color:#1c1c1c'>11%<div class='small' style='color:#6b6b6b'>n=366</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=270</div></td><td style='background:rgba(143,29,29,0.05);color:#1c1c1c'>5%<div class='small' style='color:#6b6b6b'>n=349</div></td><td style='background:rgba(143,29,29,0.00);color:#1c1c1c'>0%<div class='small' style='color:#6b6b6b'>n=329</div></td></tr>
-  </table>
-
-  <div class="grid2">
-    <div><h2>💸 Bet-sizing distribution</h2><canvas id="betsize"></canvas>
-      <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
-        medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div></div>
-    <div><h2>🧠 Latency vs win rate</h2><canvas id="latVsWin"></canvas>
-      <div class="note">Does thinking longer pay off? x = avg seconds per decision,
-        y = bb/100.</div></div>
-  </div>
-
   <h2>🏅 Made-hand mix at showdown</h2>
   <canvas id="madeHand"></canvas>
   <div class="note">Share of the model's showdown hands that finished as each category
@@ -358,368 +846,178 @@
   <h2 class="section">3 · 🔬 Additional analysis</h2>
   
   <div class="strategy-intro">
-    <b>Strategy leak radar:</b> each dimension counts triggered diagnostic signals.
-    Higher values mean more evidence to review, not better play. Hover a radar
-    point to see the signals behind that score.
+    <b>Player metric radar:</b> each axis is exactly one observed metric, not a
+    combined leak score. Radar radius is field percentile so small-scale metrics
+    such as all-in frequency remain visible; the bullets under each chart
+    summarize the player's style from those same metrics.
     <div class="strategy-glossary">
       <div class="strategy-gloss">
-        <b>Hand strength</b>
-        <span>Does the model map private cards into sensible action?</span>
-        <em>Signals: trash/marginal VPIP, premium passivity, weak premium-vs-trash separation, low W$SD</em>
+        <b>VPIP</b>
+        <span>Voluntarily put chips in preflop; higher means looser preflop entry.</span>
+        <em>Metric: <code>vpip</code></em>
       </div>
       <div class="strategy-gloss">
-        <b>Call discipline</b>
-        <span>Does it fold or continue correctly when facing pressure?</span>
-        <em>Signals: fold-to-bet, fold-to-cbet, WTSD with W$SD, weak-hand sticky calls</em>
+        <b>PFR</b>
+        <span>Preflop raise frequency; higher means more preflop initiative.</span>
+        <em>Metric: <code>pfr</code></em>
       </div>
       <div class="strategy-gloss">
-        <b>Initiative</b>
-        <span>Does it keep a coherent multi-street betting plan?</span>
-        <em>Signals: PFR vs c-bet gap, flop-to-turn drop, turn-to-river drop, low follow-through</em>
+        <b>AFq</b>
+        <span>Aggressive action frequency after opportunities to bet/raise.</span>
+        <em>Metric: <code>agg_freq</code></em>
       </div>
       <div class="strategy-gloss">
-        <b>Sizing</b>
-        <span>Does bet size adapt to the situation instead of using a template?</span>
-        <em>Signals: size concentration, overpot share, sizing entropy, extreme average bet size</em>
+        <b>C-bet</b>
+        <span>Flop continuation bet rate after being the preflop aggressor.</span>
+        <em>Metric: <code>cbet_rate</code></em>
       </div>
       <div class="strategy-gloss">
-        <b>Big-pot risk</b>
-        <span>Does it avoid building large pots with hands that cannot support them?</span>
-        <em>Signals: hand-win vs bb/100 mismatch, overpot-heavy losses, large sizing with poor chip EV</em>
+        <b>W$SD</b>
+        <span>Won money at showdown; higher means better showdown conversion.</span>
+        <em>Metric: <code>wsd</code></em>
       </div>
       <div class="strategy-gloss">
-        <b>Value extraction</b>
-        <span>Does it earn enough when it has strong or showdown-winning hands?</span>
-        <em>Signals: high W$SD with mediocre EV, low strong-hand open, low river aggression, small sizing</em>
+        <b>All-in</b>
+        <span>All-in action frequency; higher means more stack-risk exposure.</span>
+        <em>Metric: <code>allin_freq</code></em>
       </div>
     </div>
   </div>
   <div class="strategy-grid">
     
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>1. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</h3><div class="note">Main review area: Hand strength (2 signals).</div></div>
+        <div><h3>1. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</h3></div>
         <div class="strategy-kpi pos">+80.3<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar1"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Hand strength: marginal hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with Qs 5s (marginal); hand result -200 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 53 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.5__vs__claude-sonnet-4.6.json&amp;ep=53&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: river call facing pressure</div>
-          <div class="case-signal">Called 126 into pot 274 on river; hand result -200 chips.</div>
-          <div class="case-meta">vs gpt-5.4 · ep 65 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__gpt-5.5.json&amp;ep=65&amp;step=10">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on turn</div>
-          <div class="case-signal">After earlier aggression, chose check on turn; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 41 · action 7</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.5__vs__claude-sonnet-4.6.json&amp;ep=41&amp;step=7">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar1"></canvas>
+        <ul class="profile-summary"><li>very loose preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with noticeable all-in risk exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>2. <img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</h3><div class="note">Main review area: Call discipline (1 signals).</div></div>
+        <div><h3>2. <img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</h3></div>
         <div class="strategy-kpi pos">+41.9<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar2"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Call discipline: river call facing pressure</div>
-          <div class="case-signal">Called 80 into pot 240 on river; hand result -160 chips.</div>
-          <div class="case-meta">vs deepseek-v4-pro · ep 47 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__kimi-k2p6.json&amp;ep=47&amp;step=10">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on river</div>
-          <div class="case-signal">After earlier aggression, chose check on river; hand result -160 chips.</div>
-          <div class="case-meta">vs deepseek-v4-pro · ep 47 · action 8</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__kimi-k2p6.json&amp;ep=47&amp;step=8">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Value extraction: river check wins small</div>
-          <div class="case-signal">Checked river and still won +136, a possible missed-value spot.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 15 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_kimi-k2p6__vs__claude-opus-4.8.json&amp;ep=15&amp;step=10">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar2"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>takes initiative early</li><li>applies postflop pressure at a balanced rate</li><li>does not always follow through with c-bets</li><li>converts showdowns well</li><li>with controlled all-in exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>3. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</h3><div class="note">Main review area: Value extraction (1 signals).</div></div>
+        <div><h3>3. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</h3></div>
         <div class="strategy-kpi pos">+39.2<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar3"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Value extraction: river check wins small</div>
-          <div class="case-signal">Checked river and still won +136, a possible missed-value spot.</div>
-          <div class="case-meta">vs minimax-m2p7 · ep 44 · action 11</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_glm-5p1__vs__minimax-m2p7.json&amp;ep=44&amp;step=11">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Hand strength: trash hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 4d Qh (trash); hand result -74 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 10 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-sonnet-4.6__vs__glm-5p1.json&amp;ep=10&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: preflop call facing pressure</div>
-          <div class="case-signal">Called 12 into pot 24 on preflop; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 46 · action 3</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-sonnet-4.6__vs__glm-5p1.json&amp;ep=46&amp;step=3">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar3"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>has moderate preflop initiative</li><li>applies postflop pressure at a balanced rate</li><li>has a middle-of-field c-bet pattern</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>4. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</h3><div class="note">Main review area: Hand strength (2 signals).</div></div>
+        <div><h3>4. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</h3></div>
         <div class="strategy-kpi pos">+16.5<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar4"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Hand strength: marginal hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with Qs 5s (marginal); hand result -200 chips.</div>
-          <div class="case-meta">vs gpt-5.5 · ep 52 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-sonnet-4.6__vs__gpt-5.5.json&amp;ep=52&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Sizing: 2.2x pot sizing</div>
-          <div class="case-signal">Used raise 18 into pot 8 (2.2x pot); hand result +200 chips.</div>
-          <div class="case-meta">vs deepseek-v4-pro · ep 53 · action 2</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__claude-sonnet-4.6.json&amp;ep=53&amp;step=2">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: river call facing pressure</div>
-          <div class="case-signal">Called 125 into pot 275 on river; hand result -200 chips.</div>
-          <div class="case-meta">vs gpt-5.4 · ep 11 · action 9</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__claude-sonnet-4.6.json&amp;ep=11&amp;step=9">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar4"></canvas>
+        <ul class="profile-summary"><li>very loose preflop</li><li>has moderate preflop initiative</li><li>applies postflop pressure at a balanced rate</li><li>c-bets frequently</li><li>struggles to convert showdowns</li><li>with controlled all-in exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>5. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</h3><div class="note">Main review area: Sizing (3 signals).</div></div>
+        <div><h3>5. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</h3></div>
         <div class="strategy-kpi pos">+15.4<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar5"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Sizing: 2.1x pot sizing</div>
-          <div class="case-signal">Used raise 50 into pot 24 (2.1x pot); hand result +200 chips.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 37 · action 3</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_glm-5p2__vs__claude-opus-4.8.json&amp;ep=37&amp;step=3">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Value extraction: river check wins small</div>
-          <div class="case-signal">Checked river and still won +70, a possible missed-value spot.</div>
-          <div class="case-meta">vs deepseek-v4-pro · ep 11 · action 9</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__glm-5p2.json&amp;ep=11&amp;step=9">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on river</div>
-          <div class="case-signal">After earlier aggression, chose check on river; hand result -150 chips.</div>
-          <div class="case-meta">vs gpt-5.4 · ep 14 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__glm-5p2.json&amp;ep=14&amp;step=10">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar5"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>often shifts into a passive postflop line</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>6. <img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</h3><div class="note">Main review area: Call discipline (1 signals).</div></div>
+        <div><h3>6. <img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</h3></div>
         <div class="strategy-kpi pos">+13.6<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar6"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Call discipline: river call facing pressure</div>
-          <div class="case-signal">Called 86 into pot 314 on river; hand result -200 chips.</div>
-          <div class="case-meta">vs gpt-5.4 · ep 60 · action 12</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__deepseek-v4-pro.json&amp;ep=60&amp;step=12">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on river</div>
-          <div class="case-signal">After earlier aggression, chose check on river; hand result -106 chips.</div>
-          <div class="case-meta">vs kimi-k2p6 · ep 41 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_kimi-k2p6__vs__deepseek-v4-pro.json&amp;ep=41&amp;step=10">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Sizing: 2.2x pot sizing</div>
-          <div class="case-signal">Used raise 18 into pot 8 (2.2x pot); hand result +200 chips.</div>
-          <div class="case-meta">vs qwen3p7-plus · ep 3 · action 2</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__qwen3p7-plus.json&amp;ep=3&amp;step=2">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar6"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>takes initiative early</li><li>applies postflop pressure at a balanced rate</li><li>does not always follow through with c-bets</li><li>converts showdowns well</li><li>with noticeable all-in risk exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>7. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</h3><div class="note">Main review area: Hand strength (3 signals).</div></div>
+        <div><h3>7. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</h3></div>
         <div class="strategy-kpi neg">-2.5<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar7"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Hand strength: trash hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 6s Tc (trash); hand result -200 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 87 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__claude-sonnet-4.6.json&amp;ep=87&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: turn call facing pressure</div>
-          <div class="case-signal">Called 140 into pot 260 on turn; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 87 · action 8</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__claude-sonnet-4.6.json&amp;ep=87&amp;step=8">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on turn</div>
-          <div class="case-signal">After earlier aggression, chose check on turn; hand result -172 chips.</div>
-          <div class="case-meta">vs glm-5p1 · ep 9 · action 8</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_glm-5p1__vs__gpt-5.4.json&amp;ep=9&amp;step=8">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar7"></canvas>
+        <ul class="profile-summary"><li>very loose preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with controlled all-in exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>8. <img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</h3><div class="note">Main review area: Value extraction (3 signals).</div></div>
+        <div><h3>8. <img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</h3></div>
         <div class="strategy-kpi pos">+0.8<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar8"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Value extraction: river check wins small</div>
-          <div class="case-signal">Checked river and still won +104, a possible missed-value spot.</div>
-          <div class="case-meta">vs minimax-m2p7 · ep 75 · action 8</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_minimax-m2p7__vs__qwen3p7-plus.json&amp;ep=75&amp;step=8">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Hand strength: trash hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with Qh 2c (trash); hand result -36 chips.</div>
-          <div class="case-meta">vs gpt-oss-120b · ep 50 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-oss-120b__vs__qwen3p7-plus.json&amp;ep=50&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: preflop call facing pressure</div>
-          <div class="case-signal">Called 164 into pot 236 on preflop; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 10 · action 5</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-opus-4.8__vs__qwen3p7-plus.json&amp;ep=10&amp;step=5">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar8"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>often shifts into a passive postflop line</li><li>has a middle-of-field c-bet pattern</li><li>converts showdowns well</li><li>while avoiding many all-in spots</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>9. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</h3><div class="note">Main review area: Call discipline (3 signals).</div></div>
+        <div><h3>9. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</h3></div>
         <div class="strategy-kpi neg">-59.4<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar9"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Call discipline: turn call facing pressure</div>
-          <div class="case-signal">Called 195 into pot 205 on turn; hand result -200 chips.</div>
-          <div class="case-meta">vs minimax-m2p7 · ep 1 · action 7</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_minimax-m2p7__vs__claude-opus-4.8.json&amp;ep=1&amp;step=7">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Hand strength: trash hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 3s Jc (trash); hand result -200 chips.</div>
-          <div class="case-meta">vs gpt-oss-120b · ep 10 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-opus-4.8__vs__gpt-oss-120b.json&amp;ep=10&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Big-pot risk: large losing-pot decision</div>
-          <div class="case-signal">Took call with pot 300; hand result -200 chips.</div>
-          <div class="case-meta">vs glm-5p1 · ep 52 · action 7</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-opus-4.8__vs__glm-5p1.json&amp;ep=52&amp;step=7">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar9"></canvas>
+        <ul class="profile-summary"><li>very loose preflop</li><li>has moderate preflop initiative</li><li>often shifts into a passive postflop line</li><li>c-bets frequently</li><li>struggles to convert showdowns</li><li>with controlled all-in exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>10. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</h3><div class="note">Main review area: Call discipline (1 signals).</div></div>
+        <div><h3>10. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</h3></div>
         <div class="strategy-kpi neg">-36.6<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar10"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Call discipline: turn call facing pressure</div>
-          <div class="case-signal">Called 50 into pot 266 on turn; hand result -158 chips.</div>
-          <div class="case-meta">vs minimax-m2p7 · ep 96 · action 8</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-oss-120b__vs__minimax-m2p7.json&amp;ep=96&amp;step=8">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Initiative: initiative gives up on turn</div>
-          <div class="case-signal">After earlier aggression, chose check on turn; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 59 · action 6</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-oss-120b__vs__claude-opus-4.8.json&amp;ep=59&amp;step=6">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Hand strength: marginal hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 3c Qc (marginal); hand result -114 chips.</div>
-          <div class="case-meta">vs claude-sonnet-4.6 · ep 9 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-oss-120b__vs__claude-sonnet-4.6.json&amp;ep=9&amp;step=1">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar10"></canvas>
+        <ul class="profile-summary"><li>moderately selective preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>does not always follow through with c-bets</li><li>has middling showdown conversion</li><li>with controlled all-in exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>11. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</h3><div class="note">Main review area: Hand strength (2 signals).</div></div>
+        <div><h3>11. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</h3></div>
         <div class="strategy-kpi neg">-49.0<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar11"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Hand strength: marginal hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 6c 3c (marginal); hand result -200 chips.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 0 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-opus-4.8__vs__minimax-m2p7.json&amp;ep=0&amp;step=1">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Big-pot risk: large losing-pot decision</div>
-          <div class="case-signal">Took call with pot 295; hand result -200 chips.</div>
-          <div class="case-meta">vs claude-opus-4.8 · ep 0 · action 11</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_claude-opus-4.8__vs__minimax-m2p7.json&amp;ep=0&amp;step=11">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Sizing: 2.7x pot sizing</div>
-          <div class="case-signal">Used raise 8 into pot 3 (2.7x pot); hand result +200 chips.</div>
-          <div class="case-meta">vs kimi-k2p6 · ep 37 · action 1</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_minimax-m2p7__vs__kimi-k2p6.json&amp;ep=37&amp;step=1">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar11"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>applies postflop pressure at a balanced rate</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with noticeable all-in risk exposure</li></ul>
+      </div>
     </article>
-    <article class="strategy-card">
+    <article class="strategy-card metric-card">
       <div class="strategy-head">
-        <div><h3>12. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</h3><div class="note">Main review area: Big-pot risk (2 signals).</div></div>
+        <div><h3>12. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</h3></div>
         <div class="strategy-kpi neg">-72.6<span>bb/100</span></div>
       </div>
-      <canvas id="strategyRadar12"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">
-        <li>
-          <div class="case-title">Big-pot risk: large losing-pot decision</div>
-          <div class="case-signal">Took call with pot 306; hand result -200 chips.</div>
-          <div class="case-meta">vs kimi-k2p6 · ep 10 · action 10</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_kimi-k2p6__vs__minimax-m3.json&amp;ep=10&amp;step=10">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Hand strength: trash hand entered pot</div>
-          <div class="case-signal">Voluntarily continued preflop with 6d Jh (trash); hand result -45 chips.</div>
-          <div class="case-meta">vs gpt-5.4 · ep 94 · action 2</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_gpt-5.4__vs__minimax-m3.json&amp;ep=94&amp;step=2">watch replay</a>
-        </li>
-        <li>
-          <div class="case-title">Call discipline: turn call facing pressure</div>
-          <div class="case-signal">Called 130 into pot 270 on turn; hand result -200 chips.</div>
-          <div class="case-meta">vs deepseek-v4-pro · ep 72 · action 9</div>
-          <a class="case-link" href="holdem_replay.html?pair=strategy_deepseek-v4-pro__vs__minimax-m3.json&amp;ep=72&amp;step=9">watch replay</a>
-        </li></ol>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar12"></canvas>
+        <ul class="profile-summary"><li>loose preflop</li><li>has moderate preflop initiative</li><li>often shifts into a passive postflop line</li><li>has a middle-of-field c-bet pattern</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
+      </div>
     </article>
+  </div>
+
+  <h2>⏱️ Avg thinking time</h2>
+  <canvas id="latency"></canvas>
+  <div class="note">Average seconds per decision. This is an efficiency/agent-runtime metric, not direct poker quality.</div>
+
+  <div class="grid2">
+    <div><h2>💸 Bet-sizing distribution</h2><canvas id="betsize"></canvas>
+      <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
+        medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div></div>
+    <div><h2>🧠 Latency vs win rate</h2><canvas id="latVsWin"></canvas>
+      <div class="note">Does thinking longer pay off? x = avg seconds per decision,
+        y = bb/100.</div></div>
   </div>
 
 <script>
@@ -741,8 +1039,8 @@ const ACCENT='#8f1d1d';
 const PALETTE=['#8f1d1d','#b45309','#1a7f37','#1d4ed8','#6d28d9','#be185d','#0f766e'];
 
 
-const STRATEGY = [{"id": "strategyRadar1", "label": "GPT 5.5", "scores": [2, 2, 1, 0, 0, 0], "signals": {"Hand strength": ["high trash VPIP: 67%", "high marginal VPIP: 76%"], "Call discipline": ["low fold-to-bet: 19%", "trash continues plus sticky facing bets"], "Initiative": ["aggression drops turn to river: 49%->37%"], "Sizing": [], "Big-pot risk": [], "Value extraction": []}}, {"id": "strategyRadar2", "label": "Kimi K2.6", "scores": [0, 1, 1, 0, 0, 1], "signals": {"Hand strength": [], "Call discipline": ["very low fold-to-cbet: 4%"], "Initiative": ["high PFR 42% but low c-bet 43%"], "Sizing": [], "Big-pot risk": [], "Value extraction": ["low river aggression 15% despite decent W$SD"]}}, {"id": "strategyRadar3", "label": "GLM-5.1", "scores": [0, 0, 0, 0, 0, 1], "signals": {"Hand strength": [], "Call discipline": [], "Initiative": [], "Sizing": [], "Big-pot risk": [], "Value extraction": ["low strong-hand open: 64%"]}}, {"id": "strategyRadar4", "label": "Claude Sonnet 4.6", "scores": [2, 0, 0, 2, 0, 0], "signals": {"Hand strength": ["high marginal VPIP: 75%", "low W$SD: 35%"], "Call discipline": [], "Initiative": [], "Sizing": ["concentrated sizing: medium 61%", "low sizing entropy: 0.69"], "Big-pot risk": [], "Value extraction": []}}, {"id": "strategyRadar5", "label": "GLM-5.2", "scores": [0, 0, 1, 3, 0, 2], "signals": {"Hand strength": [], "Call discipline": [], "Initiative": ["aggression drops turn to river: 36%->26%"], "Sizing": ["concentrated sizing: medium 64%", "low sizing entropy: 0.72", "average size is extreme: 0.89x pot"], "Big-pot risk": [], "Value extraction": ["low strong-hand open: 57%", "small average bet size: 0.89x"]}}, {"id": "strategyRadar6", "label": "DeepSeek V4 Pro", "scores": [0, 1, 1, 1, 0, 0], "signals": {"Hand strength": [], "Call discipline": ["very low fold-to-cbet: 10%"], "Initiative": ["high PFR 38% but low c-bet 54%"], "Sizing": ["high overpot share: 40%"], "Big-pot risk": [], "Value extraction": []}}, {"id": "strategyRadar7", "label": "GPT 5.4", "scores": [3, 2, 1, 1, 1, 1], "signals": {"Hand strength": ["high trash VPIP: 72%", "high marginal VPIP: 85%", "weak premium-vs-trash separation: 76%"], "Call discipline": ["low fold-to-bet: 20%", "trash continues plus sticky facing bets"], "Initiative": ["aggression drops turn to river: 45%->27%"], "Sizing": ["average size is extreme: 0.91x pot"], "Big-pot risk": ["wins hands but loses chips: 64%, -2.5 bb/100"], "Value extraction": ["small average bet size: 0.91x"]}}, {"id": "strategyRadar8", "label": "Qwen3.7 Plus", "scores": [1, 0, 0, 0, 0, 3], "signals": {"Hand strength": ["premium open below 95%: 95%"], "Call discipline": [], "Initiative": [], "Sizing": [], "Big-pot risk": [], "Value extraction": ["high W$SD 54% but mediocre chip EV", "low strong-hand open: 56%", "low river aggression 12% despite decent W$SD"]}}, {"id": "strategyRadar9", "label": "Claude Opus 4.8", "scores": [2, 3, 1, 1, 2, 0], "signals": {"Hand strength": ["high trash VPIP: 60%", "low W$SD: 38%"], "Call discipline": ["low fold-to-bet: 21%", "high WTSD 32% with low W$SD 38%", "trash continues plus sticky facing bets"], "Initiative": ["aggression drops flop to turn: 34%->21%"], "Sizing": ["high overpot share: 32%"], "Big-pot risk": ["overpot-heavy with weak chip result", "many showdowns without enough wins"], "Value extraction": []}}, {"id": "strategyRadar10", "label": "GPT-OSS 120B", "scores": [0, 1, 1, 0, 0, 0], "signals": {"Hand strength": [], "Call discipline": ["very low fold-to-cbet: 9%"], "Initiative": ["high PFR 36% but low c-bet 52%"], "Sizing": [], "Big-pot risk": [], "Value extraction": []}}, {"id": "strategyRadar11", "label": "MiniMax-M2.7", "scores": [2, 0, 0, 1, 2, 1], "signals": {"Hand strength": ["premium open below 95%: 90%", "low W$SD: 41%"], "Call discipline": [], "Initiative": [], "Sizing": ["average size is extreme: 1.41x pot"], "Big-pot risk": ["wins hands but loses chips: 53%, -49.0 bb/100", "large average sizing with poor bb/100"], "Value extraction": ["low strong-hand open: 56%"]}}, {"id": "strategyRadar12", "label": "MiniMax-M3", "scores": [1, 1, 0, 1, 2, 1], "signals": {"Hand strength": ["premium open below 95%: 95%"], "Call discipline": ["very low fold-to-cbet: 4%"], "Initiative": [], "Sizing": ["high overpot share: 33%"], "Big-pot risk": ["overpot-heavy with weak chip result", "many showdowns without enough wins"], "Value extraction": ["low strong-hand open: 61%"]}}];
-const STRATEGY_LABELS = ["Hand strength", "Call discipline", "Initiative", "Sizing", "Big-pot risk", "Value extraction"];
+const STRATEGY = [{"id": "strategyRadar1", "model": "gpt-5.5", "label": "GPT 5.5", "scores": [91.66666666666667, 83.33333333333333, 91.66666666666667, 100.0, 41.666666666666664, 91.66666666666667], "raw": {"VPIP": "75%", "PFR": "41%", "AFq": "46%", "C-bet": "78%", "W$SD": "46%", "All-in": "0.4%"}}, {"id": "strategyRadar2", "model": "kimi-k2p6", "label": "Kimi K2.6", "scores": [50.0, 91.66666666666667, 66.66666666666667, 8.333333333333334, 83.33333333333333, 50.0], "raw": {"VPIP": "61%", "PFR": "42%", "AFq": "35%", "C-bet": "43%", "W$SD": "54%", "All-in": "0.2%"}}, {"id": "strategyRadar3", "model": "glm-5p1", "label": "GLM-5.1", "scores": [33.333333333333336, 50.0, 41.666666666666664, 50.0, 75.0, 33.333333333333336], "raw": {"VPIP": "59%", "PFR": "26%", "AFq": "30%", "C-bet": "61%", "W$SD": "51%", "All-in": "0.1%"}}, {"id": "strategyRadar4", "model": "claude-sonnet-4.6", "label": "Claude Sonnet 4.6", "scores": [75.0, 33.333333333333336, 58.333333333333336, 75.0, 8.333333333333334, 75.0], "raw": {"VPIP": "71%", "PFR": "25%", "AFq": "32%", "C-bet": "73%", "W$SD": "35%", "All-in": "0.4%"}}, {"id": "strategyRadar5", "model": "glm-5p2", "label": "GLM-5.2", "scores": [58.333333333333336, 16.666666666666668, 33.333333333333336, 66.66666666666667, 50.0, 16.666666666666668], "raw": {"VPIP": "61%", "PFR": "18%", "AFq": "29%", "C-bet": "72%", "W$SD": "47%", "All-in": "0.1%"}}, {"id": "strategyRadar6", "model": "deepseek-v4-pro", "label": "DeepSeek V4 Pro", "scores": [16.666666666666668, 75.0, 75.0, 25.0, 100.0, 83.33333333333333], "raw": {"VPIP": "58%", "PFR": "38%", "AFq": "40%", "C-bet": "54%", "W$SD": "56%", "All-in": "0.4%"}}, {"id": "strategyRadar7", "model": "gpt-5.4", "label": "GPT 5.4", "scores": [100.0, 100.0, 100.0, 91.66666666666667, 66.66666666666667, 41.666666666666664], "raw": {"VPIP": "79%", "PFR": "51%", "AFq": "47%", "C-bet": "75%", "W$SD": "50%", "All-in": "0.2%"}}, {"id": "strategyRadar8", "model": "qwen3p7-plus", "label": "Qwen3.7 Plus", "scores": [66.66666666666667, 25.0, 8.333333333333334, 41.666666666666664, 91.66666666666667, 33.333333333333336], "raw": {"VPIP": "62%", "PFR": "18%", "AFq": "18%", "C-bet": "58%", "W$SD": "54%", "All-in": "0.1%"}}, {"id": "strategyRadar9", "model": "claude-opus-4.8", "label": "Claude Opus 4.8", "scores": [83.33333333333333, 41.666666666666664, 25.0, 58.333333333333336, 16.666666666666668, 66.66666666666667], "raw": {"VPIP": "71%", "PFR": "26%", "AFq": "27%", "C-bet": "70%", "W$SD": "38%", "All-in": "0.3%"}}, {"id": "strategyRadar10", "model": "gpt-oss-120b", "label": "GPT-OSS 120B", "scores": [8.333333333333334, 66.66666666666667, 83.33333333333333, 16.666666666666668, 58.333333333333336, 58.333333333333336], "raw": {"VPIP": "54%", "PFR": "36%", "AFq": "44%", "C-bet": "52%", "W$SD": "49%", "All-in": "0.3%"}}, {"id": "strategyRadar11", "model": "minimax-m2p7", "label": "MiniMax-M2.7", "scores": [25.0, 8.333333333333334, 50.0, 83.33333333333333, 25.0, 100.0], "raw": {"VPIP": "59%", "PFR": "17%", "AFq": "32%", "C-bet": "73%", "W$SD": "41%", "All-in": "0.6%"}}, {"id": "strategyRadar12", "model": "minimax-m3", "label": "MiniMax-M3", "scores": [41.666666666666664, 58.333333333333336, 16.666666666666668, 33.333333333333336, 33.333333333333336, 8.333333333333334], "raw": {"VPIP": "60%", "PFR": "28%", "AFq": "26%", "C-bet": "56%", "W$SD": "43%", "All-in": "0.0%"}}];
+const STRATEGY_LABELS = ["VPIP", "PFR", "AFq", "C-bet", "W$SD", "All-in"];
 STRATEGY.forEach((card, i) => {
   const el = document.getElementById(card.id);
   if (!el) return;
@@ -750,33 +1048,16 @@ STRATEGY.forEach((card, i) => {
     type:'radar',
     data:{ labels:STRATEGY_LABELS,
       datasets:[{ label:card.label, data:card.scores,
-        borderColor:mcol(MODELS[i]), backgroundColor:mcol(MODELS[i]) + '33',
-        pointBackgroundColor:mcol(MODELS[i]) }] },
-    options:{ scales:{ r:{ beginAtZero:true, suggestedMax:4, ticks:{ stepSize:1 } } },
+        borderColor:mcol(card.model), backgroundColor:mcol(card.model) + '33',
+        pointBackgroundColor:mcol(card.model) }] },
+    options:{ scales:{ r:{ min:0, max:100, ticks:{ display:false, stepSize:25 } } },
       plugins:{ legend:{ display:false },
-        tooltip:{ callbacks:{ afterLabel(ctx) {
-          const dim = ctx.label;
-          const sigs = card.signals[dim] || [];
-          return sigs.length ? sigs.map(s => '• ' + s) : ['no signal triggered'];
+        tooltip:{ callbacks:{ label(ctx) {
+          const raw = card.raw[ctx.label] || '';
+          return `percentile ${ctx.formattedValue} / raw ${raw}`;
         } } } } } });
 });
 
-
-// player-type scatter (VPIP x aggression)
-new Chart(scatter, { type:'scatter',
-  data:{ datasets: MODELS.map(m=>({ label:dn(m),
-      data:[{x:PM[m].vpip*100, y:PM[m].agg_freq*100}],
-      backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 })) },
-  options:{ scales:{ x:{title:{display:true,text:'VPIP % (loose →)'},min:0,max:100},
-                       y:{title:{display:true,text:'aggression % (aggressive ↑)'},min:0,max:100} },
-    plugins:{ legend:{position:'bottom'} } } });
-
-// bb/100 bar — colored by model (sign shown by value direction)
-const ranked = [...MODELS].sort((a,b)=>PM[b].bb_per_100-PM[a].bb_per_100);
-new Chart(bbchart, { type:'bar',
-  data:{ labels:ranked.map(dn), datasets:[{ data:ranked.map(m=>PM[m].bb_per_100),
-      backgroundColor:ranked.map(m=>mcol(m)) }] },
-  options:{ indexAxis:'y', plugins:{legend:{display:false}} } });
 
 // action distribution (stacked %)
 const ACTS=['fold','check','call','bet','raise','all_in'];
@@ -788,31 +1069,11 @@ new Chart(actions, { type:'bar',
   options:{ scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'% of actions'}}},
     plugins:{legend:{position:'bottom'}} } });
 
-// style radar (normalized 0-100)
-new Chart(radar, { type:'radar',
-  data:{ labels:['loose (VPIP)','PF raise','aggression','all-in','bet size','calls bets (1-fold)'],
-    datasets:MODELS.map(m=>({label:dn(m),borderColor:mcol(m),
-      backgroundColor:mcol(m)+'22',
-      data:[PM[m].vpip*100,PM[m].pfr*100,PM[m].agg_freq*100,PM[m].allin_freq*100,
-            Math.min(100,PM[m].avg_bet_xpot*50),(1-PM[m].fold_to_bet)*100]})) },
-  options:{ scales:{r:{min:0,max:100,ticks:{display:false}}},
-    plugins:{legend:{position:'bottom'}} } });
-
 // latency
 new Chart(latency, { type:'bar',
   data:{ labels:MODELS.map(dn), datasets:[{data:MODELS.map(m=>PM[m].avg_latency_s),
       backgroundColor:MODELS.map(m=>mcol(m))}] },
   options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'seconds / decision'}}} } });
-
-// aggression by street (lines per model)
-const STREETS=['preflop','flop','turn','river'];
-new Chart(streetAgg, { type:'line',
-  data:{ labels:STREETS, datasets:MODELS.map(m=>({
-      label:dn(m), borderColor:mcol(m), backgroundColor:mcol(m),
-      tension:0.25,
-      data:STREETS.map(s=>PM[m].by_street[s].agg_freq*100) })) },
-  options:{ scales:{y:{title:{display:true,text:'aggression %'},min:0,max:100}},
-    plugins:{legend:{position:'bottom'}} } });
 
 // bet-sizing distribution (stacked %)
 const BS=['small','medium','pot','over'];
