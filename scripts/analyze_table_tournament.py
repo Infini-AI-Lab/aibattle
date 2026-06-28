@@ -15,6 +15,7 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
+from report_tokens import token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
 from report_theme import BASE_CSS
 from report_legends import legend as _legend
 
@@ -78,7 +79,8 @@ def render_html(rep: dict, beh: dict) -> str:
         trows += (f"<tr><td>{i}</td><td class='model'>{model_cell(r['model'])}</td>"
                   f"<td>{r['avg_rank']}</td><td>{r['top1_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_final_stack']}</td><td>{r['bust_rate']*100:.0f}%</td>"
-                  f"<td>{tables}</td>{rc}</tr>")
+                  f"<td>{tables}</td>{rc}"
+                  f"{token_cost_cells(r['model'], beh.get(r['model'], {}).get('avg_tokens'))}</tr>")
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -113,10 +115,11 @@ def render_html(rep: dict, beh: dict) -> str:
   <h2>Leaderboard <span class="note">(+ finishing-place distribution)</span></h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>avg rank</th><th>top-1%</th>
-        <th>avg final stack</th><th>bust%</th><th>tables</th>{rankhdr}</tr>
+        <th>avg final stack</th><th>bust%</th><th>tables</th>{rankhdr}{TOKEN_HEADERS}</tr>
     {trows}
   </table>
   {_legend('table')}
+  {TOKEN_NOTE}
   {beh_html}
   <script>
   const axc={{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}};

@@ -30,6 +30,7 @@ import os
 from collections import defaultdict
 
 from model_names import strip_coached, display_name, model_cell
+from report_tokens import token_cost_cells, TOKEN_HEADERS
 from elo_util import bradley_terry, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
@@ -209,7 +210,7 @@ def render_html(rep: dict) -> str:
             f"<td>{r['hands']}</td><td>{r['decisions']}</td>"
             f"<td>{r['invalid_rate']*100:.1f}%</td>"
             f"<td>{r['truncated_rate']*100:.1f}%</td>"
-            f"<td>{r['avg_tokens']:,}</td></tr>")
+            f"{token_cost_cells(r['model'], r['avg_tokens'])}</tr>")
 
     # fundamentals (blunders)
     fund_rows = ""
@@ -316,7 +317,7 @@ def render_html(rep: dict) -> str:
   <h2>Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/hand</th><th>win%</th>
-        <th>hands</th><th>decisions</th><th>invalid%</th><th>trunc%</th><th>avg tokens/dec</th></tr>
+        <th>hands</th><th>decisions</th><th>invalid%</th><th>trunc%</th>{TOKEN_HEADERS}</tr>
     {lb_rows}
   </table>
 

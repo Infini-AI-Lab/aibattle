@@ -109,6 +109,18 @@
     font-size:13px; line-height:1.55; }
   .strategy-glossary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
     gap:8px 14px; margin-top:12px; }
+  .winloss-keys { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px; margin-top:12px; }
+  .winloss-keys > div { border:1px solid var(--line); border-radius:4px;
+    padding:8px 10px; background:var(--panel); }
+  .winloss-keys b { display:block; font-size:12px; }
+  .winloss-keys span { display:block; color:var(--dim); font-size:11px; margin-top:2px; }
+  .wk-win { border-left:3px solid var(--pos) !important; }
+  .wk-lose { border-left:3px solid var(--neg) !important; }
+  /* merged by-street table: divider before each street's (fire,fold) pair */
+  table.bystreet td:nth-child(even), table.bystreet tr:nth-child(2) th:nth-child(odd) {
+    border-left:2px solid var(--line); }
+  table.bystreet th[colspan] { text-align:center; }
   .strategy-gloss { border-top:1px solid var(--line); padding-top:7px; }
   .strategy-gloss b { display:block; color:var(--fg); }
   .strategy-gloss span { display:block; color:var(--fg); }
@@ -127,6 +139,21 @@
   .profile-summary { margin:0; padding:10px 12px 10px 24px; background:var(--faint);
     border:1px solid var(--line); color:var(--fg); font-size:12px; line-height:1.42; }
   .profile-summary li { margin:5px 0; }
+  /* one-line verdict + where-the-money-comes-from bar (pressure vs showdown) */
+  .pl-verdict { margin:2px 0 8px; font-size:12.5px; line-height:1.45; color:var(--fg); }
+  .pl-verdict .pl-tag { font-weight:700; }
+  .pl-attr { margin:0 0 10px; font-size:11px; }
+  .pl-row { display:flex; align-items:center; gap:7px; margin:4px 0; }
+  .pl-lbl { width:74px; color:var(--dim); white-space:nowrap; }
+  .pl-track { position:relative; flex:1; height:13px; background:var(--faint);
+    border:1px solid var(--line); border-radius:2px; }
+  .pl-track::before { content:''; position:absolute; left:50%; top:-1px; bottom:-1px;
+    width:1px; background:var(--dim); opacity:.5; }
+  .plf { position:absolute; top:1px; bottom:1px; }
+  .plf.pos { background:var(--pos); }
+  .plf.neg { background:var(--neg); }
+  .pl-val { width:52px; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+  .pl-val.pos { color:var(--pos); } .pl-val.neg { color:var(--neg); }
   .strategy-cases { margin:6px 0 0; padding-left:22px; font-size:12px; line-height:1.45; }
   .strategy-cases li { margin:8px 0; }
   .case-title { font-weight:700; }
@@ -135,31 +162,7 @@
   .case-link { display:inline-block; margin-top:5px; border:1px solid var(--line);
     background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }
   .case-link:hover { border-color:var(--red); color:var(--fg); }
-  .handeq-action-chart { border:1px solid var(--line); background:var(--panel); }
-  .handeq-action-row { display:grid; grid-template-columns:220px 1fr; border-top:1px solid var(--line); }
-  .handeq-action-row:first-child { border-top:0; }
-  .handeq-situation-label { padding:14px; border-right:1px solid var(--line); background:rgba(255,255,255,.35); }
-  .handeq-situation-label b { display:block; font-size:13px; }
-  .handeq-situation-label span { display:block; color:var(--dim); font-size:11px; margin-top:4px; }
-  .handeq-action-cells { display:grid; grid-template-columns:repeat(auto-fit,minmax(126px,1fr)); gap:8px; padding:10px; }
-  .handeq-action-cell { border:1px solid var(--line); padding:10px; min-height:94px; display:flex; flex-direction:column; justify-content:space-between; }
-  .handeq-action-name { font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; }
-  .handeq-action-lift { font-size:22px; font-weight:900; margin:2px 0; line-height:1; }
-  .handeq-action-meta { font-size:10px; color:var(--fg); line-height:1.25; }
-  .handeq-sample-track { height:5px; background:rgba(255,255,255,.5); border:1px solid rgba(0,0,0,.12); margin:5px 0 3px; }
-  .handeq-sample-track i { display:block; height:100%; background:rgba(28,28,28,.55); }
-  .wide-scroll { overflow-x:auto; border:1px solid var(--line); background:var(--panel); margin-top:14px; }
-  .handeq-model-table { min-width:1180px; border-collapse:separate; border-spacing:0; background:var(--panel); }
-  .handeq-model-table th { text-align:center; vertical-align:bottom; }
-  .handeq-model-table th span { display:block; max-width:140px; margin:0 auto; white-space:normal; line-height:1.25; }
-  .handeq-model-cell { min-width:148px; padding:10px; text-align:left; vertical-align:top; }
-  .handeq-cell-main { font-size:24px; line-height:1; font-weight:900; color:var(--fg); }
-  .handeq-cell-label { font-size:9px; color:var(--dim); margin-top:3px; text-transform:uppercase; font-weight:800; }
-  .handeq-cell-meta { font-size:10px; color:var(--fg); line-height:1.25; margin-top:8px; }
-  .handeq-cell-actions { display:flex; flex-wrap:wrap; gap:4px; margin-top:7px; min-height:18px; }
-  .handeq-cell-actions span { font-size:9px; line-height:1; padding:4px 5px; border:1px solid var(--line); background:rgba(255,255,255,.55); white-space:nowrap; }
   @media (max-width:860px) { .strategy-grid, .strategy-glossary { grid-template-columns:1fr; } }
-  @media (max-width:800px) { .handeq-action-row { grid-template-columns:1fr; } .handeq-situation-label { border-right:0; border-bottom:1px solid var(--line); } }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
@@ -191,7 +194,7 @@
   <h3>Leaderboard</h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips/hand</th><th>bb/100</th>
-        <th>win%</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
+        <th>win%</th><th>hands</th><th>tokens/dec</th><th>$/1K dec</th></tr>
     <tr>
           <td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Aggressive</b></div><div class='stags'><span class='tag'>LAG</span></div></td>
@@ -199,9 +202,9 @@
           <td class='pos'>+1.61</td>
           <td class='pos'>+80.3</td>
           <td>67%</td>
-          <td>11.6s</td>
-          <td>304</td>
           <td>900</td>
+          <td>—</td>
+          <td>—</td>
         </tr><tr>
           <td>2</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -209,9 +212,9 @@
           <td class='pos'>+0.84</td>
           <td class='pos'>+41.9</td>
           <td>47%</td>
-          <td>131.0s</td>
-          <td>6,977</td>
           <td>1200</td>
+          <td>6,977</td>
+          <td>$27.91</td>
         </tr><tr>
           <td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -219,9 +222,9 @@
           <td class='pos'>+0.78</td>
           <td class='pos'>+39.2</td>
           <td>46%</td>
-          <td>37.1s</td>
-          <td>2,382</td>
           <td>1200</td>
+          <td>2,382</td>
+          <td>$10.48</td>
         </tr><tr>
           <td>4</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -229,9 +232,9 @@
           <td class='pos'>+0.33</td>
           <td class='pos'>+16.5</td>
           <td>48%</td>
-          <td>3.9s</td>
-          <td>125</td>
           <td>1250</td>
+          <td>—</td>
+          <td>—</td>
         </tr><tr>
           <td>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -239,9 +242,9 @@
           <td class='pos'>+0.31</td>
           <td class='pos'>+15.4</td>
           <td>48%</td>
-          <td>26.8s</td>
-          <td>1,289</td>
           <td>1100</td>
+          <td>1,289</td>
+          <td>$5.67</td>
         </tr><tr>
           <td>6</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -249,9 +252,9 @@
           <td class='pos'>+0.27</td>
           <td class='pos'>+13.6</td>
           <td>44%</td>
-          <td>19.3s</td>
-          <td>905</td>
           <td>1200</td>
+          <td>905</td>
+          <td>$3.15</td>
         </tr><tr>
           <td>7</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Aggressive</b></div><div class='stags'><span class='tag'>LAG</span></div></td>
@@ -259,9 +262,9 @@
           <td class='neg'>-0.05</td>
           <td class='neg'>-2.5</td>
           <td>64%</td>
-          <td>23.0s</td>
-          <td>933</td>
           <td>900</td>
+          <td>—</td>
+          <td>—</td>
         </tr><tr>
           <td>8</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -269,9 +272,9 @@
           <td class='pos'>+0.02</td>
           <td class='pos'>+0.8</td>
           <td>41%</td>
-          <td>58.0s</td>
-          <td>1,090</td>
           <td>1100</td>
+          <td>1,090</td>
+          <td>$1.74</td>
         </tr><tr>
           <td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -279,9 +282,9 @@
           <td class='neg'>-1.19</td>
           <td class='neg'>-59.4</td>
           <td>51%</td>
-          <td>3.7s</td>
-          <td>38</td>
           <td>1168</td>
+          <td>—</td>
+          <td>—</td>
         </tr><tr>
           <td>10</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -289,9 +292,9 @@
           <td class='neg'>-0.73</td>
           <td class='neg'>-36.6</td>
           <td>41%</td>
-          <td>4.7s</td>
-          <td>753</td>
           <td>900</td>
+          <td>753</td>
+          <td>$0.45</td>
         </tr><tr>
           <td>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -299,9 +302,9 @@
           <td class='neg'>-0.98</td>
           <td class='neg'>-49.0</td>
           <td>53%</td>
-          <td>37.8s</td>
-          <td>7,165</td>
           <td>818</td>
+          <td>7,165</td>
+          <td>$8.60</td>
         </tr><tr>
           <td>12</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
           <td class='stylecell'><div class='slabel'><b>Loose-Passive</b></div><div class='stags'><span class='tag'>calling station</span></div></td>
@@ -309,9 +312,9 @@
           <td class='neg'>-1.45</td>
           <td class='neg'>-72.6</td>
           <td>47%</td>
-          <td>20.2s</td>
-          <td>2,167</td>
           <td>1100</td>
+          <td>2,167</td>
+          <td>$2.60</td>
         </tr>
   </table>
   <div class="note collegend">columns: <b>style</b> play-style archetype (summarized from the deeper behavior charts below) · <b>Elo</b> opponent-adjusted skill rating · <b>chips/hand</b> net chips won per hand (normalized — pairs played different hand counts) · <b>bb/100</b> big blinds won per 100 hands (standard poker win-rate) · <b>win%</b> hands won · <b>think</b> average seconds per decision · <b>tokens/dec</b> average output tokens per decision · <b>hands</b> total hands played (sample size — varies because the field was assembled in waves)</div>
@@ -319,504 +322,262 @@
     fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
     win and adjusts for opponent strength — the fair comparison when models faced different opponents.
     ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
-    chips / bb/100 / win% are raw, unadjusted metrics. think = avg seconds per decision.
-    tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
-
-  <h2>♟️ Action tendencies</h2>
-  <canvas id="actions"></canvas>
-  <div class="note">Share of each action across all the model's decisions.</div>
+    chips / bb/100 / win% are raw, unadjusted metrics.
+    tokens/dec = avg completion (reasoning) tokens generated per decision.
+    <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks
+    serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which
+    hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
+  <div class="note"><b>style</b> = play-style archetype, from VPIP (how loose) × aggression (how aggressive):
+    <b>LAG</b> = loose-aggressive — plays many hands and bets/raises a lot (high-variance, wins if skilled);
+    <b>TAG</b> = tight-aggressive — selective but aggressive (the classic solid winner);
+    <b>calling station</b> = loose-passive — plays many hands but mostly calls, rarely folds or raises
+    (pays off with second-best hands — the classic losing type);
+    <b>nit</b> = tight-passive — folds almost everything, only plays the strongest hands;
+    <b>shove-happy</b> = an unusually high all-in rate.</div>
 
   <h2>⚔️ Head-to-head chip results</h2>
   <div class="sub">Net chips <b>per hand</b> the row model won against the column model
     (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
-  <table class="h2h"><tr><th></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>GPT-OSS 120B</th><th>Kimi K2.6</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</th><td class='diag'>—</td><td class='neg' style='--v:-4.34'>-4.34</td><td class='pos' style='--v:1.96'>+1.96</td><td class='neg' style='--v:-3.147'>-3.15</td><td class='pos' style='--v:1.05'>+1.05</td><td class='pos' style='--v:0.68'>+0.68</td><td class='neg' style='--v:-4.9'>-4.90</td><td class='neg' style='--v:-0.23'>-0.23</td><td class='neg' style='--v:-2.587'>-2.59</td><td class='neg' style='--v:-9.833'>-9.83</td><td class='pos' style='--v:1.06'>+1.06</td><td class='pos' style='--v:0.24'>+0.24</td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</th><td class='pos' style='--v:4.34'>+4.34</td><td class='diag'>—</td><td class='pos' style='--v:1.113'>+1.11</td><td class='neg' style='--v:-3.22'>-3.22</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='pos' style='--v:3.9'>+3.90</td><td class='pos' style='--v:1.62'>+1.62</td><td class='pos' style='--v:0.67'>+0.67</td><td class='neg' style='--v:-2.413'>-2.41</td><td class='pos' style='--v:1.48'>+1.48</td><td class='neg' style='--v:-0.46'>-0.46</td><td class='pos' style='--v:0.03'>+0.03</td></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='neg' style='--v:-1.96'>-1.96</td><td class='neg' style='--v:-1.113'>-1.11</td><td class='diag'>—</td><td class='pos' style='--v:0.38'>+0.38</td><td class='neg' style='--v:-0.6'>-0.60</td><td class='neg' style='--v:-2.45'>-2.45</td><td class='pos' style='--v:0.87'>+0.87</td><td class='pos' style='--v:0.88'>+0.88</td><td class='pos' style='--v:2.14'>+2.14</td><td class='pos' style='--v:1.64'>+1.64</td><td class='pos' style='--v:2.28'>+2.28</td><td class='pos' style='--v:2.74'>+2.74</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='pos' style='--v:3.147'>+3.15</td><td class='pos' style='--v:3.22'>+3.22</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='diag'>—</td><td class='neg' style='--v:-2.18'>-2.18</td><td class='neg' style='--v:-0.83'>-0.83</td><td class='neg' style='--v:-1.23'>-1.23</td><td class='pos' style='--v:1.61'>+1.61</td><td class='pos' style='--v:0.46'>+0.46</td><td class='pos' style='--v:1.98'>+1.98</td><td class='pos' style='--v:1.63'>+1.63</td><td class='neg' style='--v:-1.2'>-1.20</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='neg' style='--v:-1.05'>-1.05</td><td class='pos' style='--v:0.67'>+0.67</td><td class='pos' style='--v:0.6'>+0.60</td><td class='pos' style='--v:2.18'>+2.18</td><td class='diag'>—</td><td class='neg' style='--v:-2.78'>-2.78</td><td class='neg' style='--v:-0.92'>-0.92</td><td class='pos' style='--v:0.29'>+0.29</td><td class='pos' style='--v:1.42'>+1.42</td><td class='pos' style='--v:1.56'>+1.56</td><td class='pos' style='--v:1.05'>+1.05</td><td class='pos' style='--v:0.38'>+0.38</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</th><td class='neg' style='--v:-0.68'>-0.68</td><td class='neg' style='--v:-3.9'>-3.90</td><td class='pos' style='--v:2.45'>+2.45</td><td class='pos' style='--v:0.83'>+0.83</td><td class='pos' style='--v:2.78'>+2.78</td><td class='diag'>—</td><td class='neg' style='--v:-2.08'>-2.08</td><td class='' style='--v:0.0'>+0.00</td><td class='neg' style='--v:-1.58'>-1.58</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:0.56'>+0.56</td><td class='pos' style='--v:1.17'>+1.17</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</th><td class='pos' style='--v:4.9'>+4.90</td><td class='neg' style='--v:-1.62'>-1.62</td><td class='neg' style='--v:-0.87'>-0.87</td><td class='pos' style='--v:1.23'>+1.23</td><td class='pos' style='--v:0.92'>+0.92</td><td class='pos' style='--v:2.08'>+2.08</td><td class='diag'>—</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:2.07'>+2.07</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:1.76'>+1.76</td><td class='pos' style='--v:3.99'>+3.99</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='pos' style='--v:0.23'>+0.23</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='neg' style='--v:-0.88'>-0.88</td><td class='neg' style='--v:-1.61'>-1.61</td><td class='neg' style='--v:-0.29'>-0.29</td><td class='' style='--v:0.0'>+0.00</td><td class='' style='--v:0.0'>+0.00</td><td class='diag'>—</td><td class='neg' style='--v:-0.8'>-0.80</td><td class='neg' style='--v:-4.11'>-4.11</td><td class='pos' style='--v:1.09'>+1.09</td><td class='pos' style='--v:0.45'>+0.45</td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='pos' style='--v:2.587'>+2.59</td><td class='pos' style='--v:2.413'>+2.41</td><td class='neg' style='--v:-2.14'>-2.14</td><td class='neg' style='--v:-0.46'>-0.46</td><td class='neg' style='--v:-1.42'>-1.42</td><td class='pos' style='--v:1.58'>+1.58</td><td class='neg' style='--v:-2.07'>-2.07</td><td class='pos' style='--v:0.8'>+0.80</td><td class='diag'>—</td><td class='pos' style='--v:1.19'>+1.19</td><td class='pos' style='--v:5.93'>+5.93</td><td class='neg' style='--v:-0.86'>-0.86</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class='pos' style='--v:9.833'>+9.83</td><td class='neg' style='--v:-1.48'>-1.48</td><td class='neg' style='--v:-1.64'>-1.64</td><td class='neg' style='--v:-1.98'>-1.98</td><td class='neg' style='--v:-1.56'>-1.56</td><td class='' style='--v:0.0'>+0.00</td><td class='' style='--v:0.0'>+0.00</td><td class='pos' style='--v:4.11'>+4.11</td><td class='neg' style='--v:-1.19'>-1.19</td><td class='diag'>—</td><td class='neg' style='--v:-2.06'>-2.06</td><td class='neg' style='--v:-3.98'>-3.98</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='neg' style='--v:-1.06'>-1.06</td><td class='pos' style='--v:0.46'>+0.46</td><td class='neg' style='--v:-2.28'>-2.28</td><td class='neg' style='--v:-1.63'>-1.63</td><td class='neg' style='--v:-1.05'>-1.05</td><td class='neg' style='--v:-0.56'>-0.56</td><td class='neg' style='--v:-1.76'>-1.76</td><td class='neg' style='--v:-1.09'>-1.09</td><td class='neg' style='--v:-5.93'>-5.93</td><td class='pos' style='--v:2.06'>+2.06</td><td class='diag'>—</td><td class='neg' style='--v:-3.14'>-3.14</td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='neg' style='--v:-0.24'>-0.24</td><td class='neg' style='--v:-0.03'>-0.03</td><td class='neg' style='--v:-2.74'>-2.74</td><td class='pos' style='--v:1.2'>+1.20</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='neg' style='--v:-1.17'>-1.17</td><td class='neg' style='--v:-3.99'>-3.99</td><td class='neg' style='--v:-0.45'>-0.45</td><td class='pos' style='--v:0.86'>+0.86</td><td class='pos' style='--v:3.98'>+3.98</td><td class='pos' style='--v:3.14'>+3.14</td><td class='diag'>—</td></tr></table>
+  <table class="h2h"><tr><th></th><th>GPT 5.5</th><th>Kimi K2.6</th><th>GLM-5.1</th><th>Claude Sonnet 4.6</th><th>GLM-5.2</th><th>DeepSeek V4 Pro</th><th>GPT 5.4</th><th>Qwen3.7 Plus</th><th>Claude Opus 4.8</th><th>GPT-OSS 120B</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</th><td class='diag'>—</td><td class='pos' style='--v:2.07'>+2.07</td><td class='pos' style='--v:1.23'>+1.23</td><td class='neg' style='--v:-1.62'>-1.62</td><td class='pos' style='--v:0.92'>+0.92</td><td class='neg' style='--v:-0.87'>-0.87</td><td class='pos' style='--v:2.08'>+2.08</td><td class='pos' style='--v:3.99'>+3.99</td><td class='pos' style='--v:4.9'>+4.90</td><td class='na'>—</td><td class='na'>—</td><td class='pos' style='--v:1.76'>+1.76</td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='neg' style='--v:-2.07'>-2.07</td><td class='diag'>—</td><td class='neg' style='--v:-0.46'>-0.46</td><td class='pos' style='--v:2.413'>+2.41</td><td class='neg' style='--v:-1.42'>-1.42</td><td class='neg' style='--v:-2.14'>-2.14</td><td class='pos' style='--v:1.58'>+1.58</td><td class='neg' style='--v:-0.86'>-0.86</td><td class='pos' style='--v:2.587'>+2.59</td><td class='pos' style='--v:0.8'>+0.80</td><td class='pos' style='--v:1.19'>+1.19</td><td class='pos' style='--v:5.93'>+5.93</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='neg' style='--v:-1.23'>-1.23</td><td class='pos' style='--v:0.46'>+0.46</td><td class='diag'>—</td><td class='pos' style='--v:3.22'>+3.22</td><td class='neg' style='--v:-2.18'>-2.18</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='neg' style='--v:-0.83'>-0.83</td><td class='neg' style='--v:-1.2'>-1.20</td><td class='pos' style='--v:3.147'>+3.15</td><td class='pos' style='--v:1.61'>+1.61</td><td class='pos' style='--v:1.98'>+1.98</td><td class='pos' style='--v:1.63'>+1.63</td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</th><td class='pos' style='--v:1.62'>+1.62</td><td class='neg' style='--v:-2.413'>-2.41</td><td class='neg' style='--v:-3.22'>-3.22</td><td class='diag'>—</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='pos' style='--v:1.113'>+1.11</td><td class='pos' style='--v:3.9'>+3.90</td><td class='pos' style='--v:0.03'>+0.03</td><td class='pos' style='--v:4.34'>+4.34</td><td class='pos' style='--v:0.67'>+0.67</td><td class='pos' style='--v:1.48'>+1.48</td><td class='neg' style='--v:-0.46'>-0.46</td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='neg' style='--v:-0.92'>-0.92</td><td class='pos' style='--v:1.42'>+1.42</td><td class='pos' style='--v:2.18'>+2.18</td><td class='pos' style='--v:0.67'>+0.67</td><td class='diag'>—</td><td class='pos' style='--v:0.6'>+0.60</td><td class='neg' style='--v:-2.78'>-2.78</td><td class='pos' style='--v:0.38'>+0.38</td><td class='neg' style='--v:-1.05'>-1.05</td><td class='pos' style='--v:0.29'>+0.29</td><td class='pos' style='--v:1.56'>+1.56</td><td class='pos' style='--v:1.05'>+1.05</td></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='pos' style='--v:0.87'>+0.87</td><td class='pos' style='--v:2.14'>+2.14</td><td class='pos' style='--v:0.38'>+0.38</td><td class='neg' style='--v:-1.113'>-1.11</td><td class='neg' style='--v:-0.6'>-0.60</td><td class='diag'>—</td><td class='neg' style='--v:-2.45'>-2.45</td><td class='pos' style='--v:2.74'>+2.74</td><td class='neg' style='--v:-1.96'>-1.96</td><td class='pos' style='--v:0.88'>+0.88</td><td class='pos' style='--v:1.64'>+1.64</td><td class='pos' style='--v:2.28'>+2.28</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</th><td class='neg' style='--v:-2.08'>-2.08</td><td class='neg' style='--v:-1.58'>-1.58</td><td class='pos' style='--v:0.83'>+0.83</td><td class='neg' style='--v:-3.9'>-3.90</td><td class='pos' style='--v:2.78'>+2.78</td><td class='pos' style='--v:2.45'>+2.45</td><td class='diag'>—</td><td class='pos' style='--v:1.17'>+1.17</td><td class='neg' style='--v:-0.68'>-0.68</td><td class='na'>—</td><td class='na'>—</td><td class='pos' style='--v:0.56'>+0.56</td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='neg' style='--v:-3.99'>-3.99</td><td class='pos' style='--v:0.86'>+0.86</td><td class='pos' style='--v:1.2'>+1.20</td><td class='neg' style='--v:-0.03'>-0.03</td><td class='neg' style='--v:-0.38'>-0.38</td><td class='neg' style='--v:-2.74'>-2.74</td><td class='neg' style='--v:-1.17'>-1.17</td><td class='diag'>—</td><td class='neg' style='--v:-0.24'>-0.24</td><td class='neg' style='--v:-0.45'>-0.45</td><td class='pos' style='--v:3.98'>+3.98</td><td class='pos' style='--v:3.14'>+3.14</td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</th><td class='neg' style='--v:-4.9'>-4.90</td><td class='neg' style='--v:-2.587'>-2.59</td><td class='neg' style='--v:-3.147'>-3.15</td><td class='neg' style='--v:-4.34'>-4.34</td><td class='pos' style='--v:1.05'>+1.05</td><td class='pos' style='--v:1.96'>+1.96</td><td class='pos' style='--v:0.68'>+0.68</td><td class='pos' style='--v:0.24'>+0.24</td><td class='diag'>—</td><td class='neg' style='--v:-0.23'>-0.23</td><td class='neg' style='--v:-9.833'>-9.83</td><td class='pos' style='--v:1.06'>+1.06</td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='na'>—</td><td class='neg' style='--v:-0.8'>-0.80</td><td class='neg' style='--v:-1.61'>-1.61</td><td class='neg' style='--v:-0.67'>-0.67</td><td class='neg' style='--v:-0.29'>-0.29</td><td class='neg' style='--v:-0.88'>-0.88</td><td class='na'>—</td><td class='pos' style='--v:0.45'>+0.45</td><td class='pos' style='--v:0.23'>+0.23</td><td class='diag'>—</td><td class='neg' style='--v:-4.11'>-4.11</td><td class='pos' style='--v:1.09'>+1.09</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class='na'>—</td><td class='neg' style='--v:-1.19'>-1.19</td><td class='neg' style='--v:-1.98'>-1.98</td><td class='neg' style='--v:-1.48'>-1.48</td><td class='neg' style='--v:-1.56'>-1.56</td><td class='neg' style='--v:-1.64'>-1.64</td><td class='na'>—</td><td class='neg' style='--v:-3.98'>-3.98</td><td class='pos' style='--v:9.833'>+9.83</td><td class='pos' style='--v:4.11'>+4.11</td><td class='diag'>—</td><td class='neg' style='--v:-2.06'>-2.06</td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='neg' style='--v:-1.76'>-1.76</td><td class='neg' style='--v:-5.93'>-5.93</td><td class='neg' style='--v:-1.63'>-1.63</td><td class='pos' style='--v:0.46'>+0.46</td><td class='neg' style='--v:-1.05'>-1.05</td><td class='neg' style='--v:-2.28'>-2.28</td><td class='neg' style='--v:-0.56'>-0.56</td><td class='neg' style='--v:-3.14'>-3.14</td><td class='neg' style='--v:-1.06'>-1.06</td><td class='neg' style='--v:-1.09'>-1.09</td><td class='pos' style='--v:2.06'>+2.06</td><td class='diag'>—</td></tr></table>
 
-  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
-    <div class="callout"><b>Hand-equity preview.</b> This section asks whether each model's action choices line up with the hand-equity signal available at the moment of decision. A positive lift means the chosen action's average equity was higher than the alternative observed actions in the same situation; it is evidence, not a claim of perfect poker optimality.</div>
-<h2>Action quality by situation</h2>
-  <div class="note">Each row is a strategic situation found during the hand. Each cell is an action observed in that situation. Quality change = that action's average hand equity minus the average hand equity of the other observed actions in the same situation.</div>
-  <div class="handeq-action-chart">
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>Preflop weak/marginal hand</b>
-        <span>avg EQ 44% · n=9192</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.198)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-12.4pp</div><div class='handeq-action-meta'>EQ 33% · base 45%</div><div class='handeq-sample-track'><i style='width:13.0%'></i></div><div class='handeq-action-meta'>sample 13% · n=1193</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.086)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>+5.4pp</div><div class='handeq-action-meta'>EQ 48% · base 42%</div><div class='handeq-sample-track'><i style='width:24.4%'></i></div><div class='handeq-action-meta'>sample 24% · n=2242</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.031)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-1.9pp</div><div class='handeq-action-meta'>EQ 43% · base 45%</div><div class='handeq-sample-track'><i style='width:50.7%'></i></div><div class='handeq-action-meta'>sample 51% · n=4658</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.287)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+17.9pp</div><div class='handeq-action-meta'>EQ 61% · base 44%</div><div class='handeq-sample-track'><i style='width:1.2%'></i></div><div class='handeq-action-meta'>sample 1% · n=111</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.111)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+6.9pp</div><div class='handeq-action-meta'>EQ 50% · base 43%</div><div class='handeq-sample-track'><i style='width:10.7%'></i></div><div class='handeq-action-meta'>sample 11% · n=986</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.145)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+9.1pp</div><div class='handeq-action-meta'>EQ 53% · base 44%</div><div class='handeq-sample-track'><i style='width:0.0%'></i></div><div class='handeq-action-meta'>sample 0% · n=2</div></div></div>
-    </section>
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>Preflop premium/strong hand</b>
-        <span>avg EQ 63% · n=3066</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.041)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>-2.6pp</div><div class='handeq-action-meta'>EQ 61% · base 63%</div><div class='handeq-sample-track'><i style='width:3.2%'></i></div><div class='handeq-action-meta'>sample 3% · n=99</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.198)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-12.4pp</div><div class='handeq-action-meta'>EQ 52% · base 65%</div><div class='handeq-sample-track'><i style='width:12.1%'></i></div><div class='handeq-action-meta'>sample 12% · n=370</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.098)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+6.1pp</div><div class='handeq-action-meta'>EQ 68% · base 62%</div><div class='handeq-sample-track'><i style='width:21.3%'></i></div><div class='handeq-action-meta'>sample 21% · n=652</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.025)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+1.5pp</div><div class='handeq-action-meta'>EQ 64% · base 62%</div><div class='handeq-sample-track'><i style='width:63.4%'></i></div><div class='handeq-action-meta'>sample 63% · n=1943</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.201)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+12.5pp</div><div class='handeq-action-meta'>EQ 76% · base 63%</div><div class='handeq-sample-track'><i style='width:0.1%'></i></div><div class='handeq-action-meta'>sample 0% · n=2</div></div></div>
-    </section>
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>BTN/SB first decision</b>
-        <span>avg EQ 52% · n=8132</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.195)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-12.2pp</div><div class='handeq-action-meta'>EQ 46% · base 58%</div><div class='handeq-sample-track'><i style='width:50.2%'></i></div><div class='handeq-action-meta'>sample 50% · n=4082</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.195)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+12.2pp</div><div class='handeq-action-meta'>EQ 58% · base 46%</div><div class='handeq-sample-track'><i style='width:49.8%'></i></div><div class='handeq-action-meta'>sample 50% · n=4047</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.220)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+13.7pp</div><div class='handeq-action-meta'>EQ 65% · base 52%</div><div class='handeq-sample-track'><i style='width:0.0%'></i></div><div class='handeq-action-meta'>sample 0% · n=3</div></div></div>
-    </section>
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>Flop as preflop raiser</b>
-        <span>avg EQ 63% · n=2193</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.255)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>-16.0pp</div><div class='handeq-action-meta'>EQ 52% · base 68%</div><div class='handeq-sample-track'><i style='width:29.1%'></i></div><div class='handeq-action-meta'>sample 29% · n=638</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.245)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+15.3pp</div><div class='handeq-action-meta'>EQ 68% · base 52%</div><div class='handeq-sample-track'><i style='width:70.6%'></i></div><div class='handeq-action-meta'>sample 71% · n=1548</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.565)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+35.3pp</div><div class='handeq-action-meta'>EQ 98% · base 63%</div><div class='handeq-sample-track'><i style='width:0.3%'></i></div><div class='handeq-action-meta'>sample 0% · n=7</div></div></div>
-    </section>
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>Turn/river facing bet</b>
-        <span>avg EQ 31% · n=3999</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.270)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-16.9pp</div><div class='handeq-action-meta'>EQ 22% · base 39%</div><div class='handeq-sample-track'><i style='width:46.6%'></i></div><div class='handeq-action-meta'>sample 47% · n=1862</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.192)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>+12.0pp</div><div class='handeq-action-meta'>EQ 37% · base 25%</div><div class='handeq-sample-track'><i style='width:49.6%'></i></div><div class='handeq-action-meta'>sample 50% · n=1985</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.485)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+30.3pp</div><div class='handeq-action-meta'>EQ 60% · base 30%</div><div class='handeq-sample-track'><i style='width:3.1%'></i></div><div class='handeq-action-meta'>sample 3% · n=124</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.676)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+42.3pp</div><div class='handeq-action-meta'>EQ 73% · base 31%</div><div class='handeq-sample-track'><i style='width:0.7%'></i></div><div class='handeq-action-meta'>sample 1% · n=28</div></div></div>
-    </section>
-    <section class="handeq-action-row">
-      <div class="handeq-situation-label">
-        <b>Large pot decision</b>
-        <span>avg EQ 38% · n=905</span>
-      </div>
-      <div class="handeq-action-cells"><div class='handeq-action-cell' style='background:rgba(185,28,28,0.460)'><div class='handeq-action-name'>fold</div><div class='handeq-action-lift'>-28.8pp</div><div class='handeq-action-meta'>EQ 18% · base 47%</div><div class='handeq-sample-track'><i style='width:28.7%'></i></div><div class='handeq-action-meta'>sample 29% · n=260</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.019)'><div class='handeq-action-name'>check</div><div class='handeq-action-lift'>+1.2pp</div><div class='handeq-action-meta'>EQ 39% · base 38%</div><div class='handeq-sample-track'><i style='width:20.6%'></i></div><div class='handeq-action-meta'>sample 21% · n=186</div></div><div class='handeq-action-cell' style='background:rgba(185,28,28,0.018)'><div class='handeq-action-name'>call</div><div class='handeq-action-lift'>-1.1pp</div><div class='handeq-action-meta'>EQ 38% · base 39%</div><div class='handeq-sample-track'><i style='width:31.4%'></i></div><div class='handeq-action-meta'>sample 31% · n=284</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.643)'><div class='handeq-action-name'>bet</div><div class='handeq-action-lift'>+40.2pp</div><div class='handeq-action-meta'>EQ 74% · base 33%</div><div class='handeq-sample-track'><i style='width:12.3%'></i></div><div class='handeq-action-meta'>sample 12% · n=111</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.168)'><div class='handeq-action-name'>raise</div><div class='handeq-action-lift'>+10.5pp</div><div class='handeq-action-meta'>EQ 49% · base 38%</div><div class='handeq-sample-track'><i style='width:3.8%'></i></div><div class='handeq-action-meta'>sample 4% · n=34</div></div><div class='handeq-action-cell' style='background:rgba(26,127,55,0.617)'><div class='handeq-action-name'>all-in</div><div class='handeq-action-lift'>+38.5pp</div><div class='handeq-action-meta'>EQ 76% · base 37%</div><div class='handeq-sample-track'><i style='width:3.3%'></i></div><div class='handeq-action-meta'>sample 3% · n=30</div></div></div>
-    </section></div>
-<h2>Model situation exposure × quality-aligned choice rate</h2>
-  <div class="note">Y-axis is model; X-axis is situation. The large number is the share of choices assigned to actions whose hand-equity lift is positive within that situation. Cell color uses 50% as the white midpoint: greener above, redder below.</div>
-  <div class="wide-scroll"><table class="handeq-model-table">
-    <tr><th class="model">model</th><th><span>Preflop weak/marginal</span></th><th><span>Preflop premium/strong</span></th><th><span>BTN/SB first</span></th><th><span>Flop after PFR</span></th><th><span>Turn/river facing bet</span></th><th><span>Large pot</span></th></tr>
-    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.139)">
-          <div class="handeq-cell-main">40%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 35% · n=672</div>
-          <div class="handeq-cell-actions"><span>call 53%</span><span>check 22%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.598)">
-          <div class="handeq-cell-main">92%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 10% · n=189</div>
-          <div class="handeq-cell-actions"><span>raise 63%</span><span>bet 29%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.091)">
-          <div class="handeq-cell-main">56%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 31% · n=600</div>
-          <div class="handeq-cell-actions"><span>raise 56%</span><span>call 44%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.603)">
-          <div class="handeq-cell-main">92%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 9% · n=184</div>
-          <div class="handeq-cell-actions"><span>bet 92%</span><span>check 8%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.275)">
-          <div class="handeq-cell-main">69%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=233</div>
-          <div class="handeq-cell-actions"><span>call 64%</span><span>fold 31%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.045)">
-          <div class="handeq-cell-main">47%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=64</div>
-          <div class="handeq-cell-actions"><span>call 34%</span><span>check 28%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.056)">
-          <div class="handeq-cell-main">54%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 32% · n=859</div>
-          <div class="handeq-cell-actions"><span>call 31%</span><span>check 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.573)">
-          <div class="handeq-cell-main">90%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 11% · n=293</div>
-          <div class="handeq-cell-actions"><span>raise 61%</span><span>bet 29%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.405)">
-          <div class="handeq-cell-main">78%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 28% · n=749</div>
-          <div class="handeq-cell-actions"><span>raise 78%</span><span>call 22%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.096)">
-          <div class="handeq-cell-main">43%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=316</div>
-          <div class="handeq-cell-actions"><span>check 57%</span><span>bet 43%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.080)">
-          <div class="handeq-cell-main">56%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 14% · n=378</div>
-          <div class="handeq-cell-actions"><span>call 54%</span><span>fold 44%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.375)">
-          <div class="handeq-cell-main">24%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 4% · n=96</div>
-          <div class="handeq-cell-actions"><span>call 48%</span><span>fold 28%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.226)">
-          <div class="handeq-cell-main">34%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 33% · n=894</div>
-          <div class="handeq-cell-actions"><span>call 48%</span><span>check 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.398)">
-          <div class="handeq-cell-main">78%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=326</div>
-          <div class="handeq-cell-actions"><span>raise 62%</span><span>bet 15%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.156)">
-          <div class="handeq-cell-main">39%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 30% · n=804</div>
-          <div class="handeq-cell-actions"><span>call 61%</span><span>raise 39%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.390)">
-          <div class="handeq-cell-main">77%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 6% · n=170</div>
-          <div class="handeq-cell-actions"><span>bet 75%</span><span>check 23%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.090)">
-          <div class="handeq-cell-main">44%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 15% · n=407</div>
-          <div class="handeq-cell-actions"><span>fold 56%</span><span>call 42%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.214)">
-          <div class="handeq-cell-main">35%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=94</div>
-          <div class="handeq-cell-actions"><span>fold 36%</span><span>call 29%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.368)">
-          <div class="handeq-cell-main">24%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 35% · n=1183</div>
-          <div class="handeq-cell-actions"><span>call 66%</span><span>check 24%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.547)">
-          <div class="handeq-cell-main">88%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=416</div>
-          <div class="handeq-cell-actions"><span>raise 62%</span><span>bet 26%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.271)">
-          <div class="handeq-cell-main">31%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 31% · n=1058</div>
-          <div class="handeq-cell-actions"><span>call 69%</span><span>raise 31%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.502)">
-          <div class="handeq-cell-main">85%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 5% · n=172</div>
-          <div class="handeq-cell-actions"><span>bet 83%</span><span>check 15%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.035)">
-          <div class="handeq-cell-main">48%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 14% · n=469</div>
-          <div class="handeq-cell-actions"><span>fold 52%</span><span>call 42%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.088)">
-          <div class="handeq-cell-main">56%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=114</div>
-          <div class="handeq-cell-actions"><span>check 23%</span><span>fold 22%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.374)">
-          <div class="handeq-cell-main">24%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 34% · n=528</div>
-          <div class="handeq-cell-actions"><span>call 58%</span><span>check 23%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.368)">
-          <div class="handeq-cell-main">76%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=184</div>
-          <div class="handeq-cell-actions"><span>raise 59%</span><span>call 18%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.284)">
-          <div class="handeq-cell-main">30%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 31% · n=469</div>
-          <div class="handeq-cell-actions"><span>call 70%</span><span>raise 30%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.392)">
-          <div class="handeq-cell-main">77%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 5% · n=79</div>
-          <div class="handeq-cell-actions"><span>bet 77%</span><span>check 23%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.080)">
-          <div class="handeq-cell-main">56%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 15% · n=225</div>
-          <div class="handeq-cell-actions"><span>call 53%</span><span>fold 44%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.125)">
-          <div class="handeq-cell-main">41%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=46</div>
-          <div class="handeq-cell-actions"><span>fold 30%</span><span>call 28%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.106)">
-          <div class="handeq-cell-main">43%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 31% · n=781</div>
-          <div class="handeq-cell-actions"><span>call 35%</span><span>check 26%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.553)">
-          <div class="handeq-cell-main">88%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 14% · n=337</div>
-          <div class="handeq-cell-actions"><span>raise 69%</span><span>bet 19%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.287)">
-          <div class="handeq-cell-main">70%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 30% · n=748</div>
-          <div class="handeq-cell-actions"><span>raise 70%</span><span>call 30%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.148)">
-          <div class="handeq-cell-main">60%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 11% · n=262</div>
-          <div class="handeq-cell-actions"><span>bet 60%</span><span>check 40%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.125)">
-          <div class="handeq-cell-main">41%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 11% · n=276</div>
-          <div class="handeq-cell-actions"><span>fold 59%</span><span>call 34%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.360)">
-          <div class="handeq-cell-main">25%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=76</div>
-          <div class="handeq-cell-actions"><span>fold 43%</span><span>call 32%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.075)">
-          <div class="handeq-cell-main">55%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 33% · n=694</div>
-          <div class="handeq-cell-actions"><span>call 41%</span><span>raise 31%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.606)">
-          <div class="handeq-cell-main">92%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 9% · n=190</div>
-          <div class="handeq-cell-actions"><span>raise 64%</span><span>bet 28%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.329)">
-          <div class="handeq-cell-main">73%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 28% · n=600</div>
-          <div class="handeq-cell-actions"><span>raise 73%</span><span>call 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.567)">
-          <div class="handeq-cell-main">89%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=254</div>
-          <div class="handeq-cell-actions"><span>bet 89%</span><span>check 11%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.071)">
-          <div class="handeq-cell-main">55%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 14% · n=306</div>
-          <div class="handeq-cell-actions"><span>call 53%</span><span>fold 45%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.108)">
-          <div class="handeq-cell-main">43%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 4% · n=87</div>
-          <div class="handeq-cell-actions"><span>call 31%</span><span>fold 26%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.372)">
-          <div class="handeq-cell-main">24%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 33% · n=534</div>
-          <div class="handeq-cell-actions"><span>call 61%</span><span>check 22%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.329)">
-          <div class="handeq-cell-main">73%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=195</div>
-          <div class="handeq-cell-actions"><span>raise 62%</span><span>call 14%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.263)">
-          <div class="handeq-cell-main">32%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 30% · n=492</div>
-          <div class="handeq-cell-actions"><span>call 68%</span><span>raise 32%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.333)">
-          <div class="handeq-cell-main">73%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 6% · n=93</div>
-          <div class="handeq-cell-actions"><span>bet 73%</span><span>check 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.028)">
-          <div class="handeq-cell-main">52%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 18% · n=287</div>
-          <div class="handeq-cell-actions"><span>call 51%</span><span>fold 48%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.175)">
-          <div class="handeq-cell-main">38%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 2% · n=37</div>
-          <div class="handeq-cell-actions"><span>call 41%</span><span>check 27%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.327)">
-          <div class="handeq-cell-main">27%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 34% · n=1228</div>
-          <div class="handeq-cell-actions"><span>call 66%</span><span>check 25%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.589)">
-          <div class="handeq-cell-main">91%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 10% · n=351</div>
-          <div class="handeq-cell-actions"><span>raise 68%</span><span>bet 23%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.197)">
-          <div class="handeq-cell-main">36%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 30% · n=1082</div>
-          <div class="handeq-cell-actions"><span>call 64%</span><span>raise 36%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.435)">
-          <div class="handeq-cell-main">80%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 6% · n=227</div>
-          <div class="handeq-cell-actions"><span>bet 80%</span><span>check 20%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.205)">
-          <div class="handeq-cell-main">64%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 17% · n=638</div>
-          <div class="handeq-cell-actions"><span>call 60%</span><span>fold 36%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.095)">
-          <div class="handeq-cell-main">43%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 4% · n=136</div>
-          <div class="handeq-cell-actions"><span>call 33%</span><span>fold 24%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.022)">
-          <div class="handeq-cell-main">48%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 34% · n=642</div>
-          <div class="handeq-cell-actions"><span>call 28%</span><span>check 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.635)">
-          <div class="handeq-cell-main">94%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=219</div>
-          <div class="handeq-cell-actions"><span>raise 70%</span><span>bet 24%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.314)">
-          <div class="handeq-cell-main">72%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 28% · n=522</div>
-          <div class="handeq-cell-actions"><span>raise 72%</span><span>call 28%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.117)">
-          <div class="handeq-cell-main">58%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 12% · n=215</div>
-          <div class="handeq-cell-actions"><span>bet 58%</span><span>check 42%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.358)">
-          <div class="handeq-cell-main">25%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 11% · n=211</div>
-          <div class="handeq-cell-actions"><span>fold 75%</span><span>call 20%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.196)">
-          <div class="handeq-cell-main">36%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=55</div>
-          <div class="handeq-cell-actions"><span>fold 47%</span><span>check 18%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.325)">
-          <div class="handeq-cell-main">27%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 36% · n=678</div>
-          <div class="handeq-cell-actions"><span>call 58%</span><span>check 24%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.296)">
-          <div class="handeq-cell-main">71%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 11% · n=214</div>
-          <div class="handeq-cell-actions"><span>raise 56%</span><span>call 25%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.263)">
-          <div class="handeq-cell-main">32%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 31% · n=576</div>
-          <div class="handeq-cell-actions"><span>call 68%</span><span>raise 31%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.330)">
-          <div class="handeq-cell-main">73%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 5% · n=85</div>
-          <div class="handeq-cell-actions"><span>bet 73%</span><span>check 27%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.063)">
-          <div class="handeq-cell-main">54%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 14% · n=261</div>
-          <div class="handeq-cell-actions"><span>fold 46%</span><span>call 44%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.044)">
-          <div class="handeq-cell-main">47%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=49</div>
-          <div class="handeq-cell-actions"><span>fold 29%</span><span>check 29%</span></div>
-        </td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.123)">
-          <div class="handeq-cell-main">41%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 32% · n=499</div>
-          <div class="handeq-cell-actions"><span>call 50%</span><span>check 24%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.341)">
-          <div class="handeq-cell-main">74%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 10% · n=152</div>
-          <div class="handeq-cell-actions"><span>raise 60%</span><span>call 18%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.190)">
-          <div class="handeq-cell-main">63%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 27% · n=432</div>
-          <div class="handeq-cell-actions"><span>raise 63%</span><span>call 37%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.222)">
-          <div class="handeq-cell-main">65%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 9% · n=136</div>
-          <div class="handeq-cell-actions"><span>bet 65%</span><span>check 35%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(26,127,55,0.234)">
-          <div class="handeq-cell-main">66%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 20% · n=308</div>
-          <div class="handeq-cell-actions"><span>call 66%</span><span>fold 34%</span></div>
-        </td>
-        <td class="handeq-model-cell" style="background:rgba(185,28,28,0.155)">
-          <div class="handeq-cell-main">39%</div>
-          <div class="handeq-cell-label">quality-aligned</div>
-          <div class="handeq-cell-meta">situation share 3% · n=51</div>
-          <div class="handeq-cell-actions"><span>call 37%</span><span>check 27%</span></div>
-        </td></tr>
-  </table></div>
+  <h2 class="section">2 · 🔍 Why — what makes a model win or lose</h2>
+  <div class="strategy-intro">
+    <b>Two ways to win, one way to lose.</b> Chips come from two places:
+    <span class="pos">Pressure</span> — winning pots <i>without</i> showdown by folding
+    opponents out — and <span class="pos">Showdown</span> — winning <i>at</i> showdown with the
+    stronger hand. Winners do at least one of these well; losers mostly bleed at showdown. The map
+    below places every model on those two axes; the cards under it break down each one.
+    <div class="winloss-keys">
+      <div class="wk-win"><b>↑ tends to win</b><span>aggression &amp; pressure that forces folds; winning the pots you contest</span></div>
+      <div class="wk-lose"><b>↓ tends to lose</b><span>over-sized bets; drifting to showdown with second-best hands</span></div>
+    </div>
+  </div>
+  <h3>The map — where each model's chips come from</h3>
+  <canvas id="quadrant" style="max-height:520px"></canvas>
+  <div class="note">x = chips won by <b>pressure</b> (no showdown) · y = chips won at <b>showdown</b>.
+    The <b>green/red number</b> next to each model is its <b>avg chips/hand</b> (pressure + showdown =
+    total). Above the dashed line = net winner, below = net loser. Far right = wins by forcing folds
+    (e.g. GPT 5.5); high up = wins with strong hands (e.g. Kimi); bottom = showdown bleed
+    (e.g. Claude Opus).</div>
 
+  
+  <div class="strategy-intro">
+    <b>Why each player wins or loses.</b> Each card opens with a one-line verdict,
+    then the <b>Pressure vs Showdown bar</b> shows where its chips come from —
+    <span class="pos">Pressure&nbsp;$</span> is won without showdown (folding
+    opponents out), <span class="pos">Showdown&nbsp;$</span> is won at showdown
+    (hand strength); a bar pointing left (red) means that line loses money. The
+    radar is the player's fingerprint across six axes (radius = field percentile);
+    the dashed ring is the field median, so anything bulging past it is a strength
+    and anything inside it a weakness.
+    <div class="strategy-glossary">
+      <div class="strategy-gloss">
+        <b>Loose</b>
+        <span>Share of hands it voluntarily plays (VPIP). Further out = looser; centre = tight. Loose only profits when backed by aggression.</span>
+        <em>Metric: <code>vpip</code></em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Aggressive</b>
+        <span>How often it bets/raises instead of calling or checking. Further out = takes the initiative; centre = passive, drifting to showdown as the underdog.</span>
+        <em>Metric: <code>agg_freq</code></em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Pressure $</b>
+        <span>Chips won per hand WITHOUT showdown — by folding opponents out. Further out = its bets really make opponents fold (how GPT 5.5 earns).</span>
+        <em>Metric: <code>blue_per_hand</code></em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Showdown $</b>
+        <span>Chips won per hand AT showdown. Further out = shows down stronger hands; deep inside = pays off second-best hands — the top reason models lose.</span>
+        <em>Metric: <code>red_per_hand</code></em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Showdown win%</b>
+        <span>Of hands that reach showdown, the share it wins (W$SD). Further out = shows down strong; centre = drags weak hands to showdown and loses them.</span>
+        <em>Metric: <code>wsd</code></em>
+      </div>
+      <div class="strategy-gloss">
+        <b>Restraint</b>
+        <span>How often it avoids showdown (1 − WTSD). Further out = ends hands early via pressure or folding; centre = can&#x27;t lay hands down.</span>
+        <em>Metric: <code>restraint</code></em>
+      </div>
+    </div>
+  </div>
+  <div class="strategy-grid">
+    
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>1. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</h3></div>
+        <div class="strategy-kpi pos">+80.3<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Loose &amp; aggressive</b> · <span class="pl-tag">Pressure winner</span> — wins pots without showdown (pressure +1.70/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:50.0%'></i></div><span class='pl-val pos'>+1.70</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:2.6%'></i></div><span class='pl-val neg'>-0.09</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar1"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>2. <img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</h3></div>
+        <div class="strategy-kpi pos">+41.9<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; moderate</b> · <span class="pl-tag">Value winner</span> — shows down stronger hands (showdown +1.20/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:10.7%'></i></div><span class='pl-val neg'>-0.36</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:35.4%'></i></div><span class='pl-val pos'>+1.20</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar2"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>3. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</h3></div>
+        <div class="strategy-kpi pos">+39.2<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; moderate</b> · <span class="pl-tag">Value winner</span> — shows down stronger hands (showdown +1.06/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:8.3%'></i></div><span class='pl-val neg'>-0.28</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:31.4%'></i></div><span class='pl-val pos'>+1.06</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar3"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>4. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</h3></div>
+        <div class="strategy-kpi pos">+16.5<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Loose &amp; moderate</b> · <span class="pl-tag">Pressure winner</span> — wins pots without showdown (pressure +0.40/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:11.6%'></i></div><span class='pl-val pos'>+0.40</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:1.9%'></i></div><span class='pl-val neg'>-0.07</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar4"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>5. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</h3></div>
+        <div class="strategy-kpi pos">+15.4<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; passive</b> · <span class="pl-tag">Pressure winner</span> — wins pots without showdown (pressure +0.22/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:6.4%'></i></div><span class='pl-val pos'>+0.22</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:2.7%'></i></div><span class='pl-val pos'>+0.09</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar5"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>6. <img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</h3></div>
+        <div class="strategy-kpi pos">+13.6<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; moderate</b> · <span class="pl-tag">Value winner</span> — shows down stronger hands (showdown +0.40/hand).</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:3.8%'></i></div><span class='pl-val neg'>-0.13</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:11.8%'></i></div><span class='pl-val pos'>+0.40</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar6"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>7. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</h3></div>
+        <div class="strategy-kpi neg">-2.5<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Loose &amp; aggressive</b> · <span class="pl-tag">Break-even</span> — roughly neutral.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:2.4%'></i></div><span class='pl-val pos'>+0.08</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:3.9%'></i></div><span class='pl-val neg'>-0.13</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar7"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>8. <img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</h3></div>
+        <div class="strategy-kpi pos">+0.8<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Loose &amp; passive</b> · <span class="pl-tag">Break-even</span> — roughly neutral.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:17.3%'></i></div><span class='pl-val neg'>-0.59</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:17.8%'></i></div><span class='pl-val pos'>+0.60</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar8"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>9. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</h3></div>
+        <div class="strategy-kpi neg">-59.4<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Loose &amp; passive</b> · <span class="pl-tag">Pays off at showdown</span> — bleeds at showdown (-1.68/hand) with second-best hands.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:14.4%'></i></div><span class='pl-val pos'>+0.49</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:49.4%'></i></div><span class='pl-val neg'>-1.68</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar9"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>10. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</h3></div>
+        <div class="strategy-kpi neg">-36.6<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; aggressive</b> · <span class="pl-tag">Pressure backfires</span> — loses without showdown (-1.05/hand), out-played pre-showdown.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:31.0%'></i></div><span class='pl-val neg'>-1.05</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:9.5%'></i></div><span class='pl-val pos'>+0.32</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar10"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>11. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</h3></div>
+        <div class="strategy-kpi neg">-49.0<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; moderate</b> · <span class="pl-tag">Pays off at showdown</span> — bleeds at showdown (-1.09/hand) with second-best hands.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf pos' style='left:50%;width:3.1%'></i></div><span class='pl-val pos'>+0.11</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:32.0%'></i></div><span class='pl-val neg'>-1.09</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar11"></canvas>
+      </div>
+    </article>
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>12. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</h3></div>
+        <div class="strategy-kpi neg">-72.6<span>bb/100</span></div>
+      </div>
+      <div class="pl-verdict"><b>Balanced &amp; passive</b> · <span class="pl-tag">Pays off at showdown</span> — bleeds at showdown (-1.02/hand) with second-best hands.</div>
+      <div class='pl-attr'><div class='pl-row'><span class='pl-lbl'>Pressure $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:12.7%'></i></div><span class='pl-val neg'>-0.43</span></div><div class='pl-row'><span class='pl-lbl'>Showdown $/h</span><div class='pl-track'><i class='plf neg' style='right:50%;width:30.2%'></i></div><span class='pl-val neg'>-1.02</span></div></div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar12"></canvas>
+      </div>
+    </article>
+  </div>
+
+  <h2 class="section">3 · 🔬 Analysis</h2>
+  
+  <h2>🔨 Aggression &amp; fold-induced by street</h2>
+  <div class="note">Per street, two paired numbers: <b style="color:#b45309">fire</b> = how often the model
+    bets/raises (its own aggression, amber); <b style="color:#1a7f37">fold</b> = how often the opponent
+    then folds to that bet (whether the pressure works, green). Read them together — a model that
+    <b>keeps firing AND forces folds into the turn/river</b> (GPT 5.5) is the credible aggressor; one that
+    <b>fires but gets called</b> (GPT 5.4 on the river) is bluffing into showdown. GPT models listed first.</div>
+  <table class="bystreet">
+    <tr><th rowspan="2" class='model'>model</th><th colspan="2">preflop</th><th colspan="2">flop</th>
+        <th colspan="2">turn</th><th colspan="2">river</th></tr>
+    <tr><th>fire</th><th>fold</th><th>fire</th><th>fold</th><th>fire</th><th>fold</th><th>fire</th><th>fold</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td style='background:rgba(180,83,9,0.24)'>44%</td><td class='strk' style='background:rgba(26,127,55,0.27)'>40%</td><td style='background:rgba(180,83,9,0.27)'>50%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>36%</td><td style='background:rgba(180,83,9,0.27)'>49%</td><td class='strk' style='background:rgba(26,127,55,0.49)'>57%</td><td style='background:rgba(180,83,9,0.20)'>37%</td><td class='strk' style='background:rgba(26,127,55,0.52)'>59%</td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td style='background:rgba(180,83,9,0.30)'>54%</td><td class='strk' style='background:rgba(26,127,55,0.18)'>34%</td><td style='background:rgba(180,83,9,0.26)'>48%</td><td class='strk' style='background:rgba(26,127,55,0.21)'>36%</td><td style='background:rgba(180,83,9,0.25)'>45%</td><td class='strk' style='background:rgba(26,127,55,0.34)'>46%</td><td style='background:rgba(180,83,9,0.15)'>27%</td><td class='strk' style='background:rgba(26,127,55,0.14)'>30%</td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td style='background:rgba(180,83,9,0.30)'>55%</td><td class='strk' style='background:rgba(26,127,55,0.12)'>29%</td><td style='background:rgba(180,83,9,0.15)'>28%</td><td class='strk' style='background:rgba(26,127,55,0.35)'>46%</td><td style='background:rgba(180,83,9,0.13)'>24%</td><td class='strk' style='background:rgba(26,127,55,0.33)'>45%</td><td style='background:rgba(180,83,9,0.08)'>15%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>36%</td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td style='background:rgba(180,83,9,0.18)'>32%</td><td class='strk' style='background:rgba(26,127,55,0.16)'>32%</td><td style='background:rgba(180,83,9,0.18)'>32%</td><td class='strk' style='background:rgba(26,127,55,0.34)'>46%</td><td style='background:rgba(180,83,9,0.16)'>30%</td><td class='strk' style='background:rgba(26,127,55,0.33)'>45%</td><td style='background:rgba(180,83,9,0.13)'>23%</td><td class='strk' style='background:rgba(26,127,55,0.28)'>41%</td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td style='background:rgba(180,83,9,0.15)'>28%</td><td class='strk' style='background:rgba(26,127,55,0.31)'>43%</td><td style='background:rgba(180,83,9,0.21)'>39%</td><td class='strk' style='background:rgba(26,127,55,0.35)'>46%</td><td style='background:rgba(180,83,9,0.18)'>34%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>36%</td><td style='background:rgba(180,83,9,0.14)'>25%</td><td class='strk' style='background:rgba(26,127,55,0.46)'>55%</td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td style='background:rgba(180,83,9,0.12)'>22%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>36%</td><td style='background:rgba(180,83,9,0.19)'>35%</td><td class='strk' style='background:rgba(26,127,55,0.32)'>44%</td><td style='background:rgba(180,83,9,0.20)'>36%</td><td class='strk' style='background:rgba(26,127,55,0.26)'>39%</td><td style='background:rgba(180,83,9,0.14)'>26%</td><td class='strk' style='background:rgba(26,127,55,0.42)'>52%</td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td style='background:rgba(180,83,9,0.28)'>51%</td><td class='strk' style='background:rgba(26,127,55,0.17)'>33%</td><td style='background:rgba(180,83,9,0.18)'>33%</td><td class='strk' style='background:rgba(26,127,55,0.35)'>46%</td><td style='background:rgba(180,83,9,0.19)'>34%</td><td class='strk' style='background:rgba(26,127,55,0.43)'>52%</td><td style='background:rgba(180,83,9,0.16)'>28%</td><td class='strk' style='background:rgba(26,127,55,0.33)'>45%</td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td style='background:rgba(180,83,9,0.12)'>22%</td><td class='strk' style='background:rgba(26,127,55,0.06)'>25%</td><td style='background:rgba(180,83,9,0.10)'>19%</td><td class='strk' style='background:rgba(26,127,55,0.37)'>48%</td><td style='background:rgba(180,83,9,0.09)'>16%</td><td class='strk' style='background:rgba(26,127,55,0.31)'>43%</td><td style='background:rgba(180,83,9,0.07)'>12%</td><td class='strk' style='background:rgba(26,127,55,0.33)'>45%</td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td style='background:rgba(180,83,9,0.16)'>29%</td><td class='strk' style='background:rgba(26,127,55,0.16)'>32%</td><td style='background:rgba(180,83,9,0.19)'>34%</td><td class='strk' style='background:rgba(26,127,55,0.39)'>49%</td><td style='background:rgba(180,83,9,0.11)'>21%</td><td class='strk' style='background:rgba(26,127,55,0.43)'>52%</td><td style='background:rgba(180,83,9,0.11)'>19%</td><td class='strk' style='background:rgba(26,127,55,0.39)'>49%</td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td style='background:rgba(180,83,9,0.30)'>54%</td><td class='strk' style='background:rgba(26,127,55,0.12)'>29%</td><td style='background:rgba(180,83,9,0.22)'>40%</td><td class='strk' style='background:rgba(26,127,55,0.32)'>44%</td><td style='background:rgba(180,83,9,0.19)'>34%</td><td class='strk' style='background:rgba(26,127,55,0.23)'>38%</td><td style='background:rgba(180,83,9,0.20)'>36%</td><td class='strk' style='background:rgba(26,127,55,0.24)'>38%</td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td style='background:rgba(180,83,9,0.12)'>22%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>36%</td><td style='background:rgba(180,83,9,0.22)'>40%</td><td class='strk' style='background:rgba(26,127,55,0.29)'>42%</td><td style='background:rgba(180,83,9,0.21)'>39%</td><td class='strk' style='background:rgba(26,127,55,0.37)'>48%</td><td style='background:rgba(180,83,9,0.16)'>29%</td><td class='strk' style='background:rgba(26,127,55,0.23)'>37%</td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td style='background:rgba(180,83,9,0.20)'>36%</td><td class='strk' style='background:rgba(26,127,55,0.17)'>33%</td><td style='background:rgba(180,83,9,0.13)'>23%</td><td class='strk' style='background:rgba(26,127,55,0.22)'>37%</td><td style='background:rgba(180,83,9,0.13)'>24%</td><td class='strk' style='background:rgba(26,127,55,0.41)'>51%</td><td style='background:rgba(180,83,9,0.09)'>16%</td><td class='strk' style='background:rgba(26,127,55,0.44)'>53%</td></tr>
+  </table>
+
+  <h2>💰 Net chips by street <span class="note">(where the money is made / lost)</span></h2>
+  <div class="note">Each hand's net result is attributed to the street it <b>ended</b> on, then averaged per
+    hand — so the four columns add up to the model's <b>chips/hand total</b>. Green = won there, red = lost.
+    It shows exactly where a model earns or bleeds: GPT 5.5 books most of its profit on the <b>turn</b>
+    (pressure), Kimi on the <b>river</b> (showdown value), GPT 5.4 <b>loses on the river</b> (bluffs get
+    called), and Claude Opus bleeds on every street.</div>
+  <table>
+    <tr><th class='model'>model</th><th>preflop</th><th>flop</th><th>turn</th><th>river</th><th>total</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td style='background:rgba(26,127,55,0.04)'>+0.07</td><td style='background:rgba(26,127,55,0.19)'>+0.32</td><td style='background:rgba(26,127,55,0.56)'>+0.93</td><td style='background:rgba(26,127,55,0.17)'>+0.28</td><td class='pos'><b>+1.61</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td style='background:rgba(185,28,28,0.00)'>-0.01</td><td style='background:rgba(26,127,55,0.03)'>+0.04</td><td style='background:rgba(26,127,55,0.09)'>+0.15</td><td style='background:rgba(26,127,55,0.39)'>+0.65</td><td class='pos'><b>+0.84</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td style='background:rgba(26,127,55,0.06)'>+0.09</td><td style='background:rgba(185,28,28,0.09)'>-0.14</td><td style='background:rgba(185,28,28,0.13)'>-0.21</td><td style='background:rgba(26,127,55,0.60)'>+1.05</td><td class='pos'><b>+0.79</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td style='background:rgba(26,127,55,0.09)'>+0.15</td><td style='background:rgba(26,127,55,0.22)'>+0.37</td><td style='background:rgba(26,127,55,0.18)'>+0.31</td><td style='background:rgba(185,28,28,0.30)'>-0.50</td><td class='pos'><b>+0.33</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td style='background:rgba(185,28,28,0.06)'>-0.10</td><td style='background:rgba(26,127,55,0.07)'>+0.12</td><td style='background:rgba(185,28,28,0.09)'>-0.14</td><td style='background:rgba(26,127,55,0.26)'>+0.43</td><td class='pos'><b>+0.31</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td style='background:rgba(26,127,55,0.11)'>+0.19</td><td style='background:rgba(185,28,28,0.08)'>-0.14</td><td style='background:rgba(26,127,55,0.05)'>+0.08</td><td style='background:rgba(26,127,55,0.09)'>+0.14</td><td class='pos'><b>+0.27</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td style='background:rgba(26,127,55,0.18)'>+0.30</td><td style='background:rgba(26,127,55,0.04)'>+0.06</td><td style='background:rgba(26,127,55,0.04)'>+0.06</td><td style='background:rgba(185,28,28,0.29)'>-0.48</td><td class='neg'><b>-0.05</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td style='background:rgba(185,28,28,0.17)'>-0.28</td><td style='background:rgba(185,28,28,0.09)'>-0.14</td><td style='background:rgba(185,28,28,0.06)'>-0.09</td><td style='background:rgba(26,127,55,0.32)'>+0.54</td><td class='pos'><b>+0.02</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td style='background:rgba(185,28,28,0.02)'>-0.04</td><td style='background:rgba(185,28,28,0.15)'>-0.25</td><td style='background:rgba(185,28,28,0.33)'>-0.56</td><td style='background:rgba(185,28,28,0.20)'>-0.34</td><td class='neg'><b>-1.19</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td style='background:rgba(185,28,28,0.17)'>-0.29</td><td style='background:rgba(185,28,28,0.11)'>-0.18</td><td style='background:rgba(185,28,28,0.06)'>-0.10</td><td style='background:rgba(185,28,28,0.10)'>-0.16</td><td class='neg'><b>-0.73</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td style='background:rgba(26,127,55,0.01)'>+0.01</td><td style='background:rgba(185,28,28,0.02)'>-0.04</td><td style='background:rgba(26,127,55,0.17)'>+0.28</td><td style='background:rgba(185,28,28,0.60)'>-1.24</td><td class='neg'><b>-0.98</b></td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td style='background:rgba(185,28,28,0.07)'>-0.12</td><td style='background:rgba(185,28,28,0.01)'>-0.01</td><td style='background:rgba(185,28,28,0.29)'>-0.48</td><td style='background:rgba(185,28,28,0.50)'>-0.84</td><td class='neg'><b>-1.45</b></td></tr>
+  </table>
+
+  <h2>🎯 Positional play <span class="note">(in position vs out of position)</span></h2>
+  <div class="note">Heads-up, the <b>button/SB</b> acts last postflop (in position) — strong players open
+    up there and tighten in the <b>BB</b> (out of position). A large <b>VPIP gap</b> (button − BB) plus
+    more button aggression means it understands position.</div>
+  <table>
+    <tr><th class='model'>model</th><th>button VPIP</th><th>BB VPIP</th><th>VPIP gap</th>
+        <th>button aggr</th><th>BB aggr</th></tr>
+    <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td>100%</td><td>60%</td><td class='pos'>+40pp</td><td>59%</td><td>32%</td></tr><tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td>75%</td><td>54%</td><td class='pos'>+20pp</td><td>48%</td><td>24%</td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td>85%</td><td>39%</td><td class='pos'>+46pp</td><td>40%</td><td>22%</td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td>88%</td><td>61%</td><td class='pos'>+28pp</td><td>35%</td><td>29%</td></tr><tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td>88%</td><td>43%</td><td class='pos'>+45pp</td><td>36%</td><td>23%</td></tr><tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td>71%</td><td>47%</td><td class='pos'>+24pp</td><td>55%</td><td>25%</td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td>100%</td><td>70%</td><td class='pos'>+31pp</td><td>61%</td><td>33%</td></tr><tr><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td>89%</td><td>42%</td><td class='pos'>+47pp</td><td>24%</td><td>12%</td></tr><tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td>94%</td><td>56%</td><td class='pos'>+38pp</td><td>31%</td><td>24%</td></tr><tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td>68%</td><td>46%</td><td class='pos'>+23pp</td><td>56%</td><td>34%</td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td>86%</td><td>46%</td><td class='pos'>+41pp</td><td>37%</td><td>27%</td></tr><tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td>80%</td><td>49%</td><td class='pos'>+31pp</td><td>46%</td><td>14%</td></tr>
+  </table>
+
+  <h2>♟️ Action tendencies</h2>
+  <canvas id="actions"></canvas>
+  <div class="note">Share of each action across all the model's decisions.</div>
 
   <h2>🃏 Preflop open-rate by hand strength</h2>
   <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
@@ -843,185 +604,13 @@
   <div class="note">Share of the model's showdown hands that finished as each category
     (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
 
-  <h2 class="section">3 · 🔬 Additional analysis</h2>
-  
-  <div class="strategy-intro">
-    <b>Player metric radar:</b> each axis is exactly one observed metric, not a
-    combined leak score. Radar radius is field percentile so small-scale metrics
-    such as all-in frequency remain visible; the bullets under each chart
-    summarize the player's style from those same metrics.
-    <div class="strategy-glossary">
-      <div class="strategy-gloss">
-        <b>VPIP</b>
-        <span>Voluntarily put chips in preflop; higher means looser preflop entry.</span>
-        <em>Metric: <code>vpip</code></em>
-      </div>
-      <div class="strategy-gloss">
-        <b>PFR</b>
-        <span>Preflop raise frequency; higher means more preflop initiative.</span>
-        <em>Metric: <code>pfr</code></em>
-      </div>
-      <div class="strategy-gloss">
-        <b>AFq</b>
-        <span>Aggressive action frequency after opportunities to bet/raise.</span>
-        <em>Metric: <code>agg_freq</code></em>
-      </div>
-      <div class="strategy-gloss">
-        <b>C-bet</b>
-        <span>Flop continuation bet rate after being the preflop aggressor.</span>
-        <em>Metric: <code>cbet_rate</code></em>
-      </div>
-      <div class="strategy-gloss">
-        <b>W$SD</b>
-        <span>Won money at showdown; higher means better showdown conversion.</span>
-        <em>Metric: <code>wsd</code></em>
-      </div>
-      <div class="strategy-gloss">
-        <b>All-in</b>
-        <span>All-in action frequency; higher means more stack-risk exposure.</span>
-        <em>Metric: <code>allin_freq</code></em>
-      </div>
-    </div>
-  </div>
-  <div class="strategy-grid">
-    
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>1. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</h3></div>
-        <div class="strategy-kpi pos">+80.3<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar1"></canvas>
-        <ul class="profile-summary"><li>very loose preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with noticeable all-in risk exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>2. <img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</h3></div>
-        <div class="strategy-kpi pos">+41.9<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar2"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>takes initiative early</li><li>applies postflop pressure at a balanced rate</li><li>does not always follow through with c-bets</li><li>converts showdowns well</li><li>with controlled all-in exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>3. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</h3></div>
-        <div class="strategy-kpi pos">+39.2<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar3"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>has moderate preflop initiative</li><li>applies postflop pressure at a balanced rate</li><li>has a middle-of-field c-bet pattern</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>4. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</h3></div>
-        <div class="strategy-kpi pos">+16.5<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar4"></canvas>
-        <ul class="profile-summary"><li>very loose preflop</li><li>has moderate preflop initiative</li><li>applies postflop pressure at a balanced rate</li><li>c-bets frequently</li><li>struggles to convert showdowns</li><li>with controlled all-in exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>5. <img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</h3></div>
-        <div class="strategy-kpi pos">+15.4<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar5"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>often shifts into a passive postflop line</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>6. <img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</h3></div>
-        <div class="strategy-kpi pos">+13.6<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar6"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>takes initiative early</li><li>applies postflop pressure at a balanced rate</li><li>does not always follow through with c-bets</li><li>converts showdowns well</li><li>with noticeable all-in risk exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>7. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</h3></div>
-        <div class="strategy-kpi neg">-2.5<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar7"></canvas>
-        <ul class="profile-summary"><li>very loose preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with controlled all-in exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>8. <img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</h3></div>
-        <div class="strategy-kpi pos">+0.8<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar8"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>often shifts into a passive postflop line</li><li>has a middle-of-field c-bet pattern</li><li>converts showdowns well</li><li>while avoiding many all-in spots</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>9. <img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</h3></div>
-        <div class="strategy-kpi neg">-59.4<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar9"></canvas>
-        <ul class="profile-summary"><li>very loose preflop</li><li>has moderate preflop initiative</li><li>often shifts into a passive postflop line</li><li>c-bets frequently</li><li>struggles to convert showdowns</li><li>with controlled all-in exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>10. <img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</h3></div>
-        <div class="strategy-kpi neg">-36.6<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar10"></canvas>
-        <ul class="profile-summary"><li>moderately selective preflop</li><li>takes initiative early</li><li>keeps pressure high after the flop</li><li>does not always follow through with c-bets</li><li>has middling showdown conversion</li><li>with controlled all-in exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>11. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</h3></div>
-        <div class="strategy-kpi neg">-49.0<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar11"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>enters more passively</li><li>applies postflop pressure at a balanced rate</li><li>c-bets frequently</li><li>has middling showdown conversion</li><li>with noticeable all-in risk exposure</li></ul>
-      </div>
-    </article>
-    <article class="strategy-card metric-card">
-      <div class="strategy-head">
-        <div><h3>12. <img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</h3></div>
-        <div class="strategy-kpi neg">-72.6<span>bb/100</span></div>
-      </div>
-      <div class="metric-profile-layout">
-        <canvas id="strategyRadar12"></canvas>
-        <ul class="profile-summary"><li>loose preflop</li><li>has moderate preflop initiative</li><li>often shifts into a passive postflop line</li><li>has a middle-of-field c-bet pattern</li><li>has middling showdown conversion</li><li>while avoiding many all-in spots</li></ul>
-      </div>
-    </article>
-  </div>
-
-  <h2>⏱️ Avg thinking time</h2>
-  <canvas id="latency"></canvas>
-  <div class="note">Average seconds per decision. This is an efficiency/agent-runtime metric, not direct poker quality.</div>
-
-  <div class="grid2">
-    <div><h2>💸 Bet-sizing distribution</h2><canvas id="betsize"></canvas>
-      <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
-        medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div></div>
-    <div><h2>🧠 Latency vs win rate</h2><canvas id="latVsWin"></canvas>
-      <div class="note">Does thinking longer pay off? x = avg seconds per decision,
-        y = bb/100.</div></div>
-  </div>
+  <h2>💸 Bet-sizing distribution</h2>
+  <canvas id="betsize"></canvas>
+  <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
+    medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div>
 
 <script>
-const R = {"models": ["claude-opus-4.8", "claude-sonnet-4.6", "deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-5.4", "gpt-5.5", "gpt-oss-120b", "kimi-k2p6", "minimax-m2p7", "minimax-m3", "qwen3p7-plus"], "per_model": {"claude-opus-4.8": {"hands": 1168, "decisions": 3449, "chips": -1387.0, "chips_per_hand": -1.188, "bb_per_100": -59.38, "win_rate": 0.5077, "wins": 593, "losses": 551, "ties": 24, "showdown_wins": 142, "fold_wins": 451, "vpip": 0.7123, "pfr": 0.262, "agg_freq": 0.2745, "agg_factor": 0.863, "fold_to_bet": 0.2142, "allin_freq": 0.0032, "avg_bet_xpot": 1.037, "avg_latency_s": 3.7, "avg_comp_tokens": 38, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 345, "check": 1278, "call": 974, "bet": 557, "raise": 284, "all_in": 11}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1216, "agg_freq": 0.2911, "fold_share": 0.0987, "mix": {"fold": 120, "check": 174, "call": 603, "bet": 65, "raise": 250, "all_in": 4}}, "flop": {"decisions": 1034, "agg_freq": 0.3409, "fold_share": 0.1064, "mix": {"fold": 110, "check": 437, "call": 172, "bet": 286, "raise": 26, "all_in": 3}}, "turn": {"decisions": 690, "agg_freq": 0.2088, "fold_share": 0.1116, "mix": {"fold": 77, "check": 358, "call": 127, "bet": 124, "raise": 4, "all_in": 0}}, "river": {"decisions": 509, "agg_freq": 0.1911, "fold_share": 0.0747, "mix": {"fold": 38, "check": 309, "call": 72, "bet": 82, "raise": 4, "all_in": 4}}}, "cbet_rate": 0.7029, "cbet_opps": 175, "fold_to_cbet": 0.1701, "facing_cbet": 147, "wtsd": 0.3185, "wsd": 0.3817, "saw_showdown": 372, "won_showdown": 142, "pf_bucket": {"premium": {"hands": 69, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 111, "open_rate": 0.8288, "call_rate": 0.1261, "fold_rate": 0.0}, "playable": {"hands": 263, "open_rate": 0.4943, "call_rate": 0.4106, "fold_rate": 0.0}, "marginal": {"hands": 246, "open_rate": 0.061, "call_rate": 0.6789, "fold_rate": 0.0285}, "trash": {"hands": 396, "open_rate": 0.0, "call_rate": 0.5985, "fold_rate": 0.1818}}, "betsize_dist": {"small": 0.0258, "medium": 0.5376, "pot": 0.1185, "over": 0.3181}, "showdown_cats": {"high card": 0.2177, "pair": 0.4704, "two pair": 0.2285, "trips": 0.0188, "straight": 0.0296, "flush": 0.0242, "full house": 0.0081}, "elo": 1472, "elo_sd": 23.5}, "claude-sonnet-4.6": {"hands": 1250, "decisions": 3458, "chips": 413.0, "chips_per_hand": 0.33, "bb_per_100": 16.52, "win_rate": 0.48, "wins": 600, "losses": 624, "ties": 26, "showdown_wins": 107, "fold_wins": 493, "vpip": 0.7112, "pfr": 0.2544, "agg_freq": 0.3183, "agg_factor": 1.001, "fold_to_bet": 0.2743, "allin_freq": 0.0038, "avg_bet_xpot": 1.0, "avg_latency_s": 3.9, "avg_comp_tokens": 125, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 455, "check": 1105, "call": 942, "bet": 689, "raise": 254, "all_in": 13}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1323, "agg_freq": 0.2771, "fold_share": 0.1217, "mix": {"fold": 161, "check": 156, "call": 684, "bet": 111, "raise": 210, "all_in": 1}}, "flop": {"decisions": 1074, "agg_freq": 0.3879, "fold_share": 0.1527, "mix": {"fold": 164, "check": 405, "call": 152, "bet": 315, "raise": 32, "all_in": 6}}, "turn": {"decisions": 635, "agg_freq": 0.3358, "fold_share": 0.137, "mix": {"fold": 87, "check": 293, "call": 71, "bet": 171, "raise": 11, "all_in": 2}}, "river": {"decisions": 426, "agg_freq": 0.2533, "fold_share": 0.1009, "mix": {"fold": 43, "check": 251, "call": 35, "bet": 92, "raise": 1, "all_in": 4}}}, "cbet_rate": 0.7256, "cbet_opps": 164, "fold_to_cbet": 0.2011, "facing_cbet": 189, "wtsd": 0.2416, "wsd": 0.3543, "saw_showdown": 302, "won_showdown": 107, "pf_bucket": {"premium": {"hands": 66, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 149, "open_rate": 0.8121, "call_rate": 0.1879, "fold_rate": 0.0}, "playable": {"hands": 311, "open_rate": 0.4116, "call_rate": 0.5241, "fold_rate": 0.0}, "marginal": {"hands": 264, "open_rate": 0.0114, "call_rate": 0.7424, "fold_rate": 0.0341}, "trash": {"hands": 389, "open_rate": 0.0, "call_rate": 0.473, "fold_rate": 0.3213}}, "betsize_dist": {"small": 0.0063, "medium": 0.6067, "pot": 0.1517, "over": 0.2354}, "showdown_cats": {"high card": 0.2517, "pair": 0.4437, "two pair": 0.2086, "trips": 0.0265, "straight": 0.0298, "flush": 0.0099, "full house": 0.0265}, "elo": 1515, "elo_sd": 22.3}, "deepseek-v4-pro": {"hands": 1200, "decisions": 2783, "chips": 327.0, "chips_per_hand": 0.273, "bb_per_100": 13.63, "win_rate": 0.4425, "wins": 531, "losses": 652, "ties": 17, "showdown_wins": 117, "fold_wins": 414, "vpip": 0.58, "pfr": 0.3758, "agg_freq": 0.3992, "agg_factor": 2.159, "fold_to_bet": 0.4076, "allin_freq": 0.004, "avg_bet_xpot": 1.119, "avg_latency_s": 19.3, "avg_comp_tokens": 905, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 576, "check": 923, "call": 403, "bet": 440, "raise": 430, "all_in": 11}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1227, "agg_freq": 0.5146, "fold_share": 0.2763, "mix": {"fold": 339, "check": 156, "call": 275, "bet": 62, "raise": 394, "all_in": 1}}, "flop": {"decisions": 806, "agg_freq": 0.3253, "fold_share": 0.1725, "mix": {"fold": 139, "check": 380, "call": 70, "bet": 193, "raise": 23, "all_in": 1}}, "turn": {"decisions": 463, "agg_freq": 0.3402, "fold_share": 0.1555, "mix": {"fold": 72, "check": 223, "call": 35, "bet": 118, "raise": 10, "all_in": 5}}, "river": {"decisions": 287, "agg_freq": 0.2835, "fold_share": 0.0906, "mix": {"fold": 26, "check": 164, "call": 23, "bet": 67, "raise": 3, "all_in": 4}}}, "cbet_rate": 0.5444, "cbet_opps": 259, "fold_to_cbet": 0.098, "facing_cbet": 102, "wtsd": 0.175, "wsd": 0.5571, "saw_showdown": 210, "won_showdown": 117, "pf_bucket": {"premium": {"hands": 78, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 145, "open_rate": 0.8, "call_rate": 0.1793, "fold_rate": 0.0}, "playable": {"hands": 282, "open_rate": 0.5957, "call_rate": 0.2624, "fold_rate": 0.0106}, "marginal": {"hands": 276, "open_rate": 0.2609, "call_rate": 0.3043, "fold_rate": 0.2609}, "trash": {"hands": 358, "open_rate": 0.0475, "call_rate": 0.1704, "fold_rate": 0.5922}}, "betsize_dist": {"small": 0.0114, "medium": 0.4109, "pot": 0.1805, "over": 0.3973}, "showdown_cats": {"high card": 0.1381, "pair": 0.4524, "two pair": 0.2762, "trips": 0.0429, "straight": 0.0381, "flush": 0.0238, "full house": 0.0286}, "elo": 1510, "elo_sd": 24.9}, "glm-5p1": {"hands": 1200, "decisions": 3166, "chips": 941.0, "chips_per_hand": 0.784, "bb_per_100": 39.21, "win_rate": 0.4625, "wins": 555, "losses": 633, "ties": 12, "showdown_wins": 144, "fold_wins": 411, "vpip": 0.5875, "pfr": 0.2625, "agg_freq": 0.3037, "agg_factor": 1.104, "fold_to_bet": 0.3336, "allin_freq": 0.0009, "avg_bet_xpot": 1.027, "avg_latency_s": 37.1, "avg_comp_tokens": 2382, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 509, "check": 1122, "call": 728, "bet": 517, "raise": 287, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1235, "agg_freq": 0.3209, "fold_share": 0.1976, "mix": {"fold": 244, "check": 213, "call": 460, "bet": 46, "raise": 270, "all_in": 2}}, "flop": {"decisions": 935, "agg_freq": 0.3189, "fold_share": 0.1348, "mix": {"fold": 126, "check": 387, "call": 164, "bet": 245, "raise": 12, "all_in": 1}}, "turn": {"decisions": 606, "agg_freq": 0.2967, "fold_share": 0.1601, "mix": {"fold": 97, "check": 285, "call": 73, "bet": 147, "raise": 4, "all_in": 0}}, "river": {"decisions": 390, "agg_freq": 0.2299, "fold_share": 0.1077, "mix": {"fold": 42, "check": 237, "call": 31, "bet": 79, "raise": 1, "all_in": 0}}}, "cbet_rate": 0.6099, "cbet_opps": 182, "fold_to_cbet": 0.2, "facing_cbet": 135, "wtsd": 0.2333, "wsd": 0.5143, "saw_showdown": 280, "won_showdown": 144, "pf_bucket": {"premium": {"hands": 79, "open_rate": 0.962, "call_rate": 0.0253, "fold_rate": 0.0}, "strong": {"hands": 128, "open_rate": 0.6406, "call_rate": 0.25, "fold_rate": 0.0}, "playable": {"hands": 265, "open_rate": 0.3472, "call_rate": 0.4491, "fold_rate": 0.0264}, "marginal": {"hands": 274, "open_rate": 0.1423, "call_rate": 0.4672, "fold_rate": 0.1679}, "trash": {"hands": 363, "open_rate": 0.0716, "call_rate": 0.3003, "fold_rate": 0.3802}}, "betsize_dist": {"small": 0.0273, "medium": 0.5452, "pot": 0.1326, "over": 0.2949}, "showdown_cats": {"high card": 0.1536, "pair": 0.4857, "two pair": 0.2571, "trips": 0.0286, "straight": 0.025, "flush": 0.0286, "full house": 0.0214}, "elo": 1533, "elo_sd": 21.6}, "glm-5p2": {"hands": 1100, "decisions": 2921, "chips": 340.0, "chips_per_hand": 0.309, "bb_per_100": 15.45, "win_rate": 0.4755, "wins": 523, "losses": 553, "ties": 24, "showdown_wins": 126, "fold_wins": 397, "vpip": 0.6145, "pfr": 0.1791, "agg_freq": 0.293, "agg_factor": 0.96, "fold_to_bet": 0.3154, "allin_freq": 0.0007, "avg_bet_xpot": 0.886, "avg_latency_s": 26.8, "avg_comp_tokens": 1289, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 433, "check": 1002, "call": 757, "bet": 545, "raise": 182, "all_in": 2}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1121, "agg_freq": 0.2231, "fold_share": 0.1963, "mix": {"fold": 220, "check": 175, "call": 525, "bet": 37, "raise": 164, "all_in": 0}}, "flop": {"decisions": 852, "agg_freq": 0.3505, "fold_share": 0.1326, "mix": {"fold": 113, "check": 367, "call": 113, "bet": 246, "raise": 13, "all_in": 0}}, "turn": {"decisions": 560, "agg_freq": 0.3603, "fold_share": 0.1179, "mix": {"fold": 66, "check": 241, "call": 75, "bet": 173, "raise": 5, "all_in": 0}}, "river": {"decisions": 388, "agg_freq": 0.2571, "fold_share": 0.0876, "mix": {"fold": 34, "check": 219, "call": 44, "bet": 89, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.7248, "cbet_opps": 109, "fold_to_cbet": 0.1574, "facing_cbet": 108, "wtsd": 0.2455, "wsd": 0.4667, "saw_showdown": 270, "won_showdown": 126, "pf_bucket": {"premium": {"hands": 76, "open_rate": 0.9605, "call_rate": 0.0395, "fold_rate": 0.0}, "strong": {"hands": 115, "open_rate": 0.5739, "call_rate": 0.3217, "fold_rate": 0.0}, "playable": {"hands": 252, "open_rate": 0.2143, "call_rate": 0.5873, "fold_rate": 0.0238}, "marginal": {"hands": 249, "open_rate": 0.0161, "call_rate": 0.6185, "fold_rate": 0.1245}, "trash": {"hands": 315, "open_rate": 0.0, "call_rate": 0.4349, "fold_rate": 0.3778}}, "betsize_dist": {"small": 0.0412, "medium": 0.6392, "pot": 0.1166, "over": 0.203}, "showdown_cats": {"high card": 0.1778, "pair": 0.5148, "two pair": 0.1815, "trips": 0.0444, "straight": 0.0333, "flush": 0.0185, "full house": 0.0296}, "elo": 1512, "elo_sd": 23.6}, "gpt-5.4": {"hands": 900, "decisions": 2475, "chips": -45.0, "chips_per_hand": -0.05, "bb_per_100": -2.5, "win_rate": 0.6356, "wins": 572, "losses": 318, "ties": 10, "showdown_wins": 113, "fold_wins": 459, "vpip": 0.7933, "pfr": 0.5144, "agg_freq": 0.4721, "agg_factor": 2.056, "fold_to_bet": 0.1987, "allin_freq": 0.002, "avg_bet_xpot": 0.91, "avg_latency_s": 23.0, "avg_comp_tokens": 933, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 217, "check": 676, "call": 516, "bet": 704, "raise": 357, "all_in": 5}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 898, "agg_freq": 0.5445, "fold_share": 0.049, "mix": {"fold": 44, "check": 97, "call": 292, "bet": 117, "raise": 347, "all_in": 1}}, "flop": {"decisions": 750, "agg_freq": 0.477, "fold_share": 0.1027, "mix": {"fold": 77, "check": 232, "call": 120, "bet": 314, "raise": 7, "all_in": 0}}, "turn": {"decisions": 499, "agg_freq": 0.4537, "fold_share": 0.1122, "mix": {"fold": 56, "check": 171, "call": 71, "bet": 198, "raise": 3, "all_in": 0}}, "river": {"decisions": 328, "agg_freq": 0.2743, "fold_share": 0.122, "mix": {"fold": 40, "check": 176, "call": 33, "bet": 75, "raise": 0, "all_in": 4}}}, "cbet_rate": 0.7537, "cbet_opps": 272, "fold_to_cbet": 0.1078, "facing_cbet": 102, "wtsd": 0.2489, "wsd": 0.5045, "saw_showdown": 224, "won_showdown": 113, "pf_bucket": {"premium": {"hands": 43, "open_rate": 0.9767, "call_rate": 0.0233, "fold_rate": 0.0}, "strong": {"hands": 103, "open_rate": 0.8835, "call_rate": 0.1165, "fold_rate": 0.0}, "playable": {"hands": 198, "open_rate": 0.8535, "call_rate": 0.101, "fold_rate": 0.0}, "marginal": {"hands": 222, "open_rate": 0.4685, "call_rate": 0.3829, "fold_rate": 0.0135}, "trash": {"hands": 264, "open_rate": 0.2159, "call_rate": 0.5038, "fold_rate": 0.0606}}, "betsize_dist": {"small": 0.2289, "medium": 0.3143, "pot": 0.2298, "over": 0.227}, "showdown_cats": {"high card": 0.0893, "pair": 0.4196, "two pair": 0.2991, "trips": 0.0893, "straight": 0.0312, "flush": 0.0446, "full house": 0.0268}, "elo": 1506, "elo_sd": 22.6}, "gpt-5.5": {"hands": 900, "decisions": 2390, "chips": 1446.0, "chips_per_hand": 1.607, "bb_per_100": 80.33, "win_rate": 0.6656, "wins": 599, "losses": 291, "ties": 10, "showdown_wins": 82, "fold_wins": 517, "vpip": 0.75, "pfr": 0.4078, "agg_freq": 0.4593, "agg_factor": 1.714, "fold_to_bet": 0.187, "allin_freq": 0.0042, "avg_bet_xpot": 0.979, "avg_latency_s": 11.6, "avg_comp_tokens": 304, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 204, "check": 602, "call": 580, "bet": 694, "raise": 300, "all_in": 10}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 901, "agg_freq": 0.4415, "fold_share": 0.0699, "mix": {"fold": 63, "check": 117, "call": 351, "bet": 94, "raise": 275, "all_in": 1}}, "flop": {"decisions": 755, "agg_freq": 0.4985, "fold_share": 0.1179, "mix": {"fold": 89, "check": 214, "call": 120, "bet": 308, "raise": 23, "all_in": 1}}, "turn": {"decisions": 455, "agg_freq": 0.4881, "fold_share": 0.0769, "mix": {"fold": 35, "check": 143, "call": 72, "bet": 198, "raise": 2, "all_in": 5}}, "river": {"decisions": 279, "agg_freq": 0.3702, "fold_share": 0.0609, "mix": {"fold": 17, "check": 128, "call": 37, "bet": 94, "raise": 0, "all_in": 3}}}, "cbet_rate": 0.7784, "cbet_opps": 194, "fold_to_cbet": 0.1197, "facing_cbet": 117, "wtsd": 0.1989, "wsd": 0.4581, "saw_showdown": 179, "won_showdown": 82, "pf_bucket": {"premium": {"hands": 44, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 88, "open_rate": 0.8636, "call_rate": 0.1364, "fold_rate": 0.0}, "playable": {"hands": 214, "open_rate": 0.7383, "call_rate": 0.215, "fold_rate": 0.0}, "marginal": {"hands": 199, "open_rate": 0.3668, "call_rate": 0.397, "fold_rate": 0.0151}, "trash": {"hands": 280, "open_rate": 0.0571, "call_rate": 0.6107, "fold_rate": 0.1071}}, "betsize_dist": {"small": 0.0906, "medium": 0.4781, "pot": 0.1215, "over": 0.3098}, "showdown_cats": {"high card": 0.0615, "pair": 0.4693, "two pair": 0.3017, "trips": 0.0726, "straight": 0.0335, "flush": 0.0223, "full house": 0.0391}, "elo": 1555, "elo_sd": 23.9}, "gpt-oss-120b": {"hands": 900, "decisions": 2013, "chips": -659.0, "chips_per_hand": -0.732, "bb_per_100": -36.61, "win_rate": 0.4144, "wins": 373, "losses": 519, "ties": 8, "showdown_wins": 72, "fold_wins": 301, "vpip": 0.5356, "pfr": 0.3622, "agg_freq": 0.4372, "agg_factor": 2.864, "fold_to_bet": 0.4719, "allin_freq": 0.003, "avg_bet_xpot": 1.086, "avg_latency_s": 4.7, "avg_comp_tokens": 753, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 453, "check": 642, "call": 236, "bet": 407, "raise": 269, "all_in": 6}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 895, "agg_freq": 0.5375, "fold_share": 0.314, "mix": {"fold": 281, "check": 117, "call": 167, "bet": 75, "raise": 254, "all_in": 1}}, "flop": {"decisions": 548, "agg_freq": 0.3996, "fold_share": 0.146, "mix": {"fold": 80, "check": 238, "call": 43, "bet": 177, "raise": 10, "all_in": 0}}, "turn": {"decisions": 348, "agg_freq": 0.3368, "fold_share": 0.181, "mix": {"fold": 63, "check": 171, "call": 18, "bet": 88, "raise": 5, "all_in": 3}}, "river": {"decisions": 222, "agg_freq": 0.3575, "fold_share": 0.1306, "mix": {"fold": 29, "check": 116, "call": 8, "bet": 67, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.5176, "cbet_opps": 199, "fold_to_cbet": 0.0909, "facing_cbet": 33, "wtsd": 0.1622, "wsd": 0.4932, "saw_showdown": 146, "won_showdown": 72, "pf_bucket": {"premium": {"hands": 45, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 78, "open_rate": 0.859, "call_rate": 0.141, "fold_rate": 0.0}, "playable": {"hands": 208, "open_rate": 0.6587, "call_rate": 0.2067, "fold_rate": 0.0625}, "marginal": {"hands": 203, "open_rate": 0.266, "call_rate": 0.266, "fold_rate": 0.2562}, "trash": {"hands": 305, "open_rate": 0.0754, "call_rate": 0.1574, "fold_rate": 0.5738}}, "betsize_dist": {"small": 0.0396, "medium": 0.3988, "pot": 0.2991, "over": 0.2625}, "showdown_cats": {"high card": 0.1644, "pair": 0.4384, "two pair": 0.2603, "trips": 0.0616, "straight": 0.0205, "flush": 0.0274, "full house": 0.0274}, "elo": 1458, "elo_sd": 28.6}, "kimi-k2p6": {"hands": 1200, "decisions": 3064, "chips": 1005.0, "chips_per_hand": 0.838, "bb_per_100": 41.88, "win_rate": 0.4683, "wins": 562, "losses": 611, "ties": 27, "showdown_wins": 169, "fold_wins": 393, "vpip": 0.6133, "pfr": 0.4192, "agg_freq": 0.3484, "agg_factor": 1.767, "fold_to_bet": 0.3494, "allin_freq": 0.0023, "avg_bet_xpot": 1.0, "avg_latency_s": 131.0, "avg_comp_tokens": 6977, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 492, "check": 1173, "call": 503, "bet": 481, "raise": 408, "all_in": 7}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1181, "agg_freq": 0.5485, "fold_share": 0.2235, "mix": {"fold": 264, "check": 155, "call": 259, "bet": 110, "raise": 393, "all_in": 0}}, "flop": {"decisions": 894, "agg_freq": 0.2789, "fold_share": 0.1298, "mix": {"fold": 116, "check": 441, "call": 120, "bet": 202, "raise": 13, "all_in": 2}}, "turn": {"decisions": 567, "agg_freq": 0.242, "fold_share": 0.1182, "mix": {"fold": 67, "check": 294, "call": 85, "bet": 117, "raise": 1, "all_in": 3}}, "river": {"decisions": 422, "agg_freq": 0.1459, "fold_share": 0.1066, "mix": {"fold": 45, "check": 283, "call": 39, "bet": 52, "raise": 1, "all_in": 2}}}, "cbet_rate": 0.4329, "cbet_opps": 328, "fold_to_cbet": 0.0446, "facing_cbet": 112, "wtsd": 0.2625, "wsd": 0.5365, "saw_showdown": 315, "won_showdown": 169, "pf_bucket": {"premium": {"hands": 82, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 116, "open_rate": 0.8103, "call_rate": 0.1897, "fold_rate": 0.0}, "playable": {"hands": 306, "open_rate": 0.6536, "call_rate": 0.2712, "fold_rate": 0.0163}, "marginal": {"hands": 257, "open_rate": 0.3424, "call_rate": 0.2335, "fold_rate": 0.1829}, "trash": {"hands": 366, "open_rate": 0.1066, "call_rate": 0.1858, "fold_rate": 0.5027}}, "betsize_dist": {"small": 0.0045, "medium": 0.4062, "pot": 0.3482, "over": 0.2411}, "showdown_cats": {"high card": 0.146, "pair": 0.5016, "two pair": 0.2095, "trips": 0.054, "straight": 0.0349, "flush": 0.0381, "full house": 0.0159}, "elo": 1535, "elo_sd": 20.8}, "minimax-m2p7": {"hands": 818, "decisions": 2111, "chips": -801.0, "chips_per_hand": -0.979, "bb_per_100": -48.96, "win_rate": 0.5342, "wins": 437, "losses": 372, "ties": 9, "showdown_wins": 89, "fold_wins": 348, "vpip": 0.5868, "pfr": 0.1699, "agg_freq": 0.3173, "agg_factor": 1.081, "fold_to_bet": 0.2687, "allin_freq": 0.0062, "avg_bet_xpot": 1.412, "avg_latency_s": 37.8, "avg_comp_tokens": 7165, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 255, "check": 734, "call": 533, "bet": 422, "raise": 154, "all_in": 13}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 788, "agg_freq": 0.2156, "fold_share": 0.1701, "mix": {"fold": 134, "check": 120, "call": 393, "bet": 33, "raise": 107, "all_in": 1}}, "flop": {"decisions": 614, "agg_freq": 0.4014, "fold_share": 0.0912, "mix": {"fold": 56, "check": 258, "call": 76, "bet": 187, "raise": 32, "all_in": 5}}, "turn": {"decisions": 423, "agg_freq": 0.3852, "fold_share": 0.104, "mix": {"fold": 44, "check": 188, "call": 45, "bet": 134, "raise": 8, "all_in": 4}}, "river": {"decisions": 286, "agg_freq": 0.2943, "fold_share": 0.0734, "mix": {"fold": 21, "check": 168, "call": 19, "bet": 68, "raise": 7, "all_in": 3}}}, "cbet_rate": 0.7273, "cbet_opps": 77, "fold_to_cbet": 0.1098, "facing_cbet": 82, "wtsd": 0.2628, "wsd": 0.414, "saw_showdown": 215, "won_showdown": 89, "pf_bucket": {"premium": {"hands": 39, "open_rate": 0.8974, "call_rate": 0.1026, "fold_rate": 0.0}, "strong": {"hands": 81, "open_rate": 0.5556, "call_rate": 0.3704, "fold_rate": 0.0}, "playable": {"hands": 154, "open_rate": 0.2857, "call_rate": 0.4935, "fold_rate": 0.039}, "marginal": {"hands": 170, "open_rate": 0.0824, "call_rate": 0.6, "fold_rate": 0.1294}, "trash": {"hands": 270, "open_rate": 0.0037, "call_rate": 0.4778, "fold_rate": 0.3185}}, "betsize_dist": {"small": 0.0798, "medium": 0.5484, "pot": 0.2207, "over": 0.1511}, "showdown_cats": {"high card": 0.2512, "pair": 0.414, "two pair": 0.2047, "trips": 0.0372, "straight": 0.0419, "flush": 0.0326, "full house": 0.0186}, "elo": 1457, "elo_sd": 28.5}, "minimax-m3": {"hands": 1100, "decisions": 3118, "chips": -1598.0, "chips_per_hand": -1.453, "bb_per_100": -72.64, "win_rate": 0.4691, "wins": 516, "losses": 567, "ties": 17, "showdown_wins": 142, "fold_wins": 374, "vpip": 0.6009, "pfr": 0.2845, "agg_freq": 0.2621, "agg_factor": 0.922, "fold_to_bet": 0.2697, "allin_freq": 0.0003, "avg_bet_xpot": 1.104, "avg_latency_s": 20.2, "avg_comp_tokens": 2167, "invalid_actions": 0, "invalid_amounts": 2, "action_mix": {"fold": 394, "check": 1237, "call": 773, "bet": 419, "raise": 294, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1100, "agg_freq": 0.356, "fold_share": 0.1982, "mix": {"fold": 218, "check": 194, "call": 374, "bet": 27, "raise": 286, "all_in": 1}}, "flop": {"decisions": 893, "agg_freq": 0.2314, "fold_share": 0.0806, "mix": {"fold": 72, "check": 434, "call": 197, "bet": 184, "raise": 6, "all_in": 0}}, "turn": {"decisions": 662, "agg_freq": 0.2373, "fold_share": 0.1088, "mix": {"fold": 72, "check": 329, "call": 121, "bet": 138, "raise": 2, "all_in": 0}}, "river": {"decisions": 463, "agg_freq": 0.1624, "fold_share": 0.0691, "mix": {"fold": 32, "check": 280, "call": 81, "bet": 70, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.5593, "cbet_opps": 177, "fold_to_cbet": 0.0355, "facing_cbet": 141, "wtsd": 0.3018, "wsd": 0.4277, "saw_showdown": 332, "won_showdown": 142, "pf_bucket": {"premium": {"hands": 56, "open_rate": 0.9464, "call_rate": 0.0536, "fold_rate": 0.0}, "strong": {"hands": 98, "open_rate": 0.6122, "call_rate": 0.2449, "fold_rate": 0.0}, "playable": {"hands": 277, "open_rate": 0.4477, "call_rate": 0.3069, "fold_rate": 0.0}, "marginal": {"hands": 228, "open_rate": 0.25, "call_rate": 0.4781, "fold_rate": 0.1009}, "trash": {"hands": 349, "open_rate": 0.0544, "call_rate": 0.3639, "fold_rate": 0.3725}}, "betsize_dist": {"small": 0.021, "medium": 0.4846, "pot": 0.1597, "over": 0.3347}, "showdown_cats": {"high card": 0.1717, "pair": 0.497, "two pair": 0.241, "trips": 0.0211, "straight": 0.0422, "flush": 0.0151, "full house": 0.009}, "elo": 1447, "elo_sd": 20.0}, "qwen3p7-plus": {"hands": 1100, "decisions": 3173, "chips": 18.0, "chips_per_hand": 0.016, "bb_per_100": 0.82, "win_rate": 0.4109, "wins": 452, "losses": 622, "ties": 26, "showdown_wins": 181, "fold_wins": 271, "vpip": 0.6209, "pfr": 0.1836, "agg_freq": 0.183, "agg_factor": 0.574, "fold_to_bet": 0.3219, "allin_freq": 0.0009, "avg_bet_xpot": 0.942, "avg_latency_s": 58.0, "avg_comp_tokens": 1090, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 496, "check": 1338, "call": 849, "bet": 292, "raise": 195, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1140, "agg_freq": 0.2188, "fold_share": 0.1702, "mix": {"fold": 194, "check": 185, "call": 554, "bet": 23, "raise": 183, "all_in": 1}}, "flop": {"decisions": 959, "agg_freq": 0.1887, "fold_share": 0.171, "mix": {"fold": 164, "check": 496, "call": 149, "bet": 141, "raise": 9, "all_in": 0}}, "turn": {"decisions": 610, "agg_freq": 0.1585, "fold_share": 0.1311, "mix": {"fold": 80, "check": 358, "call": 88, "bet": 82, "raise": 2, "all_in": 0}}, "river": {"decisions": 464, "agg_freq": 0.1207, "fold_share": 0.125, "mix": {"fold": 58, "check": 299, "call": 58, "bet": 46, "raise": 1, "all_in": 2}}}, "cbet_rate": 0.5789, "cbet_opps": 133, "fold_to_cbet": 0.1667, "facing_cbet": 138, "wtsd": 0.3027, "wsd": 0.5435, "saw_showdown": 333, "won_showdown": 181, "pf_bucket": {"premium": {"hands": 79, "open_rate": 0.9494, "call_rate": 0.0127, "fold_rate": 0.0}, "strong": {"hands": 119, "open_rate": 0.563, "call_rate": 0.2437, "fold_rate": 0.0}, "playable": {"hands": 240, "open_rate": 0.2083, "call_rate": 0.5917, "fold_rate": 0.0083}, "marginal": {"hands": 243, "open_rate": 0.037, "call_rate": 0.642, "fold_rate": 0.1193}, "trash": {"hands": 329, "open_rate": 0.003, "call_rate": 0.465, "fold_rate": 0.3374}}, "betsize_dist": {"small": 0.0143, "medium": 0.5143, "pot": 0.2612, "over": 0.2102}, "showdown_cats": {"high card": 0.1772, "pair": 0.4354, "two pair": 0.2583, "trips": 0.036, "straight": 0.0541, "flush": 0.018, "full house": 0.018}, "elo": 1499, "elo_sd": 24.5}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": -4.34, "deepseek-v4-pro": 1.96, "glm-5p1": -3.147, "glm-5p2": 1.05, "gpt-5.4": 0.68, "gpt-5.5": -4.9, "gpt-oss-120b": -0.23, "kimi-k2p6": -2.587, "minimax-m2p7": -9.833, "minimax-m3": 1.06, "qwen3p7-plus": 0.24}, "claude-sonnet-4.6": {"claude-opus-4.8": 4.34, "deepseek-v4-pro": 1.113, "glm-5p1": -3.22, "glm-5p2": -0.67, "gpt-5.4": 3.9, "gpt-5.5": 1.62, "gpt-oss-120b": 0.67, "kimi-k2p6": -2.413, "minimax-m2p7": 1.48, "minimax-m3": -0.46, "qwen3p7-plus": 0.03}, "deepseek-v4-pro": {"claude-opus-4.8": -1.96, "claude-sonnet-4.6": -1.113, "glm-5p1": 0.38, "glm-5p2": -0.6, "gpt-5.4": -2.45, "gpt-5.5": 0.87, "gpt-oss-120b": 0.88, "kimi-k2p6": 2.14, "minimax-m2p7": 1.64, "minimax-m3": 2.28, "qwen3p7-plus": 2.74}, "glm-5p1": {"claude-opus-4.8": 3.147, "claude-sonnet-4.6": 3.22, "deepseek-v4-pro": -0.38, "glm-5p2": -2.18, "gpt-5.4": -0.83, "gpt-5.5": -1.23, "gpt-oss-120b": 1.61, "kimi-k2p6": 0.46, "minimax-m2p7": 1.98, "minimax-m3": 1.63, "qwen3p7-plus": -1.2}, "glm-5p2": {"claude-opus-4.8": -1.05, "claude-sonnet-4.6": 0.67, "deepseek-v4-pro": 0.6, "glm-5p1": 2.18, "gpt-5.4": -2.78, "gpt-5.5": -0.92, "gpt-oss-120b": 0.29, "kimi-k2p6": 1.42, "minimax-m2p7": 1.56, "minimax-m3": 1.05, "qwen3p7-plus": 0.38}, "gpt-5.4": {"claude-opus-4.8": -0.68, "claude-sonnet-4.6": -3.9, "deepseek-v4-pro": 2.45, "glm-5p1": 0.83, "glm-5p2": 2.78, "gpt-5.5": -2.08, "gpt-oss-120b": 0.0, "kimi-k2p6": -1.58, "minimax-m2p7": 0.0, "minimax-m3": 0.56, "qwen3p7-plus": 1.17}, "gpt-5.5": {"claude-opus-4.8": 4.9, "claude-sonnet-4.6": -1.62, "deepseek-v4-pro": -0.87, "glm-5p1": 1.23, "glm-5p2": 0.92, "gpt-5.4": 2.08, "gpt-oss-120b": 0.0, "kimi-k2p6": 2.07, "minimax-m2p7": 0.0, "minimax-m3": 1.76, "qwen3p7-plus": 3.99}, "gpt-oss-120b": {"claude-opus-4.8": 0.23, "claude-sonnet-4.6": -0.67, "deepseek-v4-pro": -0.88, "glm-5p1": -1.61, "glm-5p2": -0.29, "gpt-5.4": 0.0, "gpt-5.5": 0.0, "kimi-k2p6": -0.8, "minimax-m2p7": -4.11, "minimax-m3": 1.09, "qwen3p7-plus": 0.45}, "kimi-k2p6": {"claude-opus-4.8": 2.587, "claude-sonnet-4.6": 2.413, "deepseek-v4-pro": -2.14, "glm-5p1": -0.46, "glm-5p2": -1.42, "gpt-5.4": 1.58, "gpt-5.5": -2.07, "gpt-oss-120b": 0.8, "minimax-m2p7": 1.19, "minimax-m3": 5.93, "qwen3p7-plus": -0.86}, "minimax-m2p7": {"claude-opus-4.8": 9.833, "claude-sonnet-4.6": -1.48, "deepseek-v4-pro": -1.64, "glm-5p1": -1.98, "glm-5p2": -1.56, "gpt-5.4": 0.0, "gpt-5.5": 0.0, "gpt-oss-120b": 4.11, "kimi-k2p6": -1.19, "minimax-m3": -2.06, "qwen3p7-plus": -3.98}, "minimax-m3": {"claude-opus-4.8": -1.06, "claude-sonnet-4.6": 0.46, "deepseek-v4-pro": -2.28, "glm-5p1": -1.63, "glm-5p2": -1.05, "gpt-5.4": -0.56, "gpt-5.5": -1.76, "gpt-oss-120b": -1.09, "kimi-k2p6": -5.93, "minimax-m2p7": 2.06, "qwen3p7-plus": -3.14}, "qwen3p7-plus": {"claude-opus-4.8": -0.24, "claude-sonnet-4.6": -0.03, "deepseek-v4-pro": -2.74, "glm-5p1": 1.2, "glm-5p2": -0.38, "gpt-5.4": -1.17, "gpt-5.5": -3.99, "gpt-oss-120b": -0.45, "kimi-k2p6": 0.86, "minimax-m2p7": 3.98, "minimax-m3": 3.14}}, "elo": {"claude-opus-4.8": 1472, "claude-sonnet-4.6": 1515, "deepseek-v4-pro": 1510, "glm-5p1": 1533, "glm-5p2": 1512, "gpt-5.4": 1506, "gpt-5.5": 1555, "gpt-oss-120b": 1458, "kimi-k2p6": 1535, "minimax-m2p7": 1457, "minimax-m3": 1447, "qwen3p7-plus": 1499}, "elo_ci": {"claude-opus-4.8": {"sd": 23.5, "lo": 1427, "hi": 1524}, "claude-sonnet-4.6": {"sd": 22.3, "lo": 1468, "hi": 1556}, "deepseek-v4-pro": {"sd": 24.9, "lo": 1464, "hi": 1559}, "glm-5p1": {"sd": 21.6, "lo": 1487, "hi": 1569}, "glm-5p2": {"sd": 23.6, "lo": 1465, "hi": 1557}, "gpt-5.4": {"sd": 22.6, "lo": 1466, "hi": 1559}, "gpt-5.5": {"sd": 23.9, "lo": 1503, "hi": 1604}, "gpt-oss-120b": {"sd": 28.6, "lo": 1404, "hi": 1520}, "kimi-k2p6": {"sd": 20.8, "lo": 1494, "hi": 1583}, "minimax-m2p7": {"sd": 28.5, "lo": 1398, "hi": 1507}, "minimax-m3": {"sd": 20.0, "lo": 1409, "hi": 1485}, "qwen3p7-plus": {"sd": 24.5, "lo": 1452, "hi": 1546}}, "hands_per_game": 150, "num_games": 62};
+const R = {"models": ["claude-opus-4.8", "claude-sonnet-4.6", "deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-5.4", "gpt-5.5", "gpt-oss-120b", "kimi-k2p6", "minimax-m2p7", "minimax-m3", "qwen3p7-plus"], "per_model": {"claude-opus-4.8": {"hands": 1168, "decisions": 3449, "chips": -1387.0, "chips_per_hand": -1.188, "blue_per_hand": 0.489, "red_per_hand": -1.676, "bb_per_100": -59.38, "win_rate": 0.5077, "wins": 593, "losses": 551, "ties": 24, "showdown_wins": 142, "fold_wins": 451, "vpip": 0.7123, "pfr": 0.262, "agg_freq": 0.2745, "agg_factor": 0.863, "fold_to_bet": 0.2142, "allin_freq": 0.0032, "avg_bet_xpot": 1.037, "avg_latency_s": 3.7, "avg_comp_tokens": 38, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 345, "check": 1278, "call": 974, "bet": 557, "raise": 284, "all_in": 11}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1216, "agg_freq": 0.2911, "fold_share": 0.0987, "mix": {"fold": 120, "check": 174, "call": 603, "bet": 65, "raise": 250, "all_in": 4}}, "flop": {"decisions": 1034, "agg_freq": 0.3409, "fold_share": 0.1064, "mix": {"fold": 110, "check": 437, "call": 172, "bet": 286, "raise": 26, "all_in": 3}}, "turn": {"decisions": 690, "agg_freq": 0.2088, "fold_share": 0.1116, "mix": {"fold": 77, "check": 358, "call": 127, "bet": 124, "raise": 4, "all_in": 0}}, "river": {"decisions": 509, "agg_freq": 0.1911, "fold_share": 0.0747, "mix": {"fold": 38, "check": 309, "call": 72, "bet": 82, "raise": 4, "all_in": 4}}}, "cbet_rate": 0.7029, "cbet_opps": 175, "fold_to_cbet": 0.1701, "facing_cbet": 147, "wtsd": 0.3185, "wsd": 0.3817, "saw_showdown": 372, "won_showdown": 142, "pf_bucket": {"premium": {"hands": 69, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 111, "open_rate": 0.8288, "call_rate": 0.1261, "fold_rate": 0.0}, "playable": {"hands": 263, "open_rate": 0.4943, "call_rate": 0.4106, "fold_rate": 0.0}, "marginal": {"hands": 246, "open_rate": 0.061, "call_rate": 0.6789, "fold_rate": 0.0285}, "trash": {"hands": 396, "open_rate": 0.0, "call_rate": 0.5985, "fold_rate": 0.1818}}, "betsize_dist": {"small": 0.0258, "medium": 0.5376, "pot": 0.1185, "over": 0.3181}, "showdown_cats": {"high card": 0.2177, "pair": 0.4704, "two pair": 0.2285, "trips": 0.0188, "straight": 0.0296, "flush": 0.0242, "full house": 0.0081}, "elo": 1472, "elo_sd": 23.5}, "claude-sonnet-4.6": {"hands": 1250, "decisions": 3458, "chips": 413.0, "chips_per_hand": 0.33, "blue_per_hand": 0.395, "red_per_hand": -0.065, "bb_per_100": 16.52, "win_rate": 0.48, "wins": 600, "losses": 624, "ties": 26, "showdown_wins": 107, "fold_wins": 493, "vpip": 0.7112, "pfr": 0.2544, "agg_freq": 0.3183, "agg_factor": 1.001, "fold_to_bet": 0.2743, "allin_freq": 0.0038, "avg_bet_xpot": 1.0, "avg_latency_s": 3.9, "avg_comp_tokens": 125, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 455, "check": 1105, "call": 942, "bet": 689, "raise": 254, "all_in": 13}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1323, "agg_freq": 0.2771, "fold_share": 0.1217, "mix": {"fold": 161, "check": 156, "call": 684, "bet": 111, "raise": 210, "all_in": 1}}, "flop": {"decisions": 1074, "agg_freq": 0.3879, "fold_share": 0.1527, "mix": {"fold": 164, "check": 405, "call": 152, "bet": 315, "raise": 32, "all_in": 6}}, "turn": {"decisions": 635, "agg_freq": 0.3358, "fold_share": 0.137, "mix": {"fold": 87, "check": 293, "call": 71, "bet": 171, "raise": 11, "all_in": 2}}, "river": {"decisions": 426, "agg_freq": 0.2533, "fold_share": 0.1009, "mix": {"fold": 43, "check": 251, "call": 35, "bet": 92, "raise": 1, "all_in": 4}}}, "cbet_rate": 0.7256, "cbet_opps": 164, "fold_to_cbet": 0.2011, "facing_cbet": 189, "wtsd": 0.2416, "wsd": 0.3543, "saw_showdown": 302, "won_showdown": 107, "pf_bucket": {"premium": {"hands": 66, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 149, "open_rate": 0.8121, "call_rate": 0.1879, "fold_rate": 0.0}, "playable": {"hands": 311, "open_rate": 0.4116, "call_rate": 0.5241, "fold_rate": 0.0}, "marginal": {"hands": 264, "open_rate": 0.0114, "call_rate": 0.7424, "fold_rate": 0.0341}, "trash": {"hands": 389, "open_rate": 0.0, "call_rate": 0.473, "fold_rate": 0.3213}}, "betsize_dist": {"small": 0.0063, "medium": 0.6067, "pot": 0.1517, "over": 0.2354}, "showdown_cats": {"high card": 0.2517, "pair": 0.4437, "two pair": 0.2086, "trips": 0.0265, "straight": 0.0298, "flush": 0.0099, "full house": 0.0265}, "elo": 1515, "elo_sd": 22.3}, "deepseek-v4-pro": {"hands": 1200, "decisions": 2783, "chips": 327.0, "chips_per_hand": 0.273, "blue_per_hand": -0.128, "red_per_hand": 0.4, "bb_per_100": 13.63, "win_rate": 0.4425, "wins": 531, "losses": 652, "ties": 17, "showdown_wins": 117, "fold_wins": 414, "vpip": 0.58, "pfr": 0.3758, "agg_freq": 0.3992, "agg_factor": 2.159, "fold_to_bet": 0.4076, "allin_freq": 0.004, "avg_bet_xpot": 1.119, "avg_latency_s": 19.3, "avg_comp_tokens": 905, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 576, "check": 923, "call": 403, "bet": 440, "raise": 430, "all_in": 11}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1227, "agg_freq": 0.5146, "fold_share": 0.2763, "mix": {"fold": 339, "check": 156, "call": 275, "bet": 62, "raise": 394, "all_in": 1}}, "flop": {"decisions": 806, "agg_freq": 0.3253, "fold_share": 0.1725, "mix": {"fold": 139, "check": 380, "call": 70, "bet": 193, "raise": 23, "all_in": 1}}, "turn": {"decisions": 463, "agg_freq": 0.3402, "fold_share": 0.1555, "mix": {"fold": 72, "check": 223, "call": 35, "bet": 118, "raise": 10, "all_in": 5}}, "river": {"decisions": 287, "agg_freq": 0.2835, "fold_share": 0.0906, "mix": {"fold": 26, "check": 164, "call": 23, "bet": 67, "raise": 3, "all_in": 4}}}, "cbet_rate": 0.5444, "cbet_opps": 259, "fold_to_cbet": 0.098, "facing_cbet": 102, "wtsd": 0.175, "wsd": 0.5571, "saw_showdown": 210, "won_showdown": 117, "pf_bucket": {"premium": {"hands": 78, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 145, "open_rate": 0.8, "call_rate": 0.1793, "fold_rate": 0.0}, "playable": {"hands": 282, "open_rate": 0.5957, "call_rate": 0.2624, "fold_rate": 0.0106}, "marginal": {"hands": 276, "open_rate": 0.2609, "call_rate": 0.3043, "fold_rate": 0.2609}, "trash": {"hands": 358, "open_rate": 0.0475, "call_rate": 0.1704, "fold_rate": 0.5922}}, "betsize_dist": {"small": 0.0114, "medium": 0.4109, "pot": 0.1805, "over": 0.3973}, "showdown_cats": {"high card": 0.1381, "pair": 0.4524, "two pair": 0.2762, "trips": 0.0429, "straight": 0.0381, "flush": 0.0238, "full house": 0.0286}, "elo": 1510, "elo_sd": 24.9}, "glm-5p1": {"hands": 1200, "decisions": 3166, "chips": 941.0, "chips_per_hand": 0.784, "blue_per_hand": -0.281, "red_per_hand": 1.065, "bb_per_100": 39.21, "win_rate": 0.4625, "wins": 555, "losses": 633, "ties": 12, "showdown_wins": 144, "fold_wins": 411, "vpip": 0.5875, "pfr": 0.2625, "agg_freq": 0.3037, "agg_factor": 1.104, "fold_to_bet": 0.3336, "allin_freq": 0.0009, "avg_bet_xpot": 1.027, "avg_latency_s": 37.1, "avg_comp_tokens": 2382, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 509, "check": 1122, "call": 728, "bet": 517, "raise": 287, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1235, "agg_freq": 0.3209, "fold_share": 0.1976, "mix": {"fold": 244, "check": 213, "call": 460, "bet": 46, "raise": 270, "all_in": 2}}, "flop": {"decisions": 935, "agg_freq": 0.3189, "fold_share": 0.1348, "mix": {"fold": 126, "check": 387, "call": 164, "bet": 245, "raise": 12, "all_in": 1}}, "turn": {"decisions": 606, "agg_freq": 0.2967, "fold_share": 0.1601, "mix": {"fold": 97, "check": 285, "call": 73, "bet": 147, "raise": 4, "all_in": 0}}, "river": {"decisions": 390, "agg_freq": 0.2299, "fold_share": 0.1077, "mix": {"fold": 42, "check": 237, "call": 31, "bet": 79, "raise": 1, "all_in": 0}}}, "cbet_rate": 0.6099, "cbet_opps": 182, "fold_to_cbet": 0.2, "facing_cbet": 135, "wtsd": 0.2333, "wsd": 0.5143, "saw_showdown": 280, "won_showdown": 144, "pf_bucket": {"premium": {"hands": 79, "open_rate": 0.962, "call_rate": 0.0253, "fold_rate": 0.0}, "strong": {"hands": 128, "open_rate": 0.6406, "call_rate": 0.25, "fold_rate": 0.0}, "playable": {"hands": 265, "open_rate": 0.3472, "call_rate": 0.4491, "fold_rate": 0.0264}, "marginal": {"hands": 274, "open_rate": 0.1423, "call_rate": 0.4672, "fold_rate": 0.1679}, "trash": {"hands": 363, "open_rate": 0.0716, "call_rate": 0.3003, "fold_rate": 0.3802}}, "betsize_dist": {"small": 0.0273, "medium": 0.5452, "pot": 0.1326, "over": 0.2949}, "showdown_cats": {"high card": 0.1536, "pair": 0.4857, "two pair": 0.2571, "trips": 0.0286, "straight": 0.025, "flush": 0.0286, "full house": 0.0214}, "elo": 1533, "elo_sd": 21.6}, "glm-5p2": {"hands": 1100, "decisions": 2921, "chips": 340.0, "chips_per_hand": 0.309, "blue_per_hand": 0.217, "red_per_hand": 0.092, "bb_per_100": 15.45, "win_rate": 0.4755, "wins": 523, "losses": 553, "ties": 24, "showdown_wins": 126, "fold_wins": 397, "vpip": 0.6145, "pfr": 0.1791, "agg_freq": 0.293, "agg_factor": 0.96, "fold_to_bet": 0.3154, "allin_freq": 0.0007, "avg_bet_xpot": 0.886, "avg_latency_s": 26.8, "avg_comp_tokens": 1289, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 433, "check": 1002, "call": 757, "bet": 545, "raise": 182, "all_in": 2}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1121, "agg_freq": 0.2231, "fold_share": 0.1963, "mix": {"fold": 220, "check": 175, "call": 525, "bet": 37, "raise": 164, "all_in": 0}}, "flop": {"decisions": 852, "agg_freq": 0.3505, "fold_share": 0.1326, "mix": {"fold": 113, "check": 367, "call": 113, "bet": 246, "raise": 13, "all_in": 0}}, "turn": {"decisions": 560, "agg_freq": 0.3603, "fold_share": 0.1179, "mix": {"fold": 66, "check": 241, "call": 75, "bet": 173, "raise": 5, "all_in": 0}}, "river": {"decisions": 388, "agg_freq": 0.2571, "fold_share": 0.0876, "mix": {"fold": 34, "check": 219, "call": 44, "bet": 89, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.7248, "cbet_opps": 109, "fold_to_cbet": 0.1574, "facing_cbet": 108, "wtsd": 0.2455, "wsd": 0.4667, "saw_showdown": 270, "won_showdown": 126, "pf_bucket": {"premium": {"hands": 76, "open_rate": 0.9605, "call_rate": 0.0395, "fold_rate": 0.0}, "strong": {"hands": 115, "open_rate": 0.5739, "call_rate": 0.3217, "fold_rate": 0.0}, "playable": {"hands": 252, "open_rate": 0.2143, "call_rate": 0.5873, "fold_rate": 0.0238}, "marginal": {"hands": 249, "open_rate": 0.0161, "call_rate": 0.6185, "fold_rate": 0.1245}, "trash": {"hands": 315, "open_rate": 0.0, "call_rate": 0.4349, "fold_rate": 0.3778}}, "betsize_dist": {"small": 0.0412, "medium": 0.6392, "pot": 0.1166, "over": 0.203}, "showdown_cats": {"high card": 0.1778, "pair": 0.5148, "two pair": 0.1815, "trips": 0.0444, "straight": 0.0333, "flush": 0.0185, "full house": 0.0296}, "elo": 1512, "elo_sd": 23.6}, "gpt-5.4": {"hands": 900, "decisions": 2475, "chips": -45.0, "chips_per_hand": -0.05, "blue_per_hand": 0.082, "red_per_hand": -0.132, "bb_per_100": -2.5, "win_rate": 0.6356, "wins": 572, "losses": 318, "ties": 10, "showdown_wins": 113, "fold_wins": 459, "vpip": 0.7933, "pfr": 0.5144, "agg_freq": 0.4721, "agg_factor": 2.056, "fold_to_bet": 0.1987, "allin_freq": 0.002, "avg_bet_xpot": 0.91, "avg_latency_s": 23.0, "avg_comp_tokens": 933, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 217, "check": 676, "call": 516, "bet": 704, "raise": 357, "all_in": 5}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 898, "agg_freq": 0.5445, "fold_share": 0.049, "mix": {"fold": 44, "check": 97, "call": 292, "bet": 117, "raise": 347, "all_in": 1}}, "flop": {"decisions": 750, "agg_freq": 0.477, "fold_share": 0.1027, "mix": {"fold": 77, "check": 232, "call": 120, "bet": 314, "raise": 7, "all_in": 0}}, "turn": {"decisions": 499, "agg_freq": 0.4537, "fold_share": 0.1122, "mix": {"fold": 56, "check": 171, "call": 71, "bet": 198, "raise": 3, "all_in": 0}}, "river": {"decisions": 328, "agg_freq": 0.2743, "fold_share": 0.122, "mix": {"fold": 40, "check": 176, "call": 33, "bet": 75, "raise": 0, "all_in": 4}}}, "cbet_rate": 0.7537, "cbet_opps": 272, "fold_to_cbet": 0.1078, "facing_cbet": 102, "wtsd": 0.2489, "wsd": 0.5045, "saw_showdown": 224, "won_showdown": 113, "pf_bucket": {"premium": {"hands": 43, "open_rate": 0.9767, "call_rate": 0.0233, "fold_rate": 0.0}, "strong": {"hands": 103, "open_rate": 0.8835, "call_rate": 0.1165, "fold_rate": 0.0}, "playable": {"hands": 198, "open_rate": 0.8535, "call_rate": 0.101, "fold_rate": 0.0}, "marginal": {"hands": 222, "open_rate": 0.4685, "call_rate": 0.3829, "fold_rate": 0.0135}, "trash": {"hands": 264, "open_rate": 0.2159, "call_rate": 0.5038, "fold_rate": 0.0606}}, "betsize_dist": {"small": 0.2289, "medium": 0.3143, "pot": 0.2298, "over": 0.227}, "showdown_cats": {"high card": 0.0893, "pair": 0.4196, "two pair": 0.2991, "trips": 0.0893, "straight": 0.0312, "flush": 0.0446, "full house": 0.0268}, "elo": 1506, "elo_sd": 22.6}, "gpt-5.5": {"hands": 900, "decisions": 2390, "chips": 1446.0, "chips_per_hand": 1.607, "blue_per_hand": 1.696, "red_per_hand": -0.089, "bb_per_100": 80.33, "win_rate": 0.6656, "wins": 599, "losses": 291, "ties": 10, "showdown_wins": 82, "fold_wins": 517, "vpip": 0.75, "pfr": 0.4078, "agg_freq": 0.4593, "agg_factor": 1.714, "fold_to_bet": 0.187, "allin_freq": 0.0042, "avg_bet_xpot": 0.979, "avg_latency_s": 11.6, "avg_comp_tokens": 304, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 204, "check": 602, "call": 580, "bet": 694, "raise": 300, "all_in": 10}, "style": {"label": "Loose-Aggressive", "tags": ["LAG"]}, "by_street": {"preflop": {"decisions": 901, "agg_freq": 0.4415, "fold_share": 0.0699, "mix": {"fold": 63, "check": 117, "call": 351, "bet": 94, "raise": 275, "all_in": 1}}, "flop": {"decisions": 755, "agg_freq": 0.4985, "fold_share": 0.1179, "mix": {"fold": 89, "check": 214, "call": 120, "bet": 308, "raise": 23, "all_in": 1}}, "turn": {"decisions": 455, "agg_freq": 0.4881, "fold_share": 0.0769, "mix": {"fold": 35, "check": 143, "call": 72, "bet": 198, "raise": 2, "all_in": 5}}, "river": {"decisions": 279, "agg_freq": 0.3702, "fold_share": 0.0609, "mix": {"fold": 17, "check": 128, "call": 37, "bet": 94, "raise": 0, "all_in": 3}}}, "cbet_rate": 0.7784, "cbet_opps": 194, "fold_to_cbet": 0.1197, "facing_cbet": 117, "wtsd": 0.1989, "wsd": 0.4581, "saw_showdown": 179, "won_showdown": 82, "pf_bucket": {"premium": {"hands": 44, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 88, "open_rate": 0.8636, "call_rate": 0.1364, "fold_rate": 0.0}, "playable": {"hands": 214, "open_rate": 0.7383, "call_rate": 0.215, "fold_rate": 0.0}, "marginal": {"hands": 199, "open_rate": 0.3668, "call_rate": 0.397, "fold_rate": 0.0151}, "trash": {"hands": 280, "open_rate": 0.0571, "call_rate": 0.6107, "fold_rate": 0.1071}}, "betsize_dist": {"small": 0.0906, "medium": 0.4781, "pot": 0.1215, "over": 0.3098}, "showdown_cats": {"high card": 0.0615, "pair": 0.4693, "two pair": 0.3017, "trips": 0.0726, "straight": 0.0335, "flush": 0.0223, "full house": 0.0391}, "elo": 1555, "elo_sd": 23.9}, "gpt-oss-120b": {"hands": 900, "decisions": 2013, "chips": -659.0, "chips_per_hand": -0.732, "blue_per_hand": -1.053, "red_per_hand": 0.321, "bb_per_100": -36.61, "win_rate": 0.4144, "wins": 373, "losses": 519, "ties": 8, "showdown_wins": 72, "fold_wins": 301, "vpip": 0.5356, "pfr": 0.3622, "agg_freq": 0.4372, "agg_factor": 2.864, "fold_to_bet": 0.4719, "allin_freq": 0.003, "avg_bet_xpot": 1.086, "avg_latency_s": 4.7, "avg_comp_tokens": 753, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 453, "check": 642, "call": 236, "bet": 407, "raise": 269, "all_in": 6}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 895, "agg_freq": 0.5375, "fold_share": 0.314, "mix": {"fold": 281, "check": 117, "call": 167, "bet": 75, "raise": 254, "all_in": 1}}, "flop": {"decisions": 548, "agg_freq": 0.3996, "fold_share": 0.146, "mix": {"fold": 80, "check": 238, "call": 43, "bet": 177, "raise": 10, "all_in": 0}}, "turn": {"decisions": 348, "agg_freq": 0.3368, "fold_share": 0.181, "mix": {"fold": 63, "check": 171, "call": 18, "bet": 88, "raise": 5, "all_in": 3}}, "river": {"decisions": 222, "agg_freq": 0.3575, "fold_share": 0.1306, "mix": {"fold": 29, "check": 116, "call": 8, "bet": 67, "raise": 0, "all_in": 2}}}, "cbet_rate": 0.5176, "cbet_opps": 199, "fold_to_cbet": 0.0909, "facing_cbet": 33, "wtsd": 0.1622, "wsd": 0.4932, "saw_showdown": 146, "won_showdown": 72, "pf_bucket": {"premium": {"hands": 45, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 78, "open_rate": 0.859, "call_rate": 0.141, "fold_rate": 0.0}, "playable": {"hands": 208, "open_rate": 0.6587, "call_rate": 0.2067, "fold_rate": 0.0625}, "marginal": {"hands": 203, "open_rate": 0.266, "call_rate": 0.266, "fold_rate": 0.2562}, "trash": {"hands": 305, "open_rate": 0.0754, "call_rate": 0.1574, "fold_rate": 0.5738}}, "betsize_dist": {"small": 0.0396, "medium": 0.3988, "pot": 0.2991, "over": 0.2625}, "showdown_cats": {"high card": 0.1644, "pair": 0.4384, "two pair": 0.2603, "trips": 0.0616, "straight": 0.0205, "flush": 0.0274, "full house": 0.0274}, "elo": 1458, "elo_sd": 28.6}, "kimi-k2p6": {"hands": 1200, "decisions": 3064, "chips": 1005.0, "chips_per_hand": 0.838, "blue_per_hand": -0.362, "red_per_hand": 1.2, "bb_per_100": 41.88, "win_rate": 0.4683, "wins": 562, "losses": 611, "ties": 27, "showdown_wins": 169, "fold_wins": 393, "vpip": 0.6133, "pfr": 0.4192, "agg_freq": 0.3484, "agg_factor": 1.767, "fold_to_bet": 0.3494, "allin_freq": 0.0023, "avg_bet_xpot": 1.0, "avg_latency_s": 131.0, "avg_comp_tokens": 6977, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 492, "check": 1173, "call": 503, "bet": 481, "raise": 408, "all_in": 7}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1181, "agg_freq": 0.5485, "fold_share": 0.2235, "mix": {"fold": 264, "check": 155, "call": 259, "bet": 110, "raise": 393, "all_in": 0}}, "flop": {"decisions": 894, "agg_freq": 0.2789, "fold_share": 0.1298, "mix": {"fold": 116, "check": 441, "call": 120, "bet": 202, "raise": 13, "all_in": 2}}, "turn": {"decisions": 567, "agg_freq": 0.242, "fold_share": 0.1182, "mix": {"fold": 67, "check": 294, "call": 85, "bet": 117, "raise": 1, "all_in": 3}}, "river": {"decisions": 422, "agg_freq": 0.1459, "fold_share": 0.1066, "mix": {"fold": 45, "check": 283, "call": 39, "bet": 52, "raise": 1, "all_in": 2}}}, "cbet_rate": 0.4329, "cbet_opps": 328, "fold_to_cbet": 0.0446, "facing_cbet": 112, "wtsd": 0.2625, "wsd": 0.5365, "saw_showdown": 315, "won_showdown": 169, "pf_bucket": {"premium": {"hands": 82, "open_rate": 1.0, "call_rate": 0.0, "fold_rate": 0.0}, "strong": {"hands": 116, "open_rate": 0.8103, "call_rate": 0.1897, "fold_rate": 0.0}, "playable": {"hands": 306, "open_rate": 0.6536, "call_rate": 0.2712, "fold_rate": 0.0163}, "marginal": {"hands": 257, "open_rate": 0.3424, "call_rate": 0.2335, "fold_rate": 0.1829}, "trash": {"hands": 366, "open_rate": 0.1066, "call_rate": 0.1858, "fold_rate": 0.5027}}, "betsize_dist": {"small": 0.0045, "medium": 0.4062, "pot": 0.3482, "over": 0.2411}, "showdown_cats": {"high card": 0.146, "pair": 0.5016, "two pair": 0.2095, "trips": 0.054, "straight": 0.0349, "flush": 0.0381, "full house": 0.0159}, "elo": 1535, "elo_sd": 20.8}, "minimax-m2p7": {"hands": 818, "decisions": 2111, "chips": -801.0, "chips_per_hand": -0.979, "blue_per_hand": 0.106, "red_per_hand": -1.086, "bb_per_100": -48.96, "win_rate": 0.5342, "wins": 437, "losses": 372, "ties": 9, "showdown_wins": 89, "fold_wins": 348, "vpip": 0.5868, "pfr": 0.1699, "agg_freq": 0.3173, "agg_factor": 1.081, "fold_to_bet": 0.2687, "allin_freq": 0.0062, "avg_bet_xpot": 1.412, "avg_latency_s": 37.8, "avg_comp_tokens": 7165, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 255, "check": 734, "call": 533, "bet": 422, "raise": 154, "all_in": 13}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 788, "agg_freq": 0.2156, "fold_share": 0.1701, "mix": {"fold": 134, "check": 120, "call": 393, "bet": 33, "raise": 107, "all_in": 1}}, "flop": {"decisions": 614, "agg_freq": 0.4014, "fold_share": 0.0912, "mix": {"fold": 56, "check": 258, "call": 76, "bet": 187, "raise": 32, "all_in": 5}}, "turn": {"decisions": 423, "agg_freq": 0.3852, "fold_share": 0.104, "mix": {"fold": 44, "check": 188, "call": 45, "bet": 134, "raise": 8, "all_in": 4}}, "river": {"decisions": 286, "agg_freq": 0.2943, "fold_share": 0.0734, "mix": {"fold": 21, "check": 168, "call": 19, "bet": 68, "raise": 7, "all_in": 3}}}, "cbet_rate": 0.7273, "cbet_opps": 77, "fold_to_cbet": 0.1098, "facing_cbet": 82, "wtsd": 0.2628, "wsd": 0.414, "saw_showdown": 215, "won_showdown": 89, "pf_bucket": {"premium": {"hands": 39, "open_rate": 0.8974, "call_rate": 0.1026, "fold_rate": 0.0}, "strong": {"hands": 81, "open_rate": 0.5556, "call_rate": 0.3704, "fold_rate": 0.0}, "playable": {"hands": 154, "open_rate": 0.2857, "call_rate": 0.4935, "fold_rate": 0.039}, "marginal": {"hands": 170, "open_rate": 0.0824, "call_rate": 0.6, "fold_rate": 0.1294}, "trash": {"hands": 270, "open_rate": 0.0037, "call_rate": 0.4778, "fold_rate": 0.3185}}, "betsize_dist": {"small": 0.0798, "medium": 0.5484, "pot": 0.2207, "over": 0.1511}, "showdown_cats": {"high card": 0.2512, "pair": 0.414, "two pair": 0.2047, "trips": 0.0372, "straight": 0.0419, "flush": 0.0326, "full house": 0.0186}, "elo": 1457, "elo_sd": 28.5}, "minimax-m3": {"hands": 1100, "decisions": 3118, "chips": -1598.0, "chips_per_hand": -1.453, "blue_per_hand": -0.43, "red_per_hand": -1.023, "bb_per_100": -72.64, "win_rate": 0.4691, "wins": 516, "losses": 567, "ties": 17, "showdown_wins": 142, "fold_wins": 374, "vpip": 0.6009, "pfr": 0.2845, "agg_freq": 0.2621, "agg_factor": 0.922, "fold_to_bet": 0.2697, "allin_freq": 0.0003, "avg_bet_xpot": 1.104, "avg_latency_s": 20.2, "avg_comp_tokens": 2167, "invalid_actions": 0, "invalid_amounts": 2, "action_mix": {"fold": 394, "check": 1237, "call": 773, "bet": 419, "raise": 294, "all_in": 1}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1100, "agg_freq": 0.356, "fold_share": 0.1982, "mix": {"fold": 218, "check": 194, "call": 374, "bet": 27, "raise": 286, "all_in": 1}}, "flop": {"decisions": 893, "agg_freq": 0.2314, "fold_share": 0.0806, "mix": {"fold": 72, "check": 434, "call": 197, "bet": 184, "raise": 6, "all_in": 0}}, "turn": {"decisions": 662, "agg_freq": 0.2373, "fold_share": 0.1088, "mix": {"fold": 72, "check": 329, "call": 121, "bet": 138, "raise": 2, "all_in": 0}}, "river": {"decisions": 463, "agg_freq": 0.1624, "fold_share": 0.0691, "mix": {"fold": 32, "check": 280, "call": 81, "bet": 70, "raise": 0, "all_in": 0}}}, "cbet_rate": 0.5593, "cbet_opps": 177, "fold_to_cbet": 0.0355, "facing_cbet": 141, "wtsd": 0.3018, "wsd": 0.4277, "saw_showdown": 332, "won_showdown": 142, "pf_bucket": {"premium": {"hands": 56, "open_rate": 0.9464, "call_rate": 0.0536, "fold_rate": 0.0}, "strong": {"hands": 98, "open_rate": 0.6122, "call_rate": 0.2449, "fold_rate": 0.0}, "playable": {"hands": 277, "open_rate": 0.4477, "call_rate": 0.3069, "fold_rate": 0.0}, "marginal": {"hands": 228, "open_rate": 0.25, "call_rate": 0.4781, "fold_rate": 0.1009}, "trash": {"hands": 349, "open_rate": 0.0544, "call_rate": 0.3639, "fold_rate": 0.3725}}, "betsize_dist": {"small": 0.021, "medium": 0.4846, "pot": 0.1597, "over": 0.3347}, "showdown_cats": {"high card": 0.1717, "pair": 0.497, "two pair": 0.241, "trips": 0.0211, "straight": 0.0422, "flush": 0.0151, "full house": 0.009}, "elo": 1447, "elo_sd": 20.0}, "qwen3p7-plus": {"hands": 1100, "decisions": 3173, "chips": 18.0, "chips_per_hand": 0.016, "blue_per_hand": -0.586, "red_per_hand": 0.603, "bb_per_100": 0.82, "win_rate": 0.4109, "wins": 452, "losses": 622, "ties": 26, "showdown_wins": 181, "fold_wins": 271, "vpip": 0.6209, "pfr": 0.1836, "agg_freq": 0.183, "agg_factor": 0.574, "fold_to_bet": 0.3219, "allin_freq": 0.0009, "avg_bet_xpot": 0.942, "avg_latency_s": 58.0, "avg_comp_tokens": 1090, "invalid_actions": 0, "invalid_amounts": 0, "action_mix": {"fold": 496, "check": 1338, "call": 849, "bet": 292, "raise": 195, "all_in": 3}, "style": {"label": "Loose-Passive", "tags": ["calling station"]}, "by_street": {"preflop": {"decisions": 1140, "agg_freq": 0.2188, "fold_share": 0.1702, "mix": {"fold": 194, "check": 185, "call": 554, "bet": 23, "raise": 183, "all_in": 1}}, "flop": {"decisions": 959, "agg_freq": 0.1887, "fold_share": 0.171, "mix": {"fold": 164, "check": 496, "call": 149, "bet": 141, "raise": 9, "all_in": 0}}, "turn": {"decisions": 610, "agg_freq": 0.1585, "fold_share": 0.1311, "mix": {"fold": 80, "check": 358, "call": 88, "bet": 82, "raise": 2, "all_in": 0}}, "river": {"decisions": 464, "agg_freq": 0.1207, "fold_share": 0.125, "mix": {"fold": 58, "check": 299, "call": 58, "bet": 46, "raise": 1, "all_in": 2}}}, "cbet_rate": 0.5789, "cbet_opps": 133, "fold_to_cbet": 0.1667, "facing_cbet": 138, "wtsd": 0.3027, "wsd": 0.5435, "saw_showdown": 333, "won_showdown": 181, "pf_bucket": {"premium": {"hands": 79, "open_rate": 0.9494, "call_rate": 0.0127, "fold_rate": 0.0}, "strong": {"hands": 119, "open_rate": 0.563, "call_rate": 0.2437, "fold_rate": 0.0}, "playable": {"hands": 240, "open_rate": 0.2083, "call_rate": 0.5917, "fold_rate": 0.0083}, "marginal": {"hands": 243, "open_rate": 0.037, "call_rate": 0.642, "fold_rate": 0.1193}, "trash": {"hands": 329, "open_rate": 0.003, "call_rate": 0.465, "fold_rate": 0.3374}}, "betsize_dist": {"small": 0.0143, "medium": 0.5143, "pot": 0.2612, "over": 0.2102}, "showdown_cats": {"high card": 0.1772, "pair": 0.4354, "two pair": 0.2583, "trips": 0.036, "straight": 0.0541, "flush": 0.018, "full house": 0.018}, "elo": 1499, "elo_sd": 24.5}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": -4.34, "deepseek-v4-pro": 1.96, "glm-5p1": -3.147, "glm-5p2": 1.05, "gpt-5.4": 0.68, "gpt-5.5": -4.9, "gpt-oss-120b": -0.23, "kimi-k2p6": -2.587, "minimax-m2p7": -9.833, "minimax-m3": 1.06, "qwen3p7-plus": 0.24}, "claude-sonnet-4.6": {"claude-opus-4.8": 4.34, "deepseek-v4-pro": 1.113, "glm-5p1": -3.22, "glm-5p2": -0.67, "gpt-5.4": 3.9, "gpt-5.5": 1.62, "gpt-oss-120b": 0.67, "kimi-k2p6": -2.413, "minimax-m2p7": 1.48, "minimax-m3": -0.46, "qwen3p7-plus": 0.03}, "deepseek-v4-pro": {"claude-opus-4.8": -1.96, "claude-sonnet-4.6": -1.113, "glm-5p1": 0.38, "glm-5p2": -0.6, "gpt-5.4": -2.45, "gpt-5.5": 0.87, "gpt-oss-120b": 0.88, "kimi-k2p6": 2.14, "minimax-m2p7": 1.64, "minimax-m3": 2.28, "qwen3p7-plus": 2.74}, "glm-5p1": {"claude-opus-4.8": 3.147, "claude-sonnet-4.6": 3.22, "deepseek-v4-pro": -0.38, "glm-5p2": -2.18, "gpt-5.4": -0.83, "gpt-5.5": -1.23, "gpt-oss-120b": 1.61, "kimi-k2p6": 0.46, "minimax-m2p7": 1.98, "minimax-m3": 1.63, "qwen3p7-plus": -1.2}, "glm-5p2": {"claude-opus-4.8": -1.05, "claude-sonnet-4.6": 0.67, "deepseek-v4-pro": 0.6, "glm-5p1": 2.18, "gpt-5.4": -2.78, "gpt-5.5": -0.92, "gpt-oss-120b": 0.29, "kimi-k2p6": 1.42, "minimax-m2p7": 1.56, "minimax-m3": 1.05, "qwen3p7-plus": 0.38}, "gpt-5.4": {"claude-opus-4.8": -0.68, "claude-sonnet-4.6": -3.9, "deepseek-v4-pro": 2.45, "glm-5p1": 0.83, "glm-5p2": 2.78, "gpt-5.5": -2.08, "gpt-oss-120b": null, "kimi-k2p6": -1.58, "minimax-m2p7": null, "minimax-m3": 0.56, "qwen3p7-plus": 1.17}, "gpt-5.5": {"claude-opus-4.8": 4.9, "claude-sonnet-4.6": -1.62, "deepseek-v4-pro": -0.87, "glm-5p1": 1.23, "glm-5p2": 0.92, "gpt-5.4": 2.08, "gpt-oss-120b": null, "kimi-k2p6": 2.07, "minimax-m2p7": null, "minimax-m3": 1.76, "qwen3p7-plus": 3.99}, "gpt-oss-120b": {"claude-opus-4.8": 0.23, "claude-sonnet-4.6": -0.67, "deepseek-v4-pro": -0.88, "glm-5p1": -1.61, "glm-5p2": -0.29, "gpt-5.4": null, "gpt-5.5": null, "kimi-k2p6": -0.8, "minimax-m2p7": -4.11, "minimax-m3": 1.09, "qwen3p7-plus": 0.45}, "kimi-k2p6": {"claude-opus-4.8": 2.587, "claude-sonnet-4.6": 2.413, "deepseek-v4-pro": -2.14, "glm-5p1": -0.46, "glm-5p2": -1.42, "gpt-5.4": 1.58, "gpt-5.5": -2.07, "gpt-oss-120b": 0.8, "minimax-m2p7": 1.19, "minimax-m3": 5.93, "qwen3p7-plus": -0.86}, "minimax-m2p7": {"claude-opus-4.8": 9.833, "claude-sonnet-4.6": -1.48, "deepseek-v4-pro": -1.64, "glm-5p1": -1.98, "glm-5p2": -1.56, "gpt-5.4": null, "gpt-5.5": null, "gpt-oss-120b": 4.11, "kimi-k2p6": -1.19, "minimax-m3": -2.06, "qwen3p7-plus": -3.98}, "minimax-m3": {"claude-opus-4.8": -1.06, "claude-sonnet-4.6": 0.46, "deepseek-v4-pro": -2.28, "glm-5p1": -1.63, "glm-5p2": -1.05, "gpt-5.4": -0.56, "gpt-5.5": -1.76, "gpt-oss-120b": -1.09, "kimi-k2p6": -5.93, "minimax-m2p7": 2.06, "qwen3p7-plus": -3.14}, "qwen3p7-plus": {"claude-opus-4.8": -0.24, "claude-sonnet-4.6": -0.03, "deepseek-v4-pro": -2.74, "glm-5p1": 1.2, "glm-5p2": -0.38, "gpt-5.4": -1.17, "gpt-5.5": -3.99, "gpt-oss-120b": -0.45, "kimi-k2p6": 0.86, "minimax-m2p7": 3.98, "minimax-m3": 3.14}}, "elo": {"claude-opus-4.8": 1472, "claude-sonnet-4.6": 1515, "deepseek-v4-pro": 1510, "glm-5p1": 1533, "glm-5p2": 1512, "gpt-5.4": 1506, "gpt-5.5": 1555, "gpt-oss-120b": 1458, "kimi-k2p6": 1535, "minimax-m2p7": 1457, "minimax-m3": 1447, "qwen3p7-plus": 1499}, "elo_ci": {"claude-opus-4.8": {"sd": 23.5, "lo": 1427, "hi": 1524}, "claude-sonnet-4.6": {"sd": 22.3, "lo": 1468, "hi": 1556}, "deepseek-v4-pro": {"sd": 24.9, "lo": 1464, "hi": 1559}, "glm-5p1": {"sd": 21.6, "lo": 1487, "hi": 1569}, "glm-5p2": {"sd": 23.6, "lo": 1465, "hi": 1557}, "gpt-5.4": {"sd": 22.6, "lo": 1466, "hi": 1559}, "gpt-5.5": {"sd": 23.9, "lo": 1503, "hi": 1604}, "gpt-oss-120b": {"sd": 28.6, "lo": 1404, "hi": 1520}, "kimi-k2p6": {"sd": 20.8, "lo": 1494, "hi": 1583}, "minimax-m2p7": {"sd": 28.5, "lo": 1398, "hi": 1507}, "minimax-m3": {"sd": 20.0, "lo": 1409, "hi": 1485}, "qwen3p7-plus": {"sd": 24.5, "lo": 1452, "hi": 1546}}, "hands_per_game": 150, "num_games": 62};
 const MODELS = R.models, PM = R.per_model;
 // Official display names; PM stays keyed by the slug, so dn() is display-only.
 const DN = {"claude-opus-4.8": "Claude Opus 4.8", "claude-sonnet-4.6": "Claude Sonnet 4.6", "deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "glm-5p2": "GLM-5.2", "gpt-5.4": "GPT 5.4", "gpt-5.5": "GPT 5.5", "gpt-oss-120b": "GPT-OSS 120B", "kimi-k2p6": "Kimi K2.6", "minimax-m2p7": "MiniMax-M2.7", "minimax-m3": "MiniMax-M3", "qwen3p7-plus": "Qwen3.7 Plus"};
@@ -1039,41 +628,41 @@ const ACCENT='#8f1d1d';
 const PALETTE=['#8f1d1d','#b45309','#1a7f37','#1d4ed8','#6d28d9','#be185d','#0f766e'];
 
 
-const STRATEGY = [{"id": "strategyRadar1", "model": "gpt-5.5", "label": "GPT 5.5", "scores": [91.66666666666667, 83.33333333333333, 91.66666666666667, 100.0, 41.666666666666664, 91.66666666666667], "raw": {"VPIP": "75%", "PFR": "41%", "AFq": "46%", "C-bet": "78%", "W$SD": "46%", "All-in": "0.4%"}}, {"id": "strategyRadar2", "model": "kimi-k2p6", "label": "Kimi K2.6", "scores": [50.0, 91.66666666666667, 66.66666666666667, 8.333333333333334, 83.33333333333333, 50.0], "raw": {"VPIP": "61%", "PFR": "42%", "AFq": "35%", "C-bet": "43%", "W$SD": "54%", "All-in": "0.2%"}}, {"id": "strategyRadar3", "model": "glm-5p1", "label": "GLM-5.1", "scores": [33.333333333333336, 50.0, 41.666666666666664, 50.0, 75.0, 33.333333333333336], "raw": {"VPIP": "59%", "PFR": "26%", "AFq": "30%", "C-bet": "61%", "W$SD": "51%", "All-in": "0.1%"}}, {"id": "strategyRadar4", "model": "claude-sonnet-4.6", "label": "Claude Sonnet 4.6", "scores": [75.0, 33.333333333333336, 58.333333333333336, 75.0, 8.333333333333334, 75.0], "raw": {"VPIP": "71%", "PFR": "25%", "AFq": "32%", "C-bet": "73%", "W$SD": "35%", "All-in": "0.4%"}}, {"id": "strategyRadar5", "model": "glm-5p2", "label": "GLM-5.2", "scores": [58.333333333333336, 16.666666666666668, 33.333333333333336, 66.66666666666667, 50.0, 16.666666666666668], "raw": {"VPIP": "61%", "PFR": "18%", "AFq": "29%", "C-bet": "72%", "W$SD": "47%", "All-in": "0.1%"}}, {"id": "strategyRadar6", "model": "deepseek-v4-pro", "label": "DeepSeek V4 Pro", "scores": [16.666666666666668, 75.0, 75.0, 25.0, 100.0, 83.33333333333333], "raw": {"VPIP": "58%", "PFR": "38%", "AFq": "40%", "C-bet": "54%", "W$SD": "56%", "All-in": "0.4%"}}, {"id": "strategyRadar7", "model": "gpt-5.4", "label": "GPT 5.4", "scores": [100.0, 100.0, 100.0, 91.66666666666667, 66.66666666666667, 41.666666666666664], "raw": {"VPIP": "79%", "PFR": "51%", "AFq": "47%", "C-bet": "75%", "W$SD": "50%", "All-in": "0.2%"}}, {"id": "strategyRadar8", "model": "qwen3p7-plus", "label": "Qwen3.7 Plus", "scores": [66.66666666666667, 25.0, 8.333333333333334, 41.666666666666664, 91.66666666666667, 33.333333333333336], "raw": {"VPIP": "62%", "PFR": "18%", "AFq": "18%", "C-bet": "58%", "W$SD": "54%", "All-in": "0.1%"}}, {"id": "strategyRadar9", "model": "claude-opus-4.8", "label": "Claude Opus 4.8", "scores": [83.33333333333333, 41.666666666666664, 25.0, 58.333333333333336, 16.666666666666668, 66.66666666666667], "raw": {"VPIP": "71%", "PFR": "26%", "AFq": "27%", "C-bet": "70%", "W$SD": "38%", "All-in": "0.3%"}}, {"id": "strategyRadar10", "model": "gpt-oss-120b", "label": "GPT-OSS 120B", "scores": [8.333333333333334, 66.66666666666667, 83.33333333333333, 16.666666666666668, 58.333333333333336, 58.333333333333336], "raw": {"VPIP": "54%", "PFR": "36%", "AFq": "44%", "C-bet": "52%", "W$SD": "49%", "All-in": "0.3%"}}, {"id": "strategyRadar11", "model": "minimax-m2p7", "label": "MiniMax-M2.7", "scores": [25.0, 8.333333333333334, 50.0, 83.33333333333333, 25.0, 100.0], "raw": {"VPIP": "59%", "PFR": "17%", "AFq": "32%", "C-bet": "73%", "W$SD": "41%", "All-in": "0.6%"}}, {"id": "strategyRadar12", "model": "minimax-m3", "label": "MiniMax-M3", "scores": [41.666666666666664, 58.333333333333336, 16.666666666666668, 33.333333333333336, 33.333333333333336, 8.333333333333334], "raw": {"VPIP": "60%", "PFR": "28%", "AFq": "26%", "C-bet": "56%", "W$SD": "43%", "All-in": "0.0%"}}];
-const STRATEGY_LABELS = ["VPIP", "PFR", "AFq", "C-bet", "W$SD", "All-in"];
+const STRATEGY = [{"id": "strategyRadar1", "model": "gpt-5.5", "label": "GPT 5.5", "scores": [91.66666666666667, 91.66666666666667, 100.0, 41.666666666666664, 41.666666666666664, 83.33333333333333], "raw": {"Loose": "75%", "Aggressive": "46%", "Pressure $": "+1.70/h", "Showdown $": "-0.09/h", "Showdown win%": "46%", "Restraint": "80%"}}, {"id": "strategyRadar2", "model": "kimi-k2p6", "label": "Kimi K2.6", "scores": [50.0, 66.66666666666667, 33.333333333333336, 100.0, 83.33333333333333, 41.666666666666664], "raw": {"Loose": "61%", "Aggressive": "35%", "Pressure $": "-0.36/h", "Showdown $": "+1.20/h", "Showdown win%": "54%", "Restraint": "74%"}}, {"id": "strategyRadar3", "model": "glm-5p1", "label": "GLM-5.1", "scores": [33.333333333333336, 41.666666666666664, 41.666666666666664, 91.66666666666667, 75.0, 75.0], "raw": {"Loose": "59%", "Aggressive": "30%", "Pressure $": "-0.28/h", "Showdown $": "+1.06/h", "Showdown win%": "51%", "Restraint": "77%"}}, {"id": "strategyRadar4", "model": "claude-sonnet-4.6", "label": "Claude Sonnet 4.6", "scores": [75.0, 58.333333333333336, 83.33333333333333, 50.0, 8.333333333333334, 66.66666666666667], "raw": {"Loose": "71%", "Aggressive": "32%", "Pressure $": "+0.40/h", "Showdown $": "-0.07/h", "Showdown win%": "35%", "Restraint": "76%"}}, {"id": "strategyRadar5", "model": "glm-5p2", "label": "GLM-5.2", "scores": [58.333333333333336, 33.333333333333336, 75.0, 58.333333333333336, 50.0, 58.333333333333336], "raw": {"Loose": "61%", "Aggressive": "29%", "Pressure $": "+0.22/h", "Showdown $": "+0.09/h", "Showdown win%": "47%", "Restraint": "75%"}}, {"id": "strategyRadar6", "model": "deepseek-v4-pro", "label": "DeepSeek V4 Pro", "scores": [16.666666666666668, 75.0, 50.0, 75.0, 100.0, 91.66666666666667], "raw": {"Loose": "58%", "Aggressive": "40%", "Pressure $": "-0.13/h", "Showdown $": "+0.40/h", "Showdown win%": "56%", "Restraint": "82%"}}, {"id": "strategyRadar7", "model": "gpt-5.4", "label": "GPT 5.4", "scores": [100.0, 100.0, 58.333333333333336, 33.333333333333336, 66.66666666666667, 50.0], "raw": {"Loose": "79%", "Aggressive": "47%", "Pressure $": "+0.08/h", "Showdown $": "-0.13/h", "Showdown win%": "50%", "Restraint": "75%"}}, {"id": "strategyRadar8", "model": "qwen3p7-plus", "label": "Qwen3.7 Plus", "scores": [66.66666666666667, 8.333333333333334, 16.666666666666668, 83.33333333333333, 91.66666666666667, 16.666666666666668], "raw": {"Loose": "62%", "Aggressive": "18%", "Pressure $": "-0.59/h", "Showdown $": "+0.60/h", "Showdown win%": "54%", "Restraint": "70%"}}, {"id": "strategyRadar9", "model": "claude-opus-4.8", "label": "Claude Opus 4.8", "scores": [83.33333333333333, 25.0, 91.66666666666667, 8.333333333333334, 16.666666666666668, 8.333333333333334], "raw": {"Loose": "71%", "Aggressive": "27%", "Pressure $": "+0.49/h", "Showdown $": "-1.68/h", "Showdown win%": "38%", "Restraint": "68%"}}, {"id": "strategyRadar10", "model": "gpt-oss-120b", "label": "GPT-OSS 120B", "scores": [8.333333333333334, 83.33333333333333, 8.333333333333334, 66.66666666666667, 58.333333333333336, 100.0], "raw": {"Loose": "54%", "Aggressive": "44%", "Pressure $": "-1.05/h", "Showdown $": "+0.32/h", "Showdown win%": "49%", "Restraint": "84%"}}, {"id": "strategyRadar11", "model": "minimax-m2p7", "label": "MiniMax-M2.7", "scores": [25.0, 50.0, 66.66666666666667, 16.666666666666668, 25.0, 33.333333333333336], "raw": {"Loose": "59%", "Aggressive": "32%", "Pressure $": "+0.11/h", "Showdown $": "-1.09/h", "Showdown win%": "41%", "Restraint": "74%"}}, {"id": "strategyRadar12", "model": "minimax-m3", "label": "MiniMax-M3", "scores": [41.666666666666664, 16.666666666666668, 25.0, 25.0, 33.333333333333336, 25.0], "raw": {"Loose": "60%", "Aggressive": "26%", "Pressure $": "-0.43/h", "Showdown $": "-1.02/h", "Showdown win%": "43%", "Restraint": "70%"}}];
+const STRATEGY_LABELS = ["Loose", "Aggressive", "Pressure $", "Showdown $", "Showdown win%", "Restraint"];
 STRATEGY.forEach((card, i) => {
   const el = document.getElementById(card.id);
   if (!el) return;
   new Chart(el, {
     type:'radar',
     data:{ labels:STRATEGY_LABELS,
-      datasets:[{ label:card.label, data:card.scores,
-        borderColor:mcol(card.model), backgroundColor:mcol(card.model) + '33',
-        pointBackgroundColor:mcol(card.model) }] },
+      datasets:[
+        { label:'field median', data:[50,50,50,50,50,50], borderColor:'#9aa0a6',
+           borderWidth:1, borderDash:[4,3], backgroundColor:'transparent', pointRadius:0 },
+        { label:card.label, data:card.scores,
+           borderColor:mcol(card.model), backgroundColor:mcol(card.model) + '33',
+           pointBackgroundColor:mcol(card.model) }
+      ] },
     options:{ scales:{ r:{ min:0, max:100, ticks:{ display:false, stepSize:25 } } },
       plugins:{ legend:{ display:false },
-        tooltip:{ callbacks:{ label(ctx) {
+        tooltip:{ filter:(item) => item.datasetIndex === 1, callbacks:{ label(ctx) {
           const raw = card.raw[ctx.label] || '';
           return `percentile ${ctx.formattedValue} / raw ${raw}`;
         } } } } } });
 });
 
 
-// action distribution (stacked %)
+// action distribution (stacked %) — GPT models pulled to the front
 const ACTS=['fold','check','call','bet','raise','all_in'];
 const ACOL={fold:'#6b7280',check:'#94a3b8',call:'#38bdf8',bet:'#fbbf24',raise:'#fb923c',all_in:'#f87171'};
+const ACT_ORDER=[...MODELS.filter(m=>m.startsWith('gpt-5')).sort().reverse(),
+                 ...MODELS.filter(m=>!m.startsWith('gpt-5'))];
 new Chart(actions, { type:'bar',
-  data:{ labels:MODELS.map(dn), datasets:ACTS.map(a=>({ label:a, backgroundColor:ACOL[a],
-      data:MODELS.map(m=>{const mix=PM[m].action_mix;const tot=Object.values(mix).reduce((x,y)=>x+y,0)||1;
+  data:{ labels:ACT_ORDER.map(dn), datasets:ACTS.map(a=>({ label:a, backgroundColor:ACOL[a],
+      data:ACT_ORDER.map(m=>{const mix=PM[m].action_mix;const tot=Object.values(mix).reduce((x,y)=>x+y,0)||1;
         return 100*mix[a]/tot;}) })) },
-  options:{ scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'% of actions'}}},
+  options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'% of actions'}}},
     plugins:{legend:{position:'bottom'}} } });
-
-// latency
-new Chart(latency, { type:'bar',
-  data:{ labels:MODELS.map(dn), datasets:[{data:MODELS.map(m=>PM[m].avg_latency_s),
-      backgroundColor:MODELS.map(m=>mcol(m))}] },
-  options:{ plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'seconds / decision'}}} } });
 
 // bet-sizing distribution (stacked %)
 const BS=['small','medium','pot','over'];
@@ -1085,15 +674,6 @@ new Chart(betsize, { type:'bar',
       title:{display:true,text:'% of bets'}}},
     plugins:{legend:{position:'bottom'}} } });
 
-// latency vs bb/100 scatter
-new Chart(latVsWin, { type:'scatter',
-  data:{ datasets:MODELS.map(m=>({label:dn(m),
-      data:[{x:PM[m].avg_latency_s,y:PM[m].bb_per_100}],
-      backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 })) },
-  options:{ scales:{
-      x:{title:{display:true,text:'avg seconds / decision'},type:'logarithmic'},
-      y:{title:{display:true,text:'bb / 100 hands'}} },
-    plugins:{legend:{position:'bottom'}} } });
 
 // made-hand mix at showdown (stacked %)
 const CATS=['high card','pair','two pair','trips','straight','flush','full house'];
@@ -1104,5 +684,62 @@ new Chart(madeHand, { type:'bar',
   options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,
       title:{display:true,text:'% of showdowns'}}},
     plugins:{legend:{position:'bottom'}} } });
+
+// "where the chips come from" map: pressure (x) vs showdown (y), per hand
+const QUAD = [{"m": "gpt-5.5", "label": "GPT 5.5", "t": 1.61, "x": 1.696, "y": -0.089}, {"m": "kimi-k2p6", "label": "Kimi K2.6", "t": 0.84, "x": -0.362, "y": 1.2}, {"m": "glm-5p1", "label": "GLM-5.1", "t": 0.78, "x": -0.281, "y": 1.065}, {"m": "claude-sonnet-4.6", "label": "Claude Sonnet 4.6", "t": 0.33, "x": 0.395, "y": -0.065}, {"m": "glm-5p2", "label": "GLM-5.2", "t": 0.31, "x": 0.217, "y": 0.092}, {"m": "deepseek-v4-pro", "label": "DeepSeek V4 Pro", "t": 0.27, "x": -0.128, "y": 0.4}, {"m": "gpt-5.4", "label": "GPT 5.4", "t": -0.05, "x": 0.082, "y": -0.132}, {"m": "qwen3p7-plus", "label": "Qwen3.7 Plus", "t": 0.02, "x": -0.586, "y": 0.603}, {"m": "claude-opus-4.8", "label": "Claude Opus 4.8", "t": -1.19, "x": 0.489, "y": -1.676}, {"m": "gpt-oss-120b", "label": "GPT-OSS 120B", "t": -0.73, "x": -1.053, "y": 0.321}, {"m": "minimax-m2p7", "label": "MiniMax-M2.7", "t": -0.98, "x": 0.106, "y": -1.086}, {"m": "minimax-m3", "label": "MiniMax-M3", "t": -1.45, "x": -0.43, "y": -1.023}];
+(function(){
+  const el=document.getElementById('quadrant'); if(!el||!window.Chart) return;
+  const pts=QUAD.map(p=>({x:p.x,y:p.y,label:p.label,model:p.m,t:p.t}));
+  const fmt=v=>(v>=0?'+':'')+v.toFixed(2);
+  const guides={ id:'qguides', beforeDatasetsDraw(c){
+    const a=c.chartArea, x=c.scales.x, y=c.scales.y, ctx=c.ctx;
+    ctx.save(); ctx.beginPath(); ctx.rect(a.left,a.top,a.right-a.left,a.bottom-a.top); ctx.clip();
+    // solid zero axes (--line); shade the winning half (total > 0) very faintly green
+    const x0=x.getPixelForValue(0), y0=y.getPixelForValue(0);
+    ctx.setLineDash([4,4]); ctx.strokeStyle='#c7b9b9';
+    ctx.beginPath();
+    ctx.moveTo(x.getPixelForValue(x.min), y.getPixelForValue(-x.min));
+    ctx.lineTo(x.getPixelForValue(x.max), y.getPixelForValue(-x.max));
+    ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeStyle='#ddd8cf'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x0,a.top); ctx.lineTo(x0,a.bottom); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(a.left,y0); ctx.lineTo(a.right,y0); ctx.stroke();
+    ctx.restore();
+  } };
+  const labels={ id:'qlabels', afterDatasetsDraw(c){
+    const ctx=c.ctx, meta=c.getDatasetMeta(0), a=c.chartArea, base=getComputedStyle(document.body).color;
+    ctx.save(); ctx.textBaseline='middle';
+    const placed=[], H=12;
+    const hit=(b1,b2)=>!(b1.x+b1.w<b2.x||b2.x+b2.w<b1.x||b1.y+b1.h<b2.y||b2.y+b2.h<b1.y);
+    // place tighter clusters first so dense spots get the simple right-side slot
+    const order=[...meta.data.keys()];
+    order.forEach((idx)=>{
+      const pt=meta.data[idx], p=pts[idx], name=p.label+' ';
+      ctx.font='10px ui-monospace,monospace'; const nw=ctx.measureText(name).width;
+      ctx.font='bold 10px ui-monospace,monospace'; const w=nw+ctx.measureText(fmt(p.t)).width;
+      const cands=[[10,0],[10,-13],[10,13],[-w-9,0],[10,-26],[10,26],[-w-9,-13],[-w-9,13]];
+      let bx=pt.x+10, by=pt.y;
+      for(const d of cands){
+        const cx=pt.x+d[0], cy=pt.y+d[1], box={x:cx,y:cy-H/2,w:w,h:H};
+        if(cx<a.left||cx+w>a.right||cy-H/2<a.top||cy+H/2>a.bottom) continue;
+        if(placed.some(pb=>hit(box,pb))) continue;
+        bx=cx; by=cy; break;
+      }
+      placed.push({x:bx,y:by-H/2,w:w,h:H});
+      ctx.font='10px ui-monospace,monospace'; ctx.fillStyle=base; ctx.fillText(name, bx, by);
+      ctx.font='bold 10px ui-monospace,monospace';
+      ctx.fillStyle=p.t>=0?'#1a7f37':'#b91c1c'; ctx.fillText(fmt(p.t), bx+nw, by);
+    });
+    ctx.restore();
+  } };
+  new Chart(el,{ type:'scatter',
+    data:{ datasets:[{ data:pts, pointRadius:5, pointHoverRadius:8,
+      backgroundColor:pts.map(p=>mcol(p.model)), borderColor:'#0003', borderWidth:1 }] },
+    options:{ layout:{padding:{right:96}}, plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label:(ctx)=>`${ctx.raw.label} — total ${fmt(ctx.raw.t)}/h (pressure ${ctx.raw.x.toFixed(2)}, showdown ${ctx.raw.y.toFixed(2)})` } } },
+      scales:{ x:{ title:{display:true,text:'Pressure $ / hand  (win without showdown →)'} },
+                y:{ title:{display:true,text:'Showdown $ / hand  (win at showdown ↑)'} } } },
+    plugins:[guides,labels] });
+})();
 </script>
 </div></body></html>

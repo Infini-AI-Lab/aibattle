@@ -2009,5 +2009,19 @@
     "37\u201340"
   ],
   "first_player_win_rate": 0.5187,
-  "num_games": 1974
+  "num_games": 1974,
+  "avg_tokens": {
+    "claude-opus-4.8": 3773,
+    "claude-sonnet-4.6": 4000,
+    "deepseek-v4-pro": 11686,
+    "glm-5p1": 10704,
+    "glm-5p2": 16151,
+    "gpt-5.4": 4256,
+    "gpt-5.5": 3466,
+    "gpt-oss-120b": 3157,
+    "kimi-k2p6": 18188,
+    "minimax-m2p7": 14874,
+    "minimax-m3": 16305,
+    "qwen3p7-plus": 10572
+  }
 }

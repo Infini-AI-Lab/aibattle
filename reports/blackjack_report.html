@@ -112,7 +112,7 @@
   <table>
     <tr><th>#</th><th class='model'>model</th><th>mean/hand</th>
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
-        <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
+        <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th><th>tokens/dec</th><th>$/1K dec</th></tr>
     <tr>
           <td>1</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td>
           <td class='pos'>+0.060</td>
@@ -122,6 +122,7 @@
           <td>5%</td>
           <td>0.0%</td>
           <td>500</td><td>6.7s</td>
+          <td>—</td><td>—</td>
         </tr><tr>
           <td>2</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
           <td class='pos'>+0.041</td>
@@ -131,6 +132,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>500</td><td>38.8s</td>
+          <td>7,667</td><td>$9.20</td>
         </tr><tr>
           <td>3</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
           <td class='pos'>+0.035</td>
@@ -140,6 +142,7 @@
           <td>6%</td>
           <td>0.0%</td>
           <td>1000</td><td>15.8s</td>
+          <td>561</td><td>$2.47</td>
         </tr><tr>
           <td>4</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
           <td class='pos'>+0.033</td>
@@ -149,6 +152,7 @@
           <td>6%</td>
           <td>0.0%</td>
           <td>500</td><td>1.5s</td>
+          <td>147</td><td>$0.09</td>
         </tr><tr>
           <td>5</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td>
           <td class='pos'>+0.020</td>
@@ -158,6 +162,7 @@
           <td>5%</td>
           <td>0.0%</td>
           <td>500</td><td>2.7s</td>
+          <td>—</td><td>—</td>
         </tr><tr>
           <td>6</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
           <td class='pos'>+0.014</td>
@@ -167,6 +172,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>500</td><td>1.3s</td>
+          <td>—</td><td>—</td>
         </tr><tr>
           <td>7</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
           <td class='pos'>+0.004</td>
@@ -176,6 +182,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>1000</td><td>72.2s</td>
+          <td>1,080</td><td>$4.75</td>
         </tr><tr>
           <td>8</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
           <td class='pos'>+0.004</td>
@@ -185,6 +192,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>1000</td><td>5.2s</td>
+          <td>1,030</td><td>$1.65</td>
         </tr><tr>
           <td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
           <td class='neg'>-0.015</td>
@@ -194,6 +202,7 @@
           <td>7%</td>
           <td>0.0%</td>
           <td>500</td><td>1.2s</td>
+          <td>—</td><td>—</td>
         </tr><tr>
           <td>10</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
           <td class='neg'>-0.033</td>
@@ -203,6 +212,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>1000</td><td>75.3s</td>
+          <td>5,919</td><td>$23.68</td>
         </tr><tr>
           <td>11</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
           <td class='neg'>-0.033</td>
@@ -212,6 +222,7 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>1000</td><td>89.0s</td>
+          <td>239</td><td>$0.83</td>
         </tr><tr>
           <td>12</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
           <td class='neg'>-0.046</td>
@@ -221,9 +232,11 @@
           <td>4%</td>
           <td>0.0%</td>
           <td>1000</td><td>9.2s</td>
+          <td>745</td><td>$0.89</td>
         </tr>
   </table>
   <div class="note collegend">columns: <b>mean/hand</b> average profit per hand (betting units) · <b>win%</b> / <b>push%</b> / <b>loss%</b> hands won / tied / lost vs dealer · <b>bust%</b> hands that went over 21 · <b>double%</b> hands doubled down · <b>natural%</b> hands dealt a natural blackjack · <b>invalid%</b> illegal or unparseable actions · <b>hands</b> hands played · <b>think</b> average seconds per decision</div>
+  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
   <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
     inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
     (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;
@@ -239,7 +252,7 @@
   </div>
 
 <script>
-const R = {"game": "independent_blackjack", "kind": "dealer", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b", "minimax-m3", "claude-opus-4.8", "claude-sonnet-4.6", "glm-5p2", "gpt-5.4", "gpt-5.5", "qwen3p7-plus"], "per_model": {"kimi-k2p6": {"hands": 1000, "profit": -32.5, "mean_per_hand": -0.0325, "win_rate": 0.428, "loss_rate": 0.489, "push_rate": 0.083, "bust_rate": 0.154, "double_rate": 0.09, "natural_rate": 0.045, "invalid_rate": 0.0, "avg_latency_s": 75.3}, "deepseek-v4-pro": {"hands": 1000, "profit": -33.0, "mean_per_hand": -0.033, "win_rate": 0.411, "loss_rate": 0.488, "push_rate": 0.101, "bust_rate": 0.159, "double_rate": 0.096, "natural_rate": 0.04, "invalid_rate": 0.0, "avg_latency_s": 89.0}, "glm-5p1": {"hands": 1000, "profit": 35.5, "mean_per_hand": 0.0355, "win_rate": 0.456, "loss_rate": 0.478, "push_rate": 0.066, "bust_rate": 0.157, "double_rate": 0.101, "natural_rate": 0.057, "invalid_rate": 0.0, "avg_latency_s": 15.8}, "minimax-m2p7": {"hands": 500, "profit": 20.5, "mean_per_hand": 0.041, "win_rate": 0.462, "loss_rate": 0.452, "push_rate": 0.086, "bust_rate": 0.136, "double_rate": 0.116, "natural_rate": 0.042, "invalid_rate": 0.0, "avg_latency_s": 38.8}, "gpt-oss-120b": {"hands": 500, "profit": 16.5, "mean_per_hand": 0.033, "win_rate": 0.454, "loss_rate": 0.47, "push_rate": 0.076, "bust_rate": 0.168, "double_rate": 0.132, "natural_rate": 0.062, "invalid_rate": 0.0, "avg_latency_s": 1.5}, "minimax-m3": {"hands": 1000, "profit": -46.5, "mean_per_hand": -0.0465, "win_rate": 0.425, "loss_rate": 0.506, "push_rate": 0.069, "bust_rate": 0.191, "double_rate": 0.081, "natural_rate": 0.035, "invalid_rate": 0.0, "avg_latency_s": 9.2}, "claude-opus-4.8": {"hands": 500, "profit": 7.0, "mean_per_hand": 0.014, "win_rate": 0.444, "loss_rate": 0.478, "push_rate": 0.078, "bust_rate": 0.156, "double_rate": 0.108, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 1.3}, "claude-sonnet-4.6": {"hands": 500, "profit": -7.5, "mean_per_hand": -0.015, "win_rate": 0.43, "loss_rate": 0.49, "push_rate": 0.08, "bust_rate": 0.166, "double_rate": 0.116, "natural_rate": 0.072, "invalid_rate": 0.0, "avg_latency_s": 1.2}, "glm-5p2": {"hands": 1000, "profit": 4.0, "mean_per_hand": 0.004, "win_rate": 0.442, "loss_rate": 0.481, "push_rate": 0.077, "bust_rate": 0.15, "double_rate": 0.106, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 72.2}, "gpt-5.4": {"hands": 500, "profit": 30.0, "mean_per_hand": 0.06, "win_rate": 0.462, "loss_rate": 0.456, "push_rate": 0.082, "bust_rate": 0.164, "double_rate": 0.108, "natural_rate": 0.048, "invalid_rate": 0.0, "avg_latency_s": 6.7}, "gpt-5.5": {"hands": 500, "profit": 10.0, "mean_per_hand": 0.02, "win_rate": 0.424, "loss_rate": 0.458, "push_rate": 0.118, "bust_rate": 0.146, "double_rate": 0.088, "natural_rate": 0.048, "invalid_rate": 0.0, "avg_latency_s": 2.7}, "qwen3p7-plus": {"hands": 1000, "profit": 4.0, "mean_per_hand": 0.004, "win_rate": 0.44, "loss_rate": 0.489, "push_rate": 0.071, "bust_rate": 0.17, "double_rate": 0.096, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 5.2}}, "total_hands": 9000, "field_profit": 8.0};
+const R = {"game": "independent_blackjack", "kind": "dealer", "models": ["kimi-k2p6", "deepseek-v4-pro", "glm-5p1", "minimax-m2p7", "gpt-oss-120b", "minimax-m3", "claude-opus-4.8", "claude-sonnet-4.6", "glm-5p2", "gpt-5.4", "gpt-5.5", "qwen3p7-plus"], "per_model": {"kimi-k2p6": {"hands": 1000, "profit": -32.5, "mean_per_hand": -0.0325, "win_rate": 0.428, "loss_rate": 0.489, "push_rate": 0.083, "bust_rate": 0.154, "double_rate": 0.09, "natural_rate": 0.045, "invalid_rate": 0.0, "avg_latency_s": 75.3, "avg_tokens": 5919}, "deepseek-v4-pro": {"hands": 1000, "profit": -33.0, "mean_per_hand": -0.033, "win_rate": 0.411, "loss_rate": 0.488, "push_rate": 0.101, "bust_rate": 0.159, "double_rate": 0.096, "natural_rate": 0.04, "invalid_rate": 0.0, "avg_latency_s": 89.0, "avg_tokens": 239}, "glm-5p1": {"hands": 1000, "profit": 35.5, "mean_per_hand": 0.0355, "win_rate": 0.456, "loss_rate": 0.478, "push_rate": 0.066, "bust_rate": 0.157, "double_rate": 0.101, "natural_rate": 0.057, "invalid_rate": 0.0, "avg_latency_s": 15.8, "avg_tokens": 561}, "minimax-m2p7": {"hands": 500, "profit": 20.5, "mean_per_hand": 0.041, "win_rate": 0.462, "loss_rate": 0.452, "push_rate": 0.086, "bust_rate": 0.136, "double_rate": 0.116, "natural_rate": 0.042, "invalid_rate": 0.0, "avg_latency_s": 38.8, "avg_tokens": 7667}, "gpt-oss-120b": {"hands": 500, "profit": 16.5, "mean_per_hand": 0.033, "win_rate": 0.454, "loss_rate": 0.47, "push_rate": 0.076, "bust_rate": 0.168, "double_rate": 0.132, "natural_rate": 0.062, "invalid_rate": 0.0, "avg_latency_s": 1.5, "avg_tokens": 147}, "minimax-m3": {"hands": 1000, "profit": -46.5, "mean_per_hand": -0.0465, "win_rate": 0.425, "loss_rate": 0.506, "push_rate": 0.069, "bust_rate": 0.191, "double_rate": 0.081, "natural_rate": 0.035, "invalid_rate": 0.0, "avg_latency_s": 9.2, "avg_tokens": 745}, "claude-opus-4.8": {"hands": 500, "profit": 7.0, "mean_per_hand": 0.014, "win_rate": 0.444, "loss_rate": 0.478, "push_rate": 0.078, "bust_rate": 0.156, "double_rate": 0.108, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 1.3, "avg_tokens": 12}, "claude-sonnet-4.6": {"hands": 500, "profit": -7.5, "mean_per_hand": -0.015, "win_rate": 0.43, "loss_rate": 0.49, "push_rate": 0.08, "bust_rate": 0.166, "double_rate": 0.116, "natural_rate": 0.072, "invalid_rate": 0.0, "avg_latency_s": 1.2, "avg_tokens": 8}, "glm-5p2": {"hands": 1000, "profit": 4.0, "mean_per_hand": 0.004, "win_rate": 0.442, "loss_rate": 0.481, "push_rate": 0.077, "bust_rate": 0.15, "double_rate": 0.106, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 72.2, "avg_tokens": 1080}, "gpt-5.4": {"hands": 500, "profit": 30.0, "mean_per_hand": 0.06, "win_rate": 0.462, "loss_rate": 0.456, "push_rate": 0.082, "bust_rate": 0.164, "double_rate": 0.108, "natural_rate": 0.048, "invalid_rate": 0.0, "avg_latency_s": 6.7, "avg_tokens": 266}, "gpt-5.5": {"hands": 500, "profit": 10.0, "mean_per_hand": 0.02, "win_rate": 0.424, "loss_rate": 0.458, "push_rate": 0.118, "bust_rate": 0.146, "double_rate": 0.088, "natural_rate": 0.048, "invalid_rate": 0.0, "avg_latency_s": 2.7, "avg_tokens": 65}, "qwen3p7-plus": {"hands": 1000, "profit": 4.0, "mean_per_hand": 0.004, "win_rate": 0.44, "loss_rate": 0.489, "push_rate": 0.071, "bust_rate": 0.17, "double_rate": 0.096, "natural_rate": 0.044, "invalid_rate": 0.0, "avg_latency_s": 5.2, "avg_tokens": 1030}}, "total_hands": 9000, "field_profit": 8.0, "avg_tokens": {"kimi-k2p6": 5919, "deepseek-v4-pro": 239, "glm-5p1": 561, "minimax-m2p7": 7667, "gpt-oss-120b": 147, "minimax-m3": 745, "claude-opus-4.8": 12, "claude-sonnet-4.6": 8, "glm-5p2": 1080, "gpt-5.4": 266, "gpt-5.5": 65, "qwen3p7-plus": 1030}};
 const pm=R.per_model, M=R.models;
 const DN = {"kimi-k2p6": "Kimi K2.6", "deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "minimax-m2p7": "MiniMax-M2.7", "gpt-oss-120b": "GPT-OSS 120B", "minimax-m3": "MiniMax-M3", "claude-opus-4.8": "Claude Opus 4.8", "claude-sonnet-4.6": "Claude Sonnet 4.6", "glm-5p2": "GLM-5.2", "gpt-5.4": "GPT 5.4", "gpt-5.5": "GPT 5.5", "qwen3p7-plus": "Qwen3.7 Plus"};
 const dn = m => DN[m] || m;

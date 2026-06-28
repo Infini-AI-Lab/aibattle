@@ -60,6 +60,30 @@ COMPANIES = {
 }
 
 
+# Fireworks serverless OUTPUT (decode) price, USD per 1M tokens, from
+# docs.fireworks.ai/serverless/pricing. Used to estimate $ cost per decision.
+# Closed models (Claude / GPT-5.x) hide their reasoning tokens, so their
+# per-decision token count — and thus cost — is not observable here.
+FIREWORKS_OUTPUT_PRICE = {
+    "deepseek-v4-pro": 3.48,
+    "glm-5p1": 4.40,
+    "glm-5p2": 4.40,
+    "kimi-k2p6": 4.00,
+    "minimax-m3": 1.20,
+    "minimax-m2p7": 1.20,
+    "qwen3p7-plus": 1.60,
+    "gpt-oss-120b": 0.60,
+}
+
+
+def output_price(model):
+    """Fireworks output price (USD / 1M tokens) for a model slug, or None."""
+    if not isinstance(model, str):
+        return None
+    slug = model[: -len(_SUFFIX)] if model.endswith(_SUFFIX) else model
+    return FIREWORKS_OUTPUT_PRICE.get(slug)
+
+
 def _company(model):
     if not isinstance(model, str):
         return None

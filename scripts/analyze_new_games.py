@@ -31,6 +31,7 @@ from collections import defaultdict
 
 from elo_util import bootstrap_elo, wld_from_records, gross_from_records
 from model_names import display_name, model_cell
+from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
 
@@ -354,6 +355,8 @@ def analyze_versus(game: str, data: dict) -> dict:
         "first_player_win_rate": round(fp_wins / max(fp_games, 1), 4),
         "num_games": sum(len(p["episodes"]) for p in data["pairs"]),
         "episodes_per_pair": data.get("episodes_per_pair"),
+        "avg_tokens": tokens_from_episodes(
+            ep for p in data["pairs"] for ep in p["episodes"]),
     }
 
 
@@ -374,6 +377,7 @@ def analyze_dealer(game: str, data: dict) -> dict:
         invalid = decisions = 0
         profit = 0.0
         lats = []
+        tok_sum = tok_n = 0
         for path in eps:
             e = json.load(open(path))
             # The model always occupies player_0 against the dealer.
@@ -401,6 +405,9 @@ def analyze_dealer(game: str, data: dict) -> dict:
                 lat = _latency(s)
                 if lat:
                     lats.append(lat)
+                ct = ((s.get("response") or {}).get("metadata") or {}).get("completion_tokens")
+                if isinstance(ct, (int, float)):
+                    tok_sum += ct; tok_n += 1
         h = max(hands, 1)
         out[m] = {
             "hands": hands, "profit": round(profit, 2),
@@ -412,11 +419,13 @@ def analyze_dealer(game: str, data: dict) -> dict:
             "invalid_rate": round(invalid / max(decisions, 1), 4),
             "avg_latency_s": round(sum(lats) / len(lats) / 1000, 1) if lats else 0.0,
         }
+        out[m]["avg_tokens"] = round(tok_sum / tok_n) if tok_n else 0
     total_hands = sum(out[m]["hands"] for m in models)
     field_profit = sum(out[m]["profit"] for m in models)
     return {
         "game": game, "kind": "dealer", "models": models, "per_model": out,
         "total_hands": total_hands, "field_profit": round(field_profit, 2),
+        "avg_tokens": {m: out[m]["avg_tokens"] for m in models},
     }
 
 
@@ -456,6 +465,7 @@ def render_versus(rep: dict) -> str:
           <td>{s['invalid_rate']*100:.1f}%</td>
           <td>{s['avg_len']:.1f}</td><td>{s['avg_latency_s']:.1f}s</td>
           <td>{s['games']}</td>
+          {token_cost_cells(m, rep.get('avg_tokens', {}).get(m))}
         </tr>"""
 
     hh = "<tr><th></th>" + "".join(f"<th>{display_name(m)}</th>" for m in models) + "</tr>"
@@ -502,10 +512,11 @@ def render_versus(rep: dict) -> str:
   <h2>🏆 Leaderboard</h2>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
-        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th></tr>
+        <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th>{TOKEN_HEADERS}</tr>
     {rows}
   </table>
   {_legend('versus')}
+  {TOKEN_NOTE}
   <div class="note">{elo_desc} ± is one bootstrap SD (resampling games 300×); ratings within ±1
     of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
     shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
@@ -598,6 +609,7 @@ def render_dealer(rep: dict) -> str:
           <td>{s['natural_rate']*100:.0f}%</td>
           <td>{s['invalid_rate']*100:.1f}%</td>
           <td>{s['hands']}</td><td>{s['avg_latency_s']:.1f}s</td>
+          {token_cost_cells(m, rep.get('avg_tokens', {}).get(m))}
         </tr>"""
 
     champ = ranked[0]
@@ -624,10 +636,11 @@ def render_dealer(rep: dict) -> str:
   <table>
     <tr><th>#</th><th class='model'>model</th><th>mean/hand</th>
         <th>win%</th><th>push%</th><th>loss%</th><th>bust%</th><th>double%</th>
-        <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th></tr>
+        <th>natural%</th><th>invalid%</th><th>hands</th><th>think</th>{TOKEN_HEADERS}</tr>
     {rows}
   </table>
   {_legend('blackjack')}
+  {TOKEN_NOTE}
   <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
     inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
     (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;

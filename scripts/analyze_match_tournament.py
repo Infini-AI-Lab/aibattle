@@ -19,6 +19,7 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
+from report_tokens import token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
 from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
@@ -631,7 +632,8 @@ def render_html(rep: dict, beh: dict) -> str:
                   f"<td>{r['win_rate']*100:.0f}%</td><td>{r['wins']}/{r['matches']}</td>"
                   f"<td>{r['draws']}</td><td>{r['busted_out_rate']*100:.0f}%</td>"
                   f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td>"
-                  f"<td>{r['matches']}</td></tr>")
+                  f"<td>{r['matches']}</td>"
+                  f"{token_cost_cells(r['model'], beh.get(r['model'], {}).get('avg_tokens'))}</tr>")
     head = "".join(f"<th>{display_name(m)}</th>" for m in models)
     grid = ""
     for a in models:
@@ -686,10 +688,11 @@ def render_html(rep: dict, beh: dict) -> str:
   <h3>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
-        <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th><th>matches</th></tr>
+        <th>draws</th><th>bust-out%</th><th>hands/match</th><th>avg win margin</th><th>matches</th>{TOKEN_HEADERS}</tr>
     {trows}
   </table>
   {_legend('match')}
+  {TOKEN_NOTE}
   <div class="note"><b>Elo</b> = Bradley-Terry rating (field mean 1500) over match win/loss results.
     Match mode is win-or-lose — chips don't count past who took the match — so the rating uses match
     outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within
@@ -724,6 +727,12 @@ def main():
     for path in (OUT_HTML, os.path.join(REPORT_DIR, "match_tournament_report.html")):
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
+    # The per-model strategy "cases" (replay-linked per-hand evidence) are already
+    # baked into the HTML above; drop them from the JSON dump so the committed file
+    # stays small (they otherwise balloon it to ~1.5 MB).
+    for s in rep.get("strategy", {}).values():
+        s.pop("cases", None)
+        s.pop("pairs", None)
     json.dump(rep, open(os.path.join(REPORT_DIR, "match_tournament_analysis.json"), "w"),
               indent=2)
     print(f"Wrote {OUT_HTML} and {REPORT_DIR}/match_tournament_report.html\n")

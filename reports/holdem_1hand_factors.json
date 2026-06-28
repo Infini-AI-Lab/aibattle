@@ -1,0 +1,296 @@
+{
+  "fold_induced": {
+    "glm-5p1": {
+      "preflop": 0.318,
+      "flop": 0.457,
+      "turn": 0.45,
+      "river": 0.412
+    },
+    "claude-opus-4.8": {
+      "preflop": 0.323,
+      "flop": 0.489,
+      "turn": 0.523,
+      "river": 0.489
+    },
+    "minimax-m2p7": {
+      "preflop": 0.362,
+      "flop": 0.42,
+      "turn": 0.479,
+      "river": 0.372
+    },
+    "gpt-oss-120b": {
+      "preflop": 0.291,
+      "flop": 0.439,
+      "turn": 0.375,
+      "river": 0.377
+    },
+    "claude-sonnet-4.6": {
+      "preflop": 0.429,
+      "flop": 0.465,
+      "turn": 0.364,
+      "river": 0.546
+    },
+    "glm-5p2": {
+      "preflop": 0.363,
+      "flop": 0.44,
+      "turn": 0.393,
+      "river": 0.516
+    },
+    "deepseek-v4-pro": {
+      "preflop": 0.328,
+      "flop": 0.465,
+      "turn": 0.519,
+      "river": 0.446
+    },
+    "kimi-k2p6": {
+      "preflop": 0.29,
+      "flop": 0.461,
+      "turn": 0.446,
+      "river": 0.364
+    },
+    "gpt-5.4": {
+      "preflop": 0.338,
+      "flop": 0.361,
+      "turn": 0.458,
+      "river": 0.304
+    },
+    "qwen3p7-plus": {
+      "preflop": 0.246,
+      "flop": 0.48,
+      "turn": 0.429,
+      "river": 0.449
+    },
+    "gpt-5.5": {
+      "preflop": 0.4,
+      "flop": 0.364,
+      "turn": 0.566,
+      "river": 0.588
+    },
+    "minimax-m3": {
+      "preflop": 0.331,
+      "flop": 0.368,
+      "turn": 0.507,
+      "river": 0.529
+    }
+  },
+  "positional": {
+    "glm-5p1": {
+      "button": {
+        "vpip": 0.85,
+        "aggr": 0.395,
+        "hands": 592
+      },
+      "bb": {
+        "vpip": 0.391,
+        "aggr": 0.224,
+        "hands": 517
+      }
+    },
+    "claude-opus-4.8": {
+      "button": {
+        "vpip": 0.939,
+        "aggr": 0.312,
+        "hands": 588
+      },
+      "bb": {
+        "vpip": 0.563,
+        "aggr": 0.238,
+        "hands": 497
+      }
+    },
+    "minimax-m2p7": {
+      "button": {
+        "vpip": 0.865,
+        "aggr": 0.366,
+        "hands": 378
+      },
+      "bb": {
+        "vpip": 0.455,
+        "aggr": 0.268,
+        "hands": 336
+      }
+    },
+    "gpt-oss-120b": {
+      "button": {
+        "vpip": 0.683,
+        "aggr": 0.557,
+        "hands": 441
+      },
+      "bb": {
+        "vpip": 0.455,
+        "aggr": 0.343,
+        "hands": 398
+      }
+    },
+    "glm-5p2": {
+      "button": {
+        "vpip": 0.885,
+        "aggr": 0.361,
+        "hands": 530
+      },
+      "bb": {
+        "vpip": 0.434,
+        "aggr": 0.228,
+        "hands": 477
+      }
+    },
+    "claude-sonnet-4.6": {
+      "button": {
+        "vpip": 0.885,
+        "aggr": 0.348,
+        "hands": 625
+      },
+      "bb": {
+        "vpip": 0.606,
+        "aggr": 0.289,
+        "hands": 554
+      }
+    },
+    "deepseek-v4-pro": {
+      "button": {
+        "vpip": 0.713,
+        "aggr": 0.553,
+        "hands": 656
+      },
+      "bb": {
+        "vpip": 0.472,
+        "aggr": 0.254,
+        "hands": 483
+      }
+    },
+    "kimi-k2p6": {
+      "button": {
+        "vpip": 0.747,
+        "aggr": 0.478,
+        "hands": 612
+      },
+      "bb": {
+        "vpip": 0.542,
+        "aggr": 0.238,
+        "hands": 515
+      }
+    },
+    "gpt-5.4": {
+      "button": {
+        "vpip": 1.0,
+        "aggr": 0.609,
+        "hands": 450
+      },
+      "bb": {
+        "vpip": 0.695,
+        "aggr": 0.332,
+        "hands": 380
+      }
+    },
+    "qwen3p7-plus": {
+      "button": {
+        "vpip": 0.886,
+        "aggr": 0.244,
+        "hands": 555
+      },
+      "bb": {
+        "vpip": 0.42,
+        "aggr": 0.118,
+        "hands": 455
+      }
+    },
+    "gpt-5.5": {
+      "button": {
+        "vpip": 1.0,
+        "aggr": 0.588,
+        "hands": 450
+      },
+      "bb": {
+        "vpip": 0.6,
+        "aggr": 0.324,
+        "hands": 375
+      }
+    },
+    "minimax-m3": {
+      "button": {
+        "vpip": 0.799,
+        "aggr": 0.461,
+        "hands": 541
+      },
+      "bb": {
+        "vpip": 0.49,
+        "aggr": 0.137,
+        "hands": 467
+      }
+    }
+  },
+  "net_by_street": {
+    "glm-5p1": {
+      "preflop": 0.094,
+      "flop": -0.143,
+      "turn": -0.214,
+      "river": 1.048
+    },
+    "claude-opus-4.8": {
+      "preflop": -0.04,
+      "flop": -0.254,
+      "turn": -0.555,
+      "river": -0.338
+    },
+    "gpt-oss-120b": {
+      "preflop": -0.288,
+      "flop": -0.18,
+      "turn": -0.1,
+      "river": -0.164
+    },
+    "minimax-m2p7": {
+      "preflop": 0.015,
+      "flop": -0.035,
+      "turn": 0.28,
+      "river": -1.238
+    },
+    "claude-sonnet-4.6": {
+      "preflop": 0.151,
+      "flop": 0.372,
+      "turn": 0.306,
+      "river": -0.498
+    },
+    "glm-5p2": {
+      "preflop": -0.104,
+      "flop": 0.12,
+      "turn": -0.143,
+      "river": 0.435
+    },
+    "deepseek-v4-pro": {
+      "preflop": 0.188,
+      "flop": -0.14,
+      "turn": 0.082,
+      "river": 0.143
+    },
+    "kimi-k2p6": {
+      "preflop": -0.008,
+      "flop": 0.044,
+      "turn": 0.15,
+      "river": 0.652
+    },
+    "gpt-5.4": {
+      "preflop": 0.302,
+      "flop": 0.059,
+      "turn": 0.064,
+      "river": -0.476
+    },
+    "qwen3p7-plus": {
+      "preflop": -0.285,
+      "flop": -0.142,
+      "turn": -0.092,
+      "river": 0.535
+    },
+    "gpt-5.5": {
+      "preflop": 0.072,
+      "flop": 0.323,
+      "turn": 0.931,
+      "river": 0.28
+    },
+    "minimax-m3": {
+      "preflop": -0.12,
+      "flop": -0.009,
+      "turn": -0.484,
+      "river": -0.84
+    }
+  }
+}

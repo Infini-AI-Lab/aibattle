@@ -27,7 +27,8 @@
       "double_rate": 0.09,
       "natural_rate": 0.045,
       "invalid_rate": 0.0,
-      "avg_latency_s": 75.3
+      "avg_latency_s": 75.3,
+      "avg_tokens": 5919
     },
     "deepseek-v4-pro": {
       "hands": 1000,
@@ -40,7 +41,8 @@
       "double_rate": 0.096,
       "natural_rate": 0.04,
       "invalid_rate": 0.0,
-      "avg_latency_s": 89.0
+      "avg_latency_s": 89.0,
+      "avg_tokens": 239
     },
     "glm-5p1": {
       "hands": 1000,
@@ -53,7 +55,8 @@
       "double_rate": 0.101,
       "natural_rate": 0.057,
       "invalid_rate": 0.0,
-      "avg_latency_s": 15.8
+      "avg_latency_s": 15.8,
+      "avg_tokens": 561
     },
     "minimax-m2p7": {
       "hands": 500,
@@ -66,7 +69,8 @@
       "double_rate": 0.116,
       "natural_rate": 0.042,
       "invalid_rate": 0.0,
-      "avg_latency_s": 38.8
+      "avg_latency_s": 38.8,
+      "avg_tokens": 7667
     },
     "gpt-oss-120b": {
       "hands": 500,
@@ -79,7 +83,8 @@
       "double_rate": 0.132,
       "natural_rate": 0.062,
       "invalid_rate": 0.0,
-      "avg_latency_s": 1.5
+      "avg_latency_s": 1.5,
+      "avg_tokens": 147
     },
     "minimax-m3": {
       "hands": 1000,
@@ -92,7 +97,8 @@
       "double_rate": 0.081,
       "natural_rate": 0.035,
       "invalid_rate": 0.0,
-      "avg_latency_s": 9.2
+      "avg_latency_s": 9.2,
+      "avg_tokens": 745
     },
     "claude-opus-4.8": {
       "hands": 500,
@@ -105,7 +111,8 @@
       "double_rate": 0.108,
       "natural_rate": 0.044,
       "invalid_rate": 0.0,
-      "avg_latency_s": 1.3
+      "avg_latency_s": 1.3,
+      "avg_tokens": 12
     },
     "claude-sonnet-4.6": {
       "hands": 500,
@@ -118,7 +125,8 @@
       "double_rate": 0.116,
       "natural_rate": 0.072,
       "invalid_rate": 0.0,
-      "avg_latency_s": 1.2
+      "avg_latency_s": 1.2,
+      "avg_tokens": 8
     },
     "glm-5p2": {
       "hands": 1000,
@@ -131,7 +139,8 @@
       "double_rate": 0.106,
       "natural_rate": 0.044,
       "invalid_rate": 0.0,
-      "avg_latency_s": 72.2
+      "avg_latency_s": 72.2,
+      "avg_tokens": 1080
     },
     "gpt-5.4": {
       "hands": 500,
@@ -144,7 +153,8 @@
       "double_rate": 0.108,
       "natural_rate": 0.048,
       "invalid_rate": 0.0,
-      "avg_latency_s": 6.7
+      "avg_latency_s": 6.7,
+      "avg_tokens": 266
     },
     "gpt-5.5": {
       "hands": 500,
@@ -157,7 +167,8 @@
       "double_rate": 0.088,
       "natural_rate": 0.048,
       "invalid_rate": 0.0,
-      "avg_latency_s": 2.7
+      "avg_latency_s": 2.7,
+      "avg_tokens": 65
     },
     "qwen3p7-plus": {
       "hands": 1000,
@@ -170,9 +181,24 @@
       "double_rate": 0.096,
       "natural_rate": 0.044,
       "invalid_rate": 0.0,
-      "avg_latency_s": 5.2
+      "avg_latency_s": 5.2,
+      "avg_tokens": 1030
     }
   },
   "total_hands": 9000,
-  "field_profit": 8.0
+  "field_profit": 8.0,
+  "avg_tokens": {
+    "kimi-k2p6": 5919,
+    "deepseek-v4-pro": 239,
+    "glm-5p1": 561,
+    "minimax-m2p7": 7667,
+    "gpt-oss-120b": 147,
+    "minimax-m3": 745,
+    "claude-opus-4.8": 12,
+    "claude-sonnet-4.6": 8,
+    "glm-5p2": 1080,
+    "gpt-5.4": 266,
+    "gpt-5.5": 65,
+    "qwen3p7-plus": 1030
+  }
 }

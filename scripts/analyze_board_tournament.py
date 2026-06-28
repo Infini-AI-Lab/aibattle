@@ -34,6 +34,7 @@ from collections import defaultdict
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
 from model_names import strip_coached, display_name, model_cell
+from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
 from elo_util import bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
@@ -568,6 +569,7 @@ def render_game(game: str, rep: dict) -> str:
           <td>{s['first_move_win_rate']*100:.0f}%</td>
           <td>{s['second_move_win_rate']*100:.0f}%</td>
           <td>{s['games']}</td>
+          {token_cost_cells(m, rep['avg_tokens'].get(m))}
         </tr>"""
 
     # head-to-head
@@ -625,10 +627,11 @@ def render_game(game: str, rep: dict) -> str:
   </div>
   <table>
     <tr><th>#</th><th class='model'>Model</th><th>Elo</th><th>Net/game</th><th>Win%</th>
-        <th>1st-move win%</th><th>2nd-move win%</th><th>Games</th></tr>
+        <th>1st-move win%</th><th>2nd-move win%</th><th>Games</th>{TOKEN_HEADERS}</tr>
     {rows}
   </table>
   {_legend('board_results')}
+  {TOKEN_NOTE}
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas>
       <div class="note">Whiskers show ±1 bootstrap SD (resampling games 300×) — wider bars mean
@@ -1052,6 +1055,8 @@ def main():
             continue
 
         rep = analyze_game(game, data)
+        rep["avg_tokens"] = tokens_from_episodes(
+            ep for g in data["games"] for ep in g["episodes"])
         reps[game] = rep
         html = render_game(game, rep)
 

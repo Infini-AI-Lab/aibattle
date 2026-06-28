@@ -505,5 +505,15 @@
   ],
   "first_player_win_rate": 0.4846,
   "num_games": 520,
-  "episodes_per_pair": 20
+  "episodes_per_pair": 20,
+  "avg_tokens": {
+    "deepseek-v4-pro": 30968,
+    "glm-5p1": 23405,
+    "glm-5p2": 20900,
+    "gpt-oss-120b": 3365,
+    "minimax-m2p7": 39353,
+    "minimax-m3": 29299,
+    "qwen3p7-plus": 34146,
+    "kimi-k2p6": 42721
+  }
 }
