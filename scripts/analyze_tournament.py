@@ -15,7 +15,9 @@ plus a head-to-head chip matrix.
 from __future__ import annotations
 
 import json
+import math
 import os
+import html as html_lib
 from collections import defaultdict
 
 from model_names import strip_coached, display_name, model_cell
@@ -432,6 +434,361 @@ def _style(vpip: float, agg: float, allin: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
+def _percentile(values, q):
+    vals = sorted(values)
+    if not vals:
+        return 0
+    k = (len(vals) - 1) * q
+    lo = int(k)
+    hi = min(lo + 1, len(vals) - 1)
+    if lo == hi:
+        return vals[lo]
+    return vals[lo] * (hi - k) + vals[hi] * (k - lo)
+
+
+def _bucket_vpip(s, bucket):
+    r = s["pf_bucket"][bucket]
+    return r["open_rate"] + r["call_rate"]
+
+
+def _street_aggr(s, street):
+    return s["by_street"][street]["agg_freq"]
+
+
+def _strategy_analysis(report: dict, ranked: list) -> tuple[str, str]:
+    """Signal-count model cards for the Additional analysis section.
+
+    Scores are diagnostic leak evidence: each triggered signal adds one point.
+    Higher values mean "more to review", not "better strategic skill".
+    """
+    pm = report["per_model"]
+    dims = [
+        ("vpip", "VPIP", "Voluntarily put chips in preflop; higher means looser preflop entry."),
+        ("pfr", "PFR", "Preflop raise frequency; higher means more preflop initiative."),
+        ("agg_freq", "AFq", "Aggressive action frequency after opportunities to bet/raise."),
+        ("cbet_rate", "C-bet", "Flop continuation bet rate after being the preflop aggressor."),
+        ("wsd", "W$SD", "Won money at showdown; higher means better showdown conversion."),
+        ("allin_freq", "All-in", "All-in action frequency; higher means more stack-risk exposure."),
+    ]
+
+    def pct(x, digits=0):
+        return f"{x * 100:.{digits}f}%"
+
+    def percentile(values):
+        vals = sorted(values)
+        if len(vals) <= 1:
+            return {vals[0]: 50.0} if vals else {}
+        return {
+            v: 100.0 * sum(1 for x in vals if x <= v) / len(vals)
+            for v in vals
+        }
+
+    pct_by_metric = {}
+    for key, _label, _help in dims:
+        values = [float(pm[m].get(key) or 0) for m in ranked]
+        pct_by_metric[key] = percentile(values)
+
+    def summarize_profile(s):
+        vpip = s.get("vpip", 0)
+        pfr = s.get("pfr", 0)
+        agg = s.get("agg_freq", 0)
+        cbet = s.get("cbet_rate", 0)
+        wsd = s.get("wsd", 0)
+        allin = s.get("allin_freq", 0)
+
+        if vpip >= 0.68:
+            entry = "very loose preflop"
+        elif vpip >= 0.56:
+            entry = "loose preflop"
+        elif vpip <= 0.44:
+            entry = "selective preflop"
+        else:
+            entry = "moderately selective preflop"
+
+        if pfr >= 0.36:
+            initiative = "takes initiative early"
+        elif pfr <= 0.22:
+            initiative = "enters more passively"
+        else:
+            initiative = "has moderate preflop initiative"
+
+        if agg >= 0.42:
+            pressure = "keeps pressure high after the flop"
+        elif agg <= 0.30:
+            pressure = "often shifts into a passive postflop line"
+        else:
+            pressure = "applies postflop pressure at a balanced rate"
+
+        if cbet >= 0.70:
+            continuation = "c-bets frequently"
+        elif cbet <= 0.55:
+            continuation = "does not always follow through with c-bets"
+        else:
+            continuation = "has a middle-of-field c-bet pattern"
+
+        if wsd >= 0.52:
+            showdown = "converts showdowns well"
+        elif wsd <= 0.40:
+            showdown = "struggles to convert showdowns"
+        else:
+            showdown = "has middling showdown conversion"
+
+        if allin >= 0.004:
+            risk = "with noticeable all-in risk exposure"
+        elif allin <= 0.0015:
+            risk = "while avoiding many all-in spots"
+        else:
+            risk = "with controlled all-in exposure"
+
+        return [entry, initiative, pressure, continuation, showdown, risk]
+
+    chart_payload = []
+    cards = []
+    glossary = ""
+    for key, label, help_text in dims:
+        glossary += f"""
+      <div class="strategy-gloss">
+        <b>{html_lib.escape(label)}</b>
+        <span>{html_lib.escape(help_text)}</span>
+        <em>Metric: <code>{html_lib.escape(key)}</code></em>
+      </div>"""
+
+    for rank, m in enumerate(ranked, 1):
+        s = pm[m]
+        raw = {key: float(s.get(key) or 0) for key, _label, _help in dims}
+        scores = [pct_by_metric[key].get(raw[key], 0) for key, _label, _help in dims]
+        raw_labels = {
+            label: pct(raw[key], 1 if key == "allin_freq" else 0)
+            for key, label, _help in dims
+        }
+        chart_payload.append({
+            "id": f"strategyRadar{rank}",
+            "model": m,
+            "label": display_name(m),
+            "scores": scores,
+            "raw": raw_labels,
+        })
+        summary_items = "".join(f"<li>{html_lib.escape(item)}</li>" for item in summarize_profile(s))
+        cards.append(f"""
+    <article class="strategy-card metric-card">
+      <div class="strategy-head">
+        <div><h3>{rank}. {model_cell(m)}</h3></div>
+        <div class="strategy-kpi {'pos' if s['bb_per_100'] >= 0 else 'neg'}">{s['bb_per_100']:+.1f}<span>bb/100</span></div>
+      </div>
+      <div class="metric-profile-layout">
+        <canvas id="strategyRadar{rank}"></canvas>
+        <ul class="profile-summary">{summary_items}</ul>
+      </div>
+    </article>""")
+
+    html = f"""
+  <div class="strategy-intro">
+    <b>Player metric radar:</b> each axis is exactly one observed metric, not a
+    combined leak score. Radar radius is field percentile so small-scale metrics
+    such as all-in frequency remain visible; the bullets under each chart
+    summarize the player's style from those same metrics.
+    <div class="strategy-glossary">{glossary}
+    </div>
+  </div>
+  <div class="strategy-grid">
+    {''.join(cards)}
+  </div>"""
+    js = f"""
+const STRATEGY = {json.dumps(chart_payload)};
+const STRATEGY_LABELS = {json.dumps([label for _key, label, _help in dims])};
+STRATEGY.forEach((card, i) => {{
+  const el = document.getElementById(card.id);
+  if (!el) return;
+  new Chart(el, {{
+    type:'radar',
+    data:{{ labels:STRATEGY_LABELS,
+      datasets:[{{ label:card.label, data:card.scores,
+        borderColor:mcol(card.model), backgroundColor:mcol(card.model) + '33',
+        pointBackgroundColor:mcol(card.model) }}] }},
+    options:{{ scales:{{ r:{{ min:0, max:100, ticks:{{ display:false, stepSize:25 }} }} }},
+      plugins:{{ legend:{{ display:false }},
+        tooltip:{{ callbacks:{{ label(ctx) {{
+          const raw = card.raw[ctx.label] || '';
+          return `percentile ${{ctx.formattedValue}} / raw ${{raw}}`;
+        }} }} }} }} }} }});
+}});
+"""
+    return html, js
+
+
+def _handeq_pct(x):
+    return "—" if x is None else f"{x * 100:.0f}%"
+
+
+def _handeq_pp(x):
+    return "—" if x is None else f"{x * 100:+.1f}pp"
+
+
+def _handeq_heat_color(v, center=0.0, span=0.45):
+    if v is None:
+        return "background:var(--faint);color:var(--dim)"
+    delta = v - center
+    alpha = min(0.72, abs(delta) / span * 0.72)
+    rgb = "26,127,55" if delta >= 0 else "185,28,28"
+    return f"background:rgba({rgb},{alpha:.3f})"
+
+
+def _handeq_centered_color(v):
+    if v is None:
+        return "background:var(--faint);color:var(--dim)"
+    delta = v - 0.5
+    if abs(delta) < 0.005:
+        return "background:#fff"
+    alpha = min(0.72, abs(delta) / 0.5 * 0.72)
+    rgb = "26,127,55" if delta > 0 else "185,28,28"
+    return f"background:rgba({rgb},{alpha:.3f})"
+
+
+def _handeq_positive_actions(action_quality_matrix):
+    positives = {}
+    for row in action_quality_matrix:
+        sid = row["id"]
+        positives[sid] = {
+            action["action"]
+            for action in row.get("actions", [])
+            if (action.get("quality_lift") or 0) > 0
+        }
+    return positives
+
+
+def _render_handeq_action_quality(matrix):
+    rows = []
+    for row in matrix:
+        cells = []
+        for cell in row.get("actions", []):
+            lift = cell.get("equity_lift")
+            if lift is None:
+                lift = cell.get("quality_lift")
+            cells.append(
+                f"<div class='handeq-action-cell' style='{_handeq_heat_color(lift)}'>"
+                f"<div class='handeq-action-name'>{html_lib.escape(cell['label'])}</div>"
+                f"<div class='handeq-action-lift'>{_handeq_pp(lift)}</div>"
+                f"<div class='handeq-action-meta'>EQ {_handeq_pct(cell.get('action_avg_equity'))} · "
+                f"base {_handeq_pct(cell.get('baseline_avg_equity'))}</div>"
+                f"<div class='handeq-sample-track'><i style='width:{(cell.get('sample_rate') or 0) * 100:.1f}%'></i></div>"
+                f"<div class='handeq-action-meta'>sample {_handeq_pct(cell.get('sample_rate'))} · "
+                f"n={cell.get('count')}</div>"
+                f"</div>"
+            )
+        rows.append(f"""
+    <section class="handeq-action-row">
+      <div class="handeq-situation-label">
+        <b>{html_lib.escape(row['label'])}</b>
+        <span>avg EQ {_handeq_pct(row.get('avg_equity'))} · n={row.get('opportunities')}</span>
+      </div>
+      <div class="handeq-action-cells">{''.join(cells)}</div>
+    </section>""")
+    return f"""
+  <h2>Action quality by situation</h2>
+  <div class="note">Each row is a strategic situation found during the hand. Each cell is an action observed in that situation. Quality change = that action's average hand equity minus the average hand equity of the other observed actions in the same situation.</div>
+  <div class="handeq-action-chart">{''.join(rows)}</div>
+"""
+
+
+def _render_handeq_model_matrix(data, model_order):
+    matrix = data.get("model_action_quality_matrix", {})
+    columns = matrix.get("columns", [])
+    rows = matrix.get("rows", [])
+    positives = _handeq_positive_actions(data.get("action_quality_matrix", []))
+
+    situations = []
+    for col in columns:
+        if col["situation_id"] not in [s["id"] for s in situations]:
+            situations.append({"id": col["situation_id"], "label": col["situation"]})
+    cols_by_situation = {
+        situation["id"]: [col for col in columns if col["situation_id"] == situation["id"]]
+        for situation in situations
+    }
+    row_by_model = {row["model"]: row for row in rows}
+    model_rows = []
+    for model in model_order:
+        row = row_by_model.get(model)
+        if not row:
+            continue
+        cell_by_col = {cell["column_id"]: cell for cell in row["cells"]}
+        cells = []
+        model_total_opps = 0
+        for situation in situations:
+            sid = situation["id"]
+            opps = 0
+            aligned = 0
+            top_actions = []
+            for col in cols_by_situation[sid]:
+                cell = cell_by_col.get(col["id"], {})
+                if cell.get("opportunities"):
+                    opps = max(opps, cell["opportunities"])
+                count = cell.get("count") or 0
+                if col["action"] in positives.get(sid, set()):
+                    aligned += count
+                if count:
+                    top_actions.append((cell.get("sample_rate") or 0, col["label"]))
+            model_total_opps += opps
+            top_actions.sort(reverse=True)
+            cells.append({
+                "label": situation["label"],
+                "opportunities": opps,
+                "aligned_rate": aligned / opps if opps else None,
+                "top_actions": top_actions[:2],
+            })
+        for cell in cells:
+            cell["situation_share"] = cell["opportunities"] / model_total_opps if model_total_opps else None
+        model_rows.append({"model": model, "cells": cells})
+
+    head = "".join(f"<th><span>{html_lib.escape(s['label'])}</span></th>" for s in situations)
+    body = []
+    for item in model_rows:
+        tds = []
+        for cell in item["cells"]:
+            aligned = cell["aligned_rate"]
+            share = cell["situation_share"]
+            top_actions = "".join(
+                f"<span>{html_lib.escape(label)} {_handeq_pct(rate)}</span>"
+                for rate, label in cell["top_actions"]
+            )
+            tds.append(f"""
+        <td class="handeq-model-cell" style="{_handeq_centered_color(aligned)}">
+          <div class="handeq-cell-main">{_handeq_pct(aligned)}</div>
+          <div class="handeq-cell-label">quality-aligned</div>
+          <div class="handeq-cell-meta">situation share {_handeq_pct(share)} · n={cell['opportunities']}</div>
+          <div class="handeq-cell-actions">{top_actions}</div>
+        </td>""")
+        body.append(f"<tr><td class='model'>{model_cell(item['model'])}</td>{''.join(tds)}</tr>")
+    return f"""
+  <h2>Model situation exposure × quality-aligned choice rate</h2>
+  <div class="note">Y-axis is model; X-axis is situation. The large number is the share of choices assigned to actions whose hand-equity lift is positive within that situation. Cell color uses 50% as the white midpoint: greener above, redder below.</div>
+  <div class="wide-scroll"><table class="handeq-model-table">
+    <tr><th class="model">model</th>{head}</tr>
+    {''.join(body)}
+  </table></div>
+"""
+
+
+def _hand_equity_analysis(ranked: list) -> str:
+    path = os.path.join(REPORT_DIR, "holdem_1hand_situation_impact.json")
+    if not os.path.exists(path):
+        return (
+            '  <div class="callout">Hand-equity diagnostics are not generated yet. Run\n'
+            '    <code>python3 scripts/analyze_1hand_situations.py</code> and regenerate this report.</div>'
+        )
+    try:
+        data = json.load(open(path, encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"<div class='callout'>Could not load hand-equity diagnostics: {html_lib.escape(str(exc))}</div>"
+    action_quality = _render_handeq_action_quality(data.get("action_quality_matrix", [])).strip()
+    model_matrix = _render_handeq_model_matrix(data, ranked).strip()
+    return f"""\
+  <div class="callout"><b>Hand-equity preview.</b> This section asks whether each model's action choices line up with the hand-equity signal available at the moment of decision. A positive lift means the chosen action's average equity was higher than the alternative observed actions in the same situation; it is evidence, not a claim of perfect poker optimality.</div>
+{action_quality}
+{model_matrix}
+"""
+
+
+# ---------------------------------------------------------------------------
 def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
@@ -443,6 +800,8 @@ def render_html(report: dict) -> str:
     elo = report.get("elo", {})
     ranked = sorted(models, key=lambda m: (elo_key(elo, m), pm[m]["bb_per_100"]),
                     reverse=True)
+    strategy_html, strategy_js = _strategy_analysis(report, ranked)
+    handeq_html = _hand_equity_analysis(ranked)
     rows = ""
     for i, m in enumerate(ranked, 1):
         s = pm[m]
@@ -461,12 +820,6 @@ def render_html(report: dict) -> str:
           <td class='{chip_cls}'>{s['chips_per_hand']:+.2f}</td>
           <td class='{chip_cls}'>{s['bb_per_100']:+.1f}</td>
           <td>{s['win_rate']*100:.0f}%</td>
-          <td>{s['vpip']*100:.0f}%</td>
-          <td>{s['pfr']*100:.0f}%</td>
-          <td>{s['agg_freq']*100:.0f}%</td>
-          <td>{s['fold_to_bet']*100:.0f}%</td>
-          <td>{s['allin_freq']*100:.0f}%</td>
-          <td>{s['avg_bet_xpot']:.2f}x</td>
           <td>{s['avg_latency_s']:.1f}s</td>
           <td>{s['avg_comp_tokens']:,}</td>
           <td>{s['hands']}</td>
@@ -528,10 +881,70 @@ def render_html(report: dict) -> str:
 {NAV_HEAD}
 <style>{BASE_CSS}
   td.bucket {{ font-weight: 600; }}
+  /* Prominent dividers for the three top-level sections (Results / Why / More). */
+  h2.section {{ font-size:23px; margin:56px 0 18px; padding-top:16px;
+    border-top:3px solid var(--red); color:var(--red); letter-spacing:.01em; }}
+  h2.section:first-of-type {{ margin-top:32px; }}
   /* Style cell: label on its own line, behaviour tag(s) on a second line, always
      two lines so the column never wraps mid-phrase. */
   td.stylecell {{ white-space:nowrap; line-height:1.5; }}
   td.stylecell .stags {{ margin-top:2px; }}
+  .strategy-intro {{ background:var(--faint); border:1px solid var(--line);
+    border-left:3px solid var(--red); padding:12px 14px; margin:12px 0 18px;
+    font-size:13px; line-height:1.55; }}
+  .strategy-glossary {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px 14px; margin-top:12px; }}
+  .strategy-gloss {{ border-top:1px solid var(--line); padding-top:7px; }}
+  .strategy-gloss b {{ display:block; color:var(--fg); }}
+  .strategy-gloss span {{ display:block; color:var(--fg); }}
+  .strategy-gloss em {{ display:block; color:var(--dim); font-style:normal; font-size:11px; }}
+  .strategy-grid {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px; margin-top:14px; }}
+  .strategy-card {{ border:1px solid var(--line); background:var(--panel);
+    padding:14px; }}
+  .strategy-head {{ display:flex; justify-content:space-between; gap:12px;
+    align-items:flex-start; }}
+  .strategy-head h3 {{ margin-bottom:4px; }}
+  .strategy-kpi {{ text-align:right; font-weight:700; font-size:18px; white-space:nowrap; }}
+  .strategy-kpi span {{ display:block; color:var(--dim); font-size:10px; font-weight:400; }}
+  .metric-profile-layout {{ display:block; margin-top:4px; }}
+  .metric-profile-layout canvas {{ width:100% !important; max-height:230px; margin:0 0 10px; }}
+  .profile-summary {{ margin:0; padding:10px 12px 10px 24px; background:var(--faint);
+    border:1px solid var(--line); color:var(--fg); font-size:12px; line-height:1.42; }}
+  .profile-summary li {{ margin:5px 0; }}
+  .strategy-cases {{ margin:6px 0 0; padding-left:22px; font-size:12px; line-height:1.45; }}
+  .strategy-cases li {{ margin:8px 0; }}
+  .case-title {{ font-weight:700; }}
+  .case-signal {{ color:var(--fg); margin-top:2px; }}
+  .case-meta {{ color:var(--dim); font-size:11px; margin-top:2px; }}
+  .case-link {{ display:inline-block; margin-top:5px; border:1px solid var(--line);
+    background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }}
+  .case-link:hover {{ border-color:var(--red); color:var(--fg); }}
+  .handeq-action-chart {{ border:1px solid var(--line); background:var(--panel); }}
+  .handeq-action-row {{ display:grid; grid-template-columns:220px 1fr; border-top:1px solid var(--line); }}
+  .handeq-action-row:first-child {{ border-top:0; }}
+  .handeq-situation-label {{ padding:14px; border-right:1px solid var(--line); background:rgba(255,255,255,.35); }}
+  .handeq-situation-label b {{ display:block; font-size:13px; }}
+  .handeq-situation-label span {{ display:block; color:var(--dim); font-size:11px; margin-top:4px; }}
+  .handeq-action-cells {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(126px,1fr)); gap:8px; padding:10px; }}
+  .handeq-action-cell {{ border:1px solid var(--line); padding:10px; min-height:94px; display:flex; flex-direction:column; justify-content:space-between; }}
+  .handeq-action-name {{ font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; }}
+  .handeq-action-lift {{ font-size:22px; font-weight:900; margin:2px 0; line-height:1; }}
+  .handeq-action-meta {{ font-size:10px; color:var(--fg); line-height:1.25; }}
+  .handeq-sample-track {{ height:5px; background:rgba(255,255,255,.5); border:1px solid rgba(0,0,0,.12); margin:5px 0 3px; }}
+  .handeq-sample-track i {{ display:block; height:100%; background:rgba(28,28,28,.55); }}
+  .wide-scroll {{ overflow-x:auto; border:1px solid var(--line); background:var(--panel); margin-top:14px; }}
+  .handeq-model-table {{ min-width:1180px; border-collapse:separate; border-spacing:0; background:var(--panel); }}
+  .handeq-model-table th {{ text-align:center; vertical-align:bottom; }}
+  .handeq-model-table th span {{ display:block; max-width:140px; margin:0 auto; white-space:normal; line-height:1.25; }}
+  .handeq-model-cell {{ min-width:148px; padding:10px; text-align:left; vertical-align:top; }}
+  .handeq-cell-main {{ font-size:24px; line-height:1; font-weight:900; color:var(--fg); }}
+  .handeq-cell-label {{ font-size:9px; color:var(--dim); margin-top:3px; text-transform:uppercase; font-weight:800; }}
+  .handeq-cell-meta {{ font-size:10px; color:var(--fg); line-height:1.25; margin-top:8px; }}
+  .handeq-cell-actions {{ display:flex; flex-wrap:wrap; gap:4px; margin-top:7px; min-height:18px; }}
+  .handeq-cell-actions span {{ font-size:9px; line-height:1; padding:4px 5px; border:1px solid var(--line); background:rgba(255,255,255,.55); white-space:nowrap; }}
+  @media (max-width:860px) {{ .strategy-grid, .strategy-glossary {{ grid-template-columns:1fr; }} }}
+  @media (max-width:800px) {{ .handeq-action-row {{ grid-template-columns:1fr; }} .handeq-situation-label {{ border-right:0; border-bottom:1px solid var(--line); }} }}
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
@@ -559,11 +972,11 @@ def render_html(report: dict) -> str:
     how often.</div>
   </div>
 
-  <h2>🏆 Leaderboard &amp; player profiles</h2>
+  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <h3>Leaderboard</h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips/hand</th><th>bb/100</th>
-        <th>win%</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th>
-        <th>all-in%</th><th>bet size</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
+        <th>win%</th><th>think</th><th>tokens/dec</th><th>hands</th></tr>
     {rows}
   </table>
   {_legend('holdem')}
@@ -571,30 +984,28 @@ def render_html(report: dict) -> str:
     fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
     win and adjusts for opponent strength — the fair comparison when models faced different opponents.
     ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
-    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
-    (looseness). PFR = preflop raise %.
-    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
-    think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
-
-  <div class="grid2">
-    <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>
-      <div class="note">x = looseness (VPIP), y = aggression. Upper-right = loose-aggressive (LAG), lower-left = nit.</div></div>
-    <div><h2>💰 Win rate (bb / 100 hands)</h2><canvas id="bbchart"></canvas></div>
-  </div>
+    chips / bb/100 / win% are raw, unadjusted metrics. think = avg seconds per decision.
+    tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
   <h2>♟️ Action tendencies</h2>
   <canvas id="actions"></canvas>
   <div class="note">Share of each action across all the model's decisions.</div>
 
-  <div class="grid2">
-    <div><h2>🧭 Style radar</h2><canvas id="radar"></canvas></div>
-    <div><h2>⏱️ Avg thinking time</h2><canvas id="latency"></canvas></div>
-  </div>
+  <h2>⚔️ Head-to-head chip results</h2>
+  <div class="sub">Net chips <b>per hand</b> the row model won against the column model
+    (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
+  <table class="h2h">{hh}</table>
 
-  <h2>📈 Aggression by street</h2>
-  <canvas id="streetAgg"></canvas>
-  <div class="note">Share of each model's actions on that street that were a bet/raise/all-in.
-    A model that c-bets but then check-folds turn/river will dip from flop → river.</div>
+  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
+  {handeq_html}
+
+  <h2>🃏 Preflop open-rate by hand strength</h2>
+  <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
+    bucket. A model that reads its cards opens premium ≫ trash.</div>
+  <table>
+    <tr><th class='model'>bucket</th>{''.join(f"<th>{display_name(m)}</th>" for m in models)}</tr>
+    {bucket_rows}
+  </table>
 
   <h2>🎯 Postflop &amp; showdown stats</h2>
   <table>
@@ -608,13 +1019,17 @@ def render_html(report: dict) -> str:
     <b>W$SD</b> = won at showdown (of showdowns seen).
   </div>
 
-  <h2>🃏 Preflop open-rate by hand strength</h2>
-  <div class="sub">% of hands the model voluntarily put chips in with each Chen-formula
-    bucket. A model that reads its cards opens premium ≫ trash.</div>
-  <table>
-    <tr><th class='model'>bucket</th>{''.join(f"<th>{display_name(m)}</th>" for m in models)}</tr>
-    {bucket_rows}
-  </table>
+  <h2>🏅 Made-hand mix at showdown</h2>
+  <canvas id="madeHand"></canvas>
+  <div class="note">Share of the model's showdown hands that finished as each category
+    (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
+
+  <h2 class="section">3 · 🔬 Additional analysis</h2>
+  {strategy_html}
+
+  <h2>⏱️ Avg thinking time</h2>
+  <canvas id="latency"></canvas>
+  <div class="note">Average seconds per decision. This is an efficiency/agent-runtime metric, not direct poker quality.</div>
 
   <div class="grid2">
     <div><h2>💸 Bet-sizing distribution</h2><canvas id="betsize"></canvas>
@@ -624,16 +1039,6 @@ def render_html(report: dict) -> str:
       <div class="note">Does thinking longer pay off? x = avg seconds per decision,
         y = bb/100.</div></div>
   </div>
-
-  <h2>🏅 Made-hand mix at showdown</h2>
-  <canvas id="madeHand"></canvas>
-  <div class="note">Share of the model's showdown hands that finished as each category
-    (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
-
-  <h2>⚔️ Head-to-head chip results</h2>
-  <div class="sub">Net chips <b>per hand</b> the row model won against the column model
-    (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
-  <table class="h2h">{hh}</table>
 
 <script>
 const R = {payload};
@@ -648,22 +1053,7 @@ const MODEL_COL = Object.fromEntries(MODELS.map((m,i)=>[m, col(i)]));
 const mcol = m => MODEL_COL[m];
 const cssText = getComputedStyle(document.body).color;
 {CHART_SETUP}
-
-// player-type scatter (VPIP x aggression)
-new Chart(scatter, {{ type:'scatter',
-  data:{{ datasets: MODELS.map(m=>({{ label:dn(m),
-      data:[{{x:PM[m].vpip*100, y:PM[m].agg_freq*100}}],
-      backgroundColor:mcol(m), pointRadius:9, pointHoverRadius:12 }})) }},
-  options:{{ scales:{{ x:{{title:{{display:true,text:'VPIP % (loose →)'}},min:0,max:100}},
-                       y:{{title:{{display:true,text:'aggression % (aggressive ↑)'}},min:0,max:100}} }},
-    plugins:{{ legend:{{position:'bottom'}} }} }} }});
-
-// bb/100 bar — colored by model (sign shown by value direction)
-const ranked = [...MODELS].sort((a,b)=>PM[b].bb_per_100-PM[a].bb_per_100);
-new Chart(bbchart, {{ type:'bar',
-  data:{{ labels:ranked.map(dn), datasets:[{{ data:ranked.map(m=>PM[m].bb_per_100),
-      backgroundColor:ranked.map(m=>mcol(m)) }}] }},
-  options:{{ indexAxis:'y', plugins:{{legend:{{display:false}}}} }} }});
+{strategy_js}
 
 // action distribution (stacked %)
 const ACTS=['fold','check','call','bet','raise','all_in'];
@@ -675,31 +1065,11 @@ new Chart(actions, {{ type:'bar',
   options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,title:{{display:true,text:'% of actions'}}}}}},
     plugins:{{legend:{{position:'bottom'}}}} }} }});
 
-// style radar (normalized 0-100)
-new Chart(radar, {{ type:'radar',
-  data:{{ labels:['loose (VPIP)','PF raise','aggression','all-in','bet size','calls bets (1-fold)'],
-    datasets:MODELS.map(m=>({{label:dn(m),borderColor:mcol(m),
-      backgroundColor:mcol(m)+'22',
-      data:[PM[m].vpip*100,PM[m].pfr*100,PM[m].agg_freq*100,PM[m].allin_freq*100,
-            Math.min(100,PM[m].avg_bet_xpot*50),(1-PM[m].fold_to_bet)*100]}})) }},
-  options:{{ scales:{{r:{{min:0,max:100,ticks:{{display:false}}}}}},
-    plugins:{{legend:{{position:'bottom'}}}} }} }});
-
 // latency
 new Chart(latency, {{ type:'bar',
   data:{{ labels:MODELS.map(dn), datasets:[{{data:MODELS.map(m=>PM[m].avg_latency_s),
       backgroundColor:MODELS.map(m=>mcol(m))}}] }},
   options:{{ plugins:{{legend:{{display:false}}}}, scales:{{y:{{title:{{display:true,text:'seconds / decision'}}}}}} }} }});
-
-// aggression by street (lines per model)
-const STREETS=['preflop','flop','turn','river'];
-new Chart(streetAgg, {{ type:'line',
-  data:{{ labels:STREETS, datasets:MODELS.map(m=>({{
-      label:dn(m), borderColor:mcol(m), backgroundColor:mcol(m),
-      tension:0.25,
-      data:STREETS.map(s=>PM[m].by_street[s].agg_freq*100) }})) }},
-  options:{{ scales:{{y:{{title:{{display:true,text:'aggression %'}},min:0,max:100}}}},
-    plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 // bet-sizing distribution (stacked %)
 const BS=['small','medium','pot','over'];

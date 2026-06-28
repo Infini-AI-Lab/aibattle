@@ -98,20 +98,23 @@
 
 <script>
 const BASE = "runs/holdem_match/replays/match/";
+const DATA_VERSION = new URLSearchParams(location.search).get("cacheBust") || "18";
 const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
 const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
 // one colour per MODEL (kept in sync with scripts/poker_behavior.py), so a model
 // keeps its colour across matches even though seats swap.
 const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
-                  "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa"};
+                  "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa",
+                  "minimax-m3":"#fb7185"};
 function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
 let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
     cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
+const PARAMS = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=17")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json?v=" + encodeURIComponent(DATA_VERSION))).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -137,26 +140,64 @@ async function init(){
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
   });
-  await loadPair(0);
+  let pairIdx = 0;
+  const pairParam = PARAMS.get("pair");
+  if (pairParam){
+    const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
+    if (found >= 0) pairIdx = found;
+  } else if (PARAMS.has("pairIndex")) {
+    pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+  }
+  await loadPair(pairIdx);
 }
 
 async function loadPair(i){
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file + "?v=17")).json();
+  if (!p) {
+    $("panel").innerHTML = "<div class='invalid'>Replay pair not found.</div>" +
+      "<div class='hint'>The link points to a pair that is not in <code>" + BASE +
+      "manifest.json</code>. Refresh the report server or rebuild match replays.</div>";
+    return;
+  }
+  $("pairSel").value = String(i);
+  pairData = await (await fetch(BASE + p.file + "?v=" + encodeURIComponent(DATA_VERSION))).json();
   $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
     const w = mt.winner_name || "—";
     return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
   }).join("");
-  selectMatch(0);
+  let matchIdx = 0;
+  const matchParam = PARAMS.get("match");
+  if (matchParam){
+    let found = pairData.episodes.findIndex(mt => String(mt.episode)===matchParam);
+    if (found < 0) found = pairData.episodes.findIndex(mt => String(mt.episode + 1)===matchParam);
+    if (found >= 0) matchIdx = found;
+  } else if (PARAMS.has("matchIndex")) {
+    matchIdx = Math.max(0, Math.min(pairData.episodes.length - 1, +PARAMS.get("matchIndex") || 0));
+  }
+  selectMatch(matchIdx);
 }
 
 function selectMatch(idx){
   match = pairData.episodes[idx];
+  if (!match) {
+    $("panel").innerHTML = "<div class='invalid'>Replay match not found.</div>";
+    return;
+  }
+  $("matchSel").value = String(idx);
   $("handSel").innerHTML = match.hands.map((h,hidx) => {
     const wn = h.winner ? (match.seat_assignment[h.winner]||h.winner) : "split";
     return `<option value="${hidx}">Hand ${h.hand}/${match.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
   }).join("");
-  selectHand(0);
+  let handIdx = 0;
+  const handParam = PARAMS.get("hand");
+  if (handParam){
+    let found = match.hands.findIndex(h => String(h.hand)===handParam);
+    if (found < 0) found = match.hands.findIndex(h => String(h.hand - 1)===handParam);
+    if (found >= 0) handIdx = found;
+  } else if (PARAMS.has("handIndex")) {
+    handIdx = Math.max(0, Math.min(match.hands.length - 1, +PARAMS.get("handIndex") || 0));
+  }
+  selectHand(handIdx);
 }
 
 function fmt(n){ return (n>0?"+":"") + n; }
@@ -169,6 +210,14 @@ function selectHand(hidx){
   cursor = 0;
   btnSeat = hand.button;
   $("slider").max = hand.moves.length;
+  if (PARAMS.has("step")){
+    const stepParam = PARAMS.get("step");
+    if (stepParam === "end" || stepParam === "last") {
+      cursor = hand.moves.length;
+    } else {
+      cursor = Math.max(0, Math.min(hand.moves.length, +stepParam || 0));
+    }
+  }
   render();
 }
 

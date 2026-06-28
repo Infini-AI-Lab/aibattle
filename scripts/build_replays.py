@@ -390,7 +390,34 @@ def build_holdem():
 
 
 MATCH_DIR = "runs/holdem_match"
+MATCH_DIR_GLOBS = [
+    "runs/holdem_match",
+    "runs/source_logs/aibattle-logs/*/holdem_match",
+]
 TABLE_DIR = "runs/holdem_table"
+
+
+def _match_pair_dirs() -> list[str]:
+    dirs = []
+    for root in MATCH_DIR_GLOBS:
+        dirs.extend(d for d in glob.glob(os.path.join(root, "*__vs__*"))
+                    if os.path.isdir(d))
+    return sorted(set(dirs))
+
+
+def _match_replay_filename(pair_dir: str, a: str, b: str) -> str:
+    base = f"match__{a}__vs__{b}"
+    norm = os.path.normpath(pair_dir)
+    parts = norm.split(os.sep)
+    if len(parts) >= 3 and parts[0] == "runs" and parts[1] == "holdem_match":
+        return f"{base}.json"
+    wave = "source"
+    if "aibattle-logs" in parts:
+        idx = parts.index("aibattle-logs")
+        if idx + 1 < len(parts):
+            wave = parts[idx + 1]
+    safe_wave = "".join(c if c.isalnum() or c in "._-" else "_" for c in wave)
+    return f"{base}__{safe_wave}.json"
 
 
 def _think_of(s: dict) -> str:
@@ -451,10 +478,9 @@ def build_match():
     """Heads-up MATCH mode: one file per pairing; a match is many hands with
     carried stacks. The aggregate match_data.json drops steps, so we read the
     per-episode ep*.json files (thinking lives inline in response.raw_output)."""
-    pair_dirs = sorted(d for d in glob.glob(os.path.join(MATCH_DIR, "*__vs__*"))
-                       if os.path.isdir(d))
+    pair_dirs = _match_pair_dirs()
     if not pair_dirs:
-        print(f"skip match: no pair dirs under {MATCH_DIR}")
+        print(f"skip match: no pair dirs under {MATCH_DIR_GLOBS}")
         return
     out_dir = os.path.join(MATCH_DIR, "replays", "match")
     os.makedirs(out_dir, exist_ok=True)
@@ -497,7 +523,7 @@ def build_match():
             man_matches.append({"i": o["episode"], "winner": o.get("winner_name"),
                                 "hands": o.get("hands_played"), "reason": o.get("reason")})
 
-        fname = f"match__{a}__vs__{b}.json"
+        fname = _match_replay_filename(pd, a, b)
         json.dump({"game": "match", "a": a, "b": b, "episodes": matches},
                   open(os.path.join(out_dir, fname), "w", encoding="utf-8"))
         manifest_pairs.append({"file": fname, "a": a, "b": b, "episodes": man_matches})
