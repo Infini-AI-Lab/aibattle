@@ -53,7 +53,7 @@ def _pair_models(pair: dict) -> set:
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -853,6 +853,10 @@ def render_html(rep: dict, beh: dict) -> str:
     <div class="seq">Win-or-lose by design — chips don't count past the match outcome —
     so the <b>Elo rates match wins/losses</b>, opponent-adjusted. Match win rate is the
     headline metric.</div>
+    <div class="seq"><b>What the model sees each turn:</b> the match score (which hand of the cap,
+    and each side's chips), its own two hole cards, the community board, the pot and both stacks,
+    its position, the bet it faces, the legal actions, and the action history — never the
+    opponent's cards.</div>
   </div>
   <h2 class="section">1 · Results — who won</h2>
   <h3>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h3>

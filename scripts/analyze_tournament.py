@@ -39,7 +39,7 @@ HAND_BUCKETS = ("premium", "strong", "playable", "marginal", "trash")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 BETSIZE_BUCKETS = ("small", "medium", "pot", "over")
 SHOWDOWN_CATS = ("high card", "pair", "two pair", "trips", "straight", "flush",
                  "full house")
@@ -468,7 +468,7 @@ def _street_aggr(s, street):
 
 
 def _strategy_analysis(report: dict, ranked: list) -> tuple[str, str]:
-    """Signal-count model cards for the Additional analysis section.
+    """Signal-count model cards for the Analysis section.
 
     Scores are diagnostic leak evidence: each triggered signal adds one point.
     Higher values mean "more to review", not "better strategic skill".
@@ -989,6 +989,9 @@ def render_html(report: dict) -> str:
     model's <b>playing style</b> (VPIP / aggression) and rate skill with a
     <b>chip-weighted, opponent-adjusted Elo</b> — rewarding how much you win, not just
     how often.</div>
+    <div class="seq"><b>What the model sees each turn:</b> its own two hole cards, the community
+    board, the pot and both stacks, its position, the bet it faces, the legal actions, and the
+    action history this hand — never the opponent's cards.</div>
   </div>
 
   <h2 class="section">1 · Results — who won</h2>

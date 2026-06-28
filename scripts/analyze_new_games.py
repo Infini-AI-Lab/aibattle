@@ -94,6 +94,9 @@ INTRO = {
         "edge, a <b>negative field net is expected</b> and short runs are luck-heavy — so "
         "models are ranked by <b>mean profit per hand</b>, not total. Bust / double / "
         "natural rates show how soundly each one plays.</div>"
+        '<div class="seq"><b>What the model sees each turn:</b> its own cards and running total, '
+        "the dealer's up-card, and the legal actions (hit / stand / double) — not the dealer's "
+        "hole card or the rest of the shoe.</div>"
         "</div>"),
     "leduc_poker": (
         '<div class="rules">'
@@ -115,6 +118,9 @@ INTRO = {
         "bluffing, value-betting and pot odds — pairing the board is the nuts, and a "
         "lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so "
         "the size of pots won/lost matters, not just who won the hand.</div>"
+        '<div class="seq"><b>What the model sees each turn:</b> its own private card, the public '
+        "card once it is revealed, the pot and the bets so far, and its legal actions — never the "
+        "opponent's card.</div>"
         "</div>"),
     "repeated_colonel_blotto": (
         '<div class="rules">'
@@ -136,14 +142,18 @@ INTRO = {
         "(equal totals draw). No hidden cards or chance — the difficulty is purely "
         "strategic: spread thin to grab the cheap fields, or stack up to guarantee the "
         "expensive ones, while reading and misdirecting the opponent across rounds.</div>"
+        '<div class="seq"><b>What the model sees each round:</b> the 5 battlefields and their point '
+        "values, its 100-troop budget, and the results of past rounds — not the opponent's current "
+        "allocation (both commit at the same time).</div>"
         "</div>"),
     "othello_lite_6x6": (
         "Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, "
         "most discs at the end wins. Late-game swings make lookahead and stable-disc "
-        "control decisive."),
+        "control decisive. Each turn the model sees the full current board and its legal "
+        "moves (perfect information)."),
 }
 
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 
 
 def _intro_html(game: str) -> str:

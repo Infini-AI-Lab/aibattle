@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script><style>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script><style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
     --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
@@ -115,6 +115,9 @@
     <div class="seq">Ranked by <b>average finishing rank</b> (lower is better), which
     rewards consistent finishes; top-1 rate is shown alongside but over-rewards
     high-variance, boom-or-bust play.</div>
+    <div class="seq"><b>What the model sees each turn:</b> its own two hole cards, the community
+    board, the pot and every player's stack, its position, the bet it faces, the legal actions, and
+    the action history — never any opponent's cards.</div>
   </div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>

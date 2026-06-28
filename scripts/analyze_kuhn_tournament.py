@@ -43,7 +43,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # this page includes those two files in <head> via NAV_HEAD and the bar is
 # injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 
 _STYLE = BASE_CSS + """
   a { text-decoration:none; } a:hover { text-decoration:underline; }
@@ -282,6 +282,8 @@ def render_html(rep: dict) -> str:
     </ul>
     <div class="seq">Every hand is one of five lines: <code>check-check</code>, <code>check-bet-fold</code>,
     <code>check-bet-call</code>, <code>bet-fold</code>, or <code>bet-call</code> — so a player makes ~1–2 decisions per hand.</div>
+    <div class="seq"><b>What the model sees each turn:</b> its own private card, the betting so far, the
+    pot, and its legal actions — never the opponent's card.</div>
   </div>
 
   <div class="callout">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash

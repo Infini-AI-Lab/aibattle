@@ -28,7 +28,7 @@ REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -107,6 +107,9 @@ def render_html(rep: dict, beh: dict) -> str:
     <div class="seq">Ranked by <b>average finishing rank</b> (lower is better), which
     rewards consistent finishes; top-1 rate is shown alongside but over-rewards
     high-variance, boom-or-bust play.</div>
+    <div class="seq"><b>What the model sees each turn:</b> its own two hole cards, the community
+    board, the pot and every player's stack, its position, the bet it faces, the legal actions, and
+    the action history — never any opponent's cards.</div>
   </div>
   <div class="grid2">
     <div><h2>Average rank</h2><canvas id="ar"></canvas></div>

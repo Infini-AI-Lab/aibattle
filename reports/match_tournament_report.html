@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Match Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script><style>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script><style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
     --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
@@ -182,6 +182,10 @@
     <div class="seq">Win-or-lose by design — chips don't count past the match outcome —
     so the <b>Elo rates match wins/losses</b>, opponent-adjusted. Match win rate is the
     headline metric.</div>
+    <div class="seq"><b>What the model sees each turn:</b> the match score (which hand of the cap,
+    and each side's chips), its own two hole cards, the community board, the pot and both stacks,
+    its position, the bet it faces, the legal actions, and the action history — never the
+    opponent's cards.</div>
   </div>
   <h2 class="section">1 · Results — who won</h2>
   <h3>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h3>

@@ -3,7 +3,7 @@
 <title>AI Battle Arena — ⚫ Othello 6×6</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -100,7 +100,7 @@
   <h1>$ ~/aibattle/othello<span class="cursor"></span></h1>
   <div class="sub">⚫ Othello 6×6 · Perfect-information board game · 6×6 board · round-robin, seat-swapped · 500 games</div>
   <a class="replaybtn" href="othello_replay.html?v=17">▶ watch game replays</a>
-  <div class="callout">Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, most discs at the end wins. Late-game swings make lookahead and stable-disc control decisive.</div>
+  <div class="callout">Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, most discs at the end wins. Late-game swings make lookahead and stable-disc control decisive. Each turn the model sees the full current board and its legal moves (perfect information).</div>
 
   <div class="kpis">
     <div class="kpi"><div class="v">1645</div><div class="l">top Elo · kimi-k2p6</div></div>

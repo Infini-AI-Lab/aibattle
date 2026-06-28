@@ -80,6 +80,8 @@ INTRO = {
         "has a known best move — which lets us score <b>tactical accuracy</b> directly: "
         "did the model take an available immediate win, and did it block the opponent's "
         "immediate winning threat?</div>"
+        '<div class="seq"><b>What the model sees each turn:</b> the full current board, whose '
+        "turn it is, and the legal (non-full) columns — perfect information.</div>"
         "</div>"),
     "gomoku": (
         '<div class="rules">'
@@ -99,6 +101,8 @@ INTRO = {
         "Connect Four there's no hidden information or chance, so we score "
         "<b>tactical accuracy</b>: did the model complete an available five (win-take) "
         "and block the opponent's immediate five-threat (block rate)?</div>"
+        '<div class="seq"><b>What the model sees each turn:</b> the full current board, whose '
+        "turn it is, and that any empty cell is a legal move — perfect information.</div>"
         "</div>"),
 }
 
@@ -119,7 +123,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=29"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
 
 
 def _other(p):
@@ -549,7 +553,7 @@ def _why_analysis(game: str) -> str:
 
 def render_game(game: str, rep: dict) -> str:
     """Conclusion-first layout in three sections: (1) Results — who won,
-    (2) Why — what separates them, (3) Additional analysis."""
+    (2) Why — what separates them, (3) Analysis."""
     payload = json.dumps(rep)
     pm = rep["per_model"]
     models = rep["models"]
@@ -648,7 +652,7 @@ def render_game(game: str, rep: dict) -> str:
   </div>
   {_why_analysis(game)}
 
-  <h2 class="section">3 · Additional analysis</h2>
+  <h2 class="section">3 · Analysis</h2>
   <div class="grid2">
     <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
     <div></div>
@@ -762,8 +766,21 @@ def _arena_elo_scores(entries: list) -> dict:
     return out
 
 
+_EXCLUDE_OVERVIEW = {"gpt-oss-120b"}   # kept off the cross-game ranking (incomplete schedule)
+
+
 def _arena_board(entries: list) -> str:
-    arena_entries = [e for e in entries if e["key"] in ARENA_GAMES]
+    # Drop excluded models from each game's ranking/ratings so the cross-game
+    # ranks and per-game z-scores are recomputed without them.
+    arena_entries = []
+    for e in entries:
+        if e["key"] not in ARENA_GAMES:
+            continue
+        fe = dict(e)
+        fe["ranking"] = [m for m in e.get("ranking", []) if m not in _EXCLUDE_OVERVIEW]
+        fe["ratings"] = {m: v for m, v in (e.get("ratings") or {}).items()
+                         if m not in _EXCLUDE_OVERVIEW}
+        arena_entries.append(fe)
     rows = _arena_scores(arena_entries)
     if not rows:
         return ""
@@ -969,7 +986,8 @@ def render_index(reps: dict) -> str:
     <div class="arena-head"><h2>🤖 Model Arena</h2>
       <span class="arena-tag">fair · one identical generic pipeline</span></div>
     <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
-      measures the model, not the scaffolding.</div>
+      measures the model, not the scaffolding. <b>Open-weight models are served via
+      Fireworks AI</b>; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
     <div class="group-label perfect">♟ Perfect information
       <span class="gl-sub">full state visible · deterministic</span></div>
     {_group("perfect")}
