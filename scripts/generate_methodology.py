@@ -123,6 +123,9 @@ def render(rows) -> str:
       .formula { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
         padding:10px 14px; margin:10px 0; font-size:13px; }
       ul.tight li { margin:5px 0; } ul.tight { margin:8px 0; }
+      .qa { margin:16px 0; font-size:13px; line-height:1.6; }
+      .qa > b:first-child { display:block; color:var(--red); margin-bottom:3px; font-size:14px; }
+      .qa .formula { margin:7px 0; display:inline-block; }
     """
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
@@ -186,6 +189,70 @@ def render(rows) -> str:
   scores. The board games and Blotto have a clear hierarchy and only a close gold/silver, so they carry
   most of the real signal. Bottom line: trust the broad tiers, not the exact rank of two adjacent
   models — and especially not the order inside the poker games' top group.</p>
+
+  <h2>📖 Metrics &amp; terms <span class="note">(plain-language Q&amp;A for the Hold'em deep-dives)</span></h2>
+  <p class="note">The poker pages use a few standard metrics and a few custom ones. Here is what each means,
+  in plain terms.</p>
+
+  <div class="qa"><b>What does “aggression” mean?</b>
+  How often a model attacks instead of going along with the action — used identically on every page:
+  <span class="formula">aggression = (bet + raise + all-in) ÷ (bet + raise + all-in + call + check)</span>
+  Folds are not counted. 0% = never bets/raises (pure caller); 100% = always bets/raises.</div>
+
+  <div class="qa"><b>What is “r” (correlation)?</b>
+  The Pearson correlation between a metric and match win rate across the models, from −1 to +1:
+  <b>+0.9</b> ≈ move together almost perfectly, <b>+0.6</b> = clearly related, <b>0</b> = unrelated,
+  <b>negative</b> = move in opposite directions. With only ~11 models, read |r| above ~0.58 as a real
+  signal and smaller values as weak.</div>
+
+  <div class="qa"><b>What is “equity”?</b>
+  A hand's chance of winning if all the cards were dealt out, estimated by simulation (deal the opponent a
+  random hand, finish the board, repeat thousands of times). Caveat: the opponent's real cards are never in
+  the logs, so equity is computed <b>vs a random hand</b>, not their actual range — a rough, range-free
+  proxy. That is why the equity-based “Decision quality” block is labelled <b>experimental</b>.</div>
+
+  <div class="qa"><b>How is a “bluff” detected?</b>
+  A bet/raise/all-in made with a weak hand — specifically when the model's equity (vs random) is below 40%,
+  so it is betting a hand that is probably behind, to push the opponent off. <b>bluff success</b> = of those
+  bluffs, how often the opponent actually folds. (Pure bluffs and semi-bluffs are lumped together, and 40%
+  is a chosen cut-off.)</div>
+
+  <div class="qa"><b>What does “bully weak opponents” mean?</b>
+  Whether a model attacks <b>passive</b> opponents (those who rarely bet/raise) harder than the aggressive
+  ones. We compare its aggression against the passive half of opponents vs the aggressive half; a positive
+  <b>bully gap</b> means it ramps up against soft opponents — the smart, exploitative move.</div>
+
+  <div class="qa"><b>What is the “gear-shift” (ahead vs behind)?</b>
+  How a model changes when it is losing on chips. Strong players, when behind, <b>raise more</b> and
+  <b>fold less</b> (they fight for pots); weak players play the same whether ahead or behind. Each cell shows
+  the value when ahead → when behind.</div>
+
+  <div class="qa"><b>Win rate vs Elo — why are they different?</b>
+  <b>Win rate</b> is just the share of matches won. <b>Elo</b> is opponent-adjusted — beating strong
+  opponents is worth more than beating weak ones, and it accounts for who each model actually played. A model
+  can have a decent raw win rate but a lower Elo if its wins came against weaker opposition, so the
+  leaderboards are ordered by Elo as the fairer ranking.</div>
+
+  <div class="qa"><b>What do the match win/loss bar colours mean?</b>
+  Every match ends one of four ways: <b>bust-win</b> (busted the opponent), <b>cap-win</b> (led on chips
+  after 30 hands), <b>cap-lose</b> (behind on chips at the cap — ground down), <b>bust-out</b> (lost the whole
+  stack). The bar splits each model's matches into these, wins on the left.</div>
+
+  <div class="qa"><b>What is the lead-trajectory heatmap?</b>
+  For each hand 1→30, the share of matches in which the model is ahead on chips. Green = usually ahead, red =
+  usually behind. A row that stays green = a wire-to-wire leader; green fading to red = it builds a lead then
+  gets ground down.</div>
+
+  <div class="qa"><b>Pressure $ vs Showdown $ (the blue/red line)?</b>
+  Where a model's chips come from. <b>Pressure $</b> = chips won <i>without</i> a showdown (opponents folded —
+  winning by aggression). <b>Showdown $</b> = chips won <i>at</i> showdown (winning with the best hand). The
+  two add up to its chips/hand.</div>
+
+  <div class="qa"><b>Common poker shorthand</b>
+  <b>bb/100</b> = big blinds won per 100 hands (the standard win-rate unit). <b>VPIP</b> = how often it
+  voluntarily plays a hand preflop (looseness). <b>PFR</b> = how often it raises preflop. <b>WTSD</b> = went
+  to showdown. <b>W$SD</b> = won money at showdown. <b>fold-to-bet</b> = how often it folds when an opponent
+  bets into it.</div>
 
   <h2>Limitations</h2>
   <ul class="tight note">
