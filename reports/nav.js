@@ -20,7 +20,7 @@
   var ACTIVE = {
     oss: {
       "index.html": "index.html",
-      "methodology.html": "methodology.html",
+      "qa.html": "qa.html",
       "connect4_report.html": "connect4_report.html",
       "connect4_replay.html": "connect4_report.html",
       "gomoku_report.html": "gomoku_report.html",
@@ -68,18 +68,18 @@
     '<a class="brand" href="' + P.oss + 'index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
     a("index.html", "Overview", "nav navtop", "oss") +
 
-    // Single arena now — perfect- and imperfect-info game groups, no top label.
-    '<span class="navclust">Perfect-info/</span>' +
-    a("connect4_report.html", "Connect4", "nav navsub", "oss") +
-    a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
+    // Single arena now — imperfect- and perfect-info game groups, no top label.
     '<span class="navclust">Imperfect-info/</span>' +
     a("holdem_tournament_report.html", "Holdem 1hand", "nav navsub", "oss") +
     a("match_tournament_report.html", "Holdem Match", "nav navsub", "oss") +
-    a("table_tournament_report.html", "Holdem Table", "nav navsub", "oss") +
     a("leduc_report.html", "Leduc Holdem", "nav navsub", "oss") +
     a("kuhn_tournament_report.html", "Kuhn", "nav navsub", "oss") +
     a("blotto_report.html", "Blotto", "nav navsub", "oss") +
-    a("blackjack_report.html", "Blackjack", "nav navsub", "oss");
+    a("blackjack_report.html", "Blackjack", "nav navsub", "oss") +
+    '<span class="navclust">Perfect-info/</span>' +
+    a("connect4_report.html", "Connect4", "nav navsub", "oss") +
+    a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
+    a("qa.html", "Q&A", "nav navtop", "oss");
 
   function mount() {
     var nav = document.querySelector("nav.navbar");
