@@ -775,8 +775,9 @@ def render_html(report: dict) -> str:
     if bystreet_rows:
         fold_pos_html += f"""
   <h2>🔨 Aggression &amp; fold-induced by street</h2>
-  <div class="note">Per street, two paired numbers: <b style="color:#b45309">fire</b> = how often the model
-    bets/raises (its own aggression, amber); <b style="color:#1a7f37">fold</b> = how often the opponent
+  <div class="note">Per street, two paired numbers: <b style="color:#b45309">fire</b> = aggression =
+    (bet+raise+all-in) ÷ (bet+raise+all-in+call+check), folds excluded (its own aggression, amber);
+    <b style="color:#1a7f37">fold</b> = how often the opponent
     then folds to that bet (whether the pressure works, green). Read them together — a model that
     <b>keeps firing AND forces folds into the turn/river</b> (GPT 5.5) is the credible aggressor; one that
     <b>fires but gets called</b> (GPT 5.4 on the river) is bluffing into showdown. GPT models listed first.</div>
@@ -805,7 +806,8 @@ def render_html(report: dict) -> str:
   <h2>🎯 Positional play <span class="note">(in position vs out of position)</span></h2>
   <div class="note">Heads-up, the <b>button/SB</b> acts last postflop (in position) — strong players open
     up there and tighten in the <b>BB</b> (out of position). A large <b>VPIP gap</b> (button − BB) plus
-    more button aggression means it understands position.</div>
+    more button aggression means it understands position. <b>aggr</b> = (bet+raise+all-in) ÷
+    (bet+raise+all-in+call+check), folds excluded.</div>
   <table>
     <tr><th class='model'>model</th><th>button VPIP</th><th>BB VPIP</th><th>VPIP gap</th>
         <th>button aggr</th><th>BB aggr</th></tr>

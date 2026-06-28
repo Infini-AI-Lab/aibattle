@@ -92,7 +92,7 @@
       "hands": 3554,
       "vpip": 0.324,
       "pfr": 0.199,
-      "aggression": 0.608,
+      "aggression": 0.397,
       "fold_to_bet": 0.64,
       "allin_rate": 0.009,
       "avg_betsize": 1.38,
@@ -110,10 +110,10 @@
         "all_in": 0.009
       },
       "street_aggr": {
-        "preflop": 0.192,
-        "flop": 0.275,
-        "turn": 0.237,
-        "river": 0.165
+        "preflop": 0.518,
+        "flop": 0.348,
+        "turn": 0.288,
+        "river": 0.204
       }
     },
     "gpt-oss-120b": {
@@ -121,7 +121,7 @@
       "hands": 3641,
       "vpip": 0.364,
       "pfr": 0.204,
-      "aggression": 0.628,
+      "aggression": 0.434,
       "fold_to_bet": 0.622,
       "allin_rate": 0.015,
       "avg_betsize": 1.63,
@@ -139,10 +139,10 @@
         "all_in": 0.015
       },
       "street_aggr": {
-        "preflop": 0.2,
-        "flop": 0.334,
-        "turn": 0.299,
-        "river": 0.254
+        "preflop": 0.497,
+        "flop": 0.422,
+        "turn": 0.369,
+        "river": 0.295
       }
     },
     "kimi-k2p6": {
@@ -150,7 +150,7 @@
       "hands": 3734,
       "vpip": 0.332,
       "pfr": 0.218,
-      "aggression": 0.575,
+      "aggression": 0.37,
       "fold_to_bet": 0.619,
       "allin_rate": 0.008,
       "avg_betsize": 1.6,
@@ -168,10 +168,10 @@
         "all_in": 0.008
       },
       "street_aggr": {
-        "preflop": 0.207,
-        "flop": 0.209,
-        "turn": 0.203,
-        "river": 0.133
+        "preflop": 0.543,
+        "flop": 0.266,
+        "turn": 0.24,
+        "river": 0.154
       }
     },
     "glm-5p1": {
@@ -179,7 +179,7 @@
       "hands": 3721,
       "vpip": 0.353,
       "pfr": 0.187,
-      "aggression": 0.564,
+      "aggression": 0.382,
       "fold_to_bet": 0.613,
       "allin_rate": 0.008,
       "avg_betsize": 1.41,
@@ -197,10 +197,10 @@
         "all_in": 0.008
       },
       "street_aggr": {
-        "preflop": 0.178,
-        "flop": 0.265,
-        "turn": 0.301,
-        "river": 0.205
+        "preflop": 0.449,
+        "flop": 0.335,
+        "turn": 0.368,
+        "river": 0.244
       }
     },
     "minimax-m2p7": {
@@ -208,7 +208,7 @@
       "hands": 3067,
       "vpip": 0.577,
       "pfr": 0.231,
-      "aggression": 0.519,
+      "aggression": 0.384,
       "fold_to_bet": 0.397,
       "allin_rate": 0.018,
       "avg_betsize": 1.38,
@@ -226,10 +226,10 @@
         "all_in": 0.018
       },
       "street_aggr": {
-        "preflop": 0.213,
-        "flop": 0.362,
-        "turn": 0.387,
-        "river": 0.3
+        "preflop": 0.35,
+        "flop": 0.412,
+        "turn": 0.442,
+        "river": 0.339
       }
     }
   }

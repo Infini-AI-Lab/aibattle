@@ -100,7 +100,9 @@ def accumulate(stats: dict, ep: dict, hand_key: str) -> None:
             players_in.add(p)
             st["decisions"] += 1
             st["acts"][act] += 1
-            if street in st["by_street"]:
+            if street in st["by_street"] and act != "fold":
+                # aggression = bet/raise/all-in over voluntary actions; folds are
+                # excluded from the denominator (call + check + bet/raise/all-in).
                 st["by_street"][street]["n"] += 1
                 if act in AGGRO:
                     st["by_street"][street]["aggr"] += 1
@@ -161,7 +163,8 @@ def _finalize(st: dict) -> dict:
         "decisions": st["decisions"], "hands": st["hands"],
         "vpip": rate(st["vpip"], st["pf_hands"]),
         "pfr": rate(st["pfr"], st["pf_hands"]),
-        "aggression": rate(st["bet_raise"], st["bet_raise"] + st["calls"]),
+        "aggression": rate(st["bet_raise"],
+                           st["bet_raise"] + st["calls"] + st["acts"]["check"]),
         "fold_to_bet": rate(st["fold_facing_bet"], st["facing_bet"]),
         "allin_rate": rate(st["allin"], dec),
         "avg_betsize": round(sum(st["betsize_ratios"]) / len(st["betsize_ratios"]), 2)
@@ -241,7 +244,8 @@ def profile_table(beh: dict, models: list) -> str:
         "<th>WTSD</th><th>W@SD</th><th>hand-win</th><th>tokens/dec</th></tr>\n"
         f"  {rows}\n</table>\n"
         "<div class=\"note\">VPIP = voluntarily entered the pot preflop (looseness). "
-        "PFR = preflop raise. aggr = bet+raise share of bet/raise/call. "
+        "PFR = preflop raise. <b>aggr</b> = aggression = (bet+raise+all-in) ÷ "
+        "(bet+raise+all-in+call+check); folds are excluded. "
         "fold→bet = folds when facing a bet. bet size = avg bet/raise as a multiple of the pot. "
         "WTSD = went to showdown; W@SD = won at showdown. "
         "hand-win = share of hands that netted chips. tokens/dec = avg reasoning tokens per decision.</div>\n")
@@ -262,23 +266,47 @@ def behavior_charts(beh: dict, models: list) -> str:
         {"label": a, "data": [round(beh[m]["action_mix"].get(a, 0) * 100, 1) for m in models],
          "backgroundColor": ACTION_COLORS[a]}
         for a in ("fold", "check", "call", "bet", "raise", "all_in")]
-    street_ds = [
-        {"label": display_name(m), "data": [round(beh[m]["street_aggr"][s] * 100, 1) for s in STREETS],
-         "borderColor": color_for(m), "backgroundColor": color_for(m),
-         "tension": 0.3, "fill": False}
-        for m in models]
     tokens = [beh[m]["avg_tokens"] for m in models]
+
+    # Aggression-by-street as a heatmap (one row per model, 4 street columns)
+    # instead of N overlapping lines. Colour = aggression %, white→amber.
+    def _agheat(v):
+        t = min(1.0, (v or 0) / 0.6)
+        base, hot = (247, 244, 238), (180, 83, 9)
+        rgb = tuple(round(base[i] + (hot[i] - base[i]) * t) for i in range(3))
+        return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}", ("#fff" if t >= 0.55 else "#1c1c1c")
+    bs_head = "".join(f"<span class='bs-h'>{s}</span>" for s in STREETS)
+    bs_rows = ""
+    for m in models:
+        cells = ""
+        for s in STREETS:
+            v = beh[m]["street_aggr"][s]
+            bg, fg = _agheat(v)
+            cells += (f"<span class='bs-cell' style='background:{bg};color:{fg}' "
+                      f"title='{s}: {v*100:.0f}%'>{v*100:.0f}</span>")
+        bs_rows += (f"<div class='bs-row'><span class='bs-name'>{logo_img(m)}{_swatch(m)}"
+                    f"{display_name(m)}</span>{cells}</div>")
+    street_heat = (
+        "<style>.bs-heat{display:flex;flex-direction:column;gap:2px;margin-top:6px}"
+        ".bs-row{display:grid;grid-template-columns:150px repeat(4,1fr);gap:1px;align-items:center}"
+        ".bs-name{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}"
+        ".bs-h{text-align:center;font-size:10px;color:#6b6b6b}"
+        ".bs-cell{text-align:center;font-size:11px;padding:4px 0;border-radius:1px;font-variant-numeric:tabular-nums}"
+        "</style>"
+        f"<div class='bs-heat'><div class='bs-row'><span class='bs-name'></span>{bs_head}</div>{bs_rows}</div>")
 
     j = json.dumps
     return f"""
-  <h2>🎭 Style map <span class="note">(VPIP vs aggression — top-right = loose &amp; aggressive)</span></h2>
+  <h2>🎭 Style map <span class="note">(VPIP vs aggression — top-right = loose &amp; aggressive;
+    aggression = (bet+raise+all-in) ÷ (bet+raise+all-in+call+check), folds excluded)</span></h2>
   <div class="grid2">
     <div><canvas id="behStyle"></canvas></div>
     <div><h2 style="margin-top:0">🧮 Thinking effort <span class="note">(avg reasoning tokens / decision)</span></h2><canvas id="behTokens"></canvas></div>
   </div>
   <div class="grid2">
     <div><h2>🃏 Action mix <span class="note">(% of all decisions)</span></h2><canvas id="behMix"></canvas></div>
-    <div><h2>📈 Aggression by street</h2><canvas id="behStreet"></canvas></div>
+    <div><h2>📈 Aggression by street <span class="note">(aggression = (bet+raise+all-in) ÷
+      (bet+raise+all-in+call+check), folds excluded; darker = more aggressive)</span></h2>{street_heat}</div>
   </div>
   <script>
   {{
@@ -295,10 +323,6 @@ def behavior_charts(beh: dict, models: list) -> str:
     data:{{labels:{j(short)},datasets:{j(mix_ds)}}},
     options:{{plugins:{{legend:{{labels:{{color:'#1c1c1c'}}}}}},
       scales:{{x:{{stacked:true,...AXC}},y:{{stacked:true,max:100,...AXC}}}}}}}});
-  new Chart(document.getElementById('behStreet'),{{type:'line',
-    data:{{labels:{j(STREETS)},datasets:{j(street_ds)}}},
-    options:{{plugins:{{legend:{{labels:{{color:'#1c1c1c'}}}}}},
-      scales:{{y:{{beginAtZero:true,max:100,title:{{display:true,text:'aggression %',color:'#6b6b6b'}},...AXC}},x:AXC}}}}}});
   }}
   </script>
 """
