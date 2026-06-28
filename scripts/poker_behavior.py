@@ -178,9 +178,15 @@ def _finalize(st: dict) -> dict:
     }
 
 
-def behavior(ep_glob: str | list[str], hand_key: str, models: list) -> dict:
-    """Return {model: finalized behavior stats} over all matching ep files."""
+def behavior(ep_glob: str | list[str], hand_key: str, models: list, exclude=()) -> dict:
+    """Return {model: finalized behavior stats} over all matching ep files.
+
+    ``exclude`` is a set of model names; any episode whose seat assignment
+    includes an excluded model is skipped entirely, so the remaining models'
+    stats are not contaminated by games against a dropped opponent.
+    """
     stats = {m: _blank() for m in models}
+    exclude = set(exclude)
     patterns = [ep_glob] if isinstance(ep_glob, str) else ep_glob
     paths = []
     for pattern in patterns:
@@ -189,6 +195,8 @@ def behavior(ep_glob: str | list[str], hand_key: str, models: list) -> dict:
         try:
             ep = strip_coached(json.load(open(path, encoding="utf-8")))
         except (OSError, json.JSONDecodeError):
+            continue
+        if exclude and exclude & set((ep.get("seat_assignment") or {}).values()):
             continue
         accumulate(stats, ep, hand_key)
     return {m: _finalize(stats[m]) for m in models}

@@ -619,7 +619,7 @@ def render_game(game: str, rep: dict) -> str:
 
   {_intro_html(game)}
 
-  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <h2 class="section">1 · Results — who won</h2>
   <div class="kpis">
     <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
     <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
@@ -641,14 +641,14 @@ def render_game(game: str, rep: dict) -> str:
   <h3>⚔️ Head-to-head (row wins–losses vs column)</h3>
   <table class='h2h'>{hh}</table>
 
-  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
+  <h2 class="section">2 · Why — what decides win &amp; loss</h2>
   <div class="grid2">
     <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
     <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
   </div>
   {_why_analysis(game)}
 
-  <h2 class="section">3 · 🔬 Additional analysis</h2>
+  <h2 class="section">3 · Additional analysis</h2>
   <div class="grid2">
     <div><h3>Game-length distribution (plies)</h3><canvas id="len"></canvas></div>
     <div></div>

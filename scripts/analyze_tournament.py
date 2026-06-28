@@ -989,7 +989,7 @@ def render_html(report: dict) -> str:
     how often.</div>
   </div>
 
-  <h2 class="section">1 · 🏆 Results — who won</h2>
+  <h2 class="section">1 · Results — who won</h2>
   <h3>Leaderboard</h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>style</th><th>Elo</th><th>chips/hand</th><th>bb/100</th>
@@ -1019,7 +1019,7 @@ def render_html(report: dict) -> str:
     (normalized by hands played, since pairs played different counts; sums to zero per pair).</div>
   <table class="h2h">{hh}</table>
 
-  <h2 class="section">2 · 🔍 Why — what makes a model win or lose</h2>
+  <h2 class="section">2 · Why — what makes a model win or lose</h2>
   <div class="strategy-intro">
     <b>Two ways to win, one way to lose.</b> Chips come from two places:
     <span class="pos">Pressure</span> — winning pots <i>without</i> showdown by folding
@@ -1041,7 +1041,7 @@ def render_html(report: dict) -> str:
 
   {strategy_html}
 
-  <h2 class="section">3 · 🔬 Analysis</h2>
+  <h2 class="section">3 · Analysis</h2>
   {fold_pos_html}
   <h2>♟️ Action tendencies</h2>
   <canvas id="actions"></canvas>
@@ -1185,8 +1185,16 @@ const QUAD = {json.dumps(quad_pts)};
 </div></body></html>"""
 
 
+EXCLUDE_HOLDEM = {"gpt-oss-120b"}   # dropped for an incomplete schedule (no GPT 5.5 / 5.4 games)
+
+
 def main():
     data = strip_coached(json.load(open(DATA)))
+    # Remove GPT-OSS and every game it played, then re-aggregate so the remaining
+    # models' chips / win rate / Elo / h2h are computed gpt-oss-free.
+    data["models"] = [m for m in data["models"] if m not in EXCLUDE_HOLDEM]
+    data["games"] = [g for g in data["games"]
+                     if g["a"] not in EXCLUDE_HOLDEM and g["b"] not in EXCLUDE_HOLDEM]
     report = analyze(data)
     html = render_html(report)
     with open(OUT, "w", encoding="utf-8") as f:

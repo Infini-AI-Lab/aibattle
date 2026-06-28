@@ -37,6 +37,19 @@ EP_GLOBS = [
 OUT_HTML = "runs/holdem_match/match_report.html"
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
+# Models dropped from the Hold'em reports for incomplete schedules (see main()).
+EXCLUDE_HOLDEM = {"gpt-oss-120b"}
+
+
+def _pair_models(pair: dict) -> set:
+    """The two model names a pair is between (robust to missing a/b keys)."""
+    if pair.get("a") and pair.get("b"):
+        return {strip_coached(pair["a"]), strip_coached(pair["b"])}
+    ms = set()
+    for e in pair.get("episodes", []):
+        ms |= {strip_coached(v) for v in (e.get("seat_assignment") or {}).values()}
+    return ms
+
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
@@ -53,7 +66,8 @@ _STYLE = BASE_CSS + """
   td.hh { font-weight:700; }
   td.hh .rec { display:block; font-weight:400; font-size:11px; color:var(--dim); margin-top:1px; }
   .strategy-intro { background:var(--faint); border:1px solid var(--line);
-    padding:14px 16px; margin:8px 0 18px; }
+    border-left:3px solid var(--red); padding:12px 14px; margin:12px 0 18px;
+    font-size:13px; line-height:1.55; }
   .strategy-glossary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
     gap:10px 16px; margin-top:12px; }
   .strategy-gloss { border-top:1px solid var(--line); padding-top:7px; }
@@ -78,7 +92,39 @@ _STYLE = BASE_CSS + """
   .case-link { display:inline-block; margin-top:5px; border:1px solid var(--line);
     padding:3px 8px; color:#4338ca; text-decoration:none; }
   .case-link:hover { border-color:var(--red); color:var(--fg); }
-  @media (max-width:860px) { .strategy-grid, .strategy-glossary { grid-template-columns:1fr; } }
+  .pl-verdict { margin:2px 0 8px; font-size:12.5px; line-height:1.45; color:var(--fg); }
+  .pl-attr { margin:0 0 10px; font-size:11px; }
+  .pl-row { display:flex; align-items:center; gap:7px; margin:4px 0; }
+  .pl-lbl { width:84px; color:var(--dim); white-space:nowrap; }
+  .pl-track { position:relative; flex:1; height:13px; background:var(--faint);
+    border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+  .pl-val { width:40px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
+  .metric-profile-layout { margin-top:4px; }
+  .metric-profile-layout canvas { width:100% !important; max-height:230px; }
+  /* win/loss-outcome bar (replaces the radar): one stacked bar per model */
+  .wl-bar { display:flex; height:26px; border:1px solid var(--line); border-radius:3px;
+    overflow:hidden; margin:2px 0 8px; background:var(--faint); }
+  .wl-bar i { display:block; height:100%; }
+  .wl-legend { display:flex; flex-wrap:wrap; gap:3px 12px; font-size:11px; color:var(--dim); }
+  .wl-legend i, .wl-key i { display:inline-block; width:10px; height:10px; border-radius:2px;
+    margin-right:4px; vertical-align:-1px; }
+  .wl-key { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 18px;
+    margin:10px 0; font-size:12px; }
+  /* lead-trajectory heatmap: one row per model, 30 hand-blocks coloured by lead% */
+  .lt-heat { display:flex; flex-direction:column; gap:2px; margin-top:10px; }
+  .lt-row { display:grid; grid-template-columns:188px repeat(30,1fr); gap:1px; align-items:center; }
+  .lt-name { display:flex; align-items:center; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; padding-right:8px; font-size:12px; }
+  .lt-wr { margin-left:auto; padding-left:8px; font-variant-numeric:tabular-nums; }
+  .lt-cell { height:20px; border-radius:1px; }
+  .lt-h { text-align:center; color:var(--dim); font-size:9px; align-self:end; }
+  .lt-head .lt-name { color:var(--dim); font-size:10px; }
+  .lt-scale { display:flex; align-items:center; gap:8px; margin:8px 0 2px; font-size:11px; color:var(--dim); }
+  .lt-grad { display:inline-block; width:180px; height:12px; border:1px solid var(--line); border-radius:2px;
+    background:linear-gradient(to right,#c0392b,#f7f4ee,#1a7f37); }
+  .lt-mid { margin-left:4px; }
+  @media (max-width:860px) { .lt-row { grid-template-columns:120px repeat(30,1fr); } }
+  @media (max-width:860px) { .strategy-grid, .strategy-glossary, .wl-key { grid-template-columns:1fr; } }
 """
 
 
@@ -340,207 +386,188 @@ def _match_strategy(data: dict, models: list[str]) -> dict:
     return s
 
 
-def _match_strategy_html(report: dict) -> tuple[str, str]:
+def _match_verdict(st, fac, lbwin_m, bo_hi, bo_lo):
+    """One-line verdict from well-sampled signals; short-stack only if n>=30."""
+    mt = st.get("matches", 1) or 1
+    bo = st.get("bust_outs", 0) / mt
+    dp = (fac.get("by_depth", {}).get("deep") or {}).get("agg")
+    sh = (fac.get("by_depth", {}).get("short") or {})
+    s, sn = sh.get("agg"), sh.get("n", 0)
+    ah = (fac.get("by_lead", {}).get("ahead") or {}).get("agg")
+    bh = (fac.get("by_lead", {}).get("behind") or {}).get("agg")
+    tag = "Strong" if lbwin_m >= 0.55 else ("Weak" if lbwin_m <= 0.43 else "Mid")
+    parts = []
+    if dp is not None and dp <= 0.22:
+        parts.append("very passive (rarely raises)")
+    elif dp is not None and dp >= 0.38:
+        parts.append("aggressive")
+    if bo >= bo_hi:
+        parts.append("high-variance (busts out a lot)")
+    elif bo <= bo_lo:
+        parts.append("steady (rarely busts out)")
+    if ah is not None and bh is not None and bh - ah >= 0.12:
+        parts.append("fights back when behind")
+    if s is not None and sn >= 30:
+        if s >= 0.45:
+            parts.append(f"shoves when short ({s*100:.0f}%)")
+        elif s <= 0.18:
+            parts.append(f"freezes when short ({s*100:.0f}%)")
+    return f"<b>{tag}</b>" + (" — " + "; ".join(parts) if parts else "") + "."
+
+
+def _match_cases_html(report):
+    """Replay-linked per-model evidence (kept as a Section 3 deep-dive)."""
     models = [r["model"] for r in report["leaderboard"]]
     stats = report["strategy"]
-    dims = [
-        ("pressure", "Stack pressure"),
-        ("recovery", "Recovery"),
-        ("volatility", "Volatility control"),
-        ("position", "Position use"),
-        ("pacing", "Match pacing"),
-        ("adapt", "Adaptation"),
-    ]
-    dim_help = {
-        "Stack pressure": {
-            "meaning": "Does the agent convert a chip lead into match wins instead of giving the lead back?",
-            "signals": "lead at checkpoint but lost, low bust-win share, small win margin",
-        },
-        "Recovery": {
-            "meaning": "Does it stabilize after falling behind, or does an early deficit become deterministic loss?",
-            "signals": "low comeback rate from <=160 chips, poor deficit survival, high bust-out share",
-        },
-        "Volatility control": {
-            "meaning": "Does it avoid one-hand collapses that erase a whole match?",
-            "signals": "large losing hands, high max drawdown, bust-outs, high big-loss rate",
-        },
-        "Position use": {
-            "meaning": "Does it understand that BTN/SB should usually be the profitable, initiative seat heads-up?",
-            "signals": "negative button EV, BB outperforming button, weak button-vs-BB gap",
-        },
-        "Match pacing": {
-            "meaning": "Does the agent close when ahead and avoid late-match decay?",
-            "signals": "late net worse than early net, many max-hand wins/losses, low bust conversion",
-        },
-        "Adaptation": {
-            "meaning": "Does it change after the previous hand, or keep following a template through momentum shifts?",
-            "signals": "negative next-hand response after big losses, frequent lead changes, repeated losses",
-        },
-    }
-
-    def rate(num, den):
-        return num / den if den else 0.0
-
-    vals = {
-        "big_loss": [rate(stats[m]["big_loss"], stats[m]["hands"]) for m in models],
-        "bust_out": [rate(stats[m]["bust_outs"], stats[m]["matches"]) for m in models],
-        "lead_fail": [rate(stats[m]["lead_fail"], stats[m]["lead_opp"]) for m in models],
-        "def_fail": [rate(stats[m]["def_fail"], stats[m]["def_opp"]) for m in models],
-        "drawdown": [rate(stats[m]["max_drawdown"], stats[m]["matches"]) for m in models],
-    }
-    t = {k: _percentile(v, .75) for k, v in vals.items()}
-    t_low = {"bust_win": _percentile([rate(stats[m]["bust_wins"], stats[m]["wins"]) for m in models], .25)}
-
     cards = []
-    chart_payload = []
+    for rank, m in enumerate(models, 1):
+        seen = set(); picked = []
+        for c in sorted(stats[m]["cases"], key=lambda x: 0 if x.get("href") else 1):
+            k = (c["dimension"], c["title"], c["opponent"], c["episode"], c.get("hand"))
+            if k in seen:
+                continue
+            seen.add(k); picked.append(c)
+            if len(picked) == 3:
+                break
+        lis = ""
+        for c in picked:
+            link = (f"<a class='case-link' href=\"{html_lib.escape(c['href'], quote=True)}\">watch replay</a>"
+                    if c.get("href") else "<div class='case-meta'>no replay for this pair</div>")
+            hand = f" · hand {c.get('hand')}" if c.get("hand") else ""
+            lis += (f"<li><div class='case-title'>{html_lib.escape(c['dimension'])}: {html_lib.escape(c['title'])}</div>"
+                    f"<div class='case-signal'>{html_lib.escape(c['signal'])}</div>"
+                    f"<div class='case-meta'>vs {html_lib.escape(str(c['opponent']))} · match {html_lib.escape(str(c['episode']))}{hand}</div>{link}</li>")
+        cards.append(f"<article class='strategy-card'><div class='strategy-head'><div>"
+                     f"<h3>{rank}. {model_cell(m)}</h3></div></div>"
+                     f"<ol class='strategy-cases'>{lis}</ol></article>")
+    return ("<div class=\"note\">Specific match moments behind each model's profile, linked into the "
+            "replay viewer.</div><div class=\"strategy-grid\">" + "".join(cards) + "</div>")
+
+
+def _match_strategy_html(report):
+    """Section 2 cards: verdict + a win/loss-outcome bar (how it wins AND loses).
+
+    Match poker is a different, more layered game than 1-Hand, so instead of a
+    radar we decompose every match into its four outcomes — won by busting the
+    opponent, won at the cap (out-chipped them), lost at the cap (ground down),
+    lost by busting out (blown up) — which is the most direct "why win / why
+    lose" view: it separates grinders from gamblers and the ground-down from the
+    blown-up.
+    """
+    models = [r["model"] for r in report["leaderboard"]]
+    stats = report["strategy"]
+    lbwin = {r["model"]: r["win_rate"] for r in report["leaderboard"]}
+    try:
+        F = json.load(open(os.path.join(REPORT_DIR, "match_factors.json")))
+    except (OSError, json.JSONDecodeError):
+        F = {"win_type": {}, "by_depth": {}, "by_lead": {}}
+
+    def rate(n, d): return n / d if d else 0.0
+    bo_rates = [rate(stats[m]["bust_outs"], stats[m]["matches"]) for m in models]
+    sb = sorted(bo_rates); bo_hi = sb[min(len(sb)-1, int(.75*len(sb)))]; bo_lo = sb[int(.25*len(sb))]
+
+    # Four match outcomes (+ rare draw), in left-to-right order: wins then losses,
+    # so the green→red boundary sits exactly at the model's win rate.
+    SEGS = [
+        ("bust_win", "won by bust",            "#1a7f37", "busted the opponent"),
+        ("cap_win",  "won at cap",             "#5fae6a", "led on chips at the 30-hand cap"),
+        ("draw",     "draw",                   "#c9c4b8", "tied at the cap"),
+        ("lost_cap", "lost at cap (cap-lose)", "#d99a2b", "behind on chips at the cap — slowly ground down"),
+        ("lost_bust","lost · bust out", "#c0392b", "busted out — lost the whole stack"),
+    ]
+    cards = []
     for rank, m in enumerate(models, 1):
         st = stats[m]
-        signals = {k: [] for k, _ in dims}
-        hands = st["hands"] or 1
-        matches = st["matches"] or 1
-        bb_hand = st["net"] / hands
-        btn_ev = st["btn_net"] / (st["btn_hands"] or 1)
-        bb_ev = st["bb_net"] / (st["bb_hands"] or 1)
-        lead_fail = rate(st["lead_fail"], st["lead_opp"])
-        def_fail = rate(st["def_fail"], st["def_opp"])
-        big_loss_rate = rate(st["big_loss"], st["hands"])
-        bust_out = rate(st["bust_outs"], st["matches"])
-        bust_win = rate(st["bust_wins"], st["wins"])
-        drawdown = rate(st["max_drawdown"], st["matches"])
-        early = st["early_net"] / (st["early_hands"] or 1)
-        late = st["late_net"] / (st["late_hands"] or 1)
-        response = st["after_big_loss_net"] / (st["after_big_loss"] or 1)
-        lead_changes = st["lead_changes"] / matches
-
-        def add(key, cond, msg):
-            if cond:
-                signals[key].append(msg)
-
-        add("pressure", st["lead_opp"] >= 2 and lead_fail >= t["lead_fail"],
-            f"lead conversion failure: {lead_fail:.0%}")
-        add("pressure", st["wins"] >= 3 and bust_win <= t_low["bust_win"],
-            f"low bust-win share: {bust_win:.0%}")
-        add("pressure", bb_hand > 0 and bust_win < .18, "wins tend to reach cap instead of finishing")
-
-        add("recovery", st["def_opp"] >= 2 and def_fail >= t["def_fail"],
-            f"deficit failure rate: {def_fail:.0%}")
-        add("recovery", bust_out >= t["bust_out"], f"high bust-out share: {bust_out:.0%}")
-        add("recovery", response < -3, f"poor next-hand response after big loss: {response:+.1f} chips")
-
-        add("volatility", big_loss_rate >= t["big_loss"], f"large-loss hand rate: {big_loss_rate:.0%}")
-        add("volatility", drawdown >= t["drawdown"], f"avg max drawdown: {drawdown:.0f} chips")
-        add("volatility", st["big_loss"] > st["big_win"], "more large losses than large wins")
-
-        add("position", btn_ev < 0, f"negative BTN/SB EV: {btn_ev:+.1f} chips/hand")
-        add("position", btn_ev < bb_ev, f"BB outperforms button: BTN {btn_ev:+.1f}, BB {bb_ev:+.1f}")
-        add("position", btn_ev - bb_ev < 1.0, "weak button advantage")
-
-        add("pacing", late + 2 < early, f"late-match decay: early {early:+.1f}, late {late:+.1f}")
-        add("pacing", st["wins"] >= 3 and bust_win < .20, f"low close-out rate: {bust_win:.0%} bust wins")
-        add("pacing", st["lead_opp"] >= 2 and lead_fail > .45, "leads often drift to cap/loss")
-
-        add("adapt", st["after_big_loss"] >= 2 and response < 0,
-            f"negative response after big losses: {response:+.1f} chips")
-        add("adapt", lead_changes > 2.0, f"frequent lead swings: {lead_changes:.1f}/match")
-        add("adapt", st["big_loss"] >= 4 and response < 1, "big losses do not trigger stabilization")
-
-        scores = [len(signals[k]) for k, _ in dims]
-        chart_payload.append({
-            "id": f"matchStrategyRadar{rank}",
-            "label": display_name(m),
-            "model": m,
-            "color": pb.colors_for([m])[0],
-            "scores": scores,
-            "signals": {label: signals[k] for k, label in dims},
-        })
-        leak_dims = sorted(
-            [(label, len(signals[k]), signals[k]) for k, label in dims if signals[k]],
-            key=lambda x: x[1],
-            reverse=True,
-        )
-        summary = ("No strong aggregate leak signal in the current scoring pass."
-                   if not leak_dims else
-                   f"Main review area: {leak_dims[0][0]} ({leak_dims[0][1]} signals).")
-        cases = []
-        seen = set()
-        for c in sorted(st["cases"], key=lambda item: 0 if item.get("href") else 1):
-            key = (c["dimension"], c["title"], c["opponent"], c["episode"], c.get("hand"))
-            if key in seen:
-                continue
-            seen.add(key)
-            cases.append(c)
-            if len(cases) == 3:
-                break
-        while len(cases) < 3:
-            label = leak_dims[len(cases) % len(leak_dims)][0] if leak_dims else "Review candidate"
-            msg = leak_dims[len(cases) % len(leak_dims)][2][0] if leak_dims else "Audit a large pot in the replay viewer"
-            cases.append({"dimension": label, "title": "aggregate signal", "signal": msg,
-                          "opponent": "field", "episode": "—", "hand": None, "href": None})
-        case_html = ""
-        for c in cases[:3]:
-            link = (f"""<a class="case-link" href="{html_lib.escape(c['href'], quote=True)}">watch replay</a>"""
-                    if c.get("href") else "<div class='case-meta'>no replay file available for this pair</div>")
-            hand = f" · hand {c.get('hand')}" if c.get("hand") else ""
-            case_html += f"""
-        <li>
-          <div class="case-title">{html_lib.escape(c['dimension'])}: {html_lib.escape(c['title'])}</div>
-          <div class="case-signal">{html_lib.escape(c['signal'])}</div>
-          <div class="case-meta">vs {html_lib.escape(str(c['opponent']))} · match {html_lib.escape(str(c['episode']))}{hand}</div>
-          {link}
-        </li>"""
+        w = F.get("win_type", {}).get(m, {}) or {}
+        mt = w.get("matches") or st.get("matches") or 1
+        segs_html = "".join(
+            f"<i style='width:{w.get(k,0)/mt*100:.2f}%;background:{col}' "
+            f"title='{lbl}: {w.get(k,0)} ({w.get(k,0)/mt*100:.0f}%) — {desc}'></i>"
+            for k, lbl, col, desc in SEGS if w.get(k, 0))
+        def pc(k): return w.get(k, 0) / mt * 100
+        legend = (
+            f"<div class='wl-legend'>"
+            f"<span><i style='background:#1a7f37'></i>bust-win {pc('bust_win'):.0f}%</span>"
+            f"<span><i style='background:#5fae6a'></i>cap-win {pc('cap_win'):.0f}%</span>"
+            f"<span><i style='background:#d99a2b'></i>cap-lose {pc('lost_cap'):.0f}%</span>"
+            f"<span><i style='background:#c0392b'></i>bust-out {pc('lost_bust'):.0f}%</span>"
+            f"</div>")
+        fac = {"by_depth": F["by_depth"].get(m, {}), "by_lead": F["by_lead"].get(m, {})}
+        verdict = _match_verdict(st, fac, lbwin[m], bo_hi, bo_lo)
+        wr = lbwin[m]
         cards.append(f"""
     <article class="strategy-card">
-      <div class="strategy-head">
-        <div><h3>{rank}. {model_cell(m)}</h3><div class="note">{html_lib.escape(summary)}</div></div>
-        <div class="strategy-kpi {'pos' if bb_hand >= 0 else 'neg'}">{bb_hand:+.1f}<span>chips/hand</span></div>
-      </div>
-      <canvas id="matchStrategyRadar{rank}"></canvas>
-      <h3>Case studies</h3>
-      <ol class="strategy-cases">{case_html}</ol>
+      <div class="strategy-head"><div><h3>{rank}. {model_cell(m)}</h3></div>
+        <div class="strategy-kpi {'pos' if wr >= 0.5 else 'neg'}">{wr*100:.0f}%<span>match win</span></div></div>
+      <div class="pl-verdict">{verdict}</div>
+      <div class="wl-bar">{segs_html}</div>
+      {legend}
     </article>""")
 
-    glossary = ""
-    for _, label in dims:
-        info = dim_help[label]
-        glossary += f"""
-      <div class="strategy-gloss">
-        <b>{html_lib.escape(label)}</b>
-        <span>{html_lib.escape(info['meaning'])}</span>
-        <em>Signals: {html_lib.escape(info['signals'])}</em>
-      </div>"""
     html = f"""
   <div class="strategy-intro">
-    <b>Match strategy radar:</b> each dimension counts triggered diagnostic signals.
-    Higher values mean more evidence to review, not better play. Hover a radar
-    point to see the signals behind that score.
-    <div class="strategy-glossary">{glossary}
+    <b>How each model wins — and how it loses.</b> Every match ends one of four ways; this bar
+    splits each model's matches into them, wins on the left, losses on the right (so the green→red
+    edge is its win rate):
+    <div class="wl-key">
+      <span><i style="background:#1a7f37"></i><b>bust-win</b> — busted the opponent</span>
+      <span><i style="background:#5fae6a"></i><b>cap-win</b> — out-chipped them over 30 hands</span>
+      <span><i style="background:#d99a2b"></i><b>cap-lose</b> — behind on chips at the cap (ground down)</span>
+      <span><i style="background:#c0392b"></i><b>bust-out</b> — busted out</span>
     </div>
+    A wide <span style="color:#5fae6a;font-weight:700">cap-win</span> block = a grinder that out-chips
+    opponents; a wide <span style="color:#d99a2b;font-weight:700">cap-lose</span> block = it gets
+    slowly ground down; a wide <span style="color:#c0392b;font-weight:700">bust-out</span>
+    block = it busts out a lot (high variance).
   </div>
-  <div class="strategy-grid">
-    {''.join(cards)}
-  </div>"""
-    js = f"""
-const MATCH_STRATEGY = {json.dumps(chart_payload)};
-const MATCH_STRATEGY_LABELS = {json.dumps([label for _, label in dims])};
-MATCH_STRATEGY.forEach((card) => {{
-  const el = document.getElementById(card.id);
-  if (!el) return;
-  new Chart(el, {{
-    type:'radar',
-    data:{{ labels:MATCH_STRATEGY_LABELS,
-      datasets:[{{ label:card.label, data:card.scores,
-        borderColor:card.color, backgroundColor:card.color + '33',
-        pointBackgroundColor:card.color }}] }},
-    options:{{ scales:{{ r:{{ beginAtZero:true, suggestedMax:4, ticks:{{ stepSize:1 }} }} }},
-      plugins:{{ legend:{{ display:false }},
-        tooltip:{{ callbacks:{{ afterLabel(ctx) {{
-          const dim = ctx.label;
-          const sigs = card.signals[dim] || [];
-          return sigs.length ? sigs.map(s => '• ' + s) : ['no signal triggered'];
-        }} }} }} }} }} }});
-}});
-"""
-    return html, js
+  <div class="strategy-grid">{''.join(cards)}</div>"""
+    return html, ""
+
+
+def _lead_traj_html(report):
+    """Heatmap: each model a row of 30 hand-blocks, coloured by its ahead-on-chips
+    share after that hand (green = ahead, red = behind). Cleaner than 12 lines."""
+    try:
+        T = json.load(open(os.path.join(REPORT_DIR, "match_factors.json"))).get("lead_trajectory", {})
+    except (OSError, json.JSONDecodeError):
+        T = {}
+    rows_data = [r for r in report["leaderboard"] if T.get(r["model"])]
+    if not rows_data:
+        return "", ""
+
+    def heat(v):
+        if v is None:
+            return "#efece6"
+        d = max(-20.0, min(20.0, v - 50.0)); t = abs(d) / 20.0
+        a = (247, 244, 238)                       # faint base at 50%
+        b = (26, 127, 55) if d >= 0 else (192, 57, 43)
+        r, g, bl = (round(a[i] + (b[i] - a[i]) * t) for i in range(3))
+        return f"#{r:02x}{g:02x}{bl:02x}"
+
+    head = "".join(f"<span class='lt-h'>{h if h in (1,5,10,15,20,25,30) else ''}</span>"
+                   for h in range(1, 31))
+    rows = [f"<div class='lt-row lt-head'><span class='lt-name'>hand →</span>{head}</div>"]
+    for r in rows_data:
+        m = r["model"]
+        cells = "".join(
+            f"<span class='lt-cell' style='background:{heat(v)}' "
+            f"title='hand {i+1}: ahead in {v:.0f}% of matches'></span>"
+            for i, v in enumerate(T[m]))
+        rows.append(f"<div class='lt-row'><span class='lt-name'>{model_cell(m)}"
+                    f"<b class='lt-wr'>{r['win_rate']*100:.0f}%</b></span>{cells}</div>")
+    html = f"""
+  <h2>📊 Lead trajectory <span class="note">(each row = a model; 30 blocks = hands 1→30; block colour =
+  share of matches it is <span style="color:#1a7f37;font-weight:700">ahead</span> /
+  <span style="color:#c0392b;font-weight:700">behind</span> on chips after that hand)</span></h2>
+  <div class="callout">A row that stays <span style="color:#1a7f37;font-weight:700">green</span> across =
+  wire-to-wire leader; green that reddens left→right = front-runs then gets ground down; green in the
+  middle that <span style="color:#c0392b;font-weight:700">reddens at the end</span> = builds a lead but
+  can't close it; all <span style="color:#c0392b;font-weight:700">red</span> = behind the whole match.
+  The last block ≈ the model's match win rate.</div>
+  <div class="lt-scale"><span>behind ≤35%</span><i class="lt-grad"></i><span>ahead ≥65%</span>
+    <span class="lt-mid">50% = even</span></div>
+  <div class="lt-heat">{''.join(rows)}</div>"""
+    return html, ""
 
 
 def analyze(data: dict) -> dict:
@@ -603,6 +630,122 @@ def analyze(data: dict) -> dict:
             "leaderboard": rows, "h2h_wins": h2h, "h2h_played": h2h_played}
 
 
+def _match_factors_html(rep: dict) -> str:
+    """Match-specific "why win/lose" block: how matches resolve (bust vs cap),
+    aggression by stack depth (push/fold gear-change), and ahead-vs-behind."""
+    path = os.path.join(REPORT_DIR, "match_factors.json")
+    try:
+        F = json.load(open(path))
+    except (OSError, json.JSONDecodeError):
+        return ('  <div class="note">Match factors not generated yet — run '
+                '<code>python3 scripts/analyze_match_factors.py</code>.</div>')
+    win, depth, lead = F["win_type"], F["by_depth"], F["by_lead"]
+    order = [r["model"] for r in rep["leaderboard"]]
+    lbwin = {r["model"]: r["win_rate"] for r in rep["leaderboard"]}
+    MIN_N = 30   # below this a stack-depth cell is greyed out (too few decisions)
+
+    def _pctile(vals, q):
+        v = sorted(vals)
+        return v[min(len(v) - 1, int(q * len(v)))] if v else 0.0
+    bo_rates = [win[m].get("lost_bust", 0) / (win[m].get("matches", 1) or 1) for m in order]
+    bo_hi, bo_lo = _pctile(bo_rates, 0.75), _pctile(bo_rates, 0.25)
+
+    def cell(d):
+        """Heat cell for an {agg, n} bucket; greyed (not green) when n < MIN_N."""
+        v, n = d.get("agg"), d.get("n", 0)
+        if v is None:
+            return "<td>—</td>"
+        sub = f"<div class='small'>n={n}</div>"
+        if n < MIN_N:
+            return (f"<td style='background:var(--faint);color:var(--dim)' "
+                    f"title='small sample — read as suggestive'>{v*100:.0f}%{sub}</td>")
+        a = min(0.62, max(0.0, v * 0.62))
+        return f"<td style='background:rgba(26,127,55,{a:.2f})'>{v*100:.0f}%{sub}</td>"
+
+    def verdict(m):
+        # Lead with well-sampled signals; only mention short-stack play if its
+        # sample is adequate (good players rarely reach short stacks).
+        w = win[m]; mt = w.get("matches", 1) or 1
+        wp = lbwin[m]; bo = w.get("lost_bust", 0) / mt
+        s, sn = depth[m]["short"]["agg"], depth[m]["short"]["n"]
+        ah, bh = lead[m]["ahead"]["agg"], lead[m]["behind"]["agg"]
+        dp = depth[m]["deep"]["agg"]   # well sampled (most decisions are deep)
+        tag = "Strong" if wp >= 0.55 else ("Weak" if wp <= 0.43 else "Mid")
+        parts = []
+        if dp is not None and dp <= 0.22:
+            parts.append("very passive (rarely raises)")
+        elif dp is not None and dp >= 0.38:
+            parts.append("aggressive")
+        if bo >= bo_hi:
+            parts.append("high-variance (busts out a lot)")
+        elif bo <= bo_lo:
+            parts.append("steady (rarely busts out)")
+        if ah is not None and bh is not None and bh - ah >= 0.12:
+            parts.append("fights back when behind")
+        if s is not None and sn >= MIN_N:
+            if s >= 0.45:
+                parts.append(f"shoves correctly when short ({s*100:.0f}%)")
+            elif s <= 0.18:
+                parts.append(f"freezes when short ({s*100:.0f}%)")
+        return f"<b>{tag}</b>" + (" — " + "; ".join(parts) if parts else "") + "."
+
+    rows1 = ""
+    for m in order:
+        w = win[m]
+        rows1 += (f"<tr><td class='model'>{model_cell(m)}</td>"
+                  f"<td>{lbwin[m]*100:.0f}%</td>"
+                  f"<td>{w.get('bust_win',0)}</td><td>{w.get('cap_win',0)}</td>"
+                  f"<td class='neg'>{w.get('lost_bust',0)}</td><td>{w.get('lost_cap',0)}</td>"
+                  f"<td class='small'>{verdict(m)}</td></tr>")
+    rows2 = ""
+    for m in order:
+        d = depth[m]
+        rows2 += (f"<tr><td class='model'>{model_cell(m)}</td>"
+                  f"{cell(d['deep'])}{cell(d['mid'])}{cell(d['short'])}</tr>")
+    rows3 = ""
+    for m in order:
+        l = lead[m]; ah, bh = l["ahead"]["agg"], l["behind"]["agg"]
+        gap = f"{(bh-ah)*100:+.0f}pp" if (ah is not None and bh is not None) else "—"
+        rows3 += (f"<tr><td class='model'>{model_cell(m)}</td>"
+                  f"{cell(l['ahead'])}{cell(l['behind'])}<td>{gap}</td></tr>")
+
+    return f"""
+  <div class="strategy-intro">
+    <b>A 30-hand match is usually won by <i>leading at the hand cap</i>, not by busting the
+    opponent</b> — so the edge is chip management: fighting back when behind, gear-changing as stacks
+    get short, and not blowing up a whole match in one hand. Note a real limitation of this fixed
+    dataset: <b>the strong models rarely reach a short stack at all</b> (they protect their chips), so
+    their short-stack columns are based on very few decisions — greyed cells (n&lt;{30}) are
+    suggestive, not conclusive. We can't add more matches, so we read those honestly.
+  </div>
+  <h2>🏁 How matches resolve <span class="note">(bust the opponent vs lead at the cap)</span></h2>
+  <div class="note">Every match counts here (well sampled). Most wins come <b>at the cap</b>; a high
+    <b>busted-out</b> count signals a high-variance, one-hand-collapse style.</div>
+  <table>
+    <tr><th class='model'>model</th><th>win%</th><th>won by bust</th><th>won at cap</th>
+        <th>busted out</th><th>lost at cap</th><th>read</th></tr>
+    {rows1}
+  </table>
+  <h2>🪜 Aggression by stack depth <span class="note">(does it push/fold when short?)</span></h2>
+  <div class="note">Share of actions that were a bet/raise, bucketed by effective stack:
+    <b>deep</b> ≥40bb · <b>mid</b> 15–40bb · <b>short</b> &lt;15bb (push-fold territory). Greener =
+    more aggressive; <b>greyed cells have n&lt;30</b> (too few decisions — read as suggestive). The
+    <b>n</b> on the short column doubles as an exposure signal: the top models barely appear there
+    because they rarely get short-stacked.</div>
+  <table>
+    <tr><th class='model'>model</th><th>deep (≥40bb)</th><th>mid</th><th>short (&lt;15bb)</th></tr>
+    {rows2}
+  </table>
+  <h2>⚖️ Aggression: ahead vs behind <span class="note">(front-running vs fighting back)</span></h2>
+  <div class="note">Well sampled (every decision). A large positive <b>gap</b> = it steps on the gas
+    when behind (fights back); near zero = it plays the same whether ahead or behind.</div>
+  <table>
+    <tr><th class='model'>model</th><th>when ahead</th><th>when behind</th><th>gap</th></tr>
+    {rows3}
+  </table>
+"""
+
+
 def render_html(rep: dict, beh: dict) -> str:
     models = rep["models"]; lb = rep["leaderboard"]
     labels = [r["model"] for r in lb]          # slugs — key behavior stats / colors
@@ -610,7 +753,10 @@ def render_html(rep: dict, beh: dict) -> str:
     winpct = [round(r["win_rate"] * 100, 1) for r in lb]
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
+    factors_html = _match_factors_html(rep)
     strategy_html, strategy_js = _match_strategy_html(rep)
+    traj_html, traj_js = _lead_traj_html(rep)
+    cases_html = _match_cases_html(rep)
     replay_btn = ('<a class="replaybtn" href="match_replay.html?v=18&cacheBust=18">'
                   '▶ watch match replays</a>')
     ep_range = rep.get("episode_count_range") or [rep["episodes_per_pair"], rep["episodes_per_pair"]]
@@ -682,9 +828,7 @@ def render_html(rep: dict, beh: dict) -> str:
     so the <b>Elo rates match wins/losses</b>, opponent-adjusted. Match win rate is the
     headline metric.</div>
   </div>
-  <h2 class="section">1 · 🏆 Results — who won</h2>
-  <h3>Match win rate</h3>
-  <canvas id="wr"></canvas>
+  <h2 class="section">1 · Results — who won</h2>
   <h3>Leaderboard <span class="note">(ranked by Elo; raw metrics kept for reference)</span></h3>
   <table>
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>win%</th><th>wins/matches</th>
@@ -699,28 +843,33 @@ def render_html(rep: dict, beh: dict) -> str:
     ±1 of each other are a statistical tie. win% and the rest are raw, unadjusted metrics.</div>
   <h3>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h3>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
-  <h2 class="section">2 · 🔍 Why — what decides win &amp; loss</h2>
-  {beh_html}
-  <h2 class="section">3 · 🔬 Additional analysis</h2>
+  <h2 class="section">2 · Why — what makes a model win or lose matches</h2>
   {strategy_html}
+  {traj_html}
+  <h2 class="section">3 · Analysis</h2>
+  {factors_html}
+  {beh_html}
+  <h2>🎬 Case studies <span class="note">(replay-linked match moments)</span></h2>
+  {cases_html}
   <script>
-  new Chart(document.getElementById('wr'), {{
-    type:'bar',
-    data:{{labels:{json.dumps(disp_labels)},datasets:[{{label:'win %',data:{json.dumps(winpct)},backgroundColor:{json.dumps(wincols)}}}]}},
-    options:{{plugins:{{legend:{{display:false}}}},
-      scales:{{y:{{beginAtZero:true,max:100,grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}},
-               x:{{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}}}}}}
-  }});
   {strategy_js}
+  {traj_js}
   </script>
 </div></body></html>"""
 
 
 def main():
     data = _load_all_match_data()
+    # Drop GPT-OSS from the Hold'em reports: its schedule is incomplete (it never
+    # played GPT 5.5 / 5.4), which inflates its raw win rate. Filtering at the data
+    # layer means every other model's win rate / Elo / h2h / strategy / behaviour is
+    # recomputed from the remaining, gpt-oss-free games. (runs/ data is untouched.)
+    data["models"] = [m for m in data["models"] if m not in EXCLUDE_HOLDEM]
+    data["pairs"] = [p for p in data["pairs"]
+                     if not (EXCLUDE_HOLDEM & _pair_models(p))]
     rep = analyze(data)
     rep["strategy"] = _match_strategy(data, rep["models"])
-    beh = pb.behavior(EP_GLOBS, "match_hand", rep["models"])
+    beh = pb.behavior(EP_GLOBS, "match_hand", rep["models"], exclude=EXCLUDE_HOLDEM)
     rep["behavior"] = beh
     html = render_html(rep, beh)
     os.makedirs(REPORT_DIR, exist_ok=True)

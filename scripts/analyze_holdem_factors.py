@@ -19,6 +19,7 @@ DATA_GLOB = "runs/holdem_1hand/*__vs__*/ep*.json"
 OUT = "reports/holdem_1hand_factors.json"
 STREETS = ("preflop", "flop", "turn", "river")
 AGG = ("bet", "raise", "all_in")
+EXCLUDE = {"gpt-oss-120b"}   # dropped for an incomplete schedule (no GPT 5.5 / 5.4 games)
 
 def norm(m): return m.replace("-coached", "")
 
@@ -35,6 +36,8 @@ def main():
         e = json.load(open(f))
         steps = e["steps"]
         sa = {k: norm(v) for k, v in e["seat_assignment"].items()}
+        if EXCLUDE & set(sa.values()):
+            continue
         # --- net chips by ending street (street of the last decision in the hand) ---
         ending = None
         for s in reversed(steps):

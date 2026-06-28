@@ -1,52 +1,34 @@
 {
   "fold_induced": {
     "glm-5p1": {
-      "preflop": 0.318,
-      "flop": 0.457,
-      "turn": 0.45,
-      "river": 0.412
+      "preflop": 0.279,
+      "flop": 0.446,
+      "turn": 0.423,
+      "river": 0.41
     },
     "claude-opus-4.8": {
-      "preflop": 0.323,
-      "flop": 0.489,
-      "turn": 0.523,
-      "river": 0.489
-    },
-    "minimax-m2p7": {
-      "preflop": 0.362,
-      "flop": 0.42,
-      "turn": 0.479,
-      "river": 0.372
-    },
-    "gpt-oss-120b": {
-      "preflop": 0.291,
-      "flop": 0.439,
-      "turn": 0.375,
-      "river": 0.377
+      "preflop": 0.314,
+      "flop": 0.469,
+      "turn": 0.513,
+      "river": 0.452
     },
     "claude-sonnet-4.6": {
-      "preflop": 0.429,
-      "flop": 0.465,
-      "turn": 0.364,
-      "river": 0.546
+      "preflop": 0.408,
+      "flop": 0.469,
+      "turn": 0.347,
+      "river": 0.527
     },
     "glm-5p2": {
-      "preflop": 0.363,
-      "flop": 0.44,
-      "turn": 0.393,
-      "river": 0.516
+      "preflop": 0.344,
+      "flop": 0.413,
+      "turn": 0.369,
+      "river": 0.494
     },
     "deepseek-v4-pro": {
-      "preflop": 0.328,
-      "flop": 0.465,
-      "turn": 0.519,
-      "river": 0.446
-    },
-    "kimi-k2p6": {
-      "preflop": 0.29,
+      "preflop": 0.312,
       "flop": 0.461,
-      "turn": 0.446,
-      "river": 0.364
+      "turn": 0.516,
+      "river": 0.431
     },
     "gpt-5.4": {
       "preflop": 0.338,
@@ -54,11 +36,17 @@
       "turn": 0.458,
       "river": 0.304
     },
+    "kimi-k2p6": {
+      "preflop": 0.269,
+      "flop": 0.454,
+      "turn": 0.436,
+      "river": 0.352
+    },
     "qwen3p7-plus": {
-      "preflop": 0.246,
-      "flop": 0.48,
-      "turn": 0.429,
-      "river": 0.449
+      "preflop": 0.22,
+      "flop": 0.472,
+      "turn": 0.425,
+      "river": 0.444
     },
     "gpt-5.5": {
       "preflop": 0.4,
@@ -66,108 +54,90 @@
       "turn": 0.566,
       "river": 0.588
     },
+    "minimax-m2p7": {
+      "preflop": 0.35,
+      "flop": 0.417,
+      "turn": 0.422,
+      "river": 0.338
+    },
     "minimax-m3": {
-      "preflop": 0.331,
-      "flop": 0.368,
-      "turn": 0.507,
-      "river": 0.529
+      "preflop": 0.3,
+      "flop": 0.354,
+      "turn": 0.492,
+      "river": 0.522
     }
   },
   "positional": {
     "glm-5p1": {
       "button": {
-        "vpip": 0.85,
-        "aggr": 0.395,
-        "hands": 592
+        "vpip": 0.843,
+        "aggr": 0.389,
+        "hands": 542
       },
       "bb": {
-        "vpip": 0.391,
-        "aggr": 0.224,
-        "hands": 517
+        "vpip": 0.388,
+        "aggr": 0.227,
+        "hands": 480
       }
     },
     "claude-opus-4.8": {
       "button": {
-        "vpip": 0.939,
-        "aggr": 0.312,
-        "hands": 588
+        "vpip": 0.941,
+        "aggr": 0.305,
+        "hands": 538
       },
       "bb": {
-        "vpip": 0.563,
-        "aggr": 0.238,
-        "hands": 497
-      }
-    },
-    "minimax-m2p7": {
-      "button": {
-        "vpip": 0.865,
-        "aggr": 0.366,
-        "hands": 378
-      },
-      "bb": {
-        "vpip": 0.455,
-        "aggr": 0.268,
-        "hands": 336
-      }
-    },
-    "gpt-oss-120b": {
-      "button": {
-        "vpip": 0.683,
-        "aggr": 0.557,
-        "hands": 441
-      },
-      "bb": {
-        "vpip": 0.455,
-        "aggr": 0.343,
-        "hands": 398
+        "vpip": 0.562,
+        "aggr": 0.241,
+        "hands": 457
       }
     },
     "glm-5p2": {
       "button": {
-        "vpip": 0.885,
-        "aggr": 0.361,
-        "hands": 530
+        "vpip": 0.879,
+        "aggr": 0.372,
+        "hands": 479
       },
       "bb": {
-        "vpip": 0.434,
-        "aggr": 0.228,
-        "hands": 477
+        "vpip": 0.425,
+        "aggr": 0.233,
+        "hands": 445
       }
     },
     "claude-sonnet-4.6": {
       "button": {
-        "vpip": 0.885,
-        "aggr": 0.348,
-        "hands": 625
+        "vpip": 0.889,
+        "aggr": 0.351,
+        "hands": 575
       },
       "bb": {
-        "vpip": 0.606,
-        "aggr": 0.289,
-        "hands": 554
+        "vpip": 0.602,
+        "aggr": 0.29,
+        "hands": 518
       }
     },
     "deepseek-v4-pro": {
       "button": {
         "vpip": 0.713,
-        "aggr": 0.553,
-        "hands": 656
+        "aggr": 0.547,
+        "hands": 599
       },
       "bb": {
-        "vpip": 0.472,
-        "aggr": 0.254,
-        "hands": 483
+        "vpip": 0.466,
+        "aggr": 0.251,
+        "hands": 453
       }
     },
     "kimi-k2p6": {
       "button": {
-        "vpip": 0.747,
-        "aggr": 0.478,
-        "hands": 612
+        "vpip": 0.739,
+        "aggr": 0.476,
+        "hands": 564
       },
       "bb": {
-        "vpip": 0.542,
-        "aggr": 0.238,
-        "hands": 515
+        "vpip": 0.52,
+        "aggr": 0.242,
+        "hands": 481
       }
     },
     "gpt-5.4": {
@@ -184,14 +154,14 @@
     },
     "qwen3p7-plus": {
       "button": {
-        "vpip": 0.886,
-        "aggr": 0.244,
-        "hands": 555
+        "vpip": 0.885,
+        "aggr": 0.255,
+        "hands": 503
       },
       "bb": {
-        "vpip": 0.42,
-        "aggr": 0.118,
-        "hands": 455
+        "vpip": 0.408,
+        "aggr": 0.117,
+        "hands": 422
       }
     },
     "gpt-5.5": {
@@ -206,67 +176,61 @@
         "hands": 375
       }
     },
+    "minimax-m2p7": {
+      "button": {
+        "vpip": 0.861,
+        "aggr": 0.354,
+        "hands": 330
+      },
+      "bb": {
+        "vpip": 0.442,
+        "aggr": 0.271,
+        "hands": 303
+      }
+    },
     "minimax-m3": {
       "button": {
-        "vpip": 0.799,
-        "aggr": 0.461,
-        "hands": 541
+        "vpip": 0.793,
+        "aggr": 0.457,
+        "hands": 488
       },
       "bb": {
         "vpip": 0.49,
-        "aggr": 0.137,
-        "hands": 467
+        "aggr": 0.134,
+        "hands": 441
       }
     }
   },
   "net_by_street": {
     "glm-5p1": {
-      "preflop": 0.094,
-      "flop": -0.143,
-      "turn": -0.214,
-      "river": 1.048
+      "preflop": 0.062,
+      "flop": -0.171,
+      "turn": -0.299,
+      "river": 1.117
     },
     "claude-opus-4.8": {
-      "preflop": -0.04,
-      "flop": -0.254,
-      "turn": -0.555,
-      "river": -0.338
-    },
-    "gpt-oss-120b": {
-      "preflop": -0.288,
-      "flop": -0.18,
-      "turn": -0.1,
-      "river": -0.164
-    },
-    "minimax-m2p7": {
-      "preflop": 0.015,
-      "flop": -0.035,
-      "turn": 0.28,
-      "river": -1.238
+      "preflop": -0.089,
+      "flop": -0.377,
+      "turn": -0.243,
+      "river": -0.567
     },
     "claude-sonnet-4.6": {
-      "preflop": 0.151,
-      "flop": 0.372,
-      "turn": 0.306,
-      "river": -0.498
+      "preflop": 0.097,
+      "flop": 0.406,
+      "turn": 0.224,
+      "river": -0.426
     },
     "glm-5p2": {
-      "preflop": -0.104,
-      "flop": 0.12,
-      "turn": -0.143,
-      "river": 0.435
+      "preflop": -0.122,
+      "flop": 0.127,
+      "turn": -0.179,
+      "river": 0.485
     },
     "deepseek-v4-pro": {
-      "preflop": 0.188,
-      "flop": -0.14,
-      "turn": 0.082,
-      "river": 0.143
-    },
-    "kimi-k2p6": {
-      "preflop": -0.008,
-      "flop": 0.044,
-      "turn": 0.15,
-      "river": 0.652
+      "preflop": 0.209,
+      "flop": -0.195,
+      "turn": 0.059,
+      "river": 0.145
     },
     "gpt-5.4": {
       "preflop": 0.302,
@@ -274,11 +238,17 @@
       "turn": 0.064,
       "river": -0.476
     },
+    "kimi-k2p6": {
+      "preflop": -0.058,
+      "flop": 0.059,
+      "turn": 0.127,
+      "river": 0.713
+    },
     "qwen3p7-plus": {
-      "preflop": -0.285,
-      "flop": -0.142,
-      "turn": -0.092,
-      "river": 0.535
+      "preflop": -0.316,
+      "flop": -0.104,
+      "turn": -0.087,
+      "river": 0.57
     },
     "gpt-5.5": {
       "preflop": 0.072,
@@ -286,11 +256,17 @@
       "turn": 0.931,
       "river": 0.28
     },
+    "minimax-m2p7": {
+      "preflop": -0.033,
+      "flop": -0.113,
+      "turn": 0.103,
+      "river": -1.645
+    },
     "minimax-m3": {
-      "preflop": -0.12,
-      "flop": -0.009,
-      "turn": -0.484,
-      "river": -0.84
+      "preflop": -0.125,
+      "flop": -0.012,
+      "turn": -0.578,
+      "river": -0.774
     }
   }
 }
