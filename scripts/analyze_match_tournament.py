@@ -630,6 +630,61 @@ def analyze(data: dict) -> dict:
             "leaderboard": rows, "h2h_wins": h2h, "h2h_played": h2h_played}
 
 
+def _match_decision_quality_html(rep: dict) -> str:
+    """Experimental, equity-based block (reads match_decision_quality.json):
+    ① is the aggression backed by cards, ② clear all-in blunders, ③ opponent
+    adaptation. Equity is vs a random hand (opponent range unknown), so these
+    are gross, range-free proxies — labelled experimental on the page."""
+    try:
+        D = json.load(open(os.path.join(REPORT_DIR, "match_decision_quality.json")))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    order = [r["model"] for r in rep["leaderboard"]]
+    wr = {r["model"]: r["win_rate"] for r in rep["leaderboard"]}
+    fe, bl, ad = D.get("fire_equity", {}), D.get("blunders", {}), D.get("adaptation", {})
+
+    def corr(vals):
+        pts = [(v, wr[m]) for m, v in zip(order, vals) if v is not None]
+        if len(pts) < 3:
+            return "—"
+        xs = [p[0] for p in pts]; ys = [p[1] for p in pts]; n = len(xs)
+        mx = sum(xs) / n; my = sum(ys) / n
+        cov = sum((a - mx) * (b - my) for a, b in zip(xs, ys))
+        vx = sum((a - mx) ** 2 for a in xs) ** .5; vy = sum((b - my) ** 2 for b in ys) ** .5
+        return f"{cov/(vx*vy):+.2f}" if vx and vy else "—"
+
+    def pc(v, fmt="{:.0%}"):
+        return fmt.format(v) if v is not None else "—"
+
+    r1 = "".join(
+        f"<tr><td class='model'>{model_cell(m)}</td>"
+        f"<td>{pc((fe.get(m,{}).get('mix') or {}).get('lt40'))}</td>"
+        f"<td>{pc(fe.get(m,{}).get('bluff_success'))}</td>"
+        f"<td>{pc(fe.get(m,{}).get('fire_eq'))}</td>"
+        f"<td class='small'>{fe.get(m,{}).get('n_agg','—')}</td></tr>" for m in order)
+
+    return f"""
+  <h2>🧪 Decision quality <span class="note">(experimental — uses each model's hole-card
+    <b>equity vs a random hand</b>; the opponent's range is never known, so read this as a gross,
+    range-free signal, not exact EV)</span></h2>
+
+  <h3>Does it bluff, or only bet strong hands?</h3>
+  <div class="note"><b>bluff rate</b> = share of its bets/raises made with weak cards (&lt;40% equity);
+    <b>bluff success</b> = of those bluffs, how often the opponent actually folds; <b>avg equity when
+    betting</b> = how strong its cards are, on average, when it fires. A model that <b>only bets strong
+    hands</b> (low bluff rate, high avg equity) is predictable and easy to fold to; <b>mixing in
+    bluffs</b> is a sign of skill.
+    <span class="small">corr with win%: <b>bluff rate {corr([(fe.get(m,{}).get('mix') or {}).get('lt40') for m in order])}</b>
+    (more bluffing ↔ winning), avg-equity-when-betting {corr([fe.get(m,{}).get('fire_eq') for m in order])}
+    (only-bet-strong ↔ losing); bluff success {corr([fe.get(m,{}).get('bluff_success') for m in order])}
+    (not a skill signal).</span></div>
+  <table>
+    <tr><th class='model'>model</th><th>bluff rate (&lt;40% eq)</th><th>bluff success</th>
+        <th>avg equity when betting</th><th>n</th></tr>{r1}
+  </table>
+"""
+
+
 def _match_factors_html(rep: dict) -> str:
     """Match-specific "why win/lose" block: how matches resolve (bust vs cap),
     aggression by stack depth (push/fold gear-change), and ahead-vs-behind."""
@@ -644,12 +699,6 @@ def _match_factors_html(rep: dict) -> str:
     lbwin = {r["model"]: r["win_rate"] for r in rep["leaderboard"]}
     MIN_N = 30   # below this a stack-depth cell is greyed out (too few decisions)
 
-    def _pctile(vals, q):
-        v = sorted(vals)
-        return v[min(len(v) - 1, int(q * len(v)))] if v else 0.0
-    bo_rates = [win[m].get("lost_bust", 0) / (win[m].get("matches", 1) or 1) for m in order]
-    bo_hi, bo_lo = _pctile(bo_rates, 0.75), _pctile(bo_rates, 0.25)
-
     def cell(d):
         """Heat cell for an {agg, n} bucket; greyed (not green) when n < MIN_N."""
         v, n = d.get("agg"), d.get("n", 0)
@@ -662,52 +711,28 @@ def _match_factors_html(rep: dict) -> str:
         a = min(0.62, max(0.0, v * 0.62))
         return f"<td style='background:rgba(26,127,55,{a:.2f})'>{v*100:.0f}%{sub}</td>"
 
-    def verdict(m):
-        # Lead with well-sampled signals; only mention short-stack play if its
-        # sample is adequate (good players rarely reach short stacks).
-        w = win[m]; mt = w.get("matches", 1) or 1
-        wp = lbwin[m]; bo = w.get("lost_bust", 0) / mt
-        s, sn = depth[m]["short"]["agg"], depth[m]["short"]["n"]
-        ah, bh = lead[m]["ahead"]["agg"], lead[m]["behind"]["agg"]
-        dp = depth[m]["deep"]["agg"]   # well sampled (most decisions are deep)
-        tag = "Strong" if wp >= 0.55 else ("Weak" if wp <= 0.43 else "Mid")
-        parts = []
-        if dp is not None and dp <= 0.22:
-            parts.append("very passive (rarely raises)")
-        elif dp is not None and dp >= 0.38:
-            parts.append("aggressive")
-        if bo >= bo_hi:
-            parts.append("high-variance (busts out a lot)")
-        elif bo <= bo_lo:
-            parts.append("steady (rarely busts out)")
-        if ah is not None and bh is not None and bh - ah >= 0.12:
-            parts.append("fights back when behind")
-        if s is not None and sn >= MIN_N:
-            if s >= 0.45:
-                parts.append(f"shoves correctly when short ({s*100:.0f}%)")
-            elif s <= 0.18:
-                parts.append(f"freezes when short ({s*100:.0f}%)")
-        return f"<b>{tag}</b>" + (" — " + "; ".join(parts) if parts else "") + "."
-
-    rows1 = ""
-    for m in order:
-        w = win[m]
-        rows1 += (f"<tr><td class='model'>{model_cell(m)}</td>"
-                  f"<td>{lbwin[m]*100:.0f}%</td>"
-                  f"<td>{w.get('bust_win',0)}</td><td>{w.get('cap_win',0)}</td>"
-                  f"<td class='neg'>{w.get('lost_bust',0)}</td><td>{w.get('lost_cap',0)}</td>"
-                  f"<td class='small'>{verdict(m)}</td></tr>")
     rows2 = ""
     for m in order:
         d = depth[m]
         rows2 += (f"<tr><td class='model'>{model_cell(m)}</td>"
                   f"{cell(d['deep'])}{cell(d['mid'])}{cell(d['short'])}</tr>")
+    def shift(a, b, good):
+        """A 'ahead% → behind% (Δ)' cell; Δ green when it shifts toward fighting
+        (good='up' = more aggressive when behind; good='down' = folds less)."""
+        if a is None or b is None:
+            return "<td>—</td>"
+        d = (b - a) * 100
+        fights = (d > 0) if good == "up" else (d < 0)
+        col = ("#1a7f37" if fights and abs(d) >= 5
+               else ("#c0392b" if (not fights) and abs(d) >= 5 else "var(--dim)"))
+        return (f"<td>{a*100:.0f}% → {b*100:.0f}% "
+                f"<b style='color:{col}'>({d:+.0f})</b></td>")
     rows3 = ""
     for m in order:
-        l = lead[m]; ah, bh = l["ahead"]["agg"], l["behind"]["agg"]
-        gap = f"{(bh-ah)*100:+.0f}pp" if (ah is not None and bh is not None) else "—"
+        a, b = lead[m]["ahead"], lead[m]["behind"]
         rows3 += (f"<tr><td class='model'>{model_cell(m)}</td>"
-                  f"{cell(l['ahead'])}{cell(l['behind'])}<td>{gap}</td></tr>")
+                  f"{shift(a.get('agg'), b.get('agg'), 'up')}"
+                  f"{shift(a.get('fold'), b.get('fold'), 'down')}</tr>")
 
     return f"""
   <div class="strategy-intro">
@@ -718,16 +743,9 @@ def _match_factors_html(rep: dict) -> str:
     their short-stack columns are based on very few decisions — greyed cells (n&lt;{30}) are
     suggestive, not conclusive. We can't add more matches, so we read those honestly.
   </div>
-  <h2>🏁 How matches resolve <span class="note">(bust the opponent vs lead at the cap)</span></h2>
-  <div class="note">Every match counts here (well sampled). Most wins come <b>at the cap</b>; a high
-    <b>busted-out</b> count signals a high-variance, one-hand-collapse style.</div>
-  <table>
-    <tr><th class='model'>model</th><th>win%</th><th>won by bust</th><th>won at cap</th>
-        <th>busted out</th><th>lost at cap</th><th>read</th></tr>
-    {rows1}
-  </table>
   <h2>🪜 Aggression by stack depth <span class="note">(does it push/fold when short?)</span></h2>
-  <div class="note">Share of actions that were a bet/raise, bucketed by effective stack:
+  <div class="note"><b>Aggression</b> = (bet+raise+all-in) ÷ (bet+raise+all-in+call+check), folds
+    excluded — bucketed by effective stack:
     <b>deep</b> ≥40bb · <b>mid</b> 15–40bb · <b>short</b> &lt;15bb (push-fold territory). Greener =
     more aggressive; <b>greyed cells have n&lt;30</b> (too few decisions — read as suggestive). The
     <b>n</b> on the short column doubles as an exposure signal: the top models barely appear there
@@ -736,11 +754,18 @@ def _match_factors_html(rep: dict) -> str:
     <tr><th class='model'>model</th><th>deep (≥40bb)</th><th>mid</th><th>short (&lt;15bb)</th></tr>
     {rows2}
   </table>
-  <h2>⚖️ Aggression: ahead vs behind <span class="note">(front-running vs fighting back)</span></h2>
-  <div class="note">Well sampled (every decision). A large positive <b>gap</b> = it steps on the gas
-    when behind (fights back); near zero = it plays the same whether ahead or behind.</div>
+  <h2>⚖️ Gear-shift: ahead vs behind <span class="note">(does it change how it plays when losing?)</span></h2>
+  <div class="note">Well sampled (every decision). Each cell is <b>when ahead → when behind (change)</b>.
+    <b>Aggression</b> = (bet+raise+all-in) ÷ (bet+raise+all-in+call+check), folds excluded;
+    <b>fold-to-bet</b> = how often it folds when facing a bet.
+    Strong players <b>shift gears when behind</b> — they <b>raise more</b> (aggression ↑) and
+    <b>fold less to bets</b> (fold-to-bet ↓), i.e. they fight for pots; the change is
+    <span style="color:#1a7f37;font-weight:700">green</span> when it shifts toward fighting,
+    <span style="color:#c0392b;font-weight:700">red</span> when it backs off. Weak players show
+    <span style="color:var(--dim)">≈0</span> — they play the same whether winning or losing.</div>
   <table>
-    <tr><th class='model'>model</th><th>when ahead</th><th>when behind</th><th>gap</th></tr>
+    <tr><th class='model'>model</th><th>aggression (ahead → behind)</th>
+        <th>fold-to-bet (ahead → behind)</th></tr>
     {rows3}
   </table>
 """
@@ -754,6 +779,7 @@ def render_html(rep: dict, beh: dict) -> str:
     wincols = pb.colors_for(labels)
     beh_html = pb.profile_table(beh, labels) + pb.behavior_charts(beh, labels)
     factors_html = _match_factors_html(rep)
+    dq_html = _match_decision_quality_html(rep)
     strategy_html, strategy_js = _match_strategy_html(rep)
     traj_html, traj_js = _lead_traj_html(rep)
     cases_html = _match_cases_html(rep)
@@ -848,6 +874,7 @@ def render_html(rep: dict, beh: dict) -> str:
   {traj_html}
   <h2 class="section">3 · Analysis</h2>
   {factors_html}
+  {dq_html}
   {beh_html}
   <h2>🎬 Case studies <span class="note">(replay-linked match moments)</span></h2>
   {cases_html}

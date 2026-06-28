@@ -762,7 +762,7 @@
       "hands": 9928,
       "vpip": 0.739,
       "pfr": 0.261,
-      "aggression": 0.46,
+      "aggression": 0.254,
       "fold_to_bet": 0.188,
       "allin_rate": 0.006,
       "avg_betsize": 1.1,
@@ -780,10 +780,10 @@
         "all_in": 0.006
       },
       "street_aggr": {
-        "preflop": 0.241,
-        "flop": 0.282,
-        "turn": 0.191,
-        "river": 0.191
+        "preflop": 0.262,
+        "flop": 0.306,
+        "turn": 0.211,
+        "river": 0.202
       }
     },
     "claude-sonnet-4.6": {
@@ -791,7 +791,7 @@
       "hands": 10054,
       "vpip": 0.678,
       "pfr": 0.198,
-      "aggression": 0.513,
+      "aggression": 0.305,
       "fold_to_bet": 0.291,
       "allin_rate": 0.013,
       "avg_betsize": 1.01,
@@ -809,10 +809,10 @@
         "all_in": 0.013
       },
       "street_aggr": {
-        "preflop": 0.183,
-        "flop": 0.338,
-        "turn": 0.329,
-        "river": 0.25
+        "preflop": 0.213,
+        "flop": 0.387,
+        "turn": 0.374,
+        "river": 0.271
       }
     },
     "deepseek-v4-pro": {
@@ -820,7 +820,7 @@
       "hands": 14553,
       "vpip": 0.509,
       "pfr": 0.28,
-      "aggression": 0.592,
+      "aggression": 0.284,
       "fold_to_bet": 0.448,
       "allin_rate": 0.002,
       "avg_betsize": 1.25,
@@ -838,10 +838,10 @@
         "all_in": 0.002
       },
       "street_aggr": {
-        "preflop": 0.266,
-        "flop": 0.22,
-        "turn": 0.207,
-        "river": 0.133
+        "preflop": 0.377,
+        "flop": 0.262,
+        "turn": 0.24,
+        "river": 0.148
       }
     },
     "glm-5p1": {
@@ -849,7 +849,7 @@
       "hands": 14180,
       "vpip": 0.607,
       "pfr": 0.214,
-      "aggression": 0.495,
+      "aggression": 0.266,
       "fold_to_bet": 0.355,
       "allin_rate": 0.003,
       "avg_betsize": 1.06,
@@ -867,10 +867,10 @@
         "all_in": 0.003
       },
       "street_aggr": {
-        "preflop": 0.197,
-        "flop": 0.253,
-        "turn": 0.239,
-        "river": 0.208
+        "preflop": 0.252,
+        "flop": 0.29,
+        "turn": 0.279,
+        "river": 0.23
       }
     },
     "glm-5p2": {
@@ -878,7 +878,7 @@
       "hands": 13492,
       "vpip": 0.68,
       "pfr": 0.172,
-      "aggression": 0.478,
+      "aggression": 0.278,
       "fold_to_bet": 0.293,
       "allin_rate": 0.004,
       "avg_betsize": 1.19,
@@ -896,10 +896,10 @@
         "all_in": 0.004
       },
       "street_aggr": {
-        "preflop": 0.158,
-        "flop": 0.325,
-        "turn": 0.294,
-        "river": 0.223
+        "preflop": 0.188,
+        "flop": 0.369,
+        "turn": 0.334,
+        "river": 0.241
       }
     },
     "gpt-5.4": {
@@ -907,7 +907,7 @@
       "hands": 9304,
       "vpip": 0.749,
       "pfr": 0.436,
-      "aggression": 0.632,
+      "aggression": 0.401,
       "fold_to_bet": 0.228,
       "allin_rate": 0.005,
       "avg_betsize": 1.02,
@@ -925,10 +925,10 @@
         "all_in": 0.005
       },
       "street_aggr": {
-        "preflop": 0.407,
-        "flop": 0.373,
-        "turn": 0.359,
-        "river": 0.227
+        "preflop": 0.447,
+        "flop": 0.416,
+        "turn": 0.4,
+        "river": 0.25
       }
     },
     "gpt-5.5": {
@@ -936,7 +936,7 @@
       "hands": 8916,
       "vpip": 0.759,
       "pfr": 0.375,
-      "aggression": 0.608,
+      "aggression": 0.404,
       "fold_to_bet": 0.209,
       "allin_rate": 0.007,
       "avg_betsize": 1.09,
@@ -954,10 +954,10 @@
         "all_in": 0.007
       },
       "street_aggr": {
-        "preflop": 0.347,
-        "flop": 0.424,
-        "turn": 0.382,
-        "river": 0.271
+        "preflop": 0.381,
+        "flop": 0.474,
+        "turn": 0.421,
+        "river": 0.288
       }
     },
     "kimi-k2p6": {
@@ -965,7 +965,7 @@
       "hands": 13667,
       "vpip": 0.601,
       "pfr": 0.43,
-      "aggression": 0.636,
+      "aggression": 0.33,
       "fold_to_bet": 0.369,
       "allin_rate": 0.003,
       "avg_betsize": 1.25,
@@ -983,10 +983,10 @@
         "all_in": 0.003
       },
       "street_aggr": {
-        "preflop": 0.41,
-        "flop": 0.214,
-        "turn": 0.191,
-        "river": 0.129
+        "preflop": 0.538,
+        "flop": 0.248,
+        "turn": 0.216,
+        "river": 0.142
       }
     },
     "minimax-m2p7": {
@@ -994,7 +994,7 @@
       "hands": 9966,
       "vpip": 0.63,
       "pfr": 0.221,
-      "aggression": 0.565,
+      "aggression": 0.335,
       "fold_to_bet": 0.277,
       "allin_rate": 0.007,
       "avg_betsize": 1.09,
@@ -1012,10 +1012,10 @@
         "all_in": 0.007
       },
       "street_aggr": {
-        "preflop": 0.207,
-        "flop": 0.364,
-        "turn": 0.361,
-        "river": 0.302
+        "preflop": 0.253,
+        "flop": 0.396,
+        "turn": 0.391,
+        "river": 0.329
       }
     },
     "minimax-m3": {
@@ -1023,7 +1023,7 @@
       "hands": 13137,
       "vpip": 0.607,
       "pfr": 0.304,
-      "aggression": 0.522,
+      "aggression": 0.275,
       "fold_to_bet": 0.275,
       "allin_rate": 0.004,
       "avg_betsize": 1.26,
@@ -1041,10 +1041,10 @@
         "all_in": 0.004
       },
       "street_aggr": {
-        "preflop": 0.285,
-        "flop": 0.231,
-        "turn": 0.228,
-        "river": 0.174
+        "preflop": 0.355,
+        "flop": 0.254,
+        "turn": 0.249,
+        "river": 0.182
       }
     },
     "qwen3p7-plus": {
@@ -1052,7 +1052,7 @@
       "hands": 13733,
       "vpip": 0.636,
       "pfr": 0.171,
-      "aggression": 0.341,
+      "aggression": 0.152,
       "fold_to_bet": 0.336,
       "allin_rate": 0.002,
       "avg_betsize": 1.1,
@@ -1070,10 +1070,10 @@
         "all_in": 0.002
       },
       "street_aggr": {
-        "preflop": 0.157,
-        "flop": 0.121,
-        "turn": 0.113,
-        "river": 0.101
+        "preflop": 0.19,
+        "flop": 0.144,
+        "turn": 0.131,
+        "river": 0.112
       }
     }
   }

@@ -30,7 +30,7 @@ def depth_bucket(eff_bb):
 def main():
     win = collections.defaultdict(lambda: collections.Counter())
     by_depth = collections.defaultdict(lambda: {b: [0, 0] for b in ("deep", "mid", "short")})
-    by_lead = collections.defaultdict(lambda: {b: [0, 0] for b in ("ahead", "behind", "even")})
+    by_lead = collections.defaultdict(lambda: {b: collections.Counter() for b in ("ahead", "behind", "even")})
     # lead trajectory: per model, per hand index 0..CAP-1 -> [ahead_weight, matches].
     # A match that ends early (a bust) carries its final stacks forward to hand CAP,
     # so being ahead at the last hand equals winning the match.
@@ -84,26 +84,37 @@ def main():
         # --- by depth + by lead: per decision ---
         for s in e["steps"]:
             m = norm(s.get("agent_name", "")); act = s.get("selected_action")
-            if act not in AGG + PASSIVE:
+            if not act:
                 continue
             pub = s.get("observation", {}).get("public", {})
-            yc = pub.get("match_your_chips"); oc = pub.get("match_opp_chips")
             lead = pub.get("match_lead")
-            is_agg = act in AGG
-            if yc is not None and oc is not None:
-                b = depth_bucket(min(yc, oc) / BB)
-                d = by_depth[m][b]; d[0] += int(is_agg); d[1] += 1
+            # by lead: aggression (over bet/raise/call/check) + fold-to-bet (any
+            # action while facing a bet) — how it changes gears ahead vs behind.
             if lead is not None:
                 lb = "ahead" if lead > 0 else ("behind" if lead < 0 else "even")
-                d = by_lead[m][lb]; d[0] += int(is_agg); d[1] += 1
+                c = by_lead[m][lb]
+                if act in AGG + PASSIVE:
+                    c["agg"] += int(act in AGG); c["n"] += 1
+                if pub.get("to_call", 0) > 0:
+                    c["faced"] += 1
+                    if act == "fold":
+                        c["fold"] += 1
+            # by depth: aggression bucketed by effective stack (bet/raise/call/check)
+            if act in AGG + PASSIVE:
+                yc = pub.get("match_your_chips"); oc = pub.get("match_opp_chips")
+                if yc is not None and oc is not None:
+                    b = depth_bucket(min(yc, oc) / BB)
+                    d = by_depth[m][b]; d[0] += int(act in AGG); d[1] += 1
         if fi % 1000 == 0:
             print(f"  {fi}/{len(files)}", flush=True)
 
     out_win = {m: dict(c) for m, c in win.items()}
     out_depth = {m: {b: {"agg": round(v[0] / v[1], 3) if v[1] else None, "n": v[1]}
                      for b, v in d.items()} for m, d in by_depth.items()}
-    out_lead = {m: {b: {"agg": round(v[0] / v[1], 3) if v[1] else None, "n": v[1]}
-                    for b, v in d.items()} for m, d in by_lead.items()}
+    out_lead = {m: {b: {"agg": round(c["agg"] / c["n"], 3) if c["n"] else None, "n": c["n"],
+                        "fold": round(c["fold"] / c["faced"], 3) if c["faced"] else None,
+                        "faced": c["faced"]}
+                    for b, c in d.items()} for m, d in by_lead.items()}
     out_traj = {m: [round(cell[0] / cell[1] * 100, 1) if cell[1] else None for cell in cells]
                 for m, cells in lead_traj.items()}
     json.dump({"win_type": out_win, "by_depth": out_depth, "by_lead": out_lead,

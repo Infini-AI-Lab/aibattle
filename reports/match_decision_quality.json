@@ -1,0 +1,305 @@
+{
+  "fire_equity": {
+    "claude-opus-4.8": {
+      "fire_eq": 0.649,
+      "passive_eq": 0.452,
+      "gap": 0.197,
+      "n_agg": 3490,
+      "mix": {
+        "lt40": 0.008,
+        "mid": 0.371,
+        "gt60": 0.481,
+        "gt80": 0.139
+      },
+      "bluff_success": 0.464,
+      "bluff_n": 28
+    },
+    "glm-5p2": {
+      "fire_eq": 0.65,
+      "passive_eq": 0.475,
+      "gap": 0.175,
+      "n_agg": 3665,
+      "mix": {
+        "lt40": 0.045,
+        "mid": 0.299,
+        "gt60": 0.483,
+        "gt80": 0.173
+      },
+      "bluff_success": 0.548,
+      "bluff_n": 166
+    },
+    "minimax-m3": {
+      "fire_eq": 0.607,
+      "passive_eq": 0.472,
+      "gap": 0.136,
+      "n_agg": 4993,
+      "mix": {
+        "lt40": 0.041,
+        "mid": 0.479,
+        "gt60": 0.368,
+        "gt80": 0.112
+      },
+      "bluff_success": 0.422,
+      "bluff_n": 206
+    },
+    "deepseek-v4-pro": {
+      "fire_eq": 0.611,
+      "passive_eq": 0.485,
+      "gap": 0.126,
+      "n_agg": 4908,
+      "mix": {
+        "lt40": 0.037,
+        "mid": 0.451,
+        "gt60": 0.41,
+        "gt80": 0.101
+      },
+      "bluff_success": 0.408,
+      "bluff_n": 184
+    },
+    "qwen3p7-plus": {
+      "fire_eq": 0.658,
+      "passive_eq": 0.493,
+      "gap": 0.165,
+      "n_agg": 2912,
+      "mix": {
+        "lt40": 0.012,
+        "mid": 0.328,
+        "gt60": 0.489,
+        "gt80": 0.171
+      },
+      "bluff_success": 0.371,
+      "bluff_n": 35
+    },
+    "gpt-5.4": {
+      "fire_eq": 0.555,
+      "passive_eq": 0.467,
+      "gap": 0.088,
+      "n_agg": 5180,
+      "mix": {
+        "lt40": 0.105,
+        "mid": 0.56,
+        "gt60": 0.267,
+        "gt80": 0.067
+      },
+      "bluff_success": 0.375,
+      "bluff_n": 544
+    },
+    "glm-5p1": {
+      "fire_eq": 0.632,
+      "passive_eq": 0.484,
+      "gap": 0.148,
+      "n_agg": 4122,
+      "mix": {
+        "lt40": 0.044,
+        "mid": 0.365,
+        "gt60": 0.445,
+        "gt80": 0.146
+      },
+      "bluff_success": 0.406,
+      "bluff_n": 180
+    },
+    "kimi-k2p6": {
+      "fire_eq": 0.59,
+      "passive_eq": 0.483,
+      "gap": 0.107,
+      "n_agg": 6675,
+      "mix": {
+        "lt40": 0.038,
+        "mid": 0.559,
+        "gt60": 0.318,
+        "gt80": 0.086
+      },
+      "bluff_success": 0.357,
+      "bluff_n": 252
+    },
+    "claude-sonnet-4.6": {
+      "fire_eq": 0.653,
+      "passive_eq": 0.469,
+      "gap": 0.184,
+      "n_agg": 3004,
+      "mix": {
+        "lt40": 0.025,
+        "mid": 0.314,
+        "gt60": 0.5,
+        "gt80": 0.161
+      },
+      "bluff_success": 0.592,
+      "bluff_n": 76
+    },
+    "gpt-5.5": {
+      "fire_eq": 0.576,
+      "passive_eq": 0.459,
+      "gap": 0.117,
+      "n_agg": 4471,
+      "mix": {
+        "lt40": 0.092,
+        "mid": 0.495,
+        "gt60": 0.326,
+        "gt80": 0.087
+      },
+      "bluff_success": 0.462,
+      "bluff_n": 411
+    },
+    "minimax-m2p7": {
+      "fire_eq": 0.6,
+      "passive_eq": 0.474,
+      "gap": 0.125,
+      "n_agg": 3344,
+      "mix": {
+        "lt40": 0.088,
+        "mid": 0.409,
+        "gt60": 0.383,
+        "gt80": 0.12
+      },
+      "bluff_success": 0.458,
+      "bluff_n": 295
+    }
+  },
+  "blunders": {
+    "glm-5p2": {
+      "spots": 181,
+      "dead_call_rate": 0.011,
+      "bad_fold_rate": 0.21,
+      "dead_calls": 2,
+      "bad_folds": 38
+    },
+    "kimi-k2p6": {
+      "spots": 262,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.153,
+      "dead_calls": 0,
+      "bad_folds": 40
+    },
+    "glm-5p1": {
+      "spots": 184,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.239,
+      "dead_calls": 0,
+      "bad_folds": 44
+    },
+    "minimax-m3": {
+      "spots": 252,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.139,
+      "dead_calls": 0,
+      "bad_folds": 35
+    },
+    "gpt-5.5": {
+      "spots": 118,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.195,
+      "dead_calls": 0,
+      "bad_folds": 23
+    },
+    "qwen3p7-plus": {
+      "spots": 196,
+      "dead_call_rate": 0.005,
+      "bad_fold_rate": 0.158,
+      "dead_calls": 1,
+      "bad_folds": 31
+    },
+    "claude-sonnet-4.6": {
+      "spots": 138,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.101,
+      "dead_calls": 0,
+      "bad_folds": 14
+    },
+    "claude-opus-4.8": {
+      "spots": 187,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.091,
+      "dead_calls": 0,
+      "bad_folds": 17
+    },
+    "minimax-m2p7": {
+      "spots": 145,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.097,
+      "dead_calls": 0,
+      "bad_folds": 14
+    },
+    "deepseek-v4-pro": {
+      "spots": 160,
+      "dead_call_rate": 0.0,
+      "bad_fold_rate": 0.338,
+      "dead_calls": 0,
+      "bad_folds": 54
+    },
+    "gpt-5.4": {
+      "spots": 135,
+      "dead_call_rate": 0.007,
+      "bad_fold_rate": 0.281,
+      "dead_calls": 1,
+      "bad_folds": 38
+    }
+  },
+  "adaptation": {
+    "claude-opus-4.8": {
+      "vs_passive": 0.257,
+      "vs_aggressive": 0.253,
+      "bully_gap": 0.003,
+      "n_opps": 10
+    },
+    "glm-5p2": {
+      "vs_passive": 0.281,
+      "vs_aggressive": 0.271,
+      "bully_gap": 0.011,
+      "n_opps": 10
+    },
+    "minimax-m3": {
+      "vs_passive": 0.275,
+      "vs_aggressive": 0.276,
+      "bully_gap": -0.002,
+      "n_opps": 10
+    },
+    "deepseek-v4-pro": {
+      "vs_passive": 0.291,
+      "vs_aggressive": 0.277,
+      "bully_gap": 0.014,
+      "n_opps": 10
+    },
+    "qwen3p7-plus": {
+      "vs_passive": 0.151,
+      "vs_aggressive": 0.151,
+      "bully_gap": -0.0,
+      "n_opps": 10
+    },
+    "gpt-5.4": {
+      "vs_passive": 0.403,
+      "vs_aggressive": 0.395,
+      "bully_gap": 0.008,
+      "n_opps": 9
+    },
+    "glm-5p1": {
+      "vs_passive": 0.28,
+      "vs_aggressive": 0.249,
+      "bully_gap": 0.031,
+      "n_opps": 10
+    },
+    "kimi-k2p6": {
+      "vs_passive": 0.334,
+      "vs_aggressive": 0.322,
+      "bully_gap": 0.012,
+      "n_opps": 10
+    },
+    "claude-sonnet-4.6": {
+      "vs_passive": 0.31,
+      "vs_aggressive": 0.298,
+      "bully_gap": 0.012,
+      "n_opps": 10
+    },
+    "gpt-5.5": {
+      "vs_passive": 0.412,
+      "vs_aggressive": 0.39,
+      "bully_gap": 0.022,
+      "n_opps": 9
+    },
+    "minimax-m2p7": {
+      "vs_passive": 0.336,
+      "vs_aggressive": 0.298,
+      "bully_gap": 0.038,
+      "n_opps": 8
+    }
+  }
+}
