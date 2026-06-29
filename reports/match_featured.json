@@ -1,0 +1,96 @@
+{
+  "game": "match",
+  "featured": [
+    {
+      "pair": "match__claude-sonnet-4.6__vs__gpt-5.4.json",
+      "match": 24,
+      "title": "Biggest comeback",
+      "label": "Biggest comeback \u2014 Claude Sonnet 4.6 vs GPT 5.4",
+      "why": "GPT 5.4 falls 384 chips behind, then wins."
+    },
+    {
+      "pair": "match__gpt-5.5__vs__gpt-5.4.json",
+      "match": 20,
+      "title": "Clash of the top two",
+      "label": "Clash of the top two \u2014 GPT 5.5 vs GPT 5.4",
+      "why": "The two strongest models, 30 hands; GPT 5.4 wins."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__claude-sonnet-4.6.json",
+      "match": 0,
+      "title": "Quick cooler",
+      "label": "Quick cooler \u2014 Claude Opus 4.8 vs Claude Sonnet 4.6",
+      "why": "Claude Sonnet 4.6 busts Claude Opus 4.8 in 1 hands."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__claude-sonnet-4.6.json",
+      "match": 12,
+      "title": "Wire-to-wire",
+      "label": "Wire-to-wire \u2014 Claude Opus 4.8 vs Claude Sonnet 4.6",
+      "why": "Claude Sonnet 4.6 leads from hand 1 to last (+400)."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__kimi-k2p6.json",
+      "match": 29,
+      "title": "Down to the wire",
+      "label": "Down to the wire \u2014 Claude Opus 4.8 vs Kimi K2.6",
+      "why": "A full 30-hand grind decided by 2 chips."
+    },
+    {
+      "pair": "match__claude-sonnet-4.6__vs__kimi-k2p6.json",
+      "match": 32,
+      "title": "Kimi K2.6 fights back",
+      "label": "Kimi K2.6 fights back \u2014 Claude Sonnet 4.6 vs Kimi K2.6",
+      "why": "Kimi K2.6 claws back from 238 chips behind to beat Claude Sonnet 4.6."
+    },
+    {
+      "pair": "match__glm-5p1__vs__minimax-m2p7.json",
+      "match": 22,
+      "title": "GLM-5.1 fights back",
+      "label": "GLM-5.1 fights back \u2014 GLM-5.1 vs MiniMax-M2.7",
+      "why": "GLM-5.1 claws back from 342 chips behind to beat MiniMax-M2.7."
+    },
+    {
+      "pair": "match__deepseek-v4-pro__vs__minimax-m2p7.json",
+      "match": 1,
+      "title": "DeepSeek V4 Pro fights back",
+      "label": "DeepSeek V4 Pro fights back \u2014 DeepSeek V4 Pro vs MiniMax-M2.7",
+      "why": "DeepSeek V4 Pro claws back from 208 chips behind to beat MiniMax-M2.7."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__glm-5p2.json",
+      "match": 27,
+      "title": "GLM-5.2 fights back",
+      "label": "GLM-5.2 fights back \u2014 Claude Opus 4.8 vs GLM-5.2",
+      "why": "GLM-5.2 claws back from 202 chips behind to beat Claude Opus 4.8."
+    },
+    {
+      "pair": "match__gpt-5.5__vs__qwen3p7-plus.json",
+      "match": 37,
+      "title": "GPT 5.5 fights back",
+      "label": "GPT 5.5 fights back \u2014 GPT 5.5 vs Qwen3.7 Plus",
+      "why": "GPT 5.5 claws back from 300 chips behind to beat Qwen3.7 Plus."
+    },
+    {
+      "pair": "match__gpt-5.5__vs__minimax-m3.json",
+      "match": 25,
+      "title": "MiniMax-M3 fights back",
+      "label": "MiniMax-M3 fights back \u2014 GPT 5.5 vs MiniMax-M3",
+      "why": "MiniMax-M3 claws back from 252 chips behind to beat GPT 5.5."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__qwen3p7-plus.json",
+      "match": 32,
+      "title": "Qwen3.7 Plus fights back",
+      "label": "Qwen3.7 Plus fights back \u2014 Claude Opus 4.8 vs Qwen3.7 Plus",
+      "why": "Qwen3.7 Plus claws back from 268 chips behind to beat Claude Opus 4.8."
+    },
+    {
+      "pair": "match__claude-opus-4.8__vs__minimax-m2p7.json",
+      "match": 16,
+      "title": "MiniMax-M2.7 fights back",
+      "label": "MiniMax-M2.7 fights back \u2014 Claude Opus 4.8 vs MiniMax-M2.7",
+      "why": "MiniMax-M2.7 claws back from 344 chips behind to beat Claude Opus 4.8."
+    }
+  ]
+}

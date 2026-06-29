@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🃏 Hold'em Match Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
-<link rel="stylesheet" href="replay.css?v=3">
+<link rel="stylesheet" href="replay.css?v=4">
 <style>
   .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
@@ -12,9 +12,11 @@
   /* match scoreboard */
   .matchbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px; padding:16px 18px;
     background:var(--panel); border:1px solid var(--line);}
-  .mside{display:flex; align-items:baseline; gap:8px;}
-  .mside .nm{font-weight:700; font-size:13px; color:var(--fg);}
-  .mside .ch{font-size:13px; color:var(--red);}
+  .mside{display:flex; align-items:baseline; gap:8px; flex:0 0 200px; min-width:0;}
+  .mside.right{justify-content:flex-end;}
+  .mside .nm{font-weight:700; font-size:13px; color:var(--fg);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mside .ch{font-size:13px; color:var(--red); flex:none;}
   .mbar{flex:1; min-width:160px; height:10px; overflow:hidden; background:var(--red); display:flex;}
   .mbar .fill{background:var(--link); height:100%;}
   .mtag{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim);}
@@ -23,7 +25,7 @@
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
     background:var(--faint); border:1px solid var(--line); padding:24px 22px;}
   .seat{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
-    padding:10px 14px; min-width:320px; position:relative;}
+    padding:10px 14px; width:340px; max-width:100%; box-sizing:border-box; position:relative;}
   .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
   .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
   .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center;
@@ -51,10 +53,15 @@
     Pick a <b>match</b>, then step through any <b>hand</b>; the bar tracks the running chip count. <b>Both hole cards</b> are shown.</div>
 
   <div class="selectors">
-    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
-    <div><label class="sel">Match</label><select id="matchSel"></select></div>
+    <div><label class="sel">⭐ Featured game</label><select id="featSel"></select></div>
     <div><label class="sel">Hand</label><select id="handSel"></select></div>
   </div>
+  <details class="browse"><summary class="sel" style="cursor:pointer">… or browse every matchup</summary>
+    <div class="selectors" style="margin-top:8px">
+      <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+      <div><label class="sel">Match</label><select id="matchSel"></select></div>
+    </div>
+  </details>
 
   <div class="matchbar" id="matchbar"></div>
 
@@ -107,8 +114,16 @@ const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
 const MODELCOL = {"deepseek-v4-pro":"#60a5fa","gpt-oss-120b":"#f472b6",
                   "kimi-k2p6":"#4ade80","glm-5p1":"#fbbf24","minimax-m2p7":"#a78bfa",
                   "minimax-m3":"#fb7185"};
-function scol(seat){ return MODELCOL[match && match.seat_assignment[seat]] || "#94a3b8"; }
-let manifest=null, pairData=null, match=null, hand=null, btnSeat=null,
+// Official display names (mirrors scripts/model_names.py) — the logs carry compact
+// Fireworks slugs with a "-coached" suffix; show readable names in the viewer.
+const DISPLAY = {"glm-5p1":"GLM-5.1","glm-5p2":"GLM-5.2","kimi-k2p6":"Kimi K2.6",
+  "minimax-m2p7":"MiniMax-M2.7","minimax-m3":"MiniMax-M3","deepseek-v4-pro":"DeepSeek V4 Pro",
+  "qwen3p7-plus":"Qwen3.7 Plus","gpt-oss-120b":"GPT-OSS 120B","gpt-5.4":"GPT 5.4",
+  "gpt-5.5":"GPT 5.5","claude-opus-4.8":"Claude Opus 4.8","claude-sonnet-4.6":"Claude Sonnet 4.6"};
+function slug(m){ return (m||"").replace(/-coached$/,""); }
+function disp(m){ return DISPLAY[slug(m)] || slug(m) || m; }
+function scol(seat){ return MODELCOL[slug(match && match.seat_assignment[seat])] || "#94a3b8"; }
+let manifest=null, featured=[], pairData=null, match=null, hand=null, btnSeat=null,
     cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const PARAMS = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -122,7 +137,15 @@ async function init(){
     return;
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
-    `<option value="${i}">${p.a} vs ${p.b}</option>`).join("");
+    `<option value="${i}">${disp(p.a)} vs ${disp(p.b)}</option>`).join("");
+  // Curated "featured games" dropdown (a small representative set); the matchup
+  // selectors above still let you browse everything.
+  try { featured = (await (await fetch("match_featured.json?v=" +
+        encodeURIComponent(DATA_VERSION))).json()).featured || []; } catch(e){ featured = []; }
+  $("featSel").innerHTML = featured.map((f,i) =>
+    `<option value="${i}">${f.label}</option>`).join("") ||
+    `<option value="-1">(no featured games)</option>`;
+  $("featSel").onchange = () => loadFeatured(+$("featSel").value);
   $("pairSel").onchange = () => loadPair(+$("pairSel").value);
   $("matchSel").onchange = () => selectMatch(+$("matchSel").value);
   $("handSel").onchange = () => selectHand(+$("handSel").value);
@@ -140,15 +163,32 @@ async function init(){
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
   });
-  let pairIdx = 0;
   const pairParam = PARAMS.get("pair");
-  if (pairParam){
-    const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
-    if (found >= 0) pairIdx = found;
-  } else if (PARAMS.has("pairIndex")) {
-    pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+  if (pairParam || PARAMS.has("pairIndex")) {
+    let pairIdx = 0;
+    if (pairParam){
+      const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
+      if (found >= 0) pairIdx = found;
+    } else {
+      pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+    }
+    await loadPair(pairIdx);            // deep-link from a report
+  } else if (featured.length) {
+    await loadFeatured(0);              // default: first curated game
+  } else {
+    await loadPair(0);
   }
-  await loadPair(pairIdx);
+}
+
+async function loadFeatured(i){
+  const f = featured[i];
+  if (!f) return;
+  $("featSel").value = String(i);
+  let idx = manifest.pairs.findIndex(p => p.file===f.pair || `${p.a}__vs__${p.b}`===f.pair);
+  if (idx < 0) idx = 0;
+  await loadPair(idx);
+  const mi = pairData.episodes.findIndex(mt => String(mt.episode)===String(f.match));
+  if (mi >= 0) selectMatch(mi);
 }
 
 async function loadPair(i){
@@ -162,7 +202,7 @@ async function loadPair(i){
   $("pairSel").value = String(i);
   pairData = await (await fetch(BASE + p.file + "?v=" + encodeURIComponent(DATA_VERSION))).json();
   $("matchSel").innerHTML = pairData.episodes.map((mt,idx) => {
-    const w = mt.winner_name || "—";
+    const w = disp(mt.winner_name) || "—";
     return `<option value="${idx}">Match #${mt.episode+1} · ${mt.hands_played} hands · ${w} wins (${mt.reason})</option>`;
   }).join("");
   let matchIdx = 0;
@@ -185,7 +225,7 @@ function selectMatch(idx){
   }
   $("matchSel").value = String(idx);
   $("handSel").innerHTML = match.hands.map((h,hidx) => {
-    const wn = h.winner ? (match.seat_assignment[h.winner]||h.winner) : "split";
+    const wn = h.winner ? disp(match.seat_assignment[h.winner]||h.winner) : "split";
     return `<option value="${hidx}">Hand ${h.hand}/${match.hands_played} · ${h.moves.length} act · ${h.reason} · ${wn}</option>`;
   }).join("");
   let handIdx = 0;
@@ -259,7 +299,7 @@ function actLabel(m){
 }
 
 function seatHTML(seat, st){
-  const agent = match.seat_assignment[seat] || seat;
+  const agent = disp(match.seat_assignment[seat] || seat);
   const stack = st.stacks[seat];
   const holes = hand.holes[seat];
   const faceUp = !!holes;
@@ -291,9 +331,9 @@ function renderMatchbar(){
   const pct = Math.round((ca||0)/total*100);
   $("matchbar").innerHTML =
     `<span class="mtag">Match standing</span>` +
-    `<div class="mside"><span class="nm">${match.seat_assignment[a]}</span><span class="ch">${ca!=null?ca:"—"}</span></div>` +
+    `<div class="mside"><span class="nm">${disp(match.seat_assignment[a])}</span><span class="ch">${ca!=null?ca:"—"}</span></div>` +
     `<div class="mbar" title="chip share"><div class="fill" style="width:${pct}%"></div></div>` +
-    `<div class="mside"><span class="ch">${cb!=null?cb:"—"}</span><span class="nm">${match.seat_assignment[b]}</span></div>`;
+    `<div class="mside right"><span class="ch">${cb!=null?cb:"—"}</span><span class="nm">${disp(match.seat_assignment[b])}</span></div>`;
 }
 
 function render(){
@@ -347,8 +387,8 @@ function renderPanel(st){
   if (cursor===0){
     html += `<div class="movenum">Hand ${hand.hand} start</div>` +
       `<div class="meta">Blinds posted (BB ${hand.big_blind}). Button/SB acts first preflop.<br>` +
-      `Chips entering: ${match.seat_assignment.player_0} ${hand.chips_before.player_0} — ` +
-      `${hand.chips_before.player_1} ${match.seat_assignment.player_1}.</div>` +
+      `Chips entering: ${disp(match.seat_assignment.player_0)} ${hand.chips_before.player_0} — ` +
+      `${hand.chips_before.player_1} ${disp(match.seat_assignment.player_1)}.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to step through the betting.</div>`;
     p.innerHTML = html; return;
   }
@@ -374,11 +414,11 @@ function renderPanel(st){
 }
 
 function resultBlock(){
-  const w = hand.winner ? (match.seat_assignment[hand.winner]||hand.winner) : null;
+  const w = hand.winner ? disp(match.seat_assignment[hand.winner]||hand.winner) : null;
   const d = hand.deltas || {};
   const title = w ? `🏆 ${w} wins the hand` : "🤝 Split pot";
   const line = Object.keys(match.seat_assignment).map(s =>
-    `${match.seat_assignment[s]} ${fmt(d[s]!=null?d[s]:0)}`).join(" · ");
+    `${disp(match.seat_assignment[s])} ${fmt(d[s]!=null?d[s]:0)}`).join(" · ");
   const runout = (hand.reason==="showdown" && (hand.final_board||[]).length<5)
     ? `<div class="rs" style="color:#6d28d9">⚠ turn/river not recorded — players were all-in; the board runout isn't logged.</div>` : "";
   return `<div class="result"><div class="rt">${title}</div>` +

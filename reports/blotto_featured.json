@@ -1,0 +1,61 @@
+{
+  "game": "blotto",
+  "featured": [
+    {
+      "pair": "deepseek-v4-pro__vs__glm-5p1",
+      "ep": 1,
+      "title": "DeepSeek V4 Pro's win",
+      "label": "DeepSeek V4 Pro's win \u2014 DeepSeek V4 Pro vs GLM-5.1",
+      "why": "DeepSeek V4 Pro beats GLM-5.1 (40 moves)."
+    },
+    {
+      "pair": "kimi-k2p6__vs__deepseek-v4-pro",
+      "ep": 0,
+      "title": "Kimi K2.6's win",
+      "label": "Kimi K2.6's win \u2014 Kimi K2.6 vs DeepSeek V4 Pro",
+      "why": "Kimi K2.6 beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__glm-5p1",
+      "ep": 16,
+      "title": "GLM-5.1's win",
+      "label": "GLM-5.1's win \u2014 DeepSeek V4 Pro vs GLM-5.1",
+      "why": "GLM-5.1 beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__qwen3p7-plus",
+      "ep": 16,
+      "title": "Qwen3.7 Plus's win",
+      "label": "Qwen3.7 Plus's win \u2014 DeepSeek V4 Pro vs Qwen3.7 Plus",
+      "why": "Qwen3.7 Plus beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__glm-5p2",
+      "ep": 17,
+      "title": "GLM-5.2's win",
+      "label": "GLM-5.2's win \u2014 DeepSeek V4 Pro vs GLM-5.2",
+      "why": "GLM-5.2 beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__minimax-m3",
+      "ep": 16,
+      "title": "MiniMax-M3's win",
+      "label": "MiniMax-M3's win \u2014 DeepSeek V4 Pro vs MiniMax-M3",
+      "why": "MiniMax-M3 beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__gpt-oss-120b",
+      "ep": 13,
+      "title": "GPT-OSS 120B's win",
+      "label": "GPT-OSS 120B's win \u2014 DeepSeek V4 Pro vs GPT-OSS 120B",
+      "why": "GPT-OSS 120B beats DeepSeek V4 Pro (40 moves)."
+    },
+    {
+      "pair": "deepseek-v4-pro__vs__minimax-m2p7",
+      "ep": 10,
+      "title": "MiniMax-M2.7's win",
+      "label": "MiniMax-M2.7's win \u2014 DeepSeek V4 Pro vs MiniMax-M2.7",
+      "why": "MiniMax-M2.7 beats DeepSeek V4 Pro (40 moves)."
+    }
+  ]
+}

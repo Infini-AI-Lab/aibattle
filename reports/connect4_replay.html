@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🔴 Connect Four Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 <link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
-<link rel="stylesheet" href="replay.css?v=3">
+<link rel="stylesheet" href="replay.css?v=4">
 <style>
   .stage{grid-template-columns:minmax(300px,420px) 1fr;}
   @media (max-width:860px){ .stage{grid-template-columns:1fr;} }
@@ -42,9 +42,14 @@
     reveals the model's full chain-of-thought for that move.</div>
 
   <div class="selectors">
-    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
-    <div><label class="sel">Game</label><select id="epSel"></select></div>
+    <div><label class="sel">⭐ Featured</label><select id="featSel"></select></div>
   </div>
+  <details class="browse"><summary class="sel" style="cursor:pointer">… or browse every matchup</summary>
+    <div class="selectors" style="margin-top:8px">
+      <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+      <div><label class="sel">Game</label><select id="epSel"></select></div>
+    </div>
+  </details>
 
   <div class="scoreboard" id="legendWrap">
     <div id="legend" style="display:contents"></div>
@@ -85,7 +90,13 @@
 const BASE = "runs/connect4/replays/connect4/";
 const PLAY_MS = 850;
 const SPEEDS = [1, 2, 4];
-let manifest=null, pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
+const DISPLAY = {"glm-5p1":"GLM-5.1","glm-5p2":"GLM-5.2","kimi-k2p6":"Kimi K2.6",
+  "minimax-m2p7":"MiniMax-M2.7","minimax-m3":"MiniMax-M3","deepseek-v4-pro":"DeepSeek V4 Pro",
+  "qwen3p7-plus":"Qwen3.7 Plus","gpt-oss-120b":"GPT-OSS 120B","gpt-5.4":"GPT 5.4",
+  "gpt-5.5":"GPT 5.5","claude-opus-4.8":"Claude Opus 4.8","claude-sonnet-4.6":"Claude Sonnet 4.6"};
+function slug(m){ return (m||"").replace(/-coached$/,""); }
+function disp(m){ return DISPLAY[slug(m)] || slug(m) || m; }
+let manifest=null, featured=[], pairData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 
 const $ = id => document.getElementById(id);
 
@@ -99,7 +110,10 @@ async function init() {
     return;
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
-    `<option value="${i}">${p.a} vs ${p.b}</option>`).join("");
+    `<option value="${i}">${disp(p.a)} vs ${disp(p.b)}</option>`).join("");
+  try { featured = (await (await fetch("connect4_featured.json?v=1")).json()).featured || []; } catch(e){ featured=[]; }
+  $("featSel").innerHTML = featured.map((f,i)=>`<option value="${i}">${f.label}</option>`).join("") || `<option value="-1">(none)</option>`;
+  $("featSel").onchange = () => loadFeatured(+$("featSel").value);
   $("pairSel").onchange = () => loadPair(+$("pairSel").value);
   $("epSel").onchange = () => selectEp(+$("epSel").value);
   $("first").onclick = () => { stop(); cursor=0; render(); };
@@ -119,8 +133,26 @@ async function init() {
     const cell=e.target.closest(".cell"); colHighlight(cell ? cell.dataset.col : null);
   });
   $("board").addEventListener("mouseleave", () => colHighlight(null));
-  await loadPair(0);
+  const _pp = PARAMS.get("pair");
+  if (_pp || PARAMS.has("pairIndex")) {
+    let pi = 0;
+    if (_pp){ const f = manifest.pairs.findIndex(p => p.file===_pp || `${p.a}__vs__${p.b}`===_pp); if(f>=0)pi=f; }
+    else pi = Math.max(0, Math.min(manifest.pairs.length-1, +PARAMS.get("pairIndex")||0));
+    await loadPair(pi);
+  } else if (featured.length) { await loadFeatured(0); }
+  else { await loadPair(0); }
 }
+
+async function loadFeatured(i){
+  const f = featured[i]; if(!f) return;
+  $("featSel").value = String(i);
+  let idx = manifest.pairs.findIndex(p => p.file===f.pair || `${p.a}__vs__${p.b}`===f.pair);
+  if (idx<0) idx=0;
+  await loadPair(idx);
+  const ei = pairData.episodes.findIndex(e => String(e.episode)===String(f.ep));
+  if (ei>=0) selectEp(ei);
+}
+
 
 function colHighlight(col){
   for (const c of $("board").children)
@@ -131,7 +163,7 @@ async function loadPair(i) {
   const p = manifest.pairs[i];
   pairData = await (await fetch(BASE + p.file + "?v=17")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
-    const r = e.reason==="win" ? `${e.winner_name} wins` : (e.reason||"");
+    const r = e.reason==="win" ? `${disp(e.winner_name)} wins` : (e.reason||"");
     return `<option value="${idx}">#${e.episode+1} · ${e.length} plies · ${r}</option>`;
   }).join("");
   selectEp(0);

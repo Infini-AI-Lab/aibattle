@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🃏 Hold'em Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
-<link rel="stylesheet" href="replay.css?v=3">
+<link rel="stylesheet" href="replay.css?v=4">
 <style>
   .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
@@ -13,7 +13,7 @@
   .felt{display:grid; grid-template-rows:auto 1fr auto; gap:16px; justify-items:center;
     background:var(--faint); border:1px solid var(--line); padding:24px 22px;}
   .seat{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line);
-    padding:10px 14px; min-width:320px; position:relative;}
+    padding:10px 14px; width:340px; max-width:100%; box-sizing:border-box; position:relative;}
   .seat.acting{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
   .seat.winner{border-color:var(--green); box-shadow:0 0 0 1px var(--green);}
   .seat .ava{width:38px; height:38px; border-radius:50%; flex:none; display:flex; align-items:center;
@@ -44,9 +44,14 @@
     <b>show reasoning</b> reveals what the model was thinking for each action.</div>
 
   <div class="selectors">
-    <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
-    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+    <div><label class="sel">⭐ Featured hand</label><select id="featSel"></select></div>
   </div>
+  <details class="browse"><summary class="sel" style="cursor:pointer">… or browse every matchup</summary>
+    <div class="selectors" style="margin-top:8px">
+      <div><label class="sel">Matchup</label><select id="pairSel"></select></div>
+      <div><label class="sel">Hand</label><select id="epSel"></select></div>
+    </div>
+  </details>
 
   <div class="stage">
     <div>
@@ -89,7 +94,13 @@ const BASE = "runs/holdem_1hand/replays/holdem/";
 const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
 const SUIT = {c:"♣", d:"♦", h:"♥", s:"♠"};
-let manifest=null, pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, showPrompt=false, speedIdx=0;
+const DISPLAY = {"glm-5p1":"GLM-5.1","glm-5p2":"GLM-5.2","kimi-k2p6":"Kimi K2.6",
+  "minimax-m2p7":"MiniMax-M2.7","minimax-m3":"MiniMax-M3","deepseek-v4-pro":"DeepSeek V4 Pro",
+  "qwen3p7-plus":"Qwen3.7 Plus","gpt-oss-120b":"GPT-OSS 120B","gpt-5.4":"GPT 5.4",
+  "gpt-5.5":"GPT 5.5","claude-opus-4.8":"Claude Opus 4.8","claude-sonnet-4.6":"Claude Sonnet 4.6"};
+function slug(m){ return (m||"").replace(/-coached$/,""); }
+function disp(m){ return DISPLAY[slug(m)] || slug(m) || m; }
+let manifest=null, featured=[], pairData=null, ep=null, btnSeat=null, cursor=0, playing=false, timer=null, showThink=false, showPrompt=false, speedIdx=0;
 const PARAMS = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
 
@@ -102,7 +113,12 @@ async function init(){
     return;
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
-    `<option value="${i}">${p.a} vs ${p.b} · rep ${p.rep}</option>`).join("");
+    `<option value="${i}">${disp(p.a)} vs ${disp(p.b)} · rep ${p.rep}</option>`).join("");
+  try { featured = (await (await fetch("holdem_featured.json?v=1")).json()).featured || []; }
+  catch(e){ featured = []; }
+  $("featSel").innerHTML = featured.map((f,i) => `<option value="${i}">${f.label}</option>`).join("")
+    || `<option value="-1">(no featured hands)</option>`;
+  $("featSel").onchange = () => loadFeatured(+$("featSel").value);
   $("pairSel").onchange = () => loadPair(+$("pairSel").value);
   $("epSel").onchange = () => selectEp(+$("epSel").value);
   $("first").onclick = () => { stop(); cursor=0; render(); };
@@ -117,15 +133,32 @@ async function init(){
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
   });
-  let pairIdx = 0;
   const pairParam = PARAMS.get("pair");
-  if (pairParam){
-    const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
-    if (found >= 0) pairIdx = found;
-  } else if (PARAMS.has("pairIndex")) {
-    pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+  if (pairParam || PARAMS.has("pairIndex")) {
+    let pairIdx = 0;
+    if (pairParam){
+      const found = manifest.pairs.findIndex(p => p.file===pairParam || `${p.a}__vs__${p.b}`===pairParam);
+      if (found >= 0) pairIdx = found;
+    } else {
+      pairIdx = Math.max(0, Math.min(manifest.pairs.length - 1, +PARAMS.get("pairIndex") || 0));
+    }
+    await loadPair(pairIdx);
+  } else if (featured.length) {
+    await loadFeatured(0);
+  } else {
+    await loadPair(0);
   }
-  await loadPair(pairIdx);
+}
+
+async function loadFeatured(i){
+  const f = featured[i];
+  if (!f) return;
+  $("featSel").value = String(i);
+  let idx = manifest.pairs.findIndex(p => p.file===f.pair || `${p.a}__vs__${p.b}`===f.pair);
+  if (idx < 0) idx = 0;
+  await loadPair(idx);
+  const ei = pairData.episodes.findIndex(e => String(e.episode)===String(f.ep));
+  if (ei >= 0) selectEp(ei);
 }
 
 async function loadPair(i){
@@ -133,7 +166,7 @@ async function loadPair(i){
   $("pairSel").value = String(i);
   pairData = await (await fetch(BASE + p.file + "?v=17")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
-    const w = e.winner_name ? `${e.winner_name} ${fmt(e.returns[e.winner])}` : "—";
+    const w = e.winner_name ? `${disp(e.winner_name)} ${fmt(e.returns[e.winner])}` : "—";
     const n = e.moves.length;
     return `<option value="${idx}">#${e.episode+1} · ${n} action${n===1?"":"s"} · ${e.reason} · ${w}</option>`;
   }).join("");
@@ -194,7 +227,7 @@ function actLabel(m){
 }
 
 function seatHTML(seat, st){
-  const agent = ep.seat_assignment[seat] || seat;
+  const agent = disp(ep.seat_assignment[seat] || seat);
   const stack = st.stacks[seat];
   const holes = ep.holes[seat];
   const faceUp = !!holes;
@@ -292,11 +325,11 @@ function renderPanel(st){
 }
 
 function resultBlock(){
-  const w = ep.winner_name;
+  const w = disp(ep.winner_name);
   let cats = "";
   if (ep.reason==="showdown" && ep.hand_categories){
     cats = " · " + Object.keys(ep.seat_assignment).map(s =>
-      `${ep.seat_assignment[s]}: ${ep.hand_categories[s]}`).join(" vs ");
+      `${disp(ep.seat_assignment[s])}: ${ep.hand_categories[s]}`).join(" vs ");
   }
   return `<div class="result"><div class="rt">🏆 ${w} wins ${fmt(ep.returns[ep.winner])}</div>` +
     `<div class="rs">by ${ep.reason}${cats}</div></div>`;
