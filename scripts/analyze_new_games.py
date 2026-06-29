@@ -509,7 +509,7 @@ def render_versus(rep: dict) -> str:
 <body><div class="wrap">
   <h1>$ ~/aibattle/{cfg['area']}<span class="cursor"></span></h1>
   <div class="sub">{emoji} {name} · {cfg['blurb']} · {rep['num_games']} games</div>
-  <a class="replaybtn" href="{cfg['replay']}?v=17">▶ watch {cfg['replay_verb']} replays</a>
+  <a class="replaybtn" href="{cfg['replay']}?cacheBust=19">🎬 Watch featured replays →</a>
   {_intro_html(rep['game'])}
 
   <div class="kpis">

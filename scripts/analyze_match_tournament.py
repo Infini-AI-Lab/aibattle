@@ -782,9 +782,8 @@ def render_html(rep: dict, beh: dict) -> str:
     dq_html = _match_decision_quality_html(rep)
     strategy_html, strategy_js = _match_strategy_html(rep)
     traj_html, traj_js = _lead_traj_html(rep)
-    cases_html = _match_cases_html(rep)
-    replay_btn = ('<a class="replaybtn" href="match_replay.html?v=18&cacheBust=18">'
-                  '▶ watch match replays</a>')
+    replay_btn = ('<a class="replaybtn" href="match_replay.html?cacheBust=19">'
+                  '🎬 Watch featured replays →</a>')
     ep_range = rep.get("episode_count_range") or [rep["episodes_per_pair"], rep["episodes_per_pair"]]
     if ep_range[0] == ep_range[1]:
         match_count_label = f"{ep_range[1]} matches/pair"
@@ -806,11 +805,12 @@ def render_html(rep: dict, beh: dict) -> str:
                   f"<td>{r['avg_hands_per_match']}</td><td>{r['avg_win_margin']}</td>"
                   f"<td>{r['matches']}</td>"
                   f"{token_cost_cells(r['model'], beh.get(r['model'], {}).get('avg_tokens'))}</tr>")
-    head = "".join(f"<th>{display_name(m)}</th>" for m in models)
+    hh_order = [r["model"] for r in rep["leaderboard"]]   # ranked (Elo) order
+    head = "".join(f"<th>{display_name(m)}</th>" for m in hh_order)
     grid = ""
-    for a in models:
+    for a in hh_order:
         cells = ""
-        for b in models:
+        for b in hh_order:
             if a == b:
                 cells += "<td class='diag'>—</td>"
                 continue
@@ -880,8 +880,6 @@ def render_html(rep: dict, beh: dict) -> str:
   {factors_html}
   {dq_html}
   {beh_html}
-  <h2>🎬 Case studies <span class="note">(replay-linked match moments)</span></h2>
-  {cases_html}
   <script>
   {strategy_js}
   {traj_js}

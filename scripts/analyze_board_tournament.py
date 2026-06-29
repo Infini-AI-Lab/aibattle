@@ -596,8 +596,8 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
-    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?v=17">'
-                  f'▶ watch game replays</a>')
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?cacheBust=19">'
+                  f'🎬 Watch featured replays →</a>')
     emoji, name = TITLE[game].split(" ", 1)
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
@@ -679,6 +679,30 @@ GAME_TAXONOMY = {
 }
 
 
+def _minirank(entry: dict) -> str:
+    """Compact full ranking for a game card: rank · model · Elo bar."""
+    ranking = entry.get("ranking") or []
+    ratings = entry.get("ratings") or {}
+    if not ranking:
+        return f"<div class='champ'>{entry.get('champ_line', '')}</div>"
+    vals = [ratings.get(m) for m in ranking if ratings.get(m) is not None]
+    lo, hi = (min(vals), max(vals)) if vals else (0, 1)
+    rng = (hi - lo) or 1
+    # Elo-scale ratings (≈1500) vs small per-hand metrics (e.g. blackjack net/hand)
+    elo_mode = max((abs(v) for v in vals), default=0) > 50
+    rows = ""
+    for i, m in enumerate(ranking, 1):
+        r = ratings.get(m)
+        pct = 25 + 75 * (r - lo) / rng if r is not None else 0
+        val = "" if r is None else (_elo_txt(r) if elo_mode else f"{r:+.3f}")
+        bar = (f"<span class='mr-bar'><i style='width:{pct:.0f}%'></i></span>"
+               if r is not None else "<span class='mr-bar'></span>")
+        rows += (f"<div class='mr-row'><span class='mr-rk'>{i}</span>"
+                 f"<span class='mr-nm'>{model_cell(m)}</span>"
+                 f"{bar}<span class='mr-val'>{val}</span></div>")
+    return f"<div class='minirank'>{rows}</div>"
+
+
 def _index_card(entry: dict) -> str:
     badges = "".join(f"<span class='badge'>{b}</span>" for b in entry["badges"])
     return f"""
@@ -686,7 +710,7 @@ def _index_card(entry: dict) -> str:
           <div class="ctitle">{entry['title']}</div>
           <div class="badges">{badges}</div>
           <div class="cmeta">{entry['meta']}</div>
-          <div class="champ">{entry['champ_line']}</div>
+          {_minirank(entry)}
           <div class="cgo">View analysis →</div>
         </a>"""
 
@@ -860,18 +884,7 @@ def render_index(reps: dict) -> str:
 
     # Kuhn first inside the imperfect group: it is the simplest game (a solved,
     # tiny-state game scored against GTO), so it reads as the natural entry point.
-    kuhn_path = os.path.join(REPORT_DIR, "kuhn_tournament_analysis.json")
-    if os.path.exists(kuhn_path):
-        k = json.load(open(kuhn_path))
-        lb = k["leaderboard"]
-        champ = lb[0]
-        entries.append({
-            "key": "kuhn", "title": "🃏 Kuhn Poker",
-            "href": "kuhn_tournament_report.html",
-            "meta": f"{k['episodes_per_pair']} hands/pair · solved game · GTO scoring",
-            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['net_per_hand']:+.3f} net/hand</span>",
-            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["kuhn"],
-        })
+    # Kuhn omitted from the overview cards (still has its own report/nav entry).
 
     # Three Hold'em formats, distinct enough to stand alone: 1-Hand (each hand
     # scored independently, bb/100), Match (heads-up, stacks carried, win the
@@ -906,19 +919,7 @@ def render_index(reps: dict) -> str:
             "ratings": {r["model"]: r.get("elo") for r in lb}, **GAME_TAXONOMY["match"],
         })
 
-    table_path = os.path.join(REPORT_DIR, "table_tournament_analysis.json")
-    if os.path.exists(table_path):
-        t = json.load(open(table_path))
-        lb = t["leaderboard"]  # pre-sorted by avg finishing rank (lower better)
-        champ = lb[0]
-        entries.append({
-            "key": "table", "title": "🃏 Hold'em Table",
-            "href": "table_tournament_report.html",
-            "meta": (f"{t['num_players']}-handed · {t['sessions']} sessions · up to "
-                     f"{t['max_hands']} hands · avg finishing rank"),
-            "champ_line": f"🏆 {champ['model']} <span class='metric'>{champ['avg_rank']} avg rank</span>",
-            "ranking": [r["model"] for r in lb], **GAME_TAXONOMY["table"],
-        })
+    # Hold'em Table omitted from the overview cards (still has its own report).
 
     # New-games tournament (independent_blackjack, leduc, blotto, othello). Its
     # analyzer (analyze_new_games.py) writes a compact entry list that already
@@ -926,7 +927,9 @@ def render_index(reps: dict) -> str:
     # straight into both the cards and the cross-game Arena Score.
     newgames_path = os.path.join(REPORT_DIR, "new_games_index.json")
     if os.path.exists(newgames_path):
-        entries.extend(json.load(open(newgames_path)))
+        # Othello omitted from the overview cards (still has its own report).
+        entries.extend(e for e in json.load(open(newgames_path))
+                       if e.get("key") != "othello_lite_6x6")
 
     def _group(name):
         cards = "".join(_index_card(e) for e in entries if e["group"] == name)
@@ -959,6 +962,14 @@ def render_index(reps: dict) -> str:
   .badge::before {{ content:"["; }} .badge::after {{ content:"]"; }}
   .cmeta {{ font-size:12px; color:var(--dim); margin:0 0 12px; }}
   .champ {{ font-size:13px; }} .metric {{ color:var(--red); font-weight:700; }}
+  .minirank {{ margin:8px 0 4px; }}
+  .mr-row {{ display:grid; grid-template-columns:18px 1fr 76px 56px; align-items:center;
+    gap:8px; font-size:12px; padding:2px 0; }}
+  .mr-rk {{ color:var(--dim); text-align:right; font-variant-numeric:tabular-nums; }}
+  .mr-nm {{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+  .mr-bar {{ position:relative; height:9px; background:var(--faint); border:1px solid var(--line); }}
+  .mr-bar i {{ position:absolute; left:0; top:0; bottom:0; background:var(--red); opacity:.5; }}
+  .mr-val {{ text-align:right; color:var(--red); font-weight:600; font-variant-numeric:tabular-nums; }}
   .cgo {{ margin-top:12px; font-size:12px; color:var(--red); }}
   table.lb td, table.lb th {{ text-align:center; }}
   table.lb td.rk, table.lb th.rk {{ width:34px; color:var(--dim); }}
@@ -988,12 +999,12 @@ def render_index(reps: dict) -> str:
     <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
       measures the model, not the scaffolding. <b>Open-weight models are served via
       Fireworks AI</b>; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
-    <div class="group-label perfect">♟ Perfect information
-      <span class="gl-sub">full state visible · deterministic</span></div>
-    {_group("perfect")}
     <div class="group-label imperfect">🎭 Imperfect information
       <span class="gl-sub">hidden cards · stochastic</span></div>
     {_group("imperfect")}
+    <div class="group-label perfect">♟ Perfect information
+      <span class="gl-sub">full state visible · deterministic</span></div>
+    {_group("perfect")}
   </section>
 
   <section class="arena" id="agentic">

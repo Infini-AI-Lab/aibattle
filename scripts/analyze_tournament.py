@@ -699,8 +699,8 @@ def render_html(report: dict) -> str:
     models = report["models"]
     pm = report["per_model"]
     payload = json.dumps(report)
-    replay_btn = ('<a class="replaybtn" href="holdem_replay.html?v=17">'
-                  '▶ watch hand replays</a>')
+    replay_btn = ('<a class="replaybtn" href="holdem_replay.html?cacheBust=19">'
+                  '🎬 Watch featured replays →</a>')
 
     # ranked leaderboard by chip-weighted Elo; raw metrics kept for reference.
     elo = report.get("elo", {})

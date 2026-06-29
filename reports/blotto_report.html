@@ -18,12 +18,12 @@
     vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
   h1 + .sub { margin-bottom:30px; }
-  .sub { color:var(--dim); font-size:13px; margin-bottom:30px; }
+  .sub { color:var(--fg); font-size:13px; margin-bottom:30px; }
   h2 { font-size:15px; margin:36px 0 10px; font-weight:700; }
   h2::before { content:"## "; color:var(--red); }
   h3 { font-size:14px; color:var(--fg); margin:0 0 6px; }
   h3::before { content:"### "; color:var(--red); }
-  .note { color:var(--dim); font-size:12px; margin:6px 0 14px; }
+  .note { color:var(--fg); font-size:12px; margin:6px 0 14px; }
   .small { font-size:10px; color:var(--dim); font-weight:400; }
 
   table { border-collapse:collapse; width:100%; font-size:13px; }
@@ -88,7 +88,7 @@
     background:var(--fg); color:var(--bg); font-weight:700; font-size:12px;
     text-align:center; vertical-align:middle; line-height:1.4; }
   .rules code { background:#fff; border:1px solid var(--line); padding:1px 6px; color:var(--red); font-size:12px; }
-  .rules .seq { color:var(--dim); font-size:12.5px; margin-top:10px; }
+  .rules .seq { color:var(--fg); font-size:12.5px; margin-top:10px; }
   /* Replay button: the one place a non-token link color is used (indigo),
      per the terminal-ui SKILL. Sits directly under the subtitle. */
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
@@ -99,7 +99,7 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/blotto<span class="cursor"></span></h1>
   <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 520 games</div>
-  <a class="replaybtn" href="blotto_replay.html?v=17">▶ watch game replays</a>
+  <a class="replaybtn" href="blotto_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
   <div class="rules"><h3>How Colonel Blotto works</h3>A two-player game of <b>simultaneous</b> resource allocation, played over <b>20 rounds</b>. Each round:<ul><li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs per round).</li><li>Allocations are revealed <b>at the same time</b> — neither sees the other's before committing.</li><li>On each battlefield the <b>larger force wins</b> that field's points; an exact tie awards the field to neither.</li><li>Whoever takes the <b>most points</b> wins the round; only resolved past rounds are shown to the opponent.</li></ul><div class="seq">After 20 rounds the <b>higher cumulative score wins</b> (equal totals draw). No hidden cards or chance — the difficulty is purely strategic: spread thin to grab the cheap fields, or stack up to guarantee the expensive ones, while reading and misdirecting the opponent across rounds.</div><div class="seq"><b>What the model sees each round:</b> the 5 battlefields and their point values, its 100-troop budget, and the results of past rounds — not the opponent's current allocation (both commit at the same time).</div></div>
 
   <div class="kpis">
