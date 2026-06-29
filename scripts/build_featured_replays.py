@@ -21,6 +21,106 @@ from model_names import strip_coached, display_name
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
 
+# Built replay tree per game (relative to REPORT_DIR, the served root). The
+# manifest here is authored by build_replays.py and is the source of truth for
+# what the viewer can actually load — so we validate every featured pick against
+# it. NOTE: build_featured_replays.py must run AFTER build_replays.py.
+GAME_REPLAY_DIR = {
+    "match": "runs/holdem_match/replays/match",
+    "holdem": "runs/holdem_1hand/replays/holdem",
+    "connect4": "runs/connect4/replays/connect4",
+    "gomoku": "runs/gomoku/replays/gomoku",
+    "othello": "runs/new_games_experiment/othello_lite_6x6/replays/othello",
+    "kuhn": "runs/kuhn_poker/replays/kuhn",
+    "leduc": "runs/new_games_experiment/leduc_poker/replays/leduc",
+    "blotto": "runs/new_games_experiment/repeated_colonel_blotto/replays/blotto",
+}
+
+
+def _make_resolver(game):
+    """Return resolve(raw_a, raw_b, orig_pair, ep) -> the manifest's exact pair
+    `file` for that game/episode, or None if it was never built.
+
+    Curation reads the rich raw runs/ logs, but build_replays.py may name pairs
+    differently (it keeps the ``-coached`` suffix for some games and strips it
+    for others) and may build only a subset of pairs/episodes. Matching against
+    the manifest makes the featured ``pair`` field always equal what the viewer
+    looks up, and silently drops picks for games that weren't built.
+    """
+    rd = os.path.join(REPORT_DIR, GAME_REPLAY_DIR[game])
+    mp = os.path.join(rd, "manifest.json")
+    if not os.path.exists(mp):
+        print(f"  WARN: manifest missing for {game} ({mp}); "
+              "featured links left UNVALIDATED — run build_replays.py first")
+        return None
+    man = json.load(open(mp))
+    files = {p["file"] for p in man["pairs"]}
+    by_raw, by_stripped = {}, {}
+    for p in man["pairs"]:
+        by_raw[frozenset((p["a"], p["b"]))] = p["file"]
+        by_stripped.setdefault(
+            frozenset((strip_coached(p["a"]), strip_coached(p["b"]))), []).append(p["file"])
+    cache = {}
+
+    def eps_of(fname):
+        if fname not in cache:
+            ids = set()
+            try:
+                d = json.load(open(os.path.join(rd, fname)))
+                for e in d.get("episodes") or []:
+                    v = e.get("episode", e.get("i")) if isinstance(e, dict) else e
+                    if v is not None:
+                        ids.add(str(v))
+            except (OSError, json.JSONDecodeError):
+                pass
+            cache[fname] = ids
+        return cache[fname]
+
+    def resolve(raw_a, raw_b, orig_pair, ep):
+        # Candidate files, most-specific first: the original name (holdem reps,
+        # board), the exact raw model pair (keeps the coached variant), then the
+        # stripped model pair (manifests that drop -coached, e.g. kuhn/leduc).
+        cand = []
+        if orig_pair in files:
+            cand.append(orig_pair)
+        f = by_raw.get(frozenset((raw_a, raw_b)))
+        if f and f not in cand:
+            cand.append(f)
+        for f in by_stripped.get(frozenset((strip_coached(raw_a), strip_coached(raw_b))), []):
+            if f not in cand:
+                cand.append(f)
+        if not cand:
+            return None
+        known = False
+        for f in cand:                       # prefer the variant holding this episode
+            e = eps_of(f)
+            if e:
+                known = True
+                if str(ep) in e:
+                    return f
+        # The episode wasn't among the built ones. If we *know* the built set
+        # (non-empty), the pick is unviewable -> drop so curation backfills.
+        # Only fail open (return the pair) when we couldn't read any episode list.
+        return None if known else cand[0]
+
+    return resolve
+
+
+def _validate(cs, game, ep_key):
+    """Drop candidates whose pair/episode was not built, and rewrite each
+    surviving candidate's ``pair`` to the manifest's exact file name."""
+    resolve = _make_resolver(game)
+    if resolve is None:
+        return cs
+    out = []
+    for c in cs:
+        f = resolve(c.get("raw_a", ""), c.get("raw_b", ""), c["pair"], c[ep_key])
+        if f:
+            out.append(dict(c, pair=f))
+    if len(out) != len(cs):
+        print(f"  [{game}] {len(out)}/{len(cs)} candidates resolve to built replays")
+    return out
+
 
 def _match_candidates():
     cands = []
@@ -52,6 +152,7 @@ def _match_candidates():
                 continue
             cands.append({
                 "pair": pair_file, "match": e["episode"],
+                "raw_a": a_raw, "raw_b": b_raw,
                 "a": a, "b": b, "winner": winner, "loser": sa[oseat],
                 "reason": e.get("reason"), "hands": e.get("hands_played") or len(hs),
                 "min_margin": min(margins), "final_margin": margins[-1],
@@ -61,7 +162,7 @@ def _match_candidates():
 
 
 def _curate_match():
-    cs = _match_candidates()
+    cs = _validate(_match_candidates(), "match", "match")
     if not cs:
         return []
     picks, used, won = [], set(), set()
@@ -148,9 +249,11 @@ def _curate_holdem():
             if wseat is None:
                 continue
             cs.append({"pair": base + ".json", "ep": e["episode"],
+                       "raw_a": a_raw, "raw_b": b_raw,
                        "a": a, "b": b, "winner": winner,
                        "loser": sa["player_1" if wseat == "player_0" else "player_0"],
                        "pot": abs(ret.get(wseat, 0)), "reason": e.get("reason")})
+    cs = _validate(cs, "holdem", "ep")
     if not cs:
         return []
     picks, used, won = [], set(), set()
@@ -181,9 +284,9 @@ def _curate_holdem():
     return picks
 
 
-def _curate_generic(glob_pat, prefix, kind):
-    """Curate board / kuhn / leduc / blotto games. pair = raw a__vs__b (matches
-    the viewer's `${p.a}__vs__${p.b}`); ep = episode id."""
+def _curate_generic(game, glob_pat, prefix, kind):
+    """Curate board / kuhn / leduc / blotto games. Pairs are validated and
+    rewritten to the manifest's exact file name via _validate(game)."""
     cs = []
     for pd in sorted(glob.glob(glob_pat)):
         if not os.path.isdir(pd):
@@ -207,9 +310,11 @@ def _curate_generic(glob_pat, prefix, kind):
             if wseat is None:
                 continue
             ret = e.get("returns") or {}
-            cs.append({"pair": core, "ep": e["episode"], "a": a, "b": b, "winner": winner,
+            cs.append({"pair": core, "ep": e["episode"], "raw_a": a_raw, "raw_b": b_raw,
+                       "a": a, "b": b, "winner": winner,
                        "loser": sa["player_1" if wseat == "player_0" else "player_0"],
                        "length": e.get("length") or 0, "pot": abs(ret.get(wseat, 0) or 0)})
+    cs = _validate(cs, game, "ep")
     if not cs:
         return []
     picks, used, won = [], set(), set()
@@ -270,7 +375,7 @@ def main():
     _write("match_featured.json", "match", _curate_match())
     _write("holdem_featured.json", "holdem", _curate_holdem())
     for name, game, glob_pat, prefix, kind in GENERIC:
-        _write(name, game, _curate_generic(glob_pat, prefix, kind))
+        _write(name, game, _curate_generic(game, glob_pat, prefix, kind))
 
 
 if __name__ == "__main__":

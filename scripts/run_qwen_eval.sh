@@ -7,7 +7,7 @@
 # 64-cap processes at once (that would push Fireworks concurrency to ~128).
 set -u
 cd "$(dirname "$0")/.."
-export PATH="/home/haizhonz/anaconda3/envs/aibattle/bin:$PATH"
+# Activate your environment (e.g. `conda activate aibattle`) before running.
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
 export COACHED=1
 export MAX_CONCURRENCY=64

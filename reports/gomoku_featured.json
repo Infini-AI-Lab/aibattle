@@ -2,84 +2,84 @@
   "game": "gomoku",
   "featured": [
     {
-      "pair": "kimi-k2p6-coached__vs__minimax-m3-coached",
+      "pair": "gomoku__kimi-k2p6-coached__vs__minimax-m3-coached.json",
       "ep": 20,
       "title": "Longest battle",
       "label": "Longest battle \u2014 Kimi K2.6 vs MiniMax-M3",
       "why": "A 69-move war; Kimi K2.6 edges MiniMax-M3."
     },
     {
-      "pair": "claude-opus-4.8__vs__gpt-5.4",
+      "pair": "gomoku__claude-opus-4.8__vs__gpt-5.4.json",
       "ep": 13,
       "title": "Claude Opus 4.8's win",
       "label": "Claude Opus 4.8's win \u2014 Claude Opus 4.8 vs GPT 5.4",
       "why": "Claude Opus 4.8 beats GPT 5.4 (56 moves)."
     },
     {
-      "pair": "claude-sonnet-4.6__vs__gpt-5.4",
+      "pair": "gomoku__claude-sonnet-4.6__vs__gpt-5.4.json",
       "ep": 8,
       "title": "Claude Sonnet 4.6's win",
       "label": "Claude Sonnet 4.6's win \u2014 Claude Sonnet 4.6 vs GPT 5.4",
       "why": "Claude Sonnet 4.6 beats GPT 5.4 (51 moves)."
     },
     {
-      "pair": "glm-5p1-coached__vs__qwen3p7-plus-coached",
+      "pair": "gomoku__glm-5p1-coached__vs__qwen3p7-plus-coached.json",
       "ep": 26,
       "title": "GLM-5.1's win",
       "label": "GLM-5.1's win \u2014 GLM-5.1 vs Qwen3.7 Plus",
       "why": "GLM-5.1 beats Qwen3.7 Plus (53 moves)."
     },
     {
-      "pair": "gpt-5.4__vs__deepseek-v4-pro-coached",
+      "pair": "gomoku__gpt-5.4__vs__deepseek-v4-pro-coached.json",
       "ep": 13,
       "title": "DeepSeek V4 Pro's win",
       "label": "DeepSeek V4 Pro's win \u2014 GPT 5.4 vs DeepSeek V4 Pro",
       "why": "DeepSeek V4 Pro beats GPT 5.4 (53 moves)."
     },
     {
-      "pair": "gpt-5.5__vs__glm-5p1-coached",
+      "pair": "gomoku__gpt-5.5__vs__glm-5p1-coached.json",
       "ep": 12,
       "title": "GPT 5.5's win",
       "label": "GPT 5.5's win \u2014 GPT 5.5 vs GLM-5.1",
       "why": "GPT 5.5 beats GLM-5.1 (59 moves)."
     },
     {
-      "pair": "qwen3p7-plus-coached__vs__glm-5p2-coached",
+      "pair": "gomoku__qwen3p7-plus-coached__vs__glm-5p2-coached.json",
       "ep": 5,
       "title": "GLM-5.2's win",
       "label": "GLM-5.2's win \u2014 Qwen3.7 Plus vs GLM-5.2",
       "why": "GLM-5.2 beats Qwen3.7 Plus (53 moves)."
     },
     {
-      "pair": "gpt-5.4__vs__qwen3p7-plus-coached",
+      "pair": "gomoku__gpt-5.4__vs__qwen3p7-plus-coached.json",
       "ep": 23,
       "title": "GPT 5.4's win",
       "label": "GPT 5.4's win \u2014 GPT 5.4 vs Qwen3.7 Plus",
       "why": "GPT 5.4 beats Qwen3.7 Plus (42 moves)."
     },
     {
-      "pair": "claude-opus-4.8__vs__qwen3p7-plus-coached",
+      "pair": "gomoku__claude-opus-4.8__vs__qwen3p7-plus-coached.json",
       "ep": 16,
       "title": "Qwen3.7 Plus's win",
       "label": "Qwen3.7 Plus's win \u2014 Claude Opus 4.8 vs Qwen3.7 Plus",
       "why": "Qwen3.7 Plus beats Claude Opus 4.8 (38 moves)."
     },
     {
-      "pair": "claude-sonnet-4.6__vs__minimax-m3-coached",
+      "pair": "gomoku__claude-sonnet-4.6__vs__minimax-m3-coached.json",
       "ep": 14,
       "title": "MiniMax-M3's win",
       "label": "MiniMax-M3's win \u2014 Claude Sonnet 4.6 vs MiniMax-M3",
       "why": "MiniMax-M3 beats Claude Sonnet 4.6 (38 moves)."
     },
     {
-      "pair": "deepseek-v4-pro-coached__vs__gpt-oss-120b-coached",
+      "pair": "gomoku__deepseek-v4-pro-coached__vs__gpt-oss-120b-coached.json",
       "ep": 5,
       "title": "GPT-OSS 120B's win",
       "label": "GPT-OSS 120B's win \u2014 DeepSeek V4 Pro vs GPT-OSS 120B",
       "why": "GPT-OSS 120B beats DeepSeek V4 Pro (39 moves)."
     },
     {
-      "pair": "claude-sonnet-4.6__vs__minimax-m2p7-coached",
+      "pair": "gomoku__claude-sonnet-4.6__vs__minimax-m2p7-coached.json",
       "ep": 32,
       "title": "MiniMax-M2.7's win",
       "label": "MiniMax-M2.7's win \u2014 Claude Sonnet 4.6 vs MiniMax-M2.7",

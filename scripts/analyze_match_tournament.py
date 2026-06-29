@@ -415,35 +415,6 @@ def _match_verdict(st, fac, lbwin_m, bo_hi, bo_lo):
     return f"<b>{tag}</b>" + (" — " + "; ".join(parts) if parts else "") + "."
 
 
-def _match_cases_html(report):
-    """Replay-linked per-model evidence (kept as a Section 3 deep-dive)."""
-    models = [r["model"] for r in report["leaderboard"]]
-    stats = report["strategy"]
-    cards = []
-    for rank, m in enumerate(models, 1):
-        seen = set(); picked = []
-        for c in sorted(stats[m]["cases"], key=lambda x: 0 if x.get("href") else 1):
-            k = (c["dimension"], c["title"], c["opponent"], c["episode"], c.get("hand"))
-            if k in seen:
-                continue
-            seen.add(k); picked.append(c)
-            if len(picked) == 3:
-                break
-        lis = ""
-        for c in picked:
-            link = (f"<a class='case-link' href=\"{html_lib.escape(c['href'], quote=True)}\">watch replay</a>"
-                    if c.get("href") else "<div class='case-meta'>no replay for this pair</div>")
-            hand = f" · hand {c.get('hand')}" if c.get("hand") else ""
-            lis += (f"<li><div class='case-title'>{html_lib.escape(c['dimension'])}: {html_lib.escape(c['title'])}</div>"
-                    f"<div class='case-signal'>{html_lib.escape(c['signal'])}</div>"
-                    f"<div class='case-meta'>vs {html_lib.escape(str(c['opponent']))} · match {html_lib.escape(str(c['episode']))}{hand}</div>{link}</li>")
-        cards.append(f"<article class='strategy-card'><div class='strategy-head'><div>"
-                     f"<h3>{rank}. {model_cell(m)}</h3></div></div>"
-                     f"<ol class='strategy-cases'>{lis}</ol></article>")
-    return ("<div class=\"note\">Specific match moments behind each model's profile, linked into the "
-            "replay viewer.</div><div class=\"strategy-grid\">" + "".join(cards) + "</div>")
-
-
 def _match_strategy_html(report):
     """Section 2 cards: verdict + a win/loss-outcome bar (how it wins AND loses).
 

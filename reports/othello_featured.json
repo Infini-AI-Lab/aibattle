@@ -2,35 +2,35 @@
   "game": "othello",
   "featured": [
     {
-      "pair": "deepseek-v4-pro__vs__glm-5p1",
+      "pair": "othello__deepseek-v4-pro__vs__glm-5p1.json",
       "ep": 27,
       "title": "Longest battle",
       "label": "Longest battle \u2014 DeepSeek V4 Pro vs GLM-5.1",
       "why": "A 40-move war; DeepSeek V4 Pro edges GLM-5.1."
     },
     {
-      "pair": "kimi-k2p6__vs__minimax-m2p7",
+      "pair": "othello__kimi-k2p6__vs__minimax-m2p7.json",
       "ep": 28,
       "title": "Kimi K2.6's win",
       "label": "Kimi K2.6's win \u2014 Kimi K2.6 vs MiniMax-M2.7",
       "why": "Kimi K2.6 beats MiniMax-M2.7 (39 moves)."
     },
     {
-      "pair": "glm-5p1__vs__gpt-oss-120b",
+      "pair": "othello__glm-5p1__vs__gpt-oss-120b.json",
       "ep": 6,
       "title": "GLM-5.1's win",
       "label": "GLM-5.1's win \u2014 GLM-5.1 vs GPT-OSS 120B",
       "why": "GLM-5.1 beats GPT-OSS 120B (36 moves)."
     },
     {
-      "pair": "minimax-m2p7__vs__gpt-oss-120b",
+      "pair": "othello__minimax-m2p7__vs__gpt-oss-120b.json",
       "ep": 16,
       "title": "GPT-OSS 120B's win",
       "label": "GPT-OSS 120B's win \u2014 MiniMax-M2.7 vs GPT-OSS 120B",
       "why": "GPT-OSS 120B beats MiniMax-M2.7 (36 moves)."
     },
     {
-      "pair": "deepseek-v4-pro__vs__minimax-m2p7",
+      "pair": "othello__deepseek-v4-pro__vs__minimax-m2p7.json",
       "ep": 34,
       "title": "MiniMax-M2.7's win",
       "label": "MiniMax-M2.7's win \u2014 DeepSeek V4 Pro vs MiniMax-M2.7",

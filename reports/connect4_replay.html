@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🔴 Connect Four Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=27"></script>
+<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>
 <link rel="stylesheet" href="replay.css?v=4">
 <style>
   .stage{grid-template-columns:minmax(300px,420px) 1fr;}
@@ -147,7 +147,7 @@ async function loadFeatured(i){
   const f = featured[i]; if(!f) return;
   $("featSel").value = String(i);
   let idx = manifest.pairs.findIndex(p => p.file===f.pair || `${p.a}__vs__${p.b}`===f.pair);
-  if (idx<0) idx=0;
+  if (idx < 0) { console.warn("featured pair not built:", f.pair); return; }
   await loadPair(idx);
   const ei = pairData.episodes.findIndex(e => String(e.episode)===String(f.ep));
   if (ei>=0) selectEp(ei);

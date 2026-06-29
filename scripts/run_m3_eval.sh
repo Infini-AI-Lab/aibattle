@@ -12,7 +12,7 @@
 # exited so the two never compete for the 64-call budget.
 set -u
 cd "$(dirname "$0")/.."
-export PATH="/home/haizhonz/anaconda3/envs/aibattle/bin:$PATH"
+# Activate your environment (e.g. `conda activate aibattle`) before running.
 export PYTHONPATH="$PWD/src${PYTHONPATH:+:$PYTHONPATH}"
 export COACHED=1
 export MAX_CONCURRENCY=64

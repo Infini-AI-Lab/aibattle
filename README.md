@@ -119,6 +119,24 @@ match.
 game state, only observations; matches are **seat-swapped** so reported skill is
 position-neutral. See `claude-doc/DESIGN.md` for the full design.
 
+## 🛠️ Build the report site
+
+The site under `reports/` is generated. Rebuild it in dependency order with:
+
+```bash
+./build.sh
+```
+
+This renders every game report + the overview, builds the replay data
+(`runs/<game>/replays/…`, gitignored), and then curates the per-game
+**featured replays** — `build_featured_replays.py` runs last because it
+validates every featured pick against the freshly built manifests.
+
+**Deploy:** publish the `reports/` directory. `reports/runs` is a symlink to
+`../runs`; the replay viewers fetch `reports/runs/<game>/replays/…/manifest.json`,
+so the host must **follow the symlink** (`cp -RL`, `rsync -L`, etc.) or the
+replays and featured dropdowns will 404.
+
 ## 🗺️ Roadmap
 
 - **Harness Arena** — open the same games to any model + any scaffolding, not just
