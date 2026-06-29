@@ -58,9 +58,14 @@
     Dealer hit cards are face-down (only its upcard and final total are public).</div>
 
   <div class="selectors">
-    <div><label class="sel">Model</label><select id="modelSel"></select></div>
-    <div><label class="sel">Hand</label><select id="epSel"></select></div>
+    <div><label class="sel">⭐ Featured hand</label><select id="featSel"></select></div>
   </div>
+  <details class="browse"><summary class="sel" style="cursor:pointer">… or browse every model</summary>
+    <div class="selectors" style="margin-top:8px">
+      <div><label class="sel">Model</label><select id="modelSel"></select></div>
+      <div><label class="sel">Hand</label><select id="epSel"></select></div>
+    </div>
+  </details>
 
   <div class="stage">
     <div>
@@ -96,10 +101,16 @@
 </div>
 
 <script>
-const BASE = "runs/new_games_experiment/independent_blackjack/replays/blackjack/";
+const BASE = "replays/blackjack/";
 const PLAY_MS = 950;
 const SPEEDS = [1, 2, 4];
-let manifest=null, modelData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
+const DISPLAY = {"glm-5p1":"GLM-5.1","glm-5p2":"GLM-5.2","kimi-k2p6":"Kimi K2.6",
+  "minimax-m2p7":"MiniMax-M2.7","minimax-m3":"MiniMax-M3","deepseek-v4-pro":"DeepSeek V4 Pro",
+  "qwen3p7-plus":"Qwen3.7 Plus","gpt-oss-120b":"GPT-OSS 120B","gpt-5.4":"GPT 5.4",
+  "gpt-5.5":"GPT 5.5","claude-opus-4.8":"Claude Opus 4.8","claude-sonnet-4.6":"Claude Sonnet 4.6"};
+function slug(m){ return (m||"").replace(/-coached$/,""); }
+function disp(m){ return DISPLAY[slug(m)] || slug(m) || m; }
+let manifest=null, featured=[], modelData=null, ep=null, cursor=0, playing=false, timer=null, showThink=false, showInput=false, speedIdx=0;
 const $ = id => document.getElementById(id);
 
 async function init(){
@@ -111,7 +122,12 @@ async function init(){
     return;
   }
   $("modelSel").innerHTML = manifest.models.map((m,i) =>
-    `<option value="${i}">${m.model}</option>`).join("");
+    `<option value="${i}">${disp(m.model)}</option>`).join("");
+  try { featured = (await (await fetch("blackjack_featured.json?v=1")).json()).featured || []; }
+  catch(e){ featured = []; }
+  $("featSel").innerHTML = featured.map((f,i) => `<option value="${i}">${f.label}</option>`).join("")
+    || `<option value="-1">(no featured hands)</option>`;
+  $("featSel").onchange = () => loadFeatured(+$("featSel").value);
   $("modelSel").onchange = () => loadModel(+$("modelSel").value);
   $("epSel").onchange = () => selectEp(+$("epSel").value);
   $("first").onclick = () => { stop(); cursor=0; render(); };
@@ -126,7 +142,18 @@ async function init(){
     if (e.key==="ArrowRight"){ stop(); step(1); e.preventDefault(); }
     if (e.key===" "){ togglePlay(); e.preventDefault(); }
   });
-  await loadModel(0);
+  if (featured.length) { await loadFeatured(0); } else { await loadModel(0); }
+}
+
+async function loadFeatured(i){
+  const f = featured[i]; if(!f) return;
+  $("featSel").value = String(i);
+  let idx = manifest.models.findIndex(m => m.file===f.pair);
+  if (idx < 0) { console.warn("featured model not built:", f.pair); return; }
+  $("modelSel").value = String(idx);
+  await loadModel(idx);
+  const ei = modelData.episodes.findIndex(e => String(e.episode)===String(f.ep));
+  if (ei >= 0) selectEp(ei);
 }
 
 async function loadModel(i){
@@ -240,7 +267,7 @@ function playerHTML(st){
   return `<div class="${cls}">${bubble}
     <span class="seatdot player"></span>
     <div class="hand">${cards}</div>
-    <div class="meta"><div class="nm">${modelData.model}${tags}</div>
+    <div class="meta"><div class="nm">${disp(modelData.model)}${tags}</div>
       <div class="sub">bets 1 unit</div></div>
     ${total}${ret}</div>`;
 }
@@ -266,16 +293,16 @@ function renderBanner(){
   let msg;
   if (ep.player_natural && ep.dealer_natural)
     msg = `<b>No decision — both sides were dealt a natural 21.</b> ` +
-          `${modelData.model} and the dealer each have blackjack, so the hand pushes and the bet is returned.`;
+          `${disp(modelData.model)} and the dealer each have blackjack, so the hand pushes and the bet is returned.`;
   else if (ep.player_natural)
-    msg = `<b>No decision — ${modelData.model} was dealt a natural blackjack (21).</b> ` +
+    msg = `<b>No decision — ${disp(modelData.model)} was dealt a natural blackjack (21).</b> ` +
           `A two-card 21 wins automatically and pays 3:2 (${fmt(ep.net)}); there is nothing to hit or stand on.`;
   else if (ep.dealer_natural)
     msg = `<b>No decision — the dealer was dealt blackjack (21).</b> ` +
-          `A dealer natural ends the hand immediately, before ${modelData.model} (dealt ${ep.player_total}) ever acts, ` +
+          `A dealer natural ends the hand immediately, before ${disp(modelData.model)} (dealt ${ep.player_total}) ever acts, ` +
           `so the bet is lost (${fmt(ep.net)}).`;
   else
-    msg = `<b>No decision was recorded for this hand.</b> ${modelData.model} ${ep.player_total} vs dealer ${ep.dealer_total}.`;
+    msg = `<b>No decision was recorded for this hand.</b> ${disp(modelData.model)} ${ep.player_total} vs dealer ${ep.dealer_total}.`;
   b.className = ep.net>0 ? "win" : (ep.net<0 ? "lose" : "");
   b.innerHTML = msg + ` <span class="hint">(Card faces aren’t recorded for no-decision hands — only the totals are shown below.)</span>`;
 }
@@ -294,8 +321,8 @@ function renderMoveList(){
 }
 
 function resultLine(){
-  const who = ep.net>0 ? `${modelData.model} wins ${fmt(ep.net)}` :
-              (ep.net<0 ? `dealer wins (${modelData.model} ${fmt(ep.net)})` : "push — bet returned");
+  const who = ep.net>0 ? `${disp(modelData.model)} wins ${fmt(ep.net)}` :
+              (ep.net<0 ? `dealer wins (${disp(modelData.model)} ${fmt(ep.net)})` : "push — bet returned");
   const why = ep.player_bust ? "player busts" :
               ep.dealer_bust ? "dealer busts" :
               ep.player_natural && !ep.dealer_natural ? "natural blackjack" :
@@ -316,7 +343,7 @@ function renderPanel(st){
     const m0 = ep.moves.find(m=>m.actor==="player");
     p.innerHTML =
       `<div class="movenum">Deal</div>` +
-      `<div class="meta">${modelData.model} is dealt ${(m0&&m0.hand||[]).join(" ")} (total ${m0?m0.total:"?"}` +
+      `<div class="meta">${disp(modelData.model)} is dealt ${(m0&&m0.hand||[]).join(" ")} (total ${m0?m0.total:"?"}` +
       `${m0&&m0.soft?", soft":""}) against dealer upcard ${st.upcard||"?"}.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to step through the decisions.</div>`;
     return;
@@ -342,7 +369,7 @@ function renderPanel(st){
       `so the played action may be arbitrary rather than the model's intended choice.</div></div>` : "";
   p.innerHTML =
     `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
-    `<div class="actor"><span class="who"><span class="seatdot player"></span>${modelData.model}</span>` +
+    `<div class="actor"><span class="who"><span class="seatdot player"></span>${disp(modelData.model)}</span>` +
     `<span class="colchip">${m.action}</span></div>` +
     `<div class="meta">holds ${(m.hand||[]).join(" ")} = ${m.total}${m.soft?" (soft)":""} vs upcard ${m.upcard}` +
     `${m.can_double?" · double available":""} · ⏱ ${lat} thinking${inv}</div>` +

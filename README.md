@@ -127,15 +127,16 @@ The site under `reports/` is generated. Rebuild it in dependency order with:
 ./build.sh
 ```
 
-This renders every game report + the overview, builds the replay data
-(`runs/<game>/replays/…`, gitignored), and then curates the per-game
-**featured replays** — `build_featured_replays.py` runs last because it
-validates every featured pick against the freshly built manifests.
+This renders every game report + the overview, builds the full replay data
+(`runs/<game>/replays/…`, ~3.4 GB, gitignored), then curates the per-game
+**featured replays** and extracts just those episodes into small, committed
+copies under `reports/replays/<game>/` (~18 MB total). The replay viewers read
+from `reports/replays/`, so the curated examples are self-contained in the repo.
 
-**Deploy:** publish the `reports/` directory. `reports/runs` is a symlink to
-`../runs`; the replay viewers fetch `reports/runs/<game>/replays/…/manifest.json`,
-so the host must **follow the symlink** (`cp -RL`, `rsync -L`, etc.) or the
-replays and featured dropdowns will 404.
+**Deploy:** publish the `reports/` directory — that's it. The featured replays
+ship inside it, so no large data or symlink is required. (The full
+`runs/<game>/replays` tree is only a build-time input for the extraction and
+for the build-only Table/Blackjack viewers.)
 
 ## 🗺️ Roadmap
 

@@ -99,7 +99,7 @@
 <body><div class="wrap">
   <h1>$ ~/aibattle/blackjack<span class="cursor"></span></h1>
   <div class="sub">🂡 Blackjack · Model vs the built-in dealer · hit/stand/double · scored by chip profit · 9000 hands total</div>
-  <a class="replaybtn" href="blackjack_replay.html?v=17">▶ watch hand replays</a>
+  <a class="replaybtn" href="blackjack_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
   <div class="rules"><h3>Setup — Blackjack</h3>Standard <a href="https://en.wikipedia.org/wiki/Blackjack" target="_blank" rel="noopener">blackjack</a> against a fixed house dealer (full rules on Wikipedia); this is a solitaire-style benchmark, <b>not</b> model-vs-model:<ul><li><b>Model vs the built-in dealer</b>, which plays the fixed house line (hits until 17, then stands). Player actions are <b>hit / stand / double</b> — no split or insurance.</li><li><b>500 hands per model</b>, each from a fresh shuffle. Deals are <b>independent</b> — not shared across models — so the luck of the cards differs from model to model.</li><li><b>Flat 1-unit bet</b> per hand (2 units on a double); a natural pays <b>3:2</b>.</li></ul><div class="seq">Because deals aren't shared and the dealer keeps a fixed house edge, a <b>negative field net is expected</b> and short runs are luck-heavy — so models are ranked by <b>mean profit per hand</b>, not total. Bust / double / natural rates show how soundly each one plays.</div><div class="seq"><b>What the model sees each turn:</b> its own cards and running total, the dealer's up-card, and the legal actions (hit / stand / double) — not the dealer's hole card or the rest of the shoe.</div></div>
 
   <div class="kpis">

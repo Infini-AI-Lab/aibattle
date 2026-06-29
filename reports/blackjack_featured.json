@@ -1,0 +1,75 @@
+{
+  "game": "blackjack",
+  "featured": [
+    {
+      "pair": "blackjack__deepseek-v4-pro.json",
+      "ep": "36",
+      "title": "Biggest doubled win",
+      "label": "Biggest doubled win \u2014 DeepSeek V4 Pro",
+      "why": "DeepSeek V4 Pro doubles down and wins +2.0."
+    },
+    {
+      "pair": "blackjack__deepseek-v4-pro.json",
+      "ep": "28",
+      "title": "Natural blackjack",
+      "label": "Natural blackjack \u2014 DeepSeek V4 Pro",
+      "why": "DeepSeek V4 Pro is dealt a natural 21 for +1.5."
+    },
+    {
+      "pair": "blackjack__deepseek-v4-pro.json",
+      "ep": "72",
+      "title": "Dealer busts",
+      "label": "Dealer busts \u2014 DeepSeek V4 Pro",
+      "why": "The dealer busts and DeepSeek V4 Pro collects +2.0."
+    },
+    {
+      "pair": "blackjack__gpt-oss-120b.json",
+      "ep": "20",
+      "title": "Double gone wrong",
+      "label": "Double gone wrong \u2014 GPT-OSS 120B",
+      "why": "GPT-OSS 120B doubles, busts, and loses -2.0."
+    },
+    {
+      "pair": "blackjack__glm-5p1.json",
+      "ep": "2",
+      "title": "GLM-5.1",
+      "label": "GLM-5.1",
+      "why": "GLM-5.1 beats the dealer for +2.0."
+    },
+    {
+      "pair": "blackjack__glm-5p2.json",
+      "ep": "11",
+      "title": "GLM-5.2",
+      "label": "GLM-5.2",
+      "why": "GLM-5.2 beats the dealer for +2.0."
+    },
+    {
+      "pair": "blackjack__kimi-k2p6.json",
+      "ep": "7",
+      "title": "Kimi K2.6",
+      "label": "Kimi K2.6",
+      "why": "Kimi K2.6 beats the dealer for +2.0."
+    },
+    {
+      "pair": "blackjack__minimax-m2p7.json",
+      "ep": "7",
+      "title": "MiniMax-M2.7",
+      "label": "MiniMax-M2.7",
+      "why": "MiniMax-M2.7 beats the dealer for +2.0."
+    },
+    {
+      "pair": "blackjack__minimax-m3.json",
+      "ep": "7",
+      "title": "MiniMax-M3",
+      "label": "MiniMax-M3",
+      "why": "MiniMax-M3 beats the dealer for +2.0."
+    },
+    {
+      "pair": "blackjack__qwen3p7-plus.json",
+      "ep": "3",
+      "title": "Qwen3.7 Plus",
+      "label": "Qwen3.7 Plus",
+      "why": "Qwen3.7 Plus beats the dealer for +2.0."
+    }
+  ]
+}

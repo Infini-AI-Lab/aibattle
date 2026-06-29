@@ -34,10 +34,12 @@ run scripts/analyze_new_games.py           # Leduc / Blotto / Othello / Blackjac
 run scripts/analyze_board_tournament.py    # Connect Four / Gomoku + overview index.html
 run scripts/generate_qa.py                 # Q&A page
 
-# 3. Replay data (gitignored) then the curated featured sets. build_featured
-#    validates every pick against the manifests, so it MUST run last.
+# 3. Full replay data (gitignored, ~3.4 GB) then the curated featured sets.
+#    build_featured validates every pick against the manifests AND extracts the
+#    featured episodes into committed slim copies (reports/replays/), so it runs
+#    last and its output is what the deployed viewers actually read.
 run scripts/build_replays.py               # connect4/gomoku/holdem/match/table/kuhn
 run scripts/build_new_games_replays.py     # leduc/blotto/othello/blackjack
-run scripts/build_featured_replays.py      # reports/*_featured.json
+run scripts/build_featured_replays.py      # reports/*_featured.json + reports/replays/
 
-echo "==> done. Serve reports/ (follow the reports/runs symlink when deploying)."
+echo "==> done. Serve reports/ (the featured replays ship inside it; no symlink needed)."

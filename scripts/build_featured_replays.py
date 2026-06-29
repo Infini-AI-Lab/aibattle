@@ -34,6 +34,7 @@ GAME_REPLAY_DIR = {
     "kuhn": "runs/kuhn_poker/replays/kuhn",
     "leduc": "runs/new_games_experiment/leduc_poker/replays/leduc",
     "blotto": "runs/new_games_experiment/repeated_colonel_blotto/replays/blotto",
+    "blackjack": "runs/new_games_experiment/independent_blackjack/replays/blackjack",
 }
 
 
@@ -352,6 +353,70 @@ def _curate_generic(game, glob_pat, prefix, kind):
     return picks
 
 
+def _curate_blackjack():
+    """Blackjack is solitaire vs the dealer, so the manifest is keyed by model
+    (no opponent). Curated from the *built* per-model files, so pair/episode
+    always resolve. ~10 watchable hands across models."""
+    src = os.path.join(REPORT_DIR, GAME_REPLAY_DIR["blackjack"])
+    man_path = os.path.join(src, "manifest.json")
+    if not os.path.exists(man_path):
+        print(f"  WARN: no built blackjack manifest at {man_path}")
+        return []
+    man = json.load(open(man_path))
+    cs = []
+    for entry in man.get("models", []):
+        model = strip_coached(entry["model"])
+        try:
+            d = json.load(open(os.path.join(src, entry["file"])))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for e in d.get("episodes", []):
+            def flag(k):
+                return str(e.get(k)).lower() == "true"
+            cs.append({"pair": entry["file"], "ep": str(e.get("episode")),
+                       "model": model, "net": float(e.get("net") or 0),
+                       "doubled": flag("doubled"), "p_nat": flag("player_natural"),
+                       "p_bust": flag("player_bust"), "d_bust": flag("dealer_bust"),
+                       "dt": e.get("dealer_total"), "pt": e.get("player_total")})
+    if not cs:
+        return []
+    picks, used, who = [], set(), set()
+
+    def take(pool, key, title, why_fn, label=None):
+        c = max((x for x in pool if (x["pair"], x["ep"]) not in used), key=key, default=None)
+        if c is None:
+            return
+        used.add((c["pair"], c["ep"])); who.add(c["model"])
+        picks.append({"pair": c["pair"], "ep": c["ep"], "title": title,
+                      "label": label or f"{title} — {display_name(c['model'])}", "why": why_fn(c)})
+
+    take([c for c in cs if c["doubled"] and c["net"] > 0], lambda c: c["net"],
+         "Biggest doubled win",
+         lambda c: f"{display_name(c['model'])} doubles down and wins {c['net']:+.1f}.")
+    take([c for c in cs if c["p_nat"] and c["net"] > 0], lambda c: c["net"],
+         "Natural blackjack",
+         lambda c: f"{display_name(c['model'])} is dealt a natural 21 for {c['net']:+.1f}.")
+    take([c for c in cs if c["d_bust"] and c["net"] > 0], lambda c: c["net"],
+         "Dealer busts",
+         lambda c: f"The dealer busts and {display_name(c['model'])} collects {c['net']:+.1f}.")
+    take([c for c in cs if c["doubled"] and c["p_bust"]], lambda c: -c["net"],
+         "Double gone wrong",
+         lambda c: f"{display_name(c['model'])} doubles, busts, and loses {c['net']:+.1f}.")
+
+    by = {}
+    for c in cs:
+        by.setdefault(c["model"], []).append(c)
+    for m in sorted(by, key=lambda m: -len(by[m])):
+        if len(picks) >= 10:
+            break
+        if m in who:
+            continue
+        take(by[m], lambda c: c["net"], display_name(m),
+             lambda c: f"{display_name(c['model'])} beats the dealer for {c['net']:+.1f}.",
+             label=display_name(m))
+    return picks
+
+
 GENERIC = [
     ("connect4_featured.json", "connect4", "runs/connect4/connect4__*__vs__*", "connect4__", "board"),
     ("gomoku_featured.json", "gomoku", "runs/gomoku/gomoku__*__vs__*", "gomoku__", "board"),
@@ -370,12 +435,69 @@ def _write(name, game, featured):
         print(f"  {p['label']}")
 
 
+# Committed, self-contained replay data for the public site. The full
+# runs/<game>/replays tree is ~3.4 GB (gitignored); here we extract ONLY the
+# featured episodes out of their (large) per-pair files, so the viewers work
+# straight from the repo without the full data or the reports/runs symlink.
+SLIM_DIR = os.path.join(REPORT_DIR, "replays")
+
+
+def _emit_slim(game, featured):
+    """Extract the featured episodes from the built per-pair files into small
+    standalone copies under reports/replays/<game>/, with a manifest trimmed to
+    only the featured pairs."""
+    if not featured:
+        return
+    src = os.path.join(REPORT_DIR, GAME_REPLAY_DIR[game])
+    man_path = os.path.join(src, "manifest.json")
+    if not os.path.exists(man_path):
+        print(f"  WARN: cannot emit slim {game}; no built manifest at {man_path}")
+        return
+    man = json.load(open(man_path))
+    want = {}                                   # pair file -> {episode ids to keep}
+    for f in featured:
+        want.setdefault(f["pair"], set()).add(str(f.get("ep", f.get("match"))))
+
+    def _ep_id(e):
+        return str(e.get("episode", e.get("i"))) if isinstance(e, dict) else str(e)
+
+    # Heads-up games key the manifest by "pairs"; blackjack (solitaire) by "models".
+    entry_key = "pairs" if "pairs" in man else "models"
+    out_dir = os.path.join(SLIM_DIR, game)
+    os.makedirs(out_dir, exist_ok=True)
+    slim_entries, total = [], 0
+    for p in man[entry_key]:
+        if p["file"] not in want:
+            continue
+        keep = want[p["file"]]
+        d = json.load(open(os.path.join(src, p["file"])))
+        d["episodes"] = [e for e in d.get("episodes", []) if _ep_id(e) in keep]
+        dst = os.path.join(out_dir, p["file"])
+        json.dump(d, open(dst, "w"))
+        total += os.path.getsize(dst)
+        pp = dict(p)                            # trim the manifest summary too
+        if isinstance(p.get("episodes"), list):
+            pp["episodes"] = [e for e in p["episodes"] if _ep_id(e) in keep]
+        slim_entries.append(pp)
+    slim_man = dict(man)
+    slim_man[entry_key] = slim_entries
+    json.dump(slim_man, open(os.path.join(out_dir, "manifest.json"), "w"))
+    print(f"  [{game}] slim replays -> {out_dir} "
+          f"({len(slim_entries)} {entry_key}, {total / 1024:.0f} KB)")
+
+
+def _build(name, game, featured):
+    _write(name, game, featured)
+    _emit_slim(game, featured)
+
+
 def main():
     os.makedirs(REPORT_DIR, exist_ok=True)
-    _write("match_featured.json", "match", _curate_match())
-    _write("holdem_featured.json", "holdem", _curate_holdem())
+    _build("match_featured.json", "match", _curate_match())
+    _build("holdem_featured.json", "holdem", _curate_holdem())
+    _build("blackjack_featured.json", "blackjack", _curate_blackjack())
     for name, game, glob_pat, prefix, kind in GENERIC:
-        _write(name, game, _curate_generic(game, glob_pat, prefix, kind))
+        _build(name, game, _curate_generic(game, glob_pat, prefix, kind))
 
 
 if __name__ == "__main__":
