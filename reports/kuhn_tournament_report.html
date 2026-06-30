@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena — Kuhn Poker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script><style>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script><style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
     --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
@@ -106,6 +106,17 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
@@ -132,6 +143,8 @@
   <div class="sub">🃏 Kuhn Poker · 12 models · round-robin · 30 seat-swapped hands/pair · deck {J,Q,K}, ~2 decisions/hand</div>
   <a class="replaybtn" href="kuhn_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
 
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>How Kuhn Poker works</h3>
     A minimal 2-player poker on a 3-card deck — <span class="card">J</span><span class="card">Q</span><span class="card">K</span>
@@ -147,15 +160,14 @@
     <code>check-bet-call</code>, <code>bet-fold</code>, or <code>bet-call</code> — so a player makes ~1–2 decisions per hand.</div>
     <div class="seq"><b>What the model sees each turn:</b> its own private card, the betting so far, the
     pot, and its legal actions — never the opponent's card.</div>
+    <div class="seq">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash
+    equilibrium rather than chips alone. At only 30 hands/pair the chip totals
+    are <b>high-variance and directional</b> — the <i>fundamentals</i> and <i>betting-style</i> sections
+    below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips;
+    the <b>Elo</b> column (opponent-adjusted Bradley-Terry rating over per-hand results, field mean
+    1500) is shown for reference, with ±1 bootstrap SD — note how wide those error bars are at this
+    sample size, which is exactly why the ranking leans on blunders instead.</div>
   </div>
-
-  <div class="callout">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash
-  equilibrium rather than chips alone. At only 30 hands/pair the chip totals
-  are <b>high-variance and directional</b> — the <i>fundamentals</i> and <i>betting-style</i> sections
-  below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips;
-  the <b>Elo</b> column (opponent-adjusted Bradley-Terry rating over per-hand results, field mean
-  1500) is shown for reference, with ±1 bootstrap SD — note how wide those error bars are at this
-  sample size, which is exactly why the ranking leans on blunders instead.</div>
 
   <h2>Bet frequency by card <span class="note">(when first to act)</span></h2>
   <div class="note">Equilibrium is <b>polarized</b>: bet the King (green) ~100%, bluff the Jack (blue) ~33%,
@@ -171,7 +183,7 @@
         <th>call J vs bet</th><th>total blunders</th></tr>
     <tr><td>1</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td>0/3</td><td>0/45</td><td class='good'>0/48 (0%)</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td>0/2</td><td>0/26</td><td class='good'>0/28 (0%)</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td>0/10</td><td>0/50</td><td class='good'>0/60 (0%)</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td>0/8</td><td>0/41</td><td class='good'>0/49 (0%)</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td>0/1</td><td>0/48</td><td class='good'>0/49 (0%)</td></tr><tr><td>6</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td>0/7</td><td>0/61</td><td class='good'>0/68 (0%)</td></tr><tr><td>7</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td>0/4</td><td>0/50</td><td class='good'>0/54 (0%)</td></tr><tr><td>8</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td>0/5</td><td>0/35</td><td class='good'>0/40 (0%)</td></tr><tr><td>9</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td>0/4</td><td>0/40</td><td class='good'>0/44 (0%)</td></tr><tr><td>10</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td>0/2</td><td>0/46</td><td class='good'>0/48 (0%)</td></tr><tr><td>11</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td>0/1</td><td>0/38</td><td class='good'>0/39 (0%)</td></tr><tr><td>12</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td>0/4</td><td>0/43</td><td class='good'>0/47 (0%)</td></tr>
   </table>
-  <div class="note collegend">columns: <b>fold K vs bet</b> how often it folds a King — the best card — facing a bet (a clear blunder) · <b>call J vs bet</b> how often it calls with a Jack — the worst card — facing a bet (a clear blunder) · <b>total blunders</b> combined count of these two mistakes</div>
+  <div class="note collegend">columns: <b>fold K vs bet</b> folds a King (best card) to a bet — a blunder · <b>call J vs bet</b> calls a Jack (worst card) to a bet — a blunder · <b>total blunders</b> sum of the two</div>
 
   <h2>Betting style <span class="note">(bet % by card, first to act · GTO: K 100% / Q 0% / J ~33%)</span></h2>
   <table>

@@ -34,7 +34,7 @@ from collections import defaultdict
 from aibattle.games.board import connects, with_cell
 from aibattle.games.gomoku import coord_to_rc
 from model_names import strip_coached, display_name, model_cell
-from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
+from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS
 from elo_util import bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
@@ -62,6 +62,8 @@ FAVICON = {"connect4": "🔴", "gomoku": "⚫"}
 # string is wrapped in a .callout.
 INTRO = {
     "connect4": (
+        '<input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>'
+        '<label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>'
         '<div class="rules">'
         "<h3>How Connect Four works</h3>"
         "A two-player game on a vertical <b>7-column × 6-row</b> grid; the two models "
@@ -69,8 +71,7 @@ INTRO = {
         "<ul>"
         "<li>On your turn you pick a <b>column</b>; the disc falls to the "
         "<b>lowest empty cell</b> in it. A full column can't be chosen.</li>"
-        "<li><b>Player 0 moves first</b> — a real edge in a solved game (see the "
-        "first-mover win rate below).</li>"
+        "<li><b>Player 0 moves first</b> — a real edge in a solved game.</li>"
         "<li>The first to line up <b>four of their discs in a row</b> — horizontally, "
         "vertically, or diagonally — wins immediately.</li>"
         "<li>If the board fills with no four-in-a-row, the game is a <b>draw</b>.</li>"
@@ -84,6 +85,8 @@ INTRO = {
         "turn it is, and the legal (non-full) columns — perfect information.</div>"
         "</div>"),
     "gomoku": (
+        '<input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>'
+        '<label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>'
         '<div class="rules">'
         "<h3>How Gomoku-Lite works</h3>"
         "A two-player game on a <b>9×9</b> board (columns A–I, rows 1–9). The two models "
@@ -624,18 +627,12 @@ def render_game(game: str, rep: dict) -> str:
   {_intro_html(game)}
 
   <h2 class="section">1 · Results — who won</h2>
-  <div class="kpis">
-    <div class="kpi"><div class="v">{_elo_txt(rep['elo'][ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
-    <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
-  </div>
   <table>
     <tr><th>#</th><th class='model'>Model</th><th>Elo</th><th>Net/game</th><th>Win%</th>
         <th>1st-move win%</th><th>2nd-move win%</th><th>Games</th>{TOKEN_HEADERS}</tr>
     {rows}
   </table>
   {_legend('board_results')}
-  {TOKEN_NOTE}
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas>
       <div class="note">Whiskers show ±1 bootstrap SD (resampling games 300×) — wider bars mean
@@ -829,10 +826,6 @@ def _arena_board(entries: list) -> str:
   <section class="board">
     <div class="arena-head"><h2>🏅 Model leaderboard</h2>
       <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
-    <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
-      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
-      low coverage as provisional).</div>
     <table class="lb">
       <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
@@ -855,6 +848,10 @@ def _arena_board(entries: list) -> str:
       </thead>
       <tbody>{body}</tbody>
     </table>
+    <div class="note lb-note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
+      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
+      low coverage as provisional).</div>
   </section>"""
 
 
@@ -943,6 +940,8 @@ def render_index(reps: dict) -> str:
 {_favicon("🎲")}
 {NAV_HEAD}
 <style>{BASE_CSS}
+  /* Leaderboard note shows on desktop only; on mobile it lives in the Q&A. */
+  @media (max-width:760px) {{ .lb-note {{ display:none; }} }}
   .arena {{ margin-top:34px; border:1px solid var(--line); padding:20px 20px 24px;
     background:var(--panel); scroll-margin-top:60px; }}
   .arena-head {{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }}

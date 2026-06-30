@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — ▶ Featured Replays</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▶</text></svg>">
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<style>
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea; }
+  body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    margin:0; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+  a { color:var(--red); }
+  h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
+  h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
+    vertical-align:text-bottom; margin-left:5px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  .sub { color:var(--fg); font-size:13px; margin-bottom:30px; }
+  h2 { font-size:15px; margin:0; font-weight:700; }
+  h2::before { content:"## "; color:var(--red); }
+  .arena { margin-top:24px; border:1px solid var(--line); padding:18px 20px 20px;
+    background:var(--panel); }
+  .arena-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .arena-tag { font-size:11px; color:var(--dim); }
+  .arena-tag::before { content:"["; color:var(--red); } .arena-tag::after { content:"]"; color:var(--red); }
+  .rlist { list-style:none; margin:0; padding:0; display:grid;
+    grid-template-columns:1fr 1fr; gap:6px 18px; }
+  .rlist a { display:block; text-decoration:none; color:var(--fg); font-size:13px;
+    padding:6px 8px; border:1px solid transparent; }
+  .rlist a::before { content:"▶ "; color:#4338ca; }
+  .rlist a:hover { border-color:var(--red); color:var(--red); background:var(--faint); }
+  .empty { font-size:12px; color:var(--dim); }
+  @media (max-width:760px) {
+    .wrap { padding:24px 14px 60px; }
+    h1 { font-size:18px; } h2 { font-size:14px; } .sub { font-size:12px; }
+    .rlist { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>$ ~/aibattle/replays<span class="cursor"></span></h1>
+  <div class="sub">▶ Featured replays · quick links into each game's <b>curated highlight games &amp; hands</b>.
+    Pick one to open it directly in that game's replay viewer.</div>
+  <div id="games"></div>
+</div>
+
+<script>
+// One curated list per game, grouped like the overview. Each entry is read from
+// the same <game>_featured.json the replay viewers use, so this page stays in
+// sync; every link opens its game's viewer at that featured replay (?feat=N).
+const GAMES = [
+  {grp:"Imperfect-info", items:[
+    {key:"holdem",    title:"🃏 Hold'em 1-Hand", replay:"holdem_replay.html",    feat:"holdem_featured.json"},
+    {key:"match",     title:"🃏 Hold'em Match",   replay:"match_replay.html",     feat:"match_featured.json"},
+    {key:"leduc",     title:"🎴 Leduc Hold'em",   replay:"leduc_replay.html",     feat:"leduc_featured.json"},
+    {key:"kuhn",      title:"🎲 Kuhn Poker",      replay:"kuhn_replay.html",      feat:"kuhn_featured.json"},
+    {key:"blotto",    title:"⚔️ Colonel Blotto",  replay:"blotto_replay.html",    feat:"blotto_featured.json"},
+    {key:"blackjack", title:"🂡 Blackjack",       replay:"blackjack_replay.html", feat:"blackjack_featured.json"},
+  ]},
+  {grp:"Perfect-info", items:[
+    {key:"connect4",  title:"🔴 Connect Four",    replay:"connect4_replay.html",  feat:"connect4_featured.json"},
+    {key:"gomoku",    title:"⚫ Gomoku",          replay:"gomoku_replay.html",    feat:"gomoku_featured.json"},
+  ]},
+];
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+async function render(){
+  const root = document.getElementById("games");
+  for (const group of GAMES){
+    for (const g of group.items){
+      let feats = [];
+      try { feats = (await (await fetch(g.feat + "?v=1")).json()).featured || []; }
+      catch(e){ feats = []; }
+      const sec = document.createElement("section");
+      sec.className = "arena";
+      const rows = feats.map((f,i) =>
+        `<li><a href="${g.replay}?feat=${i}">${esc(f.label || ("replay #"+(i+1)))}</a></li>`).join("");
+      sec.innerHTML =
+        `<div class="arena-head"><h2>${g.title}</h2>` +
+        `<span class="arena-tag">${feats.length} featured · ${group.grp}</span></div>` +
+        (rows ? `<ul class="rlist">${rows}</ul>`
+              : `<div class="empty">No featured replays found (expected <code>${g.feat}</code>).</div>`);
+      root.appendChild(sec);
+    }
+  }
+}
+render();
+</script>
+</body></html>

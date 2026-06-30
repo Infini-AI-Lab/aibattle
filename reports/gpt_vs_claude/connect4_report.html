@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🔴 Connect Four</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -92,11 +92,6 @@
 
   <div class="callout">Connect Four is a <b>solved</b>, perfect-information game — drop discs to make four in a row. With no hidden information or chance, every position has a known best move, so beyond results we score <b>tactical accuracy</b>: taking immediate wins and blocking the opponent's immediate threats.</div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">1583</div><div class="l">top Elo · claude-opus-4.8</div></div>
-    <div class="kpi"><div class="v">51%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">300</div><div class="l">games played</div></div>
-  </div>
 
   <h2>🏆 Leaderboard &amp; tactical accuracy</h2>
   <table>
@@ -149,11 +144,6 @@
           <td>16.4</td><td>281.5s</td>
         </tr>
   </table>
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500).
-    A model with no wins or no losses has no finite rating and is shown as “—” (excluded from the fit).
-    win-take = took an immediate win when one existed; block = removed an opponent's immediate
-    winning threat; miss/allow = missed wins / allowed losses (blunders). These are objective
-    tactical-accuracy measures read from the board.</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas>

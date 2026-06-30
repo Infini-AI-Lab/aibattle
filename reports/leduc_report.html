@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🎴 Leduc Holdem</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -108,6 +108,17 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
@@ -120,14 +131,10 @@
   <h1>$ ~/aibattle/leduc<span class="cursor"></span></h1>
   <div class="sub">🎴 Leduc Holdem · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 3850 games</div>
   <a class="replaybtn" href="leduc_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules"><h3>How Leduc Holdem works</h3>A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of <span class="card">J</span><span class="card">Q</span><span class="card">K</span> (J &lt; Q &lt; K). Heads-up, two betting rounds:<ul><li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li><li><b>Round 1 (pre-flop):</b> players bet on their private card alone. Actions are <code>check</code>/<code>bet</code> and <code>call</code>/<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li><li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li><li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li><li>At <b>showdown</b>, pairing your private card with the public card wins; otherwise the <b>higher card</b> wins. A fold concedes the pot.</li></ul><div class="seq">Small enough to reason about precisely, yet it has genuine bluffing, value-betting and pot odds — pairing the board is the nuts, and a lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so the size of pots won/lost matters, not just who won the hand.</div><div class="seq"><b>What the model sees each turn:</b> its own private card, the public card once it is revealed, the pot and the bets so far, and its legal actions — never the opponent's card.</div></div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">1511</div><div class="l">top Elo · glm-5p2</div></div>
-    <div class="kpi"><div class="v">41%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">3850</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">50</div><div class="l">deals/pair (seat-swapped)</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -255,12 +262,7 @@
           <td>16,247</td><td>$19.50</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>
-  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
-  <div class="note"><b>Elo</b> is a chip-weighted Bradley-Terry rating (field mean 1500) — fed the chips won in each matchup rather than win counts, so it rewards <i>how much</i> you win, like Hold'em. <b>The leaderboard is ranked by Elo.</b> ± is one bootstrap SD (resampling games 300×); ratings within ±1
-    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
-    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
-    every pair, so first-mover advantage is balanced across the field.</div>
+  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> / <b>draw%</b> won / drawn · <b>1st-move win%</b> win rate acting first · <b>invalid%</b> illegal moves · <b>plies</b> avg game length · <b>think</b> avg sec/decision · <b>games</b> games played (varies by wave)</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
@@ -313,11 +315,11 @@ new Chart(document.getElementById('elo'), { type:'bar',
 
 new Chart(document.getElementById('wdl'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[
-    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
-    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
-    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+    {label:'win %', backgroundColor:'#4ade80', data:M.map(m=>100*pm[m].wins/(pm[m].games||1))},
+    {label:'draw %', backgroundColor:'#94a3b8', data:M.map(m=>100*pm[m].draws/(pm[m].games||1))},
+    {label:'loss %', backgroundColor:'#f87171', data:M.map(m=>100*pm[m].losses/(pm[m].games||1))},
   ]},
-  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });
+  options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'% of games'}}}, plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('net'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),

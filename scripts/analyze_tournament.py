@@ -652,6 +652,8 @@ def _strategy_analysis(report: dict, ranked: list) -> tuple[str, str]:
     </article>""")
 
     html = f"""
+  <input type="checkbox" class="si-toggle" id="si-toggle" hidden>
+  <label class="si-summary" for="si-toggle">How to read these cards<span class="si-hint"> · expand</span></label>
   <div class="strategy-intro">
     <b>Why each player wins or loses.</b> Each card opens with a one-line verdict,
     then the <b>Pressure vs Showdown bar</b> shows where its chips come from —
@@ -964,12 +966,29 @@ def render_html(report: dict) -> str:
     background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }}
   .case-link:hover {{ border-color:var(--red); color:var(--fg); }}
   @media (max-width:860px) {{ .strategy-grid, .strategy-glossary {{ grid-template-columns:1fr; }} }}
+  /* The map (quadrant scatter) keeps a usable width on phones and scrolls instead of squishing. */
+  @media (max-width:760px) {{ .chartscroll {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+    .chartscroll > .chartbox {{ min-width:600px; }} }}
+  /* Mobile: fold the strategy "how to read these cards" intro + glossary. */
+  .si-toggle, .si-summary {{ display:none; }}
+  @media (max-width:760px) {{
+    .si-summary {{ display:block; cursor:pointer; margin:14px 0; background:var(--faint);
+      border:1px solid var(--line); border-left:3px solid var(--red); padding:11px 13px;
+      font-size:13px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }}
+    .si-summary .si-hint {{ font-weight:400; color:var(--dim); font-size:12px; }}
+    .si-summary::before {{ content:"▸ "; color:var(--red); }}
+    .si-toggle:checked ~ .si-summary::before {{ content:"▾ "; }}
+    .si-toggle ~ .strategy-intro {{ display:none; }}
+    .si-toggle:checked ~ .strategy-intro {{ display:block; }}
+  }}
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em 1-Hand · heads-up · each hand scored independently (bb/100) · {report['num_games']} games · {report['hands_per_game']} hands each · {len(models)} models · round-robin</div>
   {replay_btn}
 
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>Setup — Hold'em 1-Hand</h3>
     Standard heads-up No-Limit
@@ -1002,15 +1021,6 @@ def render_html(report: dict) -> str:
     {rows}
   </table>
   {_legend('holdem')}
-  <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
-    fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
-    win and adjusts for opponent strength — the fair comparison when models faced different opponents.
-    ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
-    chips / bb/100 / win% are raw, unadjusted metrics.
-    tokens/dec = avg completion (reasoning) tokens generated per decision.
-    <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks
-    serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which
-    hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
   <div class="note"><b>style</b> = play-style archetype, from VPIP (how loose) × aggression (how aggressive):
     <b>LAG</b> = loose-aggressive — plays many hands and bets/raises a lot (high-variance, wins if skilled);
     <b>TAG</b> = tight-aggressive — selective but aggressive (the classic solid winner);
@@ -1037,7 +1047,7 @@ def render_html(report: dict) -> str:
     </div>
   </div>
   <h3>The map — where each model's chips come from</h3>
-  <canvas id="quadrant" style="max-height:520px"></canvas>
+  <div class="chartscroll"><div class="chartbox"><canvas id="quadrant" style="max-height:520px"></canvas></div></div>
   <div class="note">x = chips won by <b>pressure</b> (no showdown) · y = chips won at <b>showdown</b>.
     The <b>green/red number</b> next to each model is its <b>avg chips/hand</b> (pressure + showdown =
     total). Above the dashed line = net winner, below = net loser. Far right = wins by forcing folds
@@ -1049,7 +1059,7 @@ def render_html(report: dict) -> str:
   <h2 class="section">3 · Analysis</h2>
   {fold_pos_html}
   <h2>♟️ Action tendencies</h2>
-  <canvas id="actions"></canvas>
+  <div class="chartscroll"><div class="chartbox"><canvas id="actions"></canvas></div></div>
   <div class="note">Share of each action across all the model's decisions.</div>
 
   <h2>🃏 Preflop open-rate by hand strength</h2>
@@ -1073,12 +1083,12 @@ def render_html(report: dict) -> str:
   </div>
 
   <h2>🏅 Made-hand mix at showdown</h2>
-  <canvas id="madeHand"></canvas>
+  <div class="chartscroll"><div class="chartbox"><canvas id="madeHand"></canvas></div></div>
   <div class="note">Share of the model's showdown hands that finished as each category
     (high card → full house). Tight selectors reach showdown with stronger made hands.</div>
 
   <h2>💸 Bet-sizing distribution</h2>
-  <canvas id="betsize"></canvas>
+  <div class="chartscroll"><div class="chartbox"><canvas id="betsize"></canvas></div></div>
   <div class="note">Of all aggressive actions, what fraction were small (&lt;½ pot),
     medium (½–1 pot), pot-sized (1–1.5 pot), or over-pot (≥1.5 pot).</div>
 

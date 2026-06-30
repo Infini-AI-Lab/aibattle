@@ -180,11 +180,6 @@ def render_match(rep: dict, title_meta: str) -> str:
         <th>draws</th><th>busted-out%</th><th>avg hands/match</th><th>avg win margin</th></tr>
     {rows}
   </table>
-  <div class="note"><b>Elo</b> is a Bradley-Terry rating (field mean 1500) over match win/loss
-    results; ± is one bootstrap SD. <b>Ranked by Elo.</b> A match is a heads-up sit-and-go (up to
-    {rep['max_hands']} hands, stacks carried); the match winner is whoever holds more chips at the
-    end. Win margin is the average final chip gap in matches won. Busted-out% = share of matches
-    lost by going broke.</div>
 
   <div class="grid2">
     <div><h3>Match win rate</h3><canvas id="wr"></canvas></div>

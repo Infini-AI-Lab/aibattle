@@ -31,7 +31,7 @@ from collections import defaultdict
 
 from elo_util import bootstrap_elo, wld_from_records, gross_from_records
 from model_names import display_name, model_cell
-from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
+from report_tokens import tokens_from_episodes, token_cost_cells, TOKEN_HEADERS
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
 
@@ -74,6 +74,8 @@ GAMES = {
 # Short intro per game (shown as a callout under the header, like the Kuhn page).
 INTRO = {
     "independent_blackjack": (
+        '<input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>'
+        '<label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>'
         '<div class="rules">'
         "<h3>Setup — Blackjack</h3>"
         "Standard "
@@ -99,6 +101,8 @@ INTRO = {
         "hole card or the rest of the shoe.</div>"
         "</div>"),
     "leduc_poker": (
+        '<input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>'
+        '<label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>'
         '<div class="rules">'
         "<h3>How Leduc Holdem works</h3>"
         "A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of "
@@ -123,6 +127,8 @@ INTRO = {
         "opponent's card.</div>"
         "</div>"),
     "repeated_colonel_blotto": (
+        '<input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>'
+        '<label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>'
         '<div class="rules">'
         "<h3>How Colonel Blotto works</h3>"
         "A two-player game of <b>simultaneous</b> resource allocation, played over "
@@ -490,13 +496,6 @@ def render_versus(rep: dict) -> str:
                 hh += f"<td class='{cls}'>{w}-{l}<div class='small'>{d}d</div></td>"
         hh += "</tr>"
 
-    if rep.get("elo_basis") == "chips":
-        elo_desc = ("<b>Elo</b> is a chip-weighted Bradley-Terry rating (field mean 1500) — fed the "
-                    "chips won in each matchup rather than win counts, so it rewards <i>how much</i> "
-                    "you win, like Hold'em. <b>The leaderboard is ranked by Elo.</b>")
-    else:
-        elo_desc = "Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500)."
-
     fpw = rep["first_player_win_rate"] * 100
     deals = (rep["episodes_per_pair"] or 0) // 2
     return f"""<!DOCTYPE html>
@@ -512,12 +511,6 @@ def render_versus(rep: dict) -> str:
   <a class="replaybtn" href="{cfg['replay']}?cacheBust=19">🎬 Watch featured replays →</a>
   {_intro_html(rep['game'])}
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">{_elo_txt(elo[ranked[0]])}</div><div class="l">top Elo · {ranked[0]}</div></div>
-    <div class="kpi"><div class="v">{fpw:.0f}%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">{rep['num_games']}</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">{deals}</div><div class="l">deals/pair (seat-swapped)</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -526,11 +519,6 @@ def render_versus(rep: dict) -> str:
     {rows}
   </table>
   {_legend('versus')}
-  {TOKEN_NOTE}
-  <div class="note">{elo_desc} ± is one bootstrap SD (resampling games 300×); ratings within ±1
-    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
-    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
-    every pair, so first-mover advantage is balanced across the field.</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
@@ -578,11 +566,11 @@ new Chart(document.getElementById('elo'), {{ type:'bar',
 
 new Chart(document.getElementById('wdl'), {{ type:'bar',
   data:{{ labels:M.map(dn), datasets:[
-    {{label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)}},
-    {{label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)}},
-    {{label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)}},
+    {{label:'win %', backgroundColor:'#4ade80', data:M.map(m=>100*pm[m].wins/(pm[m].games||1))}},
+    {{label:'draw %', backgroundColor:'#94a3b8', data:M.map(m=>100*pm[m].draws/(pm[m].games||1))}},
+    {{label:'loss %', backgroundColor:'#f87171', data:M.map(m=>100*pm[m].losses/(pm[m].games||1))}},
   ]}},
-  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
+  options:{{ scales:{{x:{{stacked:true}},y:{{stacked:true,max:100,title:{{display:true,text:'% of games'}}}}}}, plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 new Chart(document.getElementById('net'), {{ type:'bar',
   data:{{ labels:M.map(dn), datasets:[{{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),
@@ -636,11 +624,6 @@ def render_dealer(rep: dict) -> str:
   <a class="replaybtn" href="{cfg['replay']}?cacheBust=19">🎬 Watch featured replays →</a>
   {_intro_html(rep['game'])}
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">{pm[champ]['mean_per_hand']:+.3f}</div><div class="l">top mean/hand · {champ}</div></div>
-    <div class="kpi"><div class="v">{rep['field_profit']/rep['total_hands']:+.3f}</div><div class="l">field avg/hand vs dealer</div></div>
-    <div class="kpi"><div class="v">{rep['total_hands']}</div><div class="l">hands played</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -650,7 +633,6 @@ def render_dealer(rep: dict) -> str:
     {rows}
   </table>
   {_legend('blackjack')}
-  {TOKEN_NOTE}
   <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
     inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
     (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;

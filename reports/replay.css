@@ -29,6 +29,9 @@ h2::before { content:"## "; color:var(--red); }
 
 /* selectors */
 .selectors { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px; }
+/* show only the curated Featured selector; hide the "browse every…" expander
+   (the model/matchup + hand pickers stay in the DOM so the JS keeps working). */
+.browse { display:none; }
 label.sel { display:block; font-size:11px; color:var(--dim); text-transform:uppercase;
   letter-spacing:.04em; margin-bottom:5px; }
 select { appearance:none; background:var(--panel); color:var(--fg); border:1px solid var(--line);
@@ -39,6 +42,11 @@ select:hover, select:focus { outline:none; border-color:var(--red); }
 
 /* layout: board column + analysis panel */
 .stage { display:grid; gap:14px; align-items:start; }
+/* grid items default to min-width:auto, so a wide min-content child (the felt or
+   the analysis panel) would refuse to shrink and blow the column past the
+   viewport on a phone — making the deck + analysis panel overflow. Let them
+   shrink to the track instead. */
+.stage > * { min-width:0; }
 
 /* transport deck */
 .deck { margin-top:14px; background:var(--panel); border:1px solid var(--line); padding:16px 18px; }
@@ -153,6 +161,11 @@ table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
   .selectors { flex-direction:column; align-items:stretch; gap:10px; }
   .selectors > div { width:100%; min-width:0; }
   select { width:100%; max-width:100%; font-size:12px; }
-  .movecount { font-size:11px; }
+  .movecount { font-size:11px; min-width:0; }
   .tip { font-size:10px; }
+  /* controls deck + analysis panel: let the slider shrink and long reasoning
+     text wrap so neither forces the page wider than the screen. */
+  input[type=range] { min-width:0; }
+  .deck, .panel, .summary { min-width:0; }
+  .pbody, .pbody * { overflow-wrap:anywhere; }
 }

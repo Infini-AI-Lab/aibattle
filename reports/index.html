@@ -2,7 +2,7 @@
 <html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -114,6 +114,8 @@
     .kpi .v { font-size:18px; }
   }
 
+  /* Leaderboard note shows on desktop only; on mobile it lives in the Q&A. */
+  @media (max-width:760px) { .lb-note { display:none; } }
   .arena { margin-top:34px; border:1px solid var(--line); padding:20px 20px 24px;
     background:var(--panel); scroll-margin-top:60px; }
   .arena-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
@@ -167,10 +169,6 @@
   <section class="board">
     <div class="arena-head"><h2>🏅 Model leaderboard</h2>
       <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
-    <div class="note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
-      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
-      low coverage as provisional).</div>
     <table class="lb">
       <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
@@ -193,6 +191,10 @@
       </thead>
       <tbody><tr data-score='88.0' data-elo='1678'><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='scorecell'><span class='bar' style='width:88.0%'></span><span class='sval'>88</span></td><td><b>1678<div class='small'>+1.19 SD</div></b></td><td class='cov'>5/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='82.2' data-elo='1615'><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:82.2%'></span><span class='sval'>82</span></td><td><b>1615<div class='small'>+0.77 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='72.0' data-elo='1620'><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='scorecell'><span class='bar' style='width:72.0%'></span><span class='sval'>72</span></td><td><b>1620<div class='small'>+0.80 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='63.3' data-elo='1558'><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:63.3%'></span><span class='sval'>63</span></td><td><b>1558<div class='small'>+0.39 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='56.7' data-elo='1555'><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:56.7%'></span><span class='sval'>57</span></td><td><b>1555<div class='small'>+0.37 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚔️ Colonel Blotto</td></tr><tr data-score='55.6' data-elo='1554'><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:55.6%'></span><span class='sval'>56</span></td><td><b>1554<div class='small'>+0.36 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='46.0' data-elo='1493'><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:46.0%'></span><span class='sval'>46</span></td><td><b>1493<div class='small'>-0.05 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr data-score='38.0' data-elo='1442'><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:38.0%'></span><span class='sval'>38</span></td><td><b>1442<div class='small'>-0.39 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🔴 Connect Four</td></tr><tr data-score='34.4' data-elo='1458'><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:34.4%'></span><span class='sval'>34</span></td><td><b>1458<div class='small'>-0.28 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='19.4' data-elo='1353'><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:19.4%'></span><span class='sval'>19</span></td><td><b>1353<div class='small'>-0.98 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='1.7' data-elo='1212'><td class='rk'>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:1.7%'></span><span class='sval'>2</span></td><td><b>1212<div class='small'>-1.92 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr></tbody>
     </table>
+    <div class="note lb-note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
+      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
+      low coverage as provisional).</div>
   </section>
 
   <section class="arena" id="model">

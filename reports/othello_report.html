@@ -4,7 +4,7 @@
 <title>AI Battle Arena — ⚫ Othello 6×6</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -122,12 +122,6 @@
   <a class="replaybtn" href="othello_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
   <div class="callout">Othello 6×6 is a <b>perfect-information</b> board game — flank to flip discs, most discs at the end wins. Late-game swings make lookahead and stable-disc control decisive. Each turn the model sees the full current board and its legal moves (perfect information).</div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">1645</div><div class="l">top Elo · kimi-k2p6</div></div>
-    <div class="kpi"><div class="v">47%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">500</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">25</div><div class="l">deals/pair (seat-swapped)</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -185,12 +179,7 @@
           <td>30,088</td><td>$36.11</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>
-  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500). ± is one bootstrap SD (resampling games 300×); ratings within ±1
-    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
-    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
-    every pair, so first-mover advantage is balanced across the field.</div>
+  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> / <b>draw%</b> won / drawn · <b>1st-move win%</b> win rate acting first · <b>invalid%</b> illegal moves · <b>plies</b> avg game length · <b>think</b> avg sec/decision · <b>games</b> games played (varies by wave)</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
@@ -243,11 +232,11 @@ new Chart(document.getElementById('elo'), { type:'bar',
 
 new Chart(document.getElementById('wdl'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[
-    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
-    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
-    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+    {label:'win %', backgroundColor:'#4ade80', data:M.map(m=>100*pm[m].wins/(pm[m].games||1))},
+    {label:'draw %', backgroundColor:'#94a3b8', data:M.map(m=>100*pm[m].draws/(pm[m].games||1))},
+    {label:'loss %', backgroundColor:'#f87171', data:M.map(m=>100*pm[m].losses/(pm[m].games||1))},
   ]},
-  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });
+  options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'% of games'}}}, plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('net'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),

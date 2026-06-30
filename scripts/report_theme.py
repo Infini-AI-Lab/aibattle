@@ -103,6 +103,17 @@ BASE_CSS = """
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
      inside their own area (display:block) instead of widening the page. On
      desktop tables stay display:table so leaderboards fill the column to 100%. */

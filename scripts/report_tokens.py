@@ -13,14 +13,8 @@ from collections import defaultdict
 
 from model_names import strip_coached, output_price
 
-# Header cells (paired) and the explanatory note, so every page reads the same.
+# Header cells (paired), so every page reads the same.
 TOKEN_HEADERS = "<th>tokens/dec</th><th>$/1K dec</th>"
-TOKEN_NOTE = (
-    '<div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. '
-    '<b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model\'s Fireworks '
-    'serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which '
-    'hide their chain-of-thought, so their token count (and cost) is not observable here.</div>'
-)
 
 
 def _closed(model: str) -> bool:

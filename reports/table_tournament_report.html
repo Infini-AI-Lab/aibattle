@@ -2,7 +2,7 @@
 <html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena — Hold'em Table Mode</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script><style>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script><style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
     --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
@@ -105,6 +105,17 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
@@ -117,6 +128,8 @@
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · 5-player table · 100 sessions · up to 40 hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   <a class="replaybtn" href="table_replay.html?v=17">▶ watch table replays</a>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>Setup — Hold'em Table</h3>
     Standard No-Limit
@@ -149,8 +162,7 @@
         <th>avg final stack</th><th>bust%</th><th>tables</th><th>#1</th><th>#2</th><th>#3</th><th>#4</th><th>#5</th><th>tokens/dec</th><th>$/1K dec</th></tr>
     <tr><td>1</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td>2.68</td><td>24%</td><td>227.4</td><td>16%</td><td>100</td><td>24</td><td>25</td><td>19</td><td>23</td><td>9</td><td>10,548</td><td>$42.19</td></tr><tr><td>2</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td>2.81</td><td>22%</td><td>213.4</td><td>21%</td><td>100</td><td>22</td><td>20</td><td>26</td><td>19</td><td>13</td><td>7,342</td><td>$32.30</td></tr><tr><td>3</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td>2.93</td><td>13%</td><td>200.9</td><td>19%</td><td>100</td><td>13</td><td>28</td><td>27</td><td>17</td><td>15</td><td>2,037</td><td>$7.09</td></tr><tr><td>4</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td><td>2.99</td><td>23%</td><td>207.4</td><td>20%</td><td>100</td><td>23</td><td>14</td><td>24</td><td>19</td><td>20</td><td>829</td><td>$0.50</td></tr><tr><td>5</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td>3.59</td><td>18%</td><td>150.8</td><td>47%</td><td>100</td><td>18</td><td>13</td><td>4</td><td>22</td><td>43</td><td>9,246</td><td>$11.10</td></tr>
   </table>
-  <div class="note collegend">columns: <b>avg rank</b> average finishing position across tables (lower = better) · <b>top-1%</b> share of tables finished 1st · <b>avg final stack</b> average ending chip stack · <b>bust%</b> share of tables where it busted out · <b>tables</b> total tables played (sample size — varies because the field was assembled in waves) · <b>#1–#5</b> finishing-place distribution: how often it placed 1st through 5th</div>
-  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
+  <div class="note collegend">columns: <b>avg rank</b> avg finish (lower = better) · <b>top-1%</b> tables won · <b>avg final stack</b> avg ending stack · <b>bust%</b> tables busted out · <b>tables</b> tables played (varies by wave) · <b>#1–#5</b> finish-place distribution</div>
   <h2>🎭 Player behaviour profiles</h2>
 <table>
   <tr><th>#</th><th class='model'>model</th><th>VPIP</th><th>PFR</th><th>aggr</th><th>fold→bet</th><th>bet size</th><th>all-in%</th><th>WTSD</th><th>W@SD</th><th>hand-win</th><th>tokens/dec</th></tr>

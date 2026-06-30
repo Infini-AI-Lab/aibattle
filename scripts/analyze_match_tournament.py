@@ -19,7 +19,7 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
-from report_tokens import token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
+from report_tokens import token_cost_cells, TOKEN_HEADERS
 from elo_util import bradley_terry, elo_key, bootstrap_elo, wld_from_records
 from report_theme import BASE_CSS, CHART_SETUP
 from report_legends import legend as _legend
@@ -806,6 +806,8 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/match<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Match · Heads-up · {match_count_label} · {rep['pair_count']} pair logs · {rep['total_matches']} total matches · up to {rep['max_hands']} hands/match · stacks carried, match-level winner · primary metric: match win rate</div>
   {replay_btn}
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>Setup — Hold'em Match</h3>
     Standard heads-up No-Limit
@@ -837,11 +839,6 @@ def render_html(rep: dict, beh: dict) -> str:
     {trows}
   </table>
   {_legend('match')}
-  {TOKEN_NOTE}
-  <div class="note"><b>Elo</b> = Bradley-Terry rating (field mean 1500) over match win/loss results.
-    Match mode is win-or-lose — chips don't count past who took the match — so the rating uses match
-    outcomes only, opponent-adjusted. ± is one bootstrap SD (resampling matches 300×); ratings within
-    ±1 of each other are a statistical tie. win% and the rest are raw, unadjusted metrics.</div>
   <h3>Head-to-head <span class="note">(row's match win % vs column — green = winning, red = losing; raw record below)</span></h3>
   <table><tr><th class='model'></th>{head}</tr>{grid}</table>
   <h2 class="section">2 · Why — what makes a model win or lose matches</h2>

@@ -4,7 +4,7 @@
 <title>AI Battle Arena — ⚔️ Colonel Blotto</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -108,6 +108,17 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
@@ -120,14 +131,10 @@
   <h1>$ ~/aibattle/blotto<span class="cursor"></span></h1>
   <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 520 games</div>
   <a class="replaybtn" href="blotto_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules"><h3>How Colonel Blotto works</h3>A two-player game of <b>simultaneous</b> resource allocation, played over <b>20 rounds</b>. Each round:<ul><li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs per round).</li><li>Allocations are revealed <b>at the same time</b> — neither sees the other's before committing.</li><li>On each battlefield the <b>larger force wins</b> that field's points; an exact tie awards the field to neither.</li><li>Whoever takes the <b>most points</b> wins the round; only resolved past rounds are shown to the opponent.</li></ul><div class="seq">After 20 rounds the <b>higher cumulative score wins</b> (equal totals draw). No hidden cards or chance — the difficulty is purely strategic: spread thin to grab the cheap fields, or stack up to guarantee the expensive ones, while reading and misdirecting the opponent across rounds.</div><div class="seq"><b>What the model sees each round:</b> the 5 battlefields and their point values, its 100-troop budget, and the results of past rounds — not the opponent's current allocation (both commit at the same time).</div></div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">1764</div><div class="l">top Elo · deepseek-v4-pro</div></div>
-    <div class="kpi"><div class="v">48%</div><div class="l">first-mover win rate</div></div>
-    <div class="kpi"><div class="v">520</div><div class="l">games played</div></div>
-    <div class="kpi"><div class="v">10</div><div class="l">deals/pair (seat-swapped)</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -215,12 +222,7 @@
           <td>39,353</td><td>$47.22</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>
-  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
-  <div class="note">Elo from a Bradley-Terry fit over head-to-head results (rated field mean 1500). ± is one bootstrap SD (resampling games 300×); ratings within ±1
-    of each other are a statistical tie. A model with no wins or no losses has no finite rating and is
-    shown as “—” (excluded from the fit). net/game is the average game payoff. Seats are swapped within
-    every pair, so first-mover advantage is balanced across the field.</div>
+  <div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> / <b>draw%</b> won / drawn · <b>1st-move win%</b> win rate acting first · <b>invalid%</b> illegal moves · <b>plies</b> avg game length · <b>think</b> avg sec/decision · <b>games</b> games played (varies by wave)</div>
 
   <div class="grid2">
     <div><h3>Elo rating</h3><canvas id="elo"></canvas></div>
@@ -273,11 +275,11 @@ new Chart(document.getElementById('elo'), { type:'bar',
 
 new Chart(document.getElementById('wdl'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[
-    {label:'win', backgroundColor:'#4ade80', data:M.map(m=>pm[m].wins)},
-    {label:'draw', backgroundColor:'#94a3b8', data:M.map(m=>pm[m].draws)},
-    {label:'loss', backgroundColor:'#f87171', data:M.map(m=>pm[m].losses)},
+    {label:'win %', backgroundColor:'#4ade80', data:M.map(m=>100*pm[m].wins/(pm[m].games||1))},
+    {label:'draw %', backgroundColor:'#94a3b8', data:M.map(m=>100*pm[m].draws/(pm[m].games||1))},
+    {label:'loss %', backgroundColor:'#f87171', data:M.map(m=>100*pm[m].losses/(pm[m].games||1))},
   ]},
-  options:{ scales:{x:{stacked:true},y:{stacked:true}}, plugins:{legend:{position:'bottom'}} } });
+  options:{ scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'% of games'}}}, plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('net'), { type:'bar',
   data:{ labels:M.map(dn), datasets:[{label:'net/game', backgroundColor:M.map(m=>pm[m].net_per_game>=0?'#4ade80':'#f87171'),

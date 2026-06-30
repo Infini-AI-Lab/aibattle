@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -162,14 +162,6 @@
           <td>33</td>
         </tr>
   </table>
-  <div class="note"><b>Elo</b> = chip-weighted Bradley-Terry rating (field mean 1500): a standard Elo
-    fit, but fed the chips won in each matchup rather than hand counts, so it rewards <i>how much</i> you
-    win and adjusts for opponent strength — the fair comparison when models faced different opponents.
-    ± is one bootstrap SD (resampling hands 300×); ratings within ±1 of each other are a statistical tie.
-    chips / bb/100 / win% are raw, unadjusted metrics. VPIP = how often it voluntarily plays a hand
-    (looseness). PFR = preflop raise %.
-    aggr = aggression frequency. fold→bet = how often it folds when bet at. bet size = avg bet as a multiple of the pot.
-    think = avg seconds per decision. tokens/dec = avg completion (reasoning) tokens generated per decision.</div>
 
   <div class="grid2">
     <div><h2>🎭 Player-type map</h2><canvas id="scatter"></canvas>

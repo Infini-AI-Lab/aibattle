@@ -15,7 +15,7 @@ from collections import defaultdict
 
 import poker_behavior as pb
 from model_names import strip_coached, display_name, model_cell
-from report_tokens import token_cost_cells, TOKEN_HEADERS, TOKEN_NOTE
+from report_tokens import token_cost_cells, TOKEN_HEADERS
 from report_theme import BASE_CSS
 from report_legends import legend as _legend
 
@@ -89,6 +89,8 @@ def render_html(rep: dict, beh: dict) -> str:
   <h1>$ ~/aibattle/holdem/table<span class="cursor"></span></h1>
   <div class="sub">🃏 Hold'em Table · {n}-player table · {rep['sessions']} sessions · up to {rep['max_hands']} hands · ranked by average finishing rank (lower is better; ties broken by top-1 share). Top-1 rate is shown alongside but over-rewards high-variance play.</div>
   {replay_btn}
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>Setup — Hold'em Table</h3>
     Standard No-Limit
@@ -122,7 +124,6 @@ def render_html(rep: dict, beh: dict) -> str:
     {trows}
   </table>
   {_legend('table')}
-  {TOKEN_NOTE}
   {beh_html}
   <script>
   const axc={{grid:{{color:'#e7e2d8'}},ticks:{{color:'#1c1c1c'}}}};

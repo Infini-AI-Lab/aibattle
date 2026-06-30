@@ -20,6 +20,7 @@
   var ACTIVE = {
     oss: {
       "index.html": "index.html",
+      "replays.html": "replays.html",
       "qa.html": "qa.html",
       "connect4_report.html": "connect4_report.html",
       "connect4_replay.html": "connect4_report.html",
@@ -58,7 +59,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=32";
+  var V = "?v=33";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -79,6 +80,7 @@
     '<span class="navclust">Perfect-info/</span>' +
     a("connect4_report.html", "Connect4", "nav navsub", "oss") +
     a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
+    a("replays.html", "Featured replays", "nav navtop", "oss") +
     a("qa.html", "Q&A", "nav navtop", "oss");
 
   var html =

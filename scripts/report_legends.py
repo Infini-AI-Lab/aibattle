@@ -12,29 +12,29 @@ from __future__ import annotations
 
 LEGENDS = {
     # connect4, gomoku (board games with immediate-win/threat tactical columns)
-    "board": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate when moving first · <b>2nd-move win%</b> win rate when moving second · <b>win-take</b> share of immediate wins converted (offense) · <b>block</b> share of opponent immediate-win threats stopped (defense) · <b>miss/allow</b> missed wins / allowed losses (counts) · <b>think</b> average seconds per decision</div>""",
+    "board": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> / <b>draw%</b> won / drawn · <b>1st-move win%</b> / <b>2nd-move win%</b> win rate moving first / second · <b>win-take</b> immediate wins converted · <b>block</b> opponent win-threats stopped · <b>miss/allow</b> missed wins / allowed losses · <b>think</b> avg sec/decision</div>""",
 
     # connect4, gomoku — slim "who won" leaderboard (v2 layout; tactical columns
     # move into the "why" section, so the results table keeps only outcomes)
-    "board_results": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> games won · <b>1st-move win%</b> win rate when moving first · <b>2nd-move win%</b> win rate when moving second · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>""",
+    "board_results": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> games won · <b>1st-move win%</b> / <b>2nd-move win%</b> win rate moving first / second · <b>games</b> games played (varies by wave)</div>""",
 
     # leduc, repeated_colonel_blotto, othello_lite_6x6 (round-robin versus games)
-    "versus": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating (Bradley–Terry, 1500-centred; higher = stronger) · <b>net/game</b> mean result per game (+1 win, −1 loss, 0 draw) · <b>win%</b> / <b>draw%</b> games won / drawn · <b>1st-move win%</b> win rate for the player who acts first · <b>invalid%</b> illegal or unparseable moves · <b>plies</b> average game length in moves · <b>think</b> average seconds per decision · <b>games</b> total games played (sample size — varies because the field was assembled in waves)</div>""",
+    "versus": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>net/game</b> mean result/game (+1/−1/0) · <b>win%</b> / <b>draw%</b> won / drawn · <b>1st-move win%</b> win rate acting first · <b>invalid%</b> illegal moves · <b>plies</b> avg game length · <b>think</b> avg sec/decision · <b>games</b> games played (varies by wave)</div>""",
 
     # independent_blackjack (model vs the built-in dealer)
-    "blackjack": """<div class="note collegend">columns: <b>mean/hand</b> average profit per hand (betting units) · <b>win%</b> / <b>push%</b> / <b>loss%</b> hands won / tied / lost vs dealer · <b>bust%</b> hands that went over 21 · <b>double%</b> hands doubled down · <b>natural%</b> hands dealt a natural blackjack · <b>invalid%</b> illegal or unparseable actions · <b>hands</b> hands played · <b>think</b> average seconds per decision</div>""",
+    "blackjack": """<div class="note collegend">columns: <b>mean/hand</b> avg profit/hand (units) · <b>win%</b> / <b>push%</b> / <b>loss%</b> vs dealer · <b>bust%</b> went over 21 · <b>double%</b> doubled down · <b>natural%</b> dealt a blackjack · <b>invalid%</b> illegal actions · <b>hands</b> hands played · <b>think</b> avg sec/decision</div>""",
 
     # holdem_1hand (each hand scored independently, bb/100)
-    "holdem": """<div class="note collegend">columns: <b>style</b> play-style archetype (summarized from the deeper behavior charts below) · <b>Elo</b> opponent-adjusted skill rating · <b>chips/hand</b> net chips won per hand (normalized — pairs played different hand counts) · <b>bb/100</b> big blinds won per 100 hands (standard poker win-rate) · <b>win%</b> hands won · <b>think</b> average seconds per decision · <b>tokens/dec</b> average output tokens per decision · <b>hands</b> total hands played (sample size — varies because the field was assembled in waves)</div>""",
+    "holdem": """<div class="note collegend">columns: <b>style</b> play-style archetype · <b>Elo</b> opponent-adjusted rating · <b>chips/hand</b> net chips/hand (normalized) · <b>bb/100</b> big blinds won per 100 hands · <b>win%</b> hands won · <b>tokens/dec</b> avg output tokens/decision · <b>hands</b> hands played (varies by wave)</div>""",
 
     # kuhn_poker (solved game, scored on GTO fundamentals)
-    "kuhn": """<div class="note collegend">columns: <b>fold K vs bet</b> how often it folds a King — the best card — facing a bet (a clear blunder) · <b>call J vs bet</b> how often it calls with a Jack — the worst card — facing a bet (a clear blunder) · <b>total blunders</b> combined count of these two mistakes</div>""",
+    "kuhn": """<div class="note collegend">columns: <b>fold K vs bet</b> folds a King (best card) to a bet — a blunder · <b>call J vs bet</b> calls a Jack (worst card) to a bet — a blunder · <b>total blunders</b> sum of the two</div>""",
 
     # holdem_match (heads-up, stacks carried, win the match)
-    "match": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted skill rating · <b>win%</b> matches won · <b>wins/matches</b> matches won / played · <b>draws</b> matches drawn · <b>bust-out%</b> share of matches where the model lost all its chips · <b>hands/match</b> average hands per match · <b>avg win margin</b> average chip margin in matches it won · <b>matches</b> total matches played (sample size — varies because the field was assembled in waves)</div>""",
+    "match": """<div class="note collegend">columns: <b>Elo</b> opponent-adjusted rating · <b>win%</b> matches won · <b>wins/matches</b> won / played · <b>draws</b> matches drawn · <b>bust-out%</b> matches losing all chips · <b>hands/match</b> avg hands/match · <b>avg win margin</b> avg chip margin in wins · <b>matches</b> matches played (varies by wave)</div>""",
 
     # holdem_table (5-handed ring, scored by finishing rank)
-    "table": """<div class="note collegend">columns: <b>avg rank</b> average finishing position across tables (lower = better) · <b>top-1%</b> share of tables finished 1st · <b>avg final stack</b> average ending chip stack · <b>bust%</b> share of tables where it busted out · <b>tables</b> total tables played (sample size — varies because the field was assembled in waves) · <b>#1–#5</b> finishing-place distribution: how often it placed 1st through 5th</div>""",
+    "table": """<div class="note collegend">columns: <b>avg rank</b> avg finish (lower = better) · <b>top-1%</b> tables won · <b>avg final stack</b> avg ending stack · <b>bust%</b> tables busted out · <b>tables</b> tables played (varies by wave) · <b>#1–#5</b> finish-place distribution</div>""",
 }
 
 

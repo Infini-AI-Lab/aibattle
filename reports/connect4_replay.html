@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🔴 Connect Four Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
-<link rel="stylesheet" href="replay.css?v=9">
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<link rel="stylesheet" href="replay.css?v=11">
 <style>
   .stage{grid-template-columns:minmax(300px,420px) 1fr;}
   @media (max-width:860px){ .stage{grid-template-columns:1fr;} }
@@ -88,6 +88,7 @@
 
 <script>
 const BASE = "replays/connect4/";
+const PARAMS = new URLSearchParams(location.search);
 const PLAY_MS = 850;
 const SPEEDS = [1, 2, 4];
 const DISPLAY = {"glm-5p1":"GLM-5.1","glm-5p2":"GLM-5.2","kimi-k2p6":"Kimi K2.6",
@@ -139,7 +140,7 @@ async function init() {
     if (_pp){ const f = manifest.pairs.findIndex(p => p.file===_pp || `${p.a}__vs__${p.b}`===_pp); if(f>=0)pi=f; }
     else pi = Math.max(0, Math.min(manifest.pairs.length-1, +PARAMS.get("pairIndex")||0));
     await loadPair(pi);
-  } else if (featured.length) { await loadFeatured(0); }
+  } else if (featured.length) { await loadFeatured(Math.max(0, Math.min(featured.length - 1, (+(PARAMS.get("feat")) || 0)))); }
   else { await loadPair(0); }
 }
 
@@ -185,17 +186,17 @@ function renderLegend() {
   const sa = ep.seat_assignment;
   $("legend").innerHTML =
     `<div class="team t0"><span class="dot"></span><div>` +
-      `<div class="role">Black · first seat</div><div class="tname">${sa.player_0}</div></div></div>` +
+      `<div class="role">Black · first seat</div><div class="tname">${disp(sa.player_0)}</div></div></div>` +
     `<div class="vs">VS</div>` +
     `<div class="team t1"><span class="dot"></span><div>` +
-      `<div class="role">White</div><div class="tname">${sa.player_1}</div></div></div>`;
+      `<div class="role">White</div><div class="tname">${disp(sa.player_1)}</div></div></div>`;
   const hints=[]; for (let c=0;c<pairData.cols;c++) hints.push(`<div>${c}</div>`);
   $("colhint").innerHTML = hints.join("");
   $("colhint").style.gridTemplateColumns = `repeat(${pairData.cols}, 1fr)`;
 }
 
 function renderResult() {
-  const w = ep.winner_name;
+  const w = disp(ep.winner_name);
   $("result").innerHTML = w ? `<span class="badge win">🏆 ${w}</span>` : "";
 }
 
@@ -278,7 +279,7 @@ function renderPanel() {
   if (cursor===0){
     p.innerHTML =
       `<div class="movenum">Opening</div>` +
-      `<div class="meta">${ep.seat_assignment.player_0} = black · ${ep.seat_assignment.player_1} = white<br>` +
+      `<div class="meta">${disp(ep.seat_assignment.player_0)} = black · ${disp(ep.seat_assignment.player_1)} = white<br>` +
       `The board is seeded with one opening piece per player before play begins.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to watch the game unfold.</div>`;
     return;
@@ -295,7 +296,7 @@ function renderPanel() {
       `so the played move may be arbitrary rather than the model's intended choice.</div></div>` : "";
   p.innerHTML =
     `<div class="movenum"><b>${cursor}</b><span class="tot">/ ${ep.moves.length}</span></div>` +
-    `<div class="actor"><span class="who"><span class="disc ${sc}"></span>${m.agent}</span></div>` +
+    `<div class="actor"><span class="who"><span class="disc ${sc}"></span>${disp(m.agent)}</span></div>` +
     `<div class="actor"><span class="drops">drops into</span> <span class="colchip">col ${m.col}</span></div>` +
     `<div class="meta">${color} · ply ${m.ply} · ⏱ ${lat} thinking${inv}</div>` +
     warn +

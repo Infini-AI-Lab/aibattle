@@ -4,7 +4,7 @@
 <title>AI Battle Arena — 🂡 Blackjack</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🂡</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -108,6 +108,17 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
@@ -120,13 +131,10 @@
   <h1>$ ~/aibattle/blackjack<span class="cursor"></span></h1>
   <div class="sub">🂡 Blackjack · Model vs the built-in dealer · hit/stand/double · scored by chip profit · 9000 hands total</div>
   <a class="replaybtn" href="blackjack_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules"><h3>Setup — Blackjack</h3>Standard <a href="https://en.wikipedia.org/wiki/Blackjack" target="_blank" rel="noopener">blackjack</a> against a fixed house dealer (full rules on Wikipedia); this is a solitaire-style benchmark, <b>not</b> model-vs-model:<ul><li><b>Model vs the built-in dealer</b>, which plays the fixed house line (hits until 17, then stands). Player actions are <b>hit / stand / double</b> — no split or insurance.</li><li><b>500 hands per model</b>, each from a fresh shuffle. Deals are <b>independent</b> — not shared across models — so the luck of the cards differs from model to model.</li><li><b>Flat 1-unit bet</b> per hand (2 units on a double); a natural pays <b>3:2</b>.</li></ul><div class="seq">Because deals aren't shared and the dealer keeps a fixed house edge, a <b>negative field net is expected</b> and short runs are luck-heavy — so models are ranked by <b>mean profit per hand</b>, not total. Bust / double / natural rates show how soundly each one plays.</div><div class="seq"><b>What the model sees each turn:</b> its own cards and running total, the dealer's up-card, and the legal actions (hit / stand / double) — not the dealer's hole card or the rest of the shoe.</div></div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="v">+0.060</div><div class="l">top mean/hand · gpt-5.4</div></div>
-    <div class="kpi"><div class="v">+0.001</div><div class="l">field avg/hand vs dealer</div></div>
-    <div class="kpi"><div class="v">9000</div><div class="l">hands played</div></div>
-  </div>
 
   <h2>🏆 Leaderboard</h2>
   <table>
@@ -255,8 +263,7 @@
           <td>745</td><td>$0.89</td>
         </tr>
   </table>
-  <div class="note collegend">columns: <b>mean/hand</b> average profit per hand (betting units) · <b>win%</b> / <b>push%</b> / <b>loss%</b> hands won / tied / lost vs dealer · <b>bust%</b> hands that went over 21 · <b>double%</b> hands doubled down · <b>natural%</b> hands dealt a natural blackjack · <b>invalid%</b> illegal or unparseable actions · <b>hands</b> hands played · <b>think</b> average seconds per decision</div>
-  <div class="note"><b>tokens/dec</b> = avg completion (reasoning) tokens per decision. <b>$/1K dec</b> = estimated cost per 1,000 decisions = tokens/dec × the model's Fireworks serverless decode price (output $/1M tokens). Both are <b>—</b> for Claude and GPT-5.x, which hide their chain-of-thought, so their token count (and cost) is not observable here.</div>
+  <div class="note collegend">columns: <b>mean/hand</b> avg profit/hand (units) · <b>win%</b> / <b>push%</b> / <b>loss%</b> vs dealer · <b>bust%</b> went over 21 · <b>double%</b> doubled down · <b>natural%</b> dealt a blackjack · <b>invalid%</b> illegal actions · <b>hands</b> hands played · <b>think</b> avg sec/decision</div>
   <div class="note">Each model plays independent hands against the built-in dealer; the dealer holds an
     inherent house edge, so a negative field average is expected. mean/hand = average chips per hand
     (a doubled hand pays ±2), the fair comparison since hand counts can differ. bust = player busted;

@@ -269,6 +269,8 @@ def render_html(rep: dict) -> str:
   <div class="sub">🃏 Kuhn Poker · {len(models)} models · round-robin · {rep['episodes_per_pair']} seat-swapped hands/pair · deck {{J,Q,K}}, ~2 decisions/hand</div>
   <a class="replaybtn" href="kuhn_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
 
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
+  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
   <div class="rules">
     <h3>How Kuhn Poker works</h3>
     A minimal 2-player poker on a 3-card deck — <span class="card">J</span><span class="card">Q</span><span class="card">K</span>
@@ -284,15 +286,14 @@ def render_html(rep: dict) -> str:
     <code>check-bet-call</code>, <code>bet-fold</code>, or <code>bet-call</code> — so a player makes ~1–2 decisions per hand.</div>
     <div class="seq"><b>What the model sees each turn:</b> its own private card, the betting so far, the
     pot, and its legal actions — never the opponent's card.</div>
+    <div class="seq">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash
+    equilibrium rather than chips alone. At only {rep['episodes_per_pair']} hands/pair the chip totals
+    are <b>high-variance and directional</b> — the <i>fundamentals</i> and <i>betting-style</i> sections
+    below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips;
+    the <b>Elo</b> column (opponent-adjusted Bradley-Terry rating over per-hand results, field mean
+    1500) is shown for reference, with ±1 bootstrap SD — note how wide those error bars are at this
+    sample size, which is exactly why the ranking leans on blunders instead.</div>
   </div>
-
-  <div class="callout">Kuhn Poker is <a href="https://en.wikipedia.org/wiki/Kuhn_poker" target="_blank" rel="noopener"><b>fully solved</b></a>, so we judge play against the Nash
-  equilibrium rather than chips alone. At only {rep['episodes_per_pair']} hands/pair the chip totals
-  are <b>high-variance and directional</b> — the <i>fundamentals</i> and <i>betting-style</i> sections
-  below are the real skill signal. The leaderboard is ranked by fewest blunders, then chips;
-  the <b>Elo</b> column (opponent-adjusted Bradley-Terry rating over per-hand results, field mean
-  1500) is shown for reference, with ±1 bootstrap SD — note how wide those error bars are at this
-  sample size, which is exactly why the ranking leans on blunders instead.</div>
 
   <h2>Bet frequency by card <span class="note">(when first to act)</span></h2>
   <div class="note">Equilibrium is <b>polarized</b>: bet the King (green) ~100%, bluff the Jack (blue) ~33%,

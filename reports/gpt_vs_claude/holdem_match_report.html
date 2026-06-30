@@ -4,7 +4,7 @@
 <title>GPT vs Claude — 🃏 Hold'em Match</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -127,11 +127,6 @@
           <td>314</td>
         </tr>
   </table>
-  <div class="note"><b>Elo</b> is a Bradley-Terry rating (field mean 1500) over match win/loss
-    results; ± is one bootstrap SD. <b>Ranked by Elo.</b> A match is a heads-up sit-and-go (up to
-    30 hands, stacks carried); the match winner is whoever holds more chips at the
-    end. Win margin is the average final chip gap in matches won. Busted-out% = share of matches
-    lost by going broke.</div>
 
   <div class="grid2">
     <div><h3>Match win rate</h3><canvas id="wr"></canvas></div>

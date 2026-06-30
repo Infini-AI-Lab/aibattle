@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — ⚪ Othello-Lite Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚪</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
-<link rel="stylesheet" href="replay.css?v=9">
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<link rel="stylesheet" href="replay.css?v=11">
 <style>
   .stage{grid-template-columns:minmax(300px,420px) 1fr;}
   @media (max-width:880px){ .stage{grid-template-columns:1fr;} }
@@ -101,6 +101,7 @@
 
 <script>
 const BASE = "replays/othello/";
+const PARAMS = new URLSearchParams(location.search);
 const COLS = "ABCDEFGH";
 const PLAY_MS = 850;
 const SPEEDS = [1, 2, 4];
@@ -154,7 +155,7 @@ async function init() {
     if (_pp){ const f = manifest.pairs.findIndex(p => p.file===_pp || `${p.a}__vs__${p.b}`===_pp); if(f>=0)pi=f; }
     else pi = Math.max(0, Math.min(manifest.pairs.length-1, +PARAMS.get("pairIndex")||0));
     await loadPair(pi);
-  } else if (featured.length) { await loadFeatured(0); }
+  } else if (featured.length) { await loadFeatured(Math.max(0, Math.min(featured.length - 1, (+(PARAMS.get("feat")) || 0)))); }
   else { await loadPair(0); }
 }
 
