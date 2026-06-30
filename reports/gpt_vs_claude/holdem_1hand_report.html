@@ -15,7 +15,14 @@
      would exceed its container scrolls inside its OWN area instead of widening
      the whole page (which would drag text blocks past the viewport edge).
      Base rule = applies at all widths, not just mobile. */
-  table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
+  /* keep the horizontal slide-bar visible (not an auto-hiding overlay) so it's
+     obvious a wide table scrolls; it only renders when the table overflows. */
+  table::-webkit-scrollbar { height:10px; }
+  table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+  table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+  table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
   @media (max-width:760px) {
     .wrap { padding:24px 14px 60px; }
     .scorecell { min-width:90px; }
