@@ -103,11 +103,21 @@ BASE_CSS = """
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
+     inside their own area (display:block) instead of widening the page. On
+     desktop tables stay display:table so leaderboards fill the column to 100%. */
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
     .sub { font-size:12px; } .note { font-size:11px; }
-    table { font-size:12px; } th, td { padding:6px 7px; }
+    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint);
+      font-size:12px; }
+    table::-webkit-scrollbar { height:10px; }
+    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+    th, td { padding:6px 7px; }
     .kpi .v { font-size:18px; }
   }
 """
