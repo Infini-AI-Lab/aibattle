@@ -58,16 +58,16 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=31";
+  var V = "?v=32";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
   }
 
-  var html =
-    '<a class="brand" href="' + P.oss + 'index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
+  // The full link list. On desktop it's the sidebar column; on mobile it's the
+  // collapsible dropdown panel toggled by the ☰ button (see .navlinks in nav.css).
+  var links =
     a("index.html", "Overview", "nav navtop", "oss") +
-
     // Single arena now — imperfect- and perfect-info game groups, no top label.
     '<span class="navclust">Imperfect-info/</span>' +
     a("holdem_tournament_report.html", "Holdem 1hand", "nav navsub", "oss") +
@@ -79,17 +79,14 @@
     '<span class="navclust">Perfect-info/</span>' +
     a("connect4_report.html", "Connect4", "nav navsub", "oss") +
     a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
-    a("qa.html", "Q&A", "nav navtop", "oss") +
+    a("qa.html", "Q&A", "nav navtop", "oss");
 
-    // Compact mobile bar: shown only under 760px (CSS hides the list above and
-    // this below). Four columns; the two category links jump to the matching
-    // group on the Overview page (anchors #imperfect / #perfect there).
-    '<div class="navmobile">' +
-    a("index.html", "Overview", "navm", "oss") +
-    '<a class="navm" href="' + P.oss + 'index.html' + V + '#imperfect">Imperfect-info</a>' +
-    '<a class="navm" href="' + P.oss + 'index.html' + V + '#perfect">Perfect-info</a>' +
-    a("qa.html", "Q&A", "navm", "oss") +
-    '</div>';
+  var html =
+    '<div class="navhead">' +
+      '<a class="brand" href="' + P.oss + 'index.html' + V + '">🎲 ~/aibattle <span class="prompt">$</span></a>' +
+      '<button type="button" class="navtoggle" aria-label="Menu" aria-expanded="false">☰</button>' +
+    '</div>' +
+    '<div class="navlinks">' + links + '</div>';
 
   function mount() {
     var nav = document.querySelector("nav.navbar");
@@ -99,6 +96,18 @@
       document.body.insertBefore(nav, document.body.firstChild);
     }
     nav.innerHTML = html;
+    // Mobile dropdown: ☰ toggles the panel; tapping a link closes it.
+    var btn = nav.querySelector(".navtoggle");
+    if (btn) {
+      btn.addEventListener("click", function () {
+        var open = nav.classList.toggle("open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+    var ls = nav.querySelectorAll(".navlinks a");
+    for (var i = 0; i < ls.length; i++) {
+      ls[i].addEventListener("click", function () { nav.classList.remove("open"); });
+    }
   }
 
   if (document.readyState === "loading") {

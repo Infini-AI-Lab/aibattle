@@ -143,4 +143,16 @@ table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--f
 table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
 @media (max-width:760px) {
   .wrap { padding:24px 14px; }
+  h1 { font-size:18px; }
+  h2 { font-size:14px; }
+  .sub { font-size:12px; }
+  .arena-tag { font-size:10px; }
+  button.btn { font-size:12px; padding:6px 8px; }
+  /* selects size to their longest option (long matchup/hand labels), which
+     overflows a phone viewport — stack them and clamp each to full width. */
+  .selectors { flex-direction:column; align-items:stretch; gap:10px; }
+  .selectors > div { width:100%; min-width:0; }
+  select { width:100%; max-width:100%; font-size:12px; }
+  .movecount { font-size:11px; }
+  .tip { font-size:10px; }
 }

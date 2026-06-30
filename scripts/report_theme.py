@@ -103,7 +103,13 @@ BASE_CSS = """
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
-  @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
+  @media (max-width:760px) {
+    .grid2, .cards { grid-template-columns:1fr; }
+    h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
+    .sub { font-size:12px; } .note { font-size:11px; }
+    table { font-size:12px; } th, td { padding:6px 7px; }
+    .kpi .v { font-size:18px; }
+  }
 """
 
 # Drop-in <script> prelude: makes Chart.js readable on the light background
