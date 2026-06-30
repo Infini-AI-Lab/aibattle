@@ -31,14 +31,23 @@ body { padding-left:210px; }
   font-size:12px; margin-top:12px; padding:4px 0 2px; }
 .navbar a.nav.navtop:hover { color:#1c1c1c; }
 .navbar .navclust { font-size:12px; color:#b0a99c; margin-top:6px; padding:2px 0 2px 10px; }
+/* The compact 4-column mobile bar lives in the markup at all times but is only
+   shown under the breakpoint below; on desktop the full sidebar list is used. */
+.navmobile { display:none; }
 @media (max-width:760px) {
   body { padding-left:0; }
-  .navbar { position:sticky; top:0; bottom:auto; width:auto;
-    flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px 10px;
-    min-height:44px; padding:6px 16px;
+  /* Collapse the sidebar to a compact top bar with four columns:
+     Overview · Imperfect-info · Perfect-info · Q&A. The full list is hidden
+     and only .navmobile is shown. */
+  .navbar { position:sticky; top:0; bottom:auto; width:auto; display:block;
+    padding:0; overflow:visible;
     border-right:none; border-bottom:2px solid #8f1d1d; }
-  .navbar .brand { margin-bottom:0; margin-right:8px; }
-  .navbar a.nav.navsub { padding-left:0; }
-  .navbar .navclust { margin-top:0; padding-left:0; }
-  .navbar a.nav.navtop, .navbar .navtop { margin-top:0; padding:0; }
+  .navbar .brand, .navbar a.nav, .navbar .navclust, .navbar .navtop { display:none; }
+  .navmobile { display:grid; grid-template-columns:repeat(4,1fr); }
+  .navmobile a.navm { display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:11px 6px; line-height:1.2; font-size:12px;
+    color:#6b6b6b; text-decoration:none; border-right:1px solid #ddd8cf; }
+  .navmobile a.navm:last-child { border-right:none; }
+  .navmobile a.navm:hover { color:#1c1c1c; }
+  .navmobile a.navm.active { color:#8f1d1d; font-weight:700; }
 }

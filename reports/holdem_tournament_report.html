@@ -2,7 +2,7 @@
 <html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>
+<link rel="stylesheet" href="nav.css?v=6"><script defer src="nav.js?v=31"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -11,6 +11,22 @@
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
   .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
+  /* responsive: page content fills the column at every width. Any table that
+     would exceed its container scrolls inside its OWN area instead of widening
+     the whole page (which would drag text blocks past the viewport edge).
+     Base rule = applies at all widths, not just mobile. */
+  table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
+  /* keep the horizontal slide-bar visible (not an auto-hiding overlay) so it's
+     obvious a wide table scrolls; it only renders when the table overflows. */
+  table::-webkit-scrollbar { height:10px; }
+  table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+  table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+  table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+  @media (max-width:760px) {
+    .wrap { padding:24px 14px 60px; }
+    .scorecell { min-width:90px; }
+  }
   a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
@@ -48,7 +64,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-height:340px; }
+  canvas { max-width:100%; max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -162,7 +178,7 @@
   .case-link { display:inline-block; margin-top:5px; border:1px solid var(--line);
     background:var(--faint); color:#4338ca; text-decoration:none; padding:3px 8px; font-size:11px; }
   .case-link:hover { border-color:var(--red); color:var(--fg); }
-  @media (max-width:860px) { .strategy-grid, .strategy-glossary { grid-template-columns:1fr; } }
+  @media (max-width:860px) { .strategy-grid, .strategy-glossary, .winloss-keys { grid-template-columns:1fr; } }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/holdem/1hand<span class="cursor"></span></h1>

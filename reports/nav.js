@@ -58,7 +58,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=29";
+  var V = "?v=31";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -79,7 +79,17 @@
     '<span class="navclust">Perfect-info/</span>' +
     a("connect4_report.html", "Connect4", "nav navsub", "oss") +
     a("gomoku_report.html", "Gomoku", "nav navsub", "oss") +
-    a("qa.html", "Q&A", "nav navtop", "oss");
+    a("qa.html", "Q&A", "nav navtop", "oss") +
+
+    // Compact mobile bar: shown only under 760px (CSS hides the list above and
+    // this below). Four columns; the two category links jump to the matching
+    // group on the Overview page (anchors #imperfect / #perfect there).
+    '<div class="navmobile">' +
+    a("index.html", "Overview", "navm", "oss") +
+    '<a class="navm" href="' + P.oss + 'index.html' + V + '#imperfect">Imperfect-info</a>' +
+    '<a class="navm" href="' + P.oss + 'index.html' + V + '#perfect">Perfect-info</a>' +
+    a("qa.html", "Q&A", "navm", "oss") +
+    '</div>';
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

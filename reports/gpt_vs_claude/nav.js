@@ -58,7 +58,7 @@
 
   // V busts the browser's heuristic cache of the page HTML (the dev server
   // sends no Cache-Control). Bump it when the nav or pages are restyled.
-  var V = "?v=27";
+  var V = "?v=31";
   function a(href, label, cls, section) {
     var on = (section === cur && href === active) ? " active" : "";
     return '<a class="' + cls + on + '" href="' + P[section] + href + V + '">' + label + "</a>";
@@ -79,7 +79,17 @@
     a("leduc_report.html", "Leduc Holdem", "nav navsub", "oss") +
     a("kuhn_tournament_report.html", "Kuhn", "nav navsub", "oss") +
     a("blotto_report.html", "Blotto", "nav navsub", "oss") +
-    a("blackjack_report.html", "Blackjack", "nav navsub", "oss");
+    a("blackjack_report.html", "Blackjack", "nav navsub", "oss") +
+
+    // Compact mobile bar: shown only under 760px (CSS hides the list above and
+    // this below). Four columns; the two category links jump to the matching
+    // group on the Overview page (anchors #imperfect / #perfect there).
+    '<div class="navmobile">' +
+    a("index.html", "Overview", "navm", "oss") +
+    '<a class="navm" href="' + P.oss + 'index.html' + V + '#imperfect">Imperfect-info</a>' +
+    '<a class="navm" href="' + P.oss + 'index.html' + V + '#perfect">Perfect-info</a>' +
+    a("qa.html", "Q&A", "navm", "oss") +
+    '</div>';
 
   function mount() {
     var nav = document.querySelector("nav.navbar");

@@ -129,3 +129,18 @@ code { font-family:inherit; background:var(--faint); border:1px solid var(--line
 .result .rs { font-size:12px; color:var(--dim); margin-top:3px; }
 .potline { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#3d5c46; }
 .potline b { font-size:17px; color:#1c1c1c; margin:0 4px; }
+
+/* responsive: any table scrolls within its OWN area at every width rather than
+   widening the page (which would push text past the viewport edge); tighter
+   gutters on mobile so content hugs the screen edges like it does on desktop. */
+table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
+/* keep the horizontal slide-bar visible (not an auto-hiding overlay) so it's
+   obvious a wide table scrolls; it only renders when the table overflows. */
+table::-webkit-scrollbar { height:10px; }
+table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+@media (max-width:760px) {
+  .wrap { padding:24px 14px; }
+}
