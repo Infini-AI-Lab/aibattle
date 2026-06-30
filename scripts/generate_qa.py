@@ -15,7 +15,7 @@ import os
 from report_theme import BASE_CSS
 
 REPORT_DIR = os.environ.get("AIBATTLE_REPORT_DIR", "reports")
-NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>'
+NAV_HEAD = '<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>'
 
 def render() -> str:
     css = BASE_CSS + """

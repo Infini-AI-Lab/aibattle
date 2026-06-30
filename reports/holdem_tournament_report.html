@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>AI Battle Arena — Hold'em Tournament</title>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena — Hold'em Tournament</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=6"><script defer src="nav.js?v=31"></script>
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -109,7 +110,13 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
-  @media (max-width:760px) { .grid2, .cards { grid-template-columns:1fr; } }
+  @media (max-width:760px) {
+    .grid2, .cards { grid-template-columns:1fr; }
+    h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
+    .sub { font-size:12px; } .note { font-size:11px; }
+    table { font-size:12px; } th, td { padding:6px 7px; }
+    .kpi .v { font-size:18px; }
+  }
 
   td.bucket { font-weight: 600; }
   /* Prominent dividers for the three top-level sections (Results / Why / More). */

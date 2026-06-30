@@ -33,21 +33,28 @@ body { padding-left:210px; }
 .navbar .navclust { font-size:12px; color:#b0a99c; margin-top:6px; padding:2px 0 2px 10px; }
 /* The compact 4-column mobile bar lives in the markup at all times but is only
    shown under the breakpoint below; on desktop the full sidebar list is used. */
-.navmobile { display:none; }
+/* Desktop: the full link list is the sidebar column; the ☰ toggle is hidden. */
+.navlinks { display:flex; flex-direction:column; gap:2px; }
+.navtoggle { display:none; }
+
 @media (max-width:760px) {
+  /* Mobile: the sidebar becomes a sticky top bar (brand + ☰); the link list
+     collapses into a dropdown panel revealed when .navbar gets .open. */
   body { padding-left:0; }
-  /* Collapse the sidebar to a compact top bar with four columns:
-     Overview · Imperfect-info · Perfect-info · Q&A. The full list is hidden
-     and only .navmobile is shown. */
-  .navbar { position:sticky; top:0; bottom:auto; width:auto; display:block;
+  .navbar { position:sticky; top:0; bottom:auto; left:0; width:auto; display:block;
     padding:0; overflow:visible;
     border-right:none; border-bottom:2px solid #8f1d1d; }
-  .navbar .brand, .navbar a.nav, .navbar .navclust, .navbar .navtop { display:none; }
-  .navmobile { display:grid; grid-template-columns:repeat(4,1fr); }
-  .navmobile a.navm { display:flex; align-items:center; justify-content:center;
-    text-align:center; padding:11px 6px; line-height:1.2; font-size:12px;
-    color:#6b6b6b; text-decoration:none; border-right:1px solid #ddd8cf; }
-  .navmobile a.navm:last-child { border-right:none; }
-  .navmobile a.navm:hover { color:#1c1c1c; }
-  .navmobile a.navm.active { color:#8f1d1d; font-weight:700; }
+  .navhead { display:flex; align-items:center; justify-content:space-between;
+    padding:9px 16px; }
+  .navbar .brand { margin-bottom:0; }
+  .navtoggle { display:inline-block; background:none; border:none; cursor:pointer;
+    color:#8f1d1d; font-size:22px; line-height:1; padding:2px 6px; font-family:inherit; }
+  .navlinks { display:none; gap:0; background:#ffffff;
+    border-top:1px solid #ddd8cf; padding:4px 0 10px;
+    max-height:75vh; overflow-y:auto; }
+  .navbar.open .navlinks { display:flex; }
+  .navbar a.nav { padding:9px 18px; font-size:13px; }
+  .navbar a.nav.navsub { padding-left:30px; }
+  .navbar a.nav.navtop { margin-top:4px; padding:9px 18px; }
+  .navbar .navclust { margin-top:6px; padding:4px 18px; }
 }
