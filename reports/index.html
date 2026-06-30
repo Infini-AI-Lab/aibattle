@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=5"><script defer src="nav.js?v=30"></script>
+<link rel="stylesheet" href="nav.css?v=6"><script defer src="nav.js?v=31"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -63,7 +63,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-height:340px; }
+  canvas { max-width:100%; max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -116,7 +116,8 @@
   .arena-tag { font-size:11px; color:var(--dim); }
   .arena-tag::before { content:"["; color:var(--red); } .arena-tag::after { content:"]"; color:var(--red); }
   .group-label { display:flex; align-items:center; gap:10px; font-size:13px;
-    font-weight:700; margin:24px 0 12px; padding-left:10px; border-left:3px solid var(--red); }
+    font-weight:700; margin:24px 0 12px; padding-left:10px; border-left:3px solid var(--red);
+    scroll-margin-top:60px; }
   .group-label.perfect { border-left-color:var(--pos); }
   .group-label.imperfect { border-left-color:#b45309; }
   .group-label .gl-sub { font-size:11px; font-weight:400; color:var(--dim); }
@@ -196,7 +197,7 @@
     <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
       measures the model, not the scaffolding. <b>Open-weight models are served via
       Fireworks AI</b>; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
-    <div class="group-label imperfect">🎭 Imperfect information
+    <div class="group-label imperfect" id="imperfect">🎭 Imperfect information
       <span class="gl-sub">hidden cards · stochastic</span></div>
     <div class='cards'>
         <a class="card" href="holdem_tournament_report.html">
@@ -234,7 +235,7 @@
           <div class='minirank'><div class='mr-row'><span class='mr-rk'>1</span><span class='mr-nm'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</span><span class='mr-bar'><i style='width:100%'></i></span><span class='mr-val'>1764</span></div><div class='mr-row'><span class='mr-rk'>2</span><span class='mr-nm'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</span><span class='mr-bar'><i style='width:96%'></i></span><span class='mr-val'>1725</span></div><div class='mr-row'><span class='mr-rk'>3</span><span class='mr-nm'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</span><span class='mr-bar'><i style='width:90%'></i></span><span class='mr-val'>1671</span></div><div class='mr-row'><span class='mr-rk'>4</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</span><span class='mr-bar'><i style='width:86%'></i></span><span class='mr-val'>1640</span></div><div class='mr-row'><span class='mr-rk'>5</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</span><span class='mr-bar'><i style='width:86%'></i></span><span class='mr-val'>1638</span></div><div class='mr-row'><span class='mr-rk'>6</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</span><span class='mr-bar'><i style='width:56%'></i></span><span class='mr-val'>1363</span></div><div class='mr-row'><span class='mr-rk'>7</span><span class='mr-nm'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</span><span class='mr-bar'><i style='width:27%'></i></span><span class='mr-val'>1110</span></div><div class='mr-row'><span class='mr-rk'>8</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</span><span class='mr-bar'><i style='width:25%'></i></span><span class='mr-val'>1088</span></div></div>
           <div class="cgo">View analysis →</div>
         </a></div>
-    <div class="group-label perfect">♟ Perfect information
+    <div class="group-label perfect" id="perfect">♟ Perfect information
       <span class="gl-sub">full state visible · deterministic</span></div>
     <div class='cards'>
         <a class="card" href="connect4_report.html">
