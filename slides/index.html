@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena — Slides</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<style>
+  /* ---- Terminal theme (mirrors reports/index.html tokens) ---- */
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+    --pos:#1a7f37; --neg:#b91c1c; --link:#4338ca; --amber:#b45309; }
+  .reveal { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:36px; color:var(--fg); }
+  .reveal .slides { text-align:left; }
+  .reveal .slides section { padding-top:40px; }
+  html.reveal-viewport, .reveal-viewport { background:var(--bg); }
+
+  .reveal h1 { font-size:1.5em; color:var(--red); font-weight:700; margin:0 0 .25em;
+    text-transform:none; letter-spacing:0; }
+  .reveal h2 { font-size:1.15em; color:var(--fg); font-weight:700; margin:0 0 .5em;
+    text-transform:none; letter-spacing:0; }
+  .reveal h2::before { content:"## "; color:var(--red); }
+  .reveal h3 { font-size:.78em; color:var(--fg); font-weight:700; margin:.4em 0 .2em;
+    text-transform:none; }
+  .reveal p, .reveal li { font-size:.62em; line-height:1.55; }
+  .reveal ul { margin:.2em 0 .2em 1em; } .reveal li { margin:.18em 0; }
+  .reveal b, .reveal strong { color:var(--fg); }
+  .reveal em { color:var(--dim); font-style:italic; }
+  .reveal a { color:var(--link); }
+  .reveal code { font-family:inherit; background:var(--faint); border:1px solid var(--line);
+    padding:0 4px; font-size:.95em; }
+  .reveal .red { color:var(--red); } .reveal .pos { color:var(--pos); } .reveal .neg { color:var(--neg); }
+  .reveal .dim { color:var(--dim); }
+
+  /* kicker = part label in brackets at top of each slide */
+  .kicker { font-size:.42em; color:var(--dim); margin-bottom:.6em; letter-spacing:.04em; }
+  .kicker::before { content:"["; color:var(--red); } .kicker::after { content:"]"; color:var(--red); }
+
+  /* placeholder figure box */
+  .ph { border:1px dashed var(--red); background:var(--faint); color:var(--dim);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:.8em 1em; font-size:.5em; line-height:1.4; border-radius:0; }
+  .ph .tag { color:var(--red); font-weight:700; }
+
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+  .cols.w { grid-template-columns:1.15fr .85fr; }
+  .cols3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; align-items:start; }
+
+  table.t { border-collapse:collapse; width:100%; font-size:.5em; }
+  table.t th, table.t td { padding:5px 9px; border-bottom:1px solid var(--line); text-align:left; }
+  table.t th { color:var(--dim); font-weight:600; }
+  table.t td.r, table.t th.r { text-align:right; }
+
+  .pillars { list-style:none; margin:.2em 0 0; padding:0; }
+  .pillars li { margin:.35em 0; padding-left:12px; border-left:3px solid var(--red); }
+  .pillars b { color:var(--red); }
+
+  .chip { display:inline-block; background:var(--faint); border:1px solid var(--line);
+    padding:1px 8px; font-size:.85em; margin:2px 2px 0 0; }
+  .tag-info { font-size:.85em; color:var(--dim); }
+
+  .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:.5em .7em; margin:.4em 0; font-size:.56em; line-height:1.45; }
+
+  /* title slide */
+  .title-wrap { display:flex; flex-direction:column; }
+  .title-wrap .tagline { font-size:.62em; color:var(--fg); margin:.2em 0 1em; }
+  .title-wrap .meta { font-size:.5em; color:var(--dim); }
+  .cursor { display:inline-block; width:.5em; height:1em; background:var(--red);
+    vertical-align:text-bottom; margin-left:6px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+
+  /* section divider look reused as needed */
+  .reveal .slide-number { font-family:inherit; background:none; color:var(--dim); font-size:16px; }
+  .reveal .footer { position:absolute; bottom:14px; left:0; font-size:14px; color:var(--dim); }
+
+  /* real figures */
+  .fig { display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .fig img { max-width:100%; max-height:100%; object-fit:contain;
+    border:1px solid var(--line); background:#fff; }
+  .montage { display:flex; gap:14px; }
+  .montage img { flex:1; min-width:0; height:210px; object-fit:cover; object-position:top left;
+    border:1px solid var(--line); background:#fff; }
+  /* schematic diagrams (S13/S14) */
+  .diagram { display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+  .dbox { border:1px solid var(--line); background:var(--panel); padding:.5em .8em;
+    text-align:center; font-size:.5em; line-height:1.3; }
+  .dbox.accent { border-color:var(--red); color:var(--red); font-weight:700; }
+  .darrow { color:var(--red); font-weight:700; font-size:.7em; }
+  .dstack { display:flex; flex-direction:column; gap:8px; }
+  /* agenda / roadmap */
+  .agenda { margin-top:.3em; }
+  .ag-row { display:flex; gap:16px; align-items:flex-start; margin:.55em 0; }
+  .ag-num { color:var(--red); font-weight:700; font-size:1.15em; line-height:1.1; flex:none; }
+  .agenda h3 { margin:0 0 .15em; font-size:.82em; }
+  .agenda h3 .dim { font-weight:400; }
+  /* replay link (indigo, like the site's replaybtn) */
+  .replaylink { display:inline-block; margin-top:.3em; background:var(--faint); color:var(--link);
+    border:1px solid var(--line); border-left:3px solid var(--link); padding:.35em .6em;
+    font-size:.5em; text-decoration:none; }
+  .replaylink:hover { border-color:var(--red); color:var(--fg); }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ============ PART 1 · WHAT WE'RE BUILDING ============ -->
+
+<!-- S1 — Title -->
+<section>
+  <div class="title-wrap">
+    <h1>🎲 AI Battle Arena<span class="cursor"></span></h1>
+    <div class="tagline">An <b>evaluation-first arena</b> for adversarial games between AI agents.</div>
+    <div class="fig" style="height:380px;margin-top:6px;"><img src="assets/leaderboard.png" alt="AI Battle Arena cross-game leaderboard"></div>
+    <div class="meta" style="margin-top:1em;">Haizhong Zheng · 07/02/2026</div>
+  </div>
+  <aside class="notes">One sentence: we benchmark LLMs by having them play 9 adversarial games head-to-head under one fair pipeline, then explain *why* they win or lose.</aside>
+</section>
+
+<!-- S2 — Why adversarial games -->
+<section>
+  <div class="kicker">Part 1 · What we're building</div>
+  <h2>Why benchmark LLMs with adversarial games?</h2>
+  <div class="cols">
+    <div>
+      <h3>Static benchmarks wear out</h3>
+      <ul>
+        <li>Saturate as models improve</li>
+        <li>Leak into training data (contamination)</li>
+        <li>Gameable; reward recall over <b>decision-making</b></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Games give a renewable skill signal</h3>
+      <ul>
+        <li><b>Adversarial</b> → difficulty regenerates with the opponent</li>
+        <li>Demand <b>hidden-info reasoning</b> + <b>long-horizon planning</b></li>
+        <li>Produce a natural, <b>relative</b> ranking</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">→ We built an arena where models play <b>9 games</b> head-to-head under <b>one identical pipeline</b>, so results are directly comparable.</div>
+  <aside class="notes">Frame the gap: existing evals measure what a model knows; games measure how it decides against a reacting opponent.</aside>
+</section>
+
+<!-- S3 — Core idea + game lineup -->
+<section>
+  <div class="kicker">Part 1 · What we're building</div>
+  <h2>One pipeline, many games</h2>
+  <div class="cols w">
+    <div>
+      <ul class="pillars">
+        <li><b>One pipeline · many games</b> — same prompt / parse / retry / scoring everywhere</li>
+        <li><b>Position-neutral, opponent-adjusted</b> — round-robin, seat-swapped, bootstrap Elo with error bars</li>
+        <li><b>Logs that explain</b> — every step logged → why-win / why-lose, not just a number</li>
+        <li><b>Agents, not models</b> — agents see only <em>observations</em>, never game state → hidden info stays hidden</li>
+      </ul>
+    </div>
+    <div>
+      <table class="t">
+        <tr><th>Game</th><th>Info</th></tr>
+        <tr><td>Kuhn Poker</td><td class="dim">imperfect</td></tr>
+        <tr><td>Leduc Hold'em</td><td class="dim">imperfect</td></tr>
+        <tr><td>Hold'em 1-Hand</td><td class="dim">imperfect</td></tr>
+        <tr><td>Hold'em Match</td><td class="dim">imperfect</td></tr>
+        <tr><td>Hold'em Table (5p)</td><td class="dim">imperfect</td></tr>
+        <tr><td>Blackjack (vs dealer)</td><td class="dim">imperfect</td></tr>
+        <tr><td>Connect Four</td><td class="dim">perfect</td></tr>
+        <tr><td>Gomoku-Lite</td><td class="dim">perfect</td></tr>
+        <tr><td>Colonel Blotto</td><td class="dim">simultaneous</td></tr>
+      </table>
+    </div>
+  </div>
+  <aside class="notes">The 4 pillars are the thesis of the system. The game grid shows breadth across information structure.</aside>
+</section>
+
+<!-- S3b — Agenda / what we'll cover -->
+<section>
+  <div class="kicker">Part 1 · What we're building</div>
+  <h2>What we'll cover today</h2>
+  <div class="agenda">
+    <div class="ag-row">
+      <div class="ag-num">①</div>
+      <div>
+        <h3>🤖 Model Arena <span class="dim">— raw models, one simple prompt</span></h3>
+        <ul>
+          <li>Two game families: <b>perfect-info</b> (Connect Four · Gomoku) and <b>imperfect-info</b> (Hold'em family · Leduc · Kuhn · Blotto · Blackjack)</li>
+          <li>The <b>rankings</b> — who wins, and who wins <em>where</em></li>
+          <li>The <b>findings</b> — diagonal blind spot · pressure-vs-showdown · why models win &amp; lose</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ag-row">
+      <div class="ag-num">②</div>
+      <div>
+        <h3>🛠️ Harness Arena <span class="dim">— beyond the raw model</span></h3>
+        <ul>
+          <li><b>Preliminary</b>: what kind of <b>harness / pipeline</b> helps a model play these games better</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">Roadmap: most of today is the Model Arena (games → rankings → findings); we close with early Harness Arena results — which scaffolding lifts performance.</aside>
+</section>
+
+<!-- ============ PART 2 · RESULTS (Model Arena) ============ -->
+
+<!-- S4 (merged) — Overall leaderboard -->
+<section>
+  <div class="kicker">Model Arena · results</div>
+  <h2>The cross-game leaderboard</h2>
+  <div class="fig" style="height:400px;"><img src="assets/leaderboard.png" alt="cross-game leaderboard"></div>
+  <div class="callout"><b>Arena Rank Score</b> — average finishing place (ordinal) · <b>Arena Elo</b> — margin-aware, ±1 bootstrap SD · round-robin &amp; seat-swapped so models that met different opponents stay comparable. Frontier closed models lead, but several open-weight models sit <b>within the error bars</b>, and <b>rankings reshuffle game-to-game</b>.</div>
+  <aside class="notes">One slide: how the two scores work + the headline ranking. No model dominates every game; the per-game detail lives in the live reports.</aside>
+</section>
+
+<!-- ============ PART 3 · CASE STUDY (Model Arena) ============ -->
+
+<!-- Case study divider -->
+<section>
+  <div class="kicker">Model Arena · what the games reveal</div>
+  <h2>Case study</h2>
+  <p>Three games up close. For each: the <b>ranking</b> first, then two slices of <b>behavior</b> — and a <b>replay</b> to watch it happen.</p>
+  <div class="agenda">
+    <div class="ag-row"><div class="ag-num">🔴</div><div><h3>Gomoku <span class="dim">— do they spot &amp; block threats?</span></h3></div></div>
+    <div class="ag-row"><div class="ag-num">🃏</div><div><h3>Hold'em 1-Hand <span class="dim">— how chips are earned: pressure vs showdown</span></h3></div></div>
+    <div class="ag-row"><div class="ag-num">🃏</div><div><h3>Hold'em Match <span class="dim">— chip management over 30 hands</span></h3></div></div>
+  </div>
+</section>
+
+<!-- ===== Gomoku ===== -->
+<section>
+  <div class="kicker">Case study · Gomoku</div>
+  <h2>Gomoku — the ranking</h2>
+  <div class="fig" style="height:455px;"><img src="assets/gomoku_lb.png" alt="Gomoku leaderboard"></div>
+  <div class="callout">GPT 5.5 and Kimi K2.6 top the field — perfect-information, so this is pure board skill. <b>Where does the gap come from?</b></div>
+</section>
+<section>
+  <div class="kicker">Case study · Gomoku · behavior</div>
+  <h2>Offense is solved — defense decides</h2>
+  <div class="fig" style="height:300px;"><img src="assets/gomoku_tac.png" alt="win-take / block / late blunders"></div>
+  <ul>
+    <li><b>win-take</b> (converting an available five) is <b>~saturated, 86–100%</b> — everyone grabs the win; <b>block %</b> and <b>late-game blunders</b> fan out wide, so skill lives in <b>defense</b></li>
+    <li>On the sparse 9×9, weak models' late-blunder rate balloons to <b>~43%</b>; overall a threat is missed <b>12.8%</b> of the time</li>
+  </ul>
+</section>
+<section>
+  <div class="kicker">Case study · Gomoku · in-depth</div>
+  <h2>The blind spot is on the diagonal</h2>
+  <table class="t" style="max-width:760px;margin:0 auto;">
+    <tr><th>threat axis</th><th class="r">faced</th><th class="r">missed</th><th class="r">miss-rate</th></tr>
+    <tr><td>horizontal <span class="dim">(contiguous in text)</span></td><td class="r">428</td><td class="r">24</td><td class="r pos">5.6%</td></tr>
+    <tr><td>vertical <span class="dim">(strided across rows)</span></td><td class="r">401</td><td class="r">49</td><td class="r">12.2%</td></tr>
+    <tr><td>diagonal ↘ <span class="dim">(down-right)</span></td><td class="r">284</td><td class="r">43</td><td class="r">15.1%</td></tr>
+    <tr><td>diagonal ↙ <span class="dim">(down-left)</span></td><td class="r">231</td><td class="r">56</td><td class="r neg">24.2%</td></tr>
+  </table>
+  <div class="callout"><b>The board is fed as a 2-D grid flattened into 1-D text.</b> Horizontal lines are contiguous → easy; the more a line strays from reading order, the more it's missed. ↘ flows <i>with</i> reading order, ↙ <i>against</i> → ↙ missed most. <b>A serialization artifact, not a skill gap.</b></div>
+  <a class="replaylink" href="../reports/gomoku_replay.html?feat=0" target="_blank">▶ watch a full Gomoku battle — Kimi K2.6 vs MiniMax-M3</a>
+</section>
+
+<!-- ===== Hold'em 1-Hand ===== -->
+<section>
+  <div class="kicker">Case study · Hold'em 1-Hand</div>
+  <h2>Hold'em 1-Hand — the ranking</h2>
+  <div class="fig" style="height:455px;"><img src="assets/holdem_lb.png" alt="Hold'em 1-Hand leaderboard"></div>
+  <div class="callout">GPT 5.5 runs away (+80 bb/100). <b>Not by holding better cards</b> — by <i>how</i> it wins chips.</div>
+</section>
+<section>
+  <div class="kicker">Case study · Hold'em 1-Hand · behavior</div>
+  <h2>Where the chips come from</h2>
+  <div class="fig" style="height:400px;"><img src="assets/quadrant.png" alt="pressure vs showdown map"></div>
+  <ul>
+    <li><b>Pressure $</b> — won without showdown (folding opponents out) · <b>Showdown $</b> — won at showdown (hand strength)</li>
+    <li class="pos">Winners earn by <b>pressure</b> — fold equity (GPT 5.5, far right); <span class="neg">losers <b>bleed at showdown</b></span> — pay off second-best (bottom)</li>
+  </ul>
+</section>
+<section>
+  <div class="kicker">Case study · Hold'em 1-Hand · in-depth</div>
+  <h2>Style &amp; mistakes: three models compared</h2>
+  <div class="cols3">
+    <div class="fig" style="height:300px;"><img src="assets/hs_gpt.png" alt="GPT 5.5"></div>
+    <div class="fig" style="height:300px;"><img src="assets/hs_claude.png" alt="Claude Opus 4.8"></div>
+    <div class="fig" style="height:300px;"><img src="assets/hs_weak.png" alt="MiniMax-M2.7"></div>
+  </div>
+  <div class="callout"><b class="pos">GPT 5.5</b> — loose-aggressive, earns by <b>pressure</b> · <b>Claude Opus 4.8</b> — passive "calling station", leaks at showdown · <b class="neg">MiniMax-M2.7</b> — weakest, drags weak hands to showdown. <b>Aggression backed by discipline</b> tracks Elo. &nbsp; <a class="replaylink" href="../reports/holdem_replay.html?feat=1" target="_blank">▶ watch: a big fold forced</a></div>
+</section>
+
+<!-- ===== Hold'em Match ===== -->
+<section>
+  <div class="kicker">Case study · Hold'em Match</div>
+  <h2>Hold'em Match — the ranking</h2>
+  <div class="fig" style="height:455px;"><img src="assets/match_lb.png" alt="Hold'em Match leaderboard"></div>
+  <div class="callout">Same models, new game: win-or-lose over 30 carry-stack hands. <b>Chip management</b> now matters more than any single pot.</div>
+</section>
+<section>
+  <div class="kicker">Case study · Hold'em Match · why they win &amp; lose</div>
+  <h2>The match-only skill: shift gears with the score</h2>
+  <p>Only across 30 carry-stack hands can a model read <b>ahead vs behind</b> and adapt — a single hand can't show it. <b>Winners fight back when behind</b> (aggression ↑, fold less); flat players get ground down.</p>
+  <table class="t" style="max-width:940px;margin:0 auto;">
+    <tr><th>model</th><th class="r">aggression ahead→behind</th><th class="r">gear-shift Δ</th><th class="r">bust-out%</th><th class="r">match win%</th></tr>
+    <tr><td>GPT 5.5</td><td class="r">34% → 51%</td><td class="r pos">+17</td><td class="r neg">17%</td><td class="r">65%</td></tr>
+    <tr><td>GPT 5.4</td><td class="r">31% → 52%</td><td class="r pos">+21</td><td class="r">12%</td><td class="r">61%</td></tr>
+    <tr><td>GLM-5.1</td><td class="r">20% → 32%</td><td class="r pos">+12</td><td class="r">8%</td><td class="r">56%</td></tr>
+    <tr><td class="dim">Claude Opus 4.8</td><td class="r">25% → 25%</td><td class="r">0</td><td class="r">12%</td><td class="r">40%</td></tr>
+    <tr><td class="dim">Qwen3.7 Plus</td><td class="r">14% → 16%</td><td class="r">+2</td><td class="r">5%</td><td class="r">39%</td></tr>
+  </table>
+  <div class="callout">Top models crank aggression when behind (<b>+17 / +21</b>) and fight for pots; the bottom play the same whether winning or losing (<b>≈0</b>) → slowly ground down. <b>Adapting to the scoreboard is the skill 1-Hand can't measure.</b></div>
+</section>
+<section>
+  <div class="kicker">Case study · Hold'em Match · situational play</div>
+  <h2>Short-stacked: gamble, don't freeze</h2>
+  <p>When a model is <b>short-stacked</b> (about to lose the match), the correct play is to <b>push</b> — take a shot at a comeback, because playing it safe loses anyway. Aggression bucketed by effective stack:</p>
+  <table class="t" style="max-width:860px;margin:0 auto;">
+    <tr><th>model</th><th class="r">deep ≥40bb</th><th class="r">mid 15–40bb</th><th class="r">short &lt;15bb</th></tr>
+    <tr><td>GPT 5.5</td><td class="r">40%</td><td class="r">37%</td><td class="r pos">86%*</td></tr>
+    <tr><td>GPT 5.4</td><td class="r">40%</td><td class="r">32%</td><td class="r">24%</td></tr>
+    <tr><td>Kimi K2.6</td><td class="r">33%</td><td class="r">24%</td><td class="r">30%</td></tr>
+    <tr><td>GLM-5.1</td><td class="r">27%</td><td class="r">25%</td><td class="r pos">50%*</td></tr>
+    <tr><td>DeepSeek V4 Pro</td><td class="r">28%</td><td class="r">21%</td><td class="r pos">46%*</td></tr>
+    <tr><td>GLM-5.2</td><td class="r">28%</td><td class="r">26%</td><td class="r">18%</td></tr>
+    <tr><td>Claude Sonnet 4.6</td><td class="r">31%</td><td class="r">24%</td><td class="r">11%</td></tr>
+    <tr><td>MiniMax-M3</td><td class="r">28%</td><td class="r">22%</td><td class="r">35%</td></tr>
+    <tr><td class="dim">Claude Opus 4.8</td><td class="r">26%</td><td class="r">18%</td><td class="r neg">6%</td></tr>
+    <tr><td>MiniMax-M2.7</td><td class="r">34%</td><td class="r">35%</td><td class="r">33%</td></tr>
+    <tr><td class="dim">Qwen3.7 Plus</td><td class="r">15%</td><td class="r">12%</td><td class="r neg">0%*</td></tr>
+  </table>
+  <div class="callout"><b>GPT 5.5 shoves when short (86%)</b> to seek a comeback — it's losing anyway, so take the shot. The weak models <b>freeze</b> (Claude Opus 6%, Qwen 0%) and just die. <span class="dim">(* the top models rarely get short at all — they're usually ahead — so this sample is small / suggestive.)</span></div>
+</section>
+<section>
+  <div class="kicker">Case study · Hold'em Match · does 1-Hand skill carry over?</div>
+  <h2>The single-hand skill mostly transfers</h2>
+  <div class="fig" style="height:330px;"><img src="assets/match_leadtraj.png" alt="lead trajectory: % ahead at each of 30 hands"></div>
+  <div class="callout">Each row = a model; 30 blocks = hands 1→30; <span class="pos">green</span> = ahead, <span class="neg">red</span> = behind. <b>Single-hand strength largely carries into the match</b>: the 1-Hand king <b>GPT 5.5 leads wire-to-wire</b> (green from hand 1), while the 1-Hand basement (Qwen, MiniMax) stays red. The exception is <b>GPT 5.4</b> — mediocre per hand (1-Hand #7) but its gear-shift &amp; discipline lift it to Match #2.</div>
+</section>
+
+<!-- ============ PART 4 · WHERE WE'RE GOING ============ -->
+
+<!-- S13 — The limitation today -->
+<section>
+  <div class="kicker">Harness Arena · where we're going</div>
+  <h2>Today we measure the model out of the box</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Current results: a <b>single simple system prompt</b>, each model plays <b>independently</b> → a score</li>
+        <li>That measures the model <em>as-is</em> — not its <b>ceiling</b></li>
+        <li>Scaffolding, tools, search, or training on game logs could move it a lot</li>
+        <li class="dim">(cf. the "Harness Arena": are we measuring the model, or the scaffolding?)</li>
+      </ul>
+    </div>
+    <div class="fig" style="height:230px;"><div class="diagram"><div class="dbox">model</div><span class="darrow">+</span><div class="dbox accent">1 simple<br>system prompt</div><span class="darrow">&rarr;</span><div class="dbox">arena</div><span class="darrow">&rarr;</span><div class="dbox">score</div></div></div>
+  </div>
+  <aside class="notes">Set up the new research axis: the prompt/pipeline is currently held fixed and minimal.</aside>
+</section>
+
+<!-- S14 — New axis: training / agent pipelines -->
+<section>
+  <div class="kicker">Harness Arena · where we're going</div>
+  <h2>New axis: the pipeline, not just the model</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Research question: <b>how much does the pipeline move performance?</b></li>
+        <li>Variants: richer prompts · tools/search · self-play · <b>SFT / RL on game logs</b></li>
+        <li>The arena stays the <b>fixed measuring stick</b> across all variants</li>
+      </ul>
+    </div>
+    <div class="fig" style="height:230px;"><div class="diagram"><div class="dbox">model</div><span class="darrow">&rarr;</span><div class="dstack"><div class="dbox accent">pipeline A</div><div class="dbox accent">pipeline B</div><div class="dbox accent">pipeline C</div></div><span class="darrow">&rarr;</span><div class="dbox">arena<br><span class="dim">same ruler</span></div><span class="darrow">&rarr;</span><div class="dbox">score</div></div></div>
+  </div>
+  <aside class="notes">Position the arena as the evaluation substrate for an agent-training research program.</aside>
+</section>
+
+<!-- S15 — Early results -->
+<section>
+  <div class="kicker">Harness Arena · where we're going — preliminary</div>
+  <h2>Early results <span class="tag-info">— preliminary, directional</span></h2>
+  <div class="cols">
+    <div class="ph" style="height:280px;"><span><span class="tag">[ figure — YOUR DATA ]</span><br>same model under<br>baseline vs pipeline A vs pipeline B<br>(score / Elo bars on one game)</span></div>
+    <div>
+      <ul>
+        <li class="dim">&lt;headline number: e.g. "+X Elo from pipeline A on game Y"&gt;</li>
+        <li class="dim">&lt;what changed in behavior — links back to Part 3 metrics&gt;</li>
+        <li><b>Early &amp; directional</b> — a first look, not a final claim</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Drop in your real preliminary numbers/figure here. Keep the framing honest (early-stage).</aside>
+</section>
+
+<!-- ============ PART 4b · FUTURE WORK ============ -->
+
+<!-- Future work -->
+<section>
+  <div class="kicker">Future work</div>
+  <h2>Future work</h2>
+  <p>Model Arena is done; Harness Arena is early. Two directions from here:</p>
+  <div class="agenda">
+    <div class="ag-row"><div class="ag-num">①</div><div>
+      <h3>From evaluation → a training environment</h3>
+      <ul><li>Ship the arena as a <b>reinforcement-learning environment</b> — so others can not just <b>benchmark / evaluate</b> models, but <b>train</b> them against it (self-play, RL on game logs)</li></ul></div></div>
+    <div class="ag-row"><div class="ag-num">②</div><div>
+      <h3>From games → adversarial security</h3>
+      <ul><li>Extend AI Battle Arena into a <b>real adversarial environment</b>. Long-term, the contest isn't <b>human-vs-AI</b> — it's <b>AI-vs-AI</b> adversarial security <span class="dim">— our next project</span></li></ul></div></div>
+  </div>
+  <aside class="notes">Two future directions: (1) turn the eval substrate into a training env so the arena trains as well as ranks; (2) push toward AI-vs-AI adversarial security — the long-run shape of the contest.</aside>
+</section>
+
+<!-- ============ PART 5 · CLOSE ============ -->
+
+<!-- S16 — Takeaways -->
+<section>
+  <div class="kicker">Part 5 · Takeaways</div>
+  <h2>Takeaways</h2>
+  <ul>
+    <li>A <b>fair, opponent-adjusted arena</b> over 9 adversarial games — comparable, with honest error bars</li>
+    <li>It <b>explains, not just scores</b>: diagonal blind spots, pressure-vs-showdown, why models win or lose</li>
+    <li>Behavior <b>predicts outcome</b> — and points at fixable failure modes (e.g. board serialization)</li>
+    <li>Next frontier: the <b>pipeline / training</b> as a first-class axis, measured on the same ruler</li>
+  </ul>
+  <div class="callout">repo: <b>github.com/&lt;org&gt;/aibattle</b> &nbsp;·&nbsp; live reports + replays &nbsp;·&nbsp; metrics Q&amp;A</div>
+  <div class="footer">🎲 AI Battle Arena</div>
+  <aside class="notes">Close on the dual contribution: a credible eval + an explanatory lens, and the pipeline research it enables.</aside>
+</section>
+
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash:true, slideNumber:"c/t", controls:true, progress:true,
+    width:1280, height:720, margin:0.06,
+    center:false, transition:"fade",
+    plugins:[ RevealNotes ],
+  });
+</script>
+</body>
+</html>
