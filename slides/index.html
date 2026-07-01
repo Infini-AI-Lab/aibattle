@@ -373,21 +373,140 @@
   <aside class="notes">Position the arena as the evaluation substrate for an agent-training research program.</aside>
 </section>
 
-<!-- S15 — Early results -->
+<!-- S15 — Early results: the table -->
 <section>
-  <div class="kicker">Harness Arena · where we're going — preliminary</div>
-  <h2>Early results <span class="tag-info">— preliminary, directional</span></h2>
-  <div class="cols">
-    <div class="ph" style="height:280px;"><span><span class="tag">[ figure — YOUR DATA ]</span><br>same model under<br>baseline vs pipeline A vs pipeline B<br>(score / Elo bars on one game)</span></div>
+  <div class="kicker">Harness Arena · early results — Hold'em 1-hand</div>
+  <h2>Four pipelines vs the raw model</h2>
+  <table class="t">
+    <thead><tr><th>pipeline &nbsp;<span class="dim">(same model + inference-time scaffold)</span></th><th class="r">glm-5.2</th><th class="r">deepseek-v4</th><th class="r">kimi-k2p6</th></tr></thead>
+    <tbody>
+      <tr><td><b>aggression_default</b> &nbsp;<span class="dim">— bias toward betting</span></td><td class="r pos">65%</td><td class="r pos">63%</td><td class="r pos">68%</td></tr>
+      <tr><td><b>council</b> &nbsp;<span class="dim">— multi-view synthesis</span></td><td class="r pos">73%</td><td class="r pos">75%</td><td class="r pos">82%</td></tr>
+      <tr><td><b>best_of_3</b> &nbsp;<span class="dim">— sample &amp; select</span></td><td class="r pos">61%</td><td class="r pos">58%</td><td class="r pos">61%</td></tr>
+      <tr><td><b>self_refine</b> &nbsp;<span class="dim">— draft &amp; critique</span></td><td class="r pos">70%</td><td class="r">52%</td><td class="r">57%</td></tr>
+    </tbody>
+  </table>
+  <p class="dim" style="font-size:.5em;margin-top:.5em;">win-rate <b>head-to-head vs the plain baseline</b> (model + one plain system prompt) · 50% = tie with plain · n = 28–458 hands per cell</p>
+  <ul class="pillars" style="font-size:.9em;">
+    <li>All four <b>beat the raw model</b> — a scaffold alone, no training, lifts 1-hand win-rate</li>
+    <li>Cheapest &amp; robust: <b>aggression_default</b> = one instruction at <b>1 call</b> → <span class="pos">63–68%</span> everywhere. Strongest: <b>council</b> (multi-view) → <span class="pos">73–82%</span>, but 4 calls</li>
+    <li>More calls ≠ automatic win: <b>best_of_3</b> modest; <b>self_refine</b> model-dependent (strong on glm, ~tie elsewhere)</li>
+  </ul>
+  <aside class="notes">Head-to-head vs plain = "in what fraction of matched hands did the scaffolded model beat the same model with a plain prompt." Cleanest, roster-independent. Next 3 slides: what each pipeline is.</aside>
+</section>
+
+<!-- S15a — aggression_default -->
+<section>
+  <div class="kicker">Harness Arena · pipeline 1 of 4</div>
+  <h2>aggression_default <span class="dim">— bias toward betting</span></h2>
+  <div class="cols w">
     <div>
       <ul>
-        <li class="dim">&lt;headline number: e.g. "+X Elo from pipeline A on game Y"&gt;</li>
-        <li class="dim">&lt;what changed in behavior — links back to Part 3 metrics&gt;</li>
-        <li><b>Early &amp; directional</b> — a first look, not a final claim</li>
+        <li>Add <b>one instruction</b> to the prompt (still <b>1 model call</b>):
+          <ul>
+            <li>"Default to aggression when unclear — a <b>bet/raise</b> wins two ways (value <em>and</em> fold equity); a call only wins when ahead."</li>
+            <li>"Prefer betting/raising over a passive call unless there's a clear reason."</li>
+          </ul>
+        </li>
+        <li><em>Idea: LLMs play systematically too passively — one nudge corrects the bias</em></li>
+        <li>The <b>cheapest</b> scaffold here — no extra calls</li>
       </ul>
     </div>
+    <div class="fig">
+      <table class="t"><thead><tr><th>vs plain</th><th class="r">win%</th></tr></thead><tbody>
+        <tr><td>glm-5.2</td><td class="r pos">65%</td></tr>
+        <tr><td>deepseek-v4</td><td class="r pos">63%</td></tr>
+        <tr><td>kimi-k2p6</td><td class="r pos">68%</td></tr>
+      </tbody></table>
+      <p class="dim" style="font-size:.5em;">1 model call / decision</p>
+    </div>
   </div>
-  <aside class="notes">Drop in your real preliminary numbers/figure here. Keep the framing honest (early-stage).</aside>
+  <aside class="notes">The single biggest lever, and the cheapest: one line telling the model to stop under-betting. 63-68% vs plain on all three models at just one call.</aside>
+</section>
+
+<!-- S15a2 — council -->
+<section>
+  <div class="kicker">Harness Arena · pipeline 2 of 4</div>
+  <h2>council <span class="dim">— multi-view synthesis</span></h2>
+  <div class="cols w">
+    <div>
+      <ul>
+        <li>Ask the <b>same model</b> for the best action from <b>3 expert viewpoints</b> (separate calls, no decision yet):
+          <ul>
+            <li><b>aggressive</b> — maximize pressure &amp; fold equity</li>
+            <li><b>value</b> — extract/protect, avoid spew</li>
+            <li><b>unexploitable</b> — keep a balanced, hard-to-exploit range</li>
+          </ul>
+        </li>
+        <li>A 4th call <b>synthesizes</b> the three views into one action</li>
+        <li><em>Idea: a single pass has blind spots — force opposing perspectives, then converge</em></li>
+      </ul>
+    </div>
+    <div class="fig">
+      <table class="t"><thead><tr><th>vs plain</th><th class="r">win%</th></tr></thead><tbody>
+        <tr><td>glm-5.2</td><td class="r pos">73%</td></tr>
+        <tr><td>deepseek-v4</td><td class="r pos">75%</td></tr>
+        <tr><td>kimi-k2p6</td><td class="r pos">82%</td></tr>
+      </tbody></table>
+      <p class="dim" style="font-size:.5em;">4 model calls / decision</p>
+    </div>
+  </div>
+  <aside class="notes">The strongest &amp; most robust lift — 73-82% across three different models. Perspective-taking beats both sampling (best_of_3) and self-critique (self_refine) at the same call budget.</aside>
+</section>
+
+<!-- S15b — best_of_3 -->
+<section>
+  <div class="kicker">Harness Arena · pipeline 3 of 4</div>
+  <h2>best_of_3 <span class="dim">— sample &amp; select</span></h2>
+  <div class="cols w">
+    <div>
+      <ul>
+        <li>Generate <b>3 candidate actions</b> with different leanings:
+          <ul>
+            <li>neutral (the obvious line)</li>
+            <li>"consider a <b>more aggressive</b> line"</li>
+            <li>"consider a <b>more cautious</b> / pot-control line"</li>
+          </ul>
+        </li>
+        <li>Then <b>select the best</b> of the three</li>
+        <li><em>Selection lever, not critique: pick among finished answers rather than re-thinking</em></li>
+      </ul>
+    </div>
+    <div class="fig">
+      <table class="t"><thead><tr><th>vs plain</th><th class="r">win%</th></tr></thead><tbody>
+        <tr><td>glm-5.2</td><td class="r pos">61%</td></tr>
+        <tr><td>deepseek-v4</td><td class="r pos">58%</td></tr>
+        <tr><td>kimi-k2p6</td><td class="r pos">61%</td></tr>
+      </tbody></table>
+      <p class="dim" style="font-size:.5em;">4 model calls / decision</p>
+    </div>
+  </div>
+  <aside class="notes">Sampling + selection helps consistently but modestly (58-61%) — and it costs 4 calls to do what the 1-call aggression nudge beats.</aside>
+</section>
+
+<!-- S15c — self_refine -->
+<section>
+  <div class="kicker">Harness Arena · pipeline 4 of 4</div>
+  <h2>self_refine <span class="dim">— draft &amp; critique</span></h2>
+  <div class="cols w">
+    <div>
+      <ul>
+        <li><b>Draft</b> an action with reasoning</li>
+        <li><b>Self-critique</b> it: "is this the best legal action, or is a different one better?"</li>
+        <li><b>Revise</b> in light of the critique → final action</li>
+        <li><em>Iterative self-feedback (Self-Refine, Madaan et al. 2023)</em></li>
+      </ul>
+    </div>
+    <div class="fig">
+      <table class="t"><thead><tr><th>vs plain</th><th class="r">win%</th></tr></thead><tbody>
+        <tr><td>glm-5.2</td><td class="r pos">70%</td></tr>
+        <tr><td>deepseek-v4</td><td class="r">52%</td></tr>
+        <tr><td>kimi-k2p6</td><td class="r">57%</td></tr>
+      </tbody></table>
+      <p class="dim" style="font-size:.5em;">3 model calls / decision</p>
+    </div>
+  </div>
+  <aside class="notes">The honest counterpoint: self-critique is model-dependent — big on glm (70%) but barely beats plain on deepseek/kimi. More reasoning steps don't automatically help.</aside>
 </section>
 
 <!-- ============ PART 4b · FUTURE WORK ============ -->
@@ -406,23 +525,6 @@
       <ul><li>Extend AI Battle Arena into a <b>real adversarial environment</b>. Long-term, the contest isn't <b>human-vs-AI</b> — it's <b>AI-vs-AI</b> adversarial security <span class="dim">— our next project</span></li></ul></div></div>
   </div>
   <aside class="notes">Two future directions: (1) turn the eval substrate into a training env so the arena trains as well as ranks; (2) push toward AI-vs-AI adversarial security — the long-run shape of the contest.</aside>
-</section>
-
-<!-- ============ PART 5 · CLOSE ============ -->
-
-<!-- S16 — Takeaways -->
-<section>
-  <div class="kicker">Part 5 · Takeaways</div>
-  <h2>Takeaways</h2>
-  <ul>
-    <li>A <b>fair, opponent-adjusted arena</b> over 9 adversarial games — comparable, with honest error bars</li>
-    <li>It <b>explains, not just scores</b>: diagonal blind spots, pressure-vs-showdown, why models win or lose</li>
-    <li>Behavior <b>predicts outcome</b> — and points at fixable failure modes (e.g. board serialization)</li>
-    <li>Next frontier: the <b>pipeline / training</b> as a first-class axis, measured on the same ruler</li>
-  </ul>
-  <div class="callout">repo: <b>github.com/&lt;org&gt;/aibattle</b> &nbsp;·&nbsp; live reports + replays &nbsp;·&nbsp; metrics Q&amp;A</div>
-  <div class="footer">🎲 AI Battle Arena</div>
-  <aside class="notes">Close on the dual contribution: a credible eval + an explanatory lens, and the pipeline research it enables.</aside>
 </section>
 
 </div></div>
