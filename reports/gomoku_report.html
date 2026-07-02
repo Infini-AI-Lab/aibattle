@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — ⚫ Gomoku-Lite</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -13,19 +12,6 @@
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
   .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
-  /* On phones a wide table scrolls inside its OWN area (display:block) so it
-     doesn't widen the page; on desktop it stays display:table and fills the
-     column to 100%. Mobile-only, so desktop leaderboards span full width. */
-  @media (max-width:760px) {
-    .wrap { padding:24px 14px 60px; }
-    .scorecell { min-width:90px; }
-    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
-    table::-webkit-scrollbar { height:10px; }
-    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
-    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
-    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
-  }
   a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
@@ -63,7 +49,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-width:100%; max-height:340px; }
+  canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -119,11 +105,21 @@
   .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
   .rules { display:none; margin-top:-6px; }
   .rules-toggle:checked ~ .rules { display:block; }
+  /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
+     inside their own area (display:block) instead of widening the page. On
+     desktop tables stay display:table so leaderboards fill the column to 100%. */
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
     .sub { font-size:12px; } .note { font-size:11px; }
-    table { font-size:12px; } th, td { padding:6px 7px; }
+    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint);
+      font-size:12px; }
+    table::-webkit-scrollbar { height:10px; }
+    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+    th, td { padding:6px 7px; }
     .kpi .v { font-size:18px; }
   }
 
@@ -142,9 +138,7 @@
   <div class="sub">⚫ Gomoku-Lite · Perfect-information game · round-robin · 1957 games · board 9×9</div>
   <a class="replaybtn" href="gomoku_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
 
-  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
-  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
-  <div class="rules"><h3>How Gomoku-Lite works</h3>A two-player game on a <b>9×9</b> board (columns A–I, rows 1–9). The two models alternate placing one stone of their own color on any empty cell:<ul><li>On your turn, name an empty cell — e.g. <code>E5</code> — and a stone is placed there.</li><li><b>Player 0 moves first.</b></li><li>The first to make <b>five of their stones in a row</b> — horizontally, vertically, or diagonally — wins immediately.</li><li>If the board fills with no five-in-a-row, the game is a <b>draw</b> (rare on 9×9).</li></ul><div class="seq">Free-style Gomoku — no forbidden-move restrictions — and like Connect Four there's no hidden information or chance, so we score <b>tactical accuracy</b>: did the model complete an available five (win-take) and block the opponent's immediate five-threat (block rate)?</div><div class="seq"><b>What the model sees each turn:</b> the full current board, whose turn it is, and that any empty cell is a legal move — perfect information.</div></div>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden><label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label><div class="rules"><h3>How Gomoku-Lite works</h3>A two-player game on a <b>9×9</b> board (columns A–I, rows 1–9). The two models alternate placing one stone of their own color on any empty cell:<ul><li>On your turn, name an empty cell — e.g. <code>E5</code> — and a stone is placed there.</li><li><b>Player 0 moves first.</b></li><li>The first to make <b>five of their stones in a row</b> — horizontally, vertically, or diagonally — wins immediately.</li><li>If the board fills with no five-in-a-row, the game is a <b>draw</b> (rare on 9×9).</li></ul><div class="seq">Free-style Gomoku — no forbidden-move restrictions — and like Connect Four there's no hidden information or chance, so we score <b>tactical accuracy</b>: did the model complete an available five (win-take) and block the opponent's immediate five-threat (block rate)?</div><div class="seq"><b>What the model sees each turn:</b> the full current board, whose turn it is, and that any empty cell is a legal move — perfect information.</div></div>
 
   <h2 class="section">1 · Results — who won</h2>
   <table>

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — ⚔️ Colonel Blotto</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -13,19 +12,6 @@
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
   .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
-  /* On phones a wide table scrolls inside its OWN area (display:block) so it
-     doesn't widen the page; on desktop it stays display:table and fills the
-     column to 100%. Mobile-only, so desktop leaderboards span full width. */
-  @media (max-width:760px) {
-    .wrap { padding:24px 14px 60px; }
-    .scorecell { min-width:90px; }
-    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
-    table::-webkit-scrollbar { height:10px; }
-    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
-    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
-    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
-  }
   a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
@@ -63,7 +49,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-width:100%; max-height:340px; }
+  canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -119,21 +105,29 @@
   .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
   .rules { display:none; margin-top:-6px; }
   .rules-toggle:checked ~ .rules { display:block; }
+  /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
+     inside their own area (display:block) instead of widening the page. On
+     desktop tables stay display:table so leaderboards fill the column to 100%. */
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
     .sub { font-size:12px; } .note { font-size:11px; }
-    table { font-size:12px; } th, td { padding:6px 7px; }
+    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint);
+      font-size:12px; }
+    table::-webkit-scrollbar { height:10px; }
+    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+    th, td { padding:6px 7px; }
     .kpi .v { font-size:18px; }
   }
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/blotto<span class="cursor"></span></h1>
-  <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 520 games</div>
+  <div class="sub">⚔️ Colonel Blotto · Simultaneous resource allocation · repeated rounds · round-robin, seat-swapped · 1705 games</div>
   <a class="replaybtn" href="blotto_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
-  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
-  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
-  <div class="rules"><h3>How Colonel Blotto works</h3>A two-player game of <b>simultaneous</b> resource allocation, played over <b>20 rounds</b>. Each round:<ul><li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs per round).</li><li>Allocations are revealed <b>at the same time</b> — neither sees the other's before committing.</li><li>On each battlefield the <b>larger force wins</b> that field's points; an exact tie awards the field to neither.</li><li>Whoever takes the <b>most points</b> wins the round; only resolved past rounds are shown to the opponent.</li></ul><div class="seq">After 20 rounds the <b>higher cumulative score wins</b> (equal totals draw). No hidden cards or chance — the difficulty is purely strategic: spread thin to grab the cheap fields, or stack up to guarantee the expensive ones, while reading and misdirecting the opponent across rounds.</div><div class="seq"><b>What the model sees each round:</b> the 5 battlefields and their point values, its 100-troop budget, and the results of past rounds — not the opponent's current allocation (both commit at the same time).</div></div>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden><label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label><div class="rules"><h3>How Colonel Blotto works</h3>A two-player game of <b>simultaneous</b> resource allocation, played over <b>20 rounds</b>. Each round:<ul><li>Both players <b>secretly</b> split <b>100 troops</b> across <b>5 battlefields</b> worth <b>1, 2, 3, 4 and 5 points</b> (15 points up for grabs per round).</li><li>Allocations are revealed <b>at the same time</b> — neither sees the other's before committing.</li><li>On each battlefield the <b>larger force wins</b> that field's points; an exact tie awards the field to neither.</li><li>Whoever takes the <b>most points</b> wins the round; only resolved past rounds are shown to the opponent.</li></ul><div class="seq">After 20 rounds the <b>higher cumulative score wins</b> (equal totals draw). No hidden cards or chance — the difficulty is purely strategic: spread thin to grab the cheap fields, or stack up to guarantee the expensive ones, while reading and misdirecting the opponent across rounds.</div><div class="seq"><b>What the model sees each round:</b> the 5 battlefields and their point values, its 100-troop budget, and the results of past rounds — not the opponent's current allocation (both commit at the same time).</div></div>
 
 
   <h2>🏆 Leaderboard</h2>
@@ -141,68 +135,108 @@
     <tr><th>#</th><th class='model'>model</th><th>Elo</th><th>net/game</th><th>win%</th>
         <th>draw%</th><th>1st-move win%</th><th>invalid%</th><th>plies</th><th>think</th><th>games</th><th>tokens/dec</th><th>$/1K dec</th></tr>
     <tr>
-          <td>1</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
-          <td>1764<div class='small'>±38</div></td>
-          <td class='pos'>+0.54</td>
-          <td>76%</td><td>1%</td>
-          <td>74%</td>
+          <td>1</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
+          <td>1727<div class='small'>±27</div></td>
+          <td class='pos'>+0.49</td>
+          <td>74%</td><td>2%</td>
+          <td>77%</td>
           <td>0.0%</td>
-          <td>40.0</td><td>562.4s</td>
-          <td>140</td>
-          <td>30,968</td><td>$107.77</td>
+          <td>40.0</td><td>973.4s</td>
+          <td>300</td>
+          <td>34,537</td><td>$138.15</td>
         </tr><tr>
-          <td>2</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td>
-          <td>1725<div class='small'>±35</div></td>
-          <td class='pos'>+0.46</td>
-          <td>72%</td><td>1%</td>
-          <td>79%</td>
+          <td>2</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
+          <td>1717<div class='small'>±23</div></td>
+          <td class='pos'>+0.44</td>
+          <td>71%</td><td>2%</td>
+          <td>70%</td>
+          <td>0.1%</td>
+          <td>40.0</td><td>631.4s</td>
+          <td>265</td>
+          <td>24,286</td><td>$106.86</td>
+        </tr><tr>
+          <td>3</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td>
+          <td>1715<div class='small'>±24</div></td>
+          <td class='pos'>+0.47</td>
+          <td>72%</td><td>2%</td>
+          <td>70%</td>
           <td>0.0%</td>
-          <td>40.0</td><td>488.6s</td>
-          <td>140</td>
-          <td>42,721</td><td>$170.88</td>
+          <td>40.0</td><td>1123.7s</td>
+          <td>300</td>
+          <td>25,782</td><td>$89.72</td>
         </tr><tr>
-          <td>3</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
-          <td>1671<div class='small'>±35</div></td>
-          <td class='pos'>+0.23</td>
-          <td>61%</td><td>2%</td>
-          <td>60%</td>
-          <td>0.0%</td>
-          <td>40.0</td><td>226.2s</td>
-          <td>120</td>
-          <td>34,146</td><td>$54.63</td>
-        </tr><tr>
-          <td>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td>
-          <td>1640<div class='small'>±32</div></td>
-          <td class='pos'>+0.15</td>
-          <td>57%</td><td>2%</td>
-          <td>55%</td>
-          <td>0.0%</td>
-          <td>40.0</td><td>386.1s</td>
-          <td>120</td>
-          <td>20,900</td><td>$91.96</td>
-        </tr><tr>
-          <td>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
-          <td>1638<div class='small'>±37</div></td>
-          <td class='pos'>+0.26</td>
-          <td>61%</td><td>4%</td>
+          <td>4</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td>
+          <td>1688<div class='small'>±22</div></td>
+          <td class='pos'>+0.28</td>
+          <td>63%</td><td>1%</td>
           <td>61%</td>
           <td>0.0%</td>
-          <td>40.0</td><td>332.5s</td>
-          <td>140</td>
-          <td>23,405</td><td>$102.98</td>
+          <td>40.0</td><td>123.2s</td>
+          <td>360</td>
+          <td>—</td><td>—</td>
         </tr><tr>
-          <td>6</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
-          <td>1363<div class='small'>±37</div></td>
-          <td class='neg'>-0.34</td>
-          <td>33%</td><td>1%</td>
-          <td>30%</td>
+          <td>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td>
+          <td>1657<div class='small'>±23</div></td>
+          <td class='pos'>+0.34</td>
+          <td>65%</td><td>4%</td>
+          <td>66%</td>
           <td>0.0%</td>
-          <td>40.0</td><td>149.9s</td>
-          <td>140</td>
-          <td>29,299</td><td>$35.16</td>
+          <td>40.0</td><td>268.0s</td>
+          <td>300</td>
+          <td>15,518</td><td>$68.28</td>
         </tr><tr>
-          <td>7</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
-          <td>1110<div class='small'>±47</div></td>
+          <td>6</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td>
+          <td>1599<div class='small'>±25</div></td>
+          <td class='pos'>+0.16</td>
+          <td>57%</td><td>1%</td>
+          <td>59%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>131.7s</td>
+          <td>280</td>
+          <td>18,941</td><td>$30.31</td>
+        </tr><tr>
+          <td>7</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td>
+          <td>1595<div class='small'>±21</div></td>
+          <td class='pos'>+0.04</td>
+          <td>51%</td><td>2%</td>
+          <td>49%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>425.5s</td>
+          <td>345</td>
+          <td>—</td><td>—</td>
+        </tr><tr>
+          <td>8</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td>
+          <td>1376<div class='small'>±22</div></td>
+          <td class='neg'>-0.30</td>
+          <td>34%</td><td>1%</td>
+          <td>33%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>200.3s</td>
+          <td>300</td>
+          <td>24,787</td><td>$29.74</td>
+        </tr><tr>
+          <td>9</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td>
+          <td>1371<div class='small'>±23</div></td>
+          <td class='neg'>-0.53</td>
+          <td>22%</td><td>3%</td>
+          <td>20%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>38.4s</td>
+          <td>360</td>
+          <td>—</td><td>—</td>
+        </tr><tr>
+          <td>10</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td>
+          <td>1347<div class='small'>±25</div></td>
+          <td class='neg'>-0.58</td>
+          <td>20%</td><td>2%</td>
+          <td>17%</td>
+          <td>0.0%</td>
+          <td>40.0</td><td>44.2s</td>
+          <td>360</td>
+          <td>—</td><td>—</td>
+        </tr><tr>
+          <td>11</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</td>
+          <td>1114<div class='small'>±50</div></td>
           <td class='neg'>-0.74</td>
           <td>13%</td><td>0%</td>
           <td>10%</td>
@@ -211,8 +245,8 @@
           <td>140</td>
           <td>3,365</td><td>$2.02</td>
         </tr><tr>
-          <td>8</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
-          <td>1088<div class='small'>±68</div></td>
+          <td>12</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td>
+          <td>1094<div class='small'>±65</div></td>
           <td class='neg'>-0.71</td>
           <td>14%</td><td>1%</td>
           <td>10%</td>
@@ -234,12 +268,12 @@
   </div>
 
   <h2>⚔️ Head-to-head (row wins–losses vs column)</h2>
-  <table class='h2h'><tr><th></th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT-OSS 120B</th><th>MiniMax-M2.7</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th><th>Kimi K2.6</th></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='diag'>—</td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>18-1<div class='small'>1d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='neg'>9-11<div class='small'>0d</div></td><td class='neg'>9-10<div class='small'>1d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='neg'>4-16<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>8-10<div class='small'>2d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>18-2<div class='small'>0d</div></td><td class='pos'>16-3<div class='small'>1d</div></td><td class=''>9-9<div class='small'>2d</div></td><td class='pos'>10-9<div class='small'>1d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='neg'>3-17<div class='small'>0d</div></td><td class='pos'>10-8<div class='small'>2d</div></td><td class='diag'>—</td><td class='pos'>20-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>12-8<div class='small'>0d</div></td><td class='neg'>4-16<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>13-7<div class='small'>0d</div></td><td class='neg'>3-17<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class='neg'>1-18<div class='small'>1d</div></td><td class='neg'>2-18<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>7-13<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>4-16<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>3-16<div class='small'>1d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='pos'>16-4<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>5-15<div class='small'>0d</div></td><td class='neg'>3-17<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='pos'>11-9<div class='small'>0d</div></td><td class=''>9-9<div class='small'>2d</div></td><td class='neg'>8-12<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='pos'>15-5<div class='small'>0d</div></td><td class='diag'>—</td><td class=''>10-10<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>9-10<div class='small'>1d</div></td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class=''>10-10<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
+  <table class='h2h'><tr><th></th><th>Claude Opus 4.8</th><th>Claude Sonnet 4.6</th><th>DeepSeek V4 Pro</th><th>GLM-5.1</th><th>GLM-5.2</th><th>GPT 5.4</th><th>GPT 5.5</th><th>Kimi K2.6</th><th>MiniMax-M3</th><th>Qwen3.7 Plus</th><th>GPT-OSS 120B</th><th>MiniMax-M2.7</th></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</th><td class='diag'>—</td><td class='pos'>25-14<div class='small'>1d</div></td><td class='neg'>6-33<div class='small'>1d</div></td><td class='neg'>2-36<div class='small'>2d</div></td><td class='neg'>2-37<div class='small'>1d</div></td><td class='neg'>7-30<div class='small'>3d</div></td><td class='neg'>6-34<div class='small'>0d</div></td><td class='neg'>5-34<div class='small'>1d</div></td><td class='neg'>19-20<div class='small'>1d</div></td><td class='neg'>7-32<div class='small'>1d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</th><td class='neg'>14-25<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>4-34<div class='small'>2d</div></td><td class='neg'>3-37<div class='small'>0d</div></td><td class='neg'>5-34<div class='small'>1d</div></td><td class='neg'>10-29<div class='small'>1d</div></td><td class='neg'>6-33<div class='small'>1d</div></td><td class='neg'>4-34<div class='small'>2d</div></td><td class='neg'>14-26<div class='small'>0d</div></td><td class='neg'>11-28<div class='small'>1d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</th><td class='pos'>33-6<div class='small'>1d</div></td><td class='pos'>34-4<div class='small'>2d</div></td><td class='diag'>—</td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='pos'>24-15<div class='small'>1d</div></td><td class='neg'>19-21<div class='small'>0d</div></td><td class='neg'>9-10<div class='small'>1d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='neg'>9-11<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>18-1<div class='small'>1d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</th><td class='pos'>36-2<div class='small'>2d</div></td><td class='pos'>37-3<div class='small'>0d</div></td><td class='neg'>4-16<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>8-10<div class='small'>2d</div></td><td class=''>19-19<div class='small'>2d</div></td><td class='neg'>18-20<div class='small'>2d</div></td><td class='pos'>10-9<div class='small'>1d</div></td><td class='pos'>16-3<div class='small'>1d</div></td><td class=''>9-9<div class='small'>2d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class='pos'>18-2<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</th><td class='pos'>37-2<div class='small'>1d</div></td><td class='pos'>34-5<div class='small'>1d</div></td><td class='neg'>3-17<div class='small'>0d</div></td><td class='pos'>10-8<div class='small'>2d</div></td><td class='diag'>—</td><td class='pos'>20-4<div class='small'>1d</div></td><td class='pos'>29-10<div class='small'>1d</div></td><td class='neg'>4-16<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>12-8<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</th><td class='pos'>30-7<div class='small'>3d</div></td><td class='pos'>29-10<div class='small'>1d</div></td><td class='neg'>15-24<div class='small'>1d</div></td><td class=''>19-19<div class='small'>2d</div></td><td class='neg'>4-20<div class='small'>1d</div></td><td class='diag'>—</td><td class='neg'>12-28<div class='small'>0d</div></td><td class='neg'>12-28<div class='small'>0d</div></td><td class='pos'>30-10<div class='small'>0d</div></td><td class='pos'>25-15<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</th><td class='pos'>34-6<div class='small'>0d</div></td><td class='pos'>33-6<div class='small'>1d</div></td><td class='pos'>21-19<div class='small'>0d</div></td><td class='pos'>20-18<div class='small'>2d</div></td><td class='neg'>10-29<div class='small'>1d</div></td><td class='pos'>28-12<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>16-24<div class='small'>0d</div></td><td class='pos'>38-1<div class='small'>1d</div></td><td class='pos'>28-12<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</th><td class='pos'>34-5<div class='small'>1d</div></td><td class='pos'>34-4<div class='small'>2d</div></td><td class='pos'>10-9<div class='small'>1d</div></td><td class='neg'>9-10<div class='small'>1d</div></td><td class='pos'>16-4<div class='small'>0d</div></td><td class='pos'>28-12<div class='small'>0d</div></td><td class='pos'>24-16<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>17-3<div class='small'>0d</div></td><td class=''>10-10<div class='small'>0d</div></td><td class='pos'>19-1<div class='small'>0d</div></td><td class='pos'>20-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</th><td class='pos'>20-19<div class='small'>1d</div></td><td class='pos'>26-14<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>3-16<div class='small'>1d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>10-30<div class='small'>0d</div></td><td class='neg'>1-38<div class='small'>1d</div></td><td class='neg'>3-17<div class='small'>0d</div></td><td class='diag'>—</td><td class='neg'>5-15<div class='small'>0d</div></td><td class='pos'>17-3<div class='small'>0d</div></td><td class='pos'>16-4<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</th><td class='pos'>32-7<div class='small'>1d</div></td><td class='pos'>28-11<div class='small'>1d</div></td><td class='pos'>11-9<div class='small'>0d</div></td><td class=''>9-9<div class='small'>2d</div></td><td class='neg'>8-12<div class='small'>0d</div></td><td class='neg'>15-25<div class='small'>0d</div></td><td class='neg'>12-28<div class='small'>0d</div></td><td class=''>10-10<div class='small'>0d</div></td><td class='pos'>15-5<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>20-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>1-19<div class='small'>0d</div></td><td class='neg'>3-17<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='diag'>—</td><td class='pos'>13-7<div class='small'>0d</div></td></tr><tr><th class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</th><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>1-18<div class='small'>1d</div></td><td class='neg'>2-18<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>0-20<div class='small'>0d</div></td><td class='neg'>4-16<div class='small'>0d</div></td><td class=''>0-0<div class='small'>0d</div></td><td class='neg'>7-13<div class='small'>0d</div></td><td class='diag'>—</td></tr></table>
 
 <script>
-const R = {"game": "repeated_colonel_blotto", "kind": "versus", "models": ["deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-oss-120b", "minimax-m2p7", "minimax-m3", "qwen3p7-plus", "kimi-k2p6"], "per_model": {"deepseek-v4-pro": {"games": 140, "wins": 107, "losses": 31, "draws": 2, "win_rate": 0.7643, "draw_rate": 0.0143, "net_per_game": 0.5429, "first_move_win_rate": 0.7429, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 562.4, "len_hist": [140]}, "glm-5p1": {"games": 140, "wins": 85, "losses": 49, "draws": 6, "win_rate": 0.6071, "draw_rate": 0.0429, "net_per_game": 0.2571, "first_move_win_rate": 0.6143, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 332.5, "len_hist": [140]}, "glm-5p2": {"games": 120, "wins": 68, "losses": 50, "draws": 2, "win_rate": 0.5667, "draw_rate": 0.0167, "net_per_game": 0.15, "first_move_win_rate": 0.55, "invalid_rate": 0.0, "decisions": 2400, "avg_len": 40.0, "avg_latency_s": 386.1, "len_hist": [120]}, "gpt-oss-120b": {"games": 140, "wins": 18, "losses": 122, "draws": 0, "win_rate": 0.1286, "draw_rate": 0.0, "net_per_game": -0.7429, "first_move_win_rate": 0.1, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 20.6, "len_hist": [140]}, "minimax-m2p7": {"games": 100, "wins": 14, "losses": 85, "draws": 1, "win_rate": 0.14, "draw_rate": 0.01, "net_per_game": -0.71, "first_move_win_rate": 0.1, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 181.2, "len_hist": [100]}, "minimax-m3": {"games": 140, "wins": 46, "losses": 93, "draws": 1, "win_rate": 0.3286, "draw_rate": 0.0071, "net_per_game": -0.3357, "first_move_win_rate": 0.3, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 149.9, "len_hist": [140]}, "qwen3p7-plus": {"games": 120, "wins": 73, "losses": 45, "draws": 2, "win_rate": 0.6083, "draw_rate": 0.0167, "net_per_game": 0.2333, "first_move_win_rate": 0.6, "invalid_rate": 0.0, "decisions": 2400, "avg_len": 40.0, "avg_latency_s": 226.2, "len_hist": [120]}, "kimi-k2p6": {"games": 140, "wins": 101, "losses": 37, "draws": 2, "win_rate": 0.7214, "draw_rate": 0.0143, "net_per_game": 0.4571, "first_move_win_rate": 0.7857, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 488.6, "len_hist": [140]}}, "h2h": {"deepseek-v4-pro": {"glm-5p1": [16, 4, 0], "glm-5p2": [17, 3, 0], "gpt-oss-120b": [19, 1, 0], "minimax-m2p7": [18, 1, 1], "minimax-m3": [19, 1, 0], "qwen3p7-plus": [9, 11, 0], "kimi-k2p6": [9, 10, 1]}, "glm-5p1": {"deepseek-v4-pro": [4, 16, 0], "glm-5p2": [8, 10, 2], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [18, 2, 0], "minimax-m3": [16, 3, 1], "qwen3p7-plus": [9, 9, 2], "kimi-k2p6": [10, 9, 1]}, "glm-5p2": {"deepseek-v4-pro": [3, 17, 0], "glm-5p1": [10, 8, 2], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [0, 0, 0], "minimax-m3": [19, 1, 0], "qwen3p7-plus": [12, 8, 0], "kimi-k2p6": [4, 16, 0]}, "gpt-oss-120b": {"deepseek-v4-pro": [1, 19, 0], "glm-5p1": [0, 20, 0], "glm-5p2": [0, 20, 0], "minimax-m2p7": [13, 7, 0], "minimax-m3": [3, 17, 0], "qwen3p7-plus": [0, 20, 0], "kimi-k2p6": [1, 19, 0]}, "minimax-m2p7": {"deepseek-v4-pro": [1, 18, 1], "glm-5p1": [2, 18, 0], "glm-5p2": [0, 0, 0], "gpt-oss-120b": [7, 13, 0], "minimax-m3": [4, 16, 0], "qwen3p7-plus": [0, 0, 0], "kimi-k2p6": [0, 20, 0]}, "minimax-m3": {"deepseek-v4-pro": [1, 19, 0], "glm-5p1": [3, 16, 1], "glm-5p2": [1, 19, 0], "gpt-oss-120b": [17, 3, 0], "minimax-m2p7": [16, 4, 0], "qwen3p7-plus": [5, 15, 0], "kimi-k2p6": [3, 17, 0]}, "qwen3p7-plus": {"deepseek-v4-pro": [11, 9, 0], "glm-5p1": [9, 9, 2], "glm-5p2": [8, 12, 0], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [0, 0, 0], "minimax-m3": [15, 5, 0], "kimi-k2p6": [10, 10, 0]}, "kimi-k2p6": {"deepseek-v4-pro": [10, 9, 1], "glm-5p1": [9, 10, 1], "glm-5p2": [16, 4, 0], "gpt-oss-120b": [19, 1, 0], "minimax-m2p7": [20, 0, 0], "minimax-m3": [17, 3, 0], "qwen3p7-plus": [10, 10, 0]}}, "elo": {"deepseek-v4-pro": 1764, "glm-5p1": 1638, "glm-5p2": 1640, "gpt-oss-120b": 1110, "minimax-m2p7": 1088, "minimax-m3": 1363, "qwen3p7-plus": 1671, "kimi-k2p6": 1725}, "elo_ci": {"deepseek-v4-pro": {"sd": 37.7, "lo": 1702, "hi": 1858}, "glm-5p1": {"sd": 36.8, "lo": 1570, "hi": 1713}, "glm-5p2": {"sd": 32.2, "lo": 1579, "hi": 1708}, "gpt-oss-120b": {"sd": 47.3, "lo": 1007, "hi": 1195}, "minimax-m2p7": {"sd": 68.4, "lo": 919, "hi": 1178}, "minimax-m3": {"sd": 37.3, "lo": 1286, "hi": 1431}, "qwen3p7-plus": {"sd": 35.3, "lo": 1614, "hi": 1748}, "kimi-k2p6": {"sd": 35.2, "lo": 1667, "hi": 1805}}, "elo_basis": "wins", "len_bins": ["40\u201340"], "first_player_win_rate": 0.4846, "num_games": 520, "episodes_per_pair": 20, "avg_tokens": {"deepseek-v4-pro": 30968, "glm-5p1": 23405, "glm-5p2": 20900, "gpt-oss-120b": 3365, "minimax-m2p7": 39353, "minimax-m3": 29299, "qwen3p7-plus": 34146, "kimi-k2p6": 42721}};
+const R = {"game": "repeated_colonel_blotto", "kind": "versus", "models": ["claude-opus-4.8", "claude-sonnet-4.6", "deepseek-v4-pro", "glm-5p1", "glm-5p2", "gpt-5.4", "gpt-5.5", "kimi-k2p6", "minimax-m3", "qwen3p7-plus", "gpt-oss-120b", "minimax-m2p7"], "per_model": {"claude-opus-4.8": {"games": 360, "wins": 79, "losses": 270, "draws": 11, "win_rate": 0.2194, "draw_rate": 0.0306, "net_per_game": -0.5306, "first_move_win_rate": 0.2, "invalid_rate": 0.0, "decisions": 7200, "avg_len": 40.0, "avg_latency_s": 38.4, "len_hist": [360]}, "claude-sonnet-4.6": {"games": 360, "wins": 71, "losses": 280, "draws": 9, "win_rate": 0.1972, "draw_rate": 0.025, "net_per_game": -0.5806, "first_move_win_rate": 0.1722, "invalid_rate": 0.0, "decisions": 7200, "avg_len": 40.0, "avg_latency_s": 44.2, "len_hist": [360]}, "deepseek-v4-pro": {"games": 300, "wins": 217, "losses": 77, "draws": 6, "win_rate": 0.7233, "draw_rate": 0.02, "net_per_game": 0.4667, "first_move_win_rate": 0.7, "invalid_rate": 0.0, "decisions": 6000, "avg_len": 40.0, "avg_latency_s": 1123.7, "len_hist": [300]}, "glm-5p1": {"games": 300, "wins": 195, "losses": 93, "draws": 12, "win_rate": 0.65, "draw_rate": 0.04, "net_per_game": 0.34, "first_move_win_rate": 0.66, "invalid_rate": 0.0, "decisions": 6000, "avg_len": 40.0, "avg_latency_s": 268.0, "len_hist": [300]}, "glm-5p2": {"games": 265, "wins": 188, "losses": 71, "draws": 6, "win_rate": 0.7094, "draw_rate": 0.0226, "net_per_game": 0.4415, "first_move_win_rate": 0.7023, "invalid_rate": 0.0011, "decisions": 5300, "avg_len": 40.0, "avg_latency_s": 631.4, "len_hist": [265]}, "gpt-5.4": {"games": 345, "wins": 176, "losses": 161, "draws": 8, "win_rate": 0.5101, "draw_rate": 0.0232, "net_per_game": 0.0435, "first_move_win_rate": 0.4885, "invalid_rate": 0.0, "decisions": 6900, "avg_len": 40.0, "avg_latency_s": 425.5, "len_hist": [345]}, "gpt-5.5": {"games": 360, "wins": 228, "losses": 127, "draws": 5, "win_rate": 0.6333, "draw_rate": 0.0139, "net_per_game": 0.2806, "first_move_win_rate": 0.6056, "invalid_rate": 0.0, "decisions": 7200, "avg_len": 40.0, "avg_latency_s": 123.2, "len_hist": [360]}, "kimi-k2p6": {"games": 300, "wins": 221, "losses": 74, "draws": 5, "win_rate": 0.7367, "draw_rate": 0.0167, "net_per_game": 0.49, "first_move_win_rate": 0.7667, "invalid_rate": 0.0, "decisions": 6000, "avg_len": 40.0, "avg_latency_s": 973.4, "len_hist": [300]}, "minimax-m3": {"games": 300, "wins": 103, "losses": 194, "draws": 3, "win_rate": 0.3433, "draw_rate": 0.01, "net_per_game": -0.3033, "first_move_win_rate": 0.3333, "invalid_rate": 0.0, "decisions": 6000, "avg_len": 40.0, "avg_latency_s": 200.3, "len_hist": [300]}, "qwen3p7-plus": {"games": 280, "wins": 160, "losses": 116, "draws": 4, "win_rate": 0.5714, "draw_rate": 0.0143, "net_per_game": 0.1571, "first_move_win_rate": 0.5857, "invalid_rate": 0.0, "decisions": 5600, "avg_len": 40.0, "avg_latency_s": 131.7, "len_hist": [280]}, "gpt-oss-120b": {"games": 140, "wins": 18, "losses": 122, "draws": 0, "win_rate": 0.1286, "draw_rate": 0.0, "net_per_game": -0.7429, "first_move_win_rate": 0.1, "invalid_rate": 0.0, "decisions": 2800, "avg_len": 40.0, "avg_latency_s": 20.6, "len_hist": [140]}, "minimax-m2p7": {"games": 100, "wins": 14, "losses": 85, "draws": 1, "win_rate": 0.14, "draw_rate": 0.01, "net_per_game": -0.71, "first_move_win_rate": 0.1, "invalid_rate": 0.0, "decisions": 2000, "avg_len": 40.0, "avg_latency_s": 181.2, "len_hist": [100]}}, "h2h": {"claude-opus-4.8": {"claude-sonnet-4.6": [25, 14, 1], "deepseek-v4-pro": [6, 33, 1], "glm-5p1": [2, 36, 2], "glm-5p2": [2, 37, 1], "gpt-5.4": [7, 30, 3], "gpt-5.5": [6, 34, 0], "kimi-k2p6": [5, 34, 1], "minimax-m3": [19, 20, 1], "qwen3p7-plus": [7, 32, 1], "gpt-oss-120b": [0, 0, 0], "minimax-m2p7": [0, 0, 0]}, "claude-sonnet-4.6": {"claude-opus-4.8": [14, 25, 1], "deepseek-v4-pro": [4, 34, 2], "glm-5p1": [3, 37, 0], "glm-5p2": [5, 34, 1], "gpt-5.4": [10, 29, 1], "gpt-5.5": [6, 33, 1], "kimi-k2p6": [4, 34, 2], "minimax-m3": [14, 26, 0], "qwen3p7-plus": [11, 28, 1], "gpt-oss-120b": [0, 0, 0], "minimax-m2p7": [0, 0, 0]}, "deepseek-v4-pro": {"claude-opus-4.8": [33, 6, 1], "claude-sonnet-4.6": [34, 4, 2], "glm-5p1": [16, 4, 0], "glm-5p2": [17, 3, 0], "gpt-5.4": [24, 15, 1], "gpt-5.5": [19, 21, 0], "kimi-k2p6": [9, 10, 1], "minimax-m3": [19, 1, 0], "qwen3p7-plus": [9, 11, 0], "gpt-oss-120b": [19, 1, 0], "minimax-m2p7": [18, 1, 1]}, "glm-5p1": {"claude-opus-4.8": [36, 2, 2], "claude-sonnet-4.6": [37, 3, 0], "deepseek-v4-pro": [4, 16, 0], "glm-5p2": [8, 10, 2], "gpt-5.4": [19, 19, 2], "gpt-5.5": [18, 20, 2], "kimi-k2p6": [10, 9, 1], "minimax-m3": [16, 3, 1], "qwen3p7-plus": [9, 9, 2], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [18, 2, 0]}, "glm-5p2": {"claude-opus-4.8": [37, 2, 1], "claude-sonnet-4.6": [34, 5, 1], "deepseek-v4-pro": [3, 17, 0], "glm-5p1": [10, 8, 2], "gpt-5.4": [20, 4, 1], "gpt-5.5": [29, 10, 1], "kimi-k2p6": [4, 16, 0], "minimax-m3": [19, 1, 0], "qwen3p7-plus": [12, 8, 0], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [0, 0, 0]}, "gpt-5.4": {"claude-opus-4.8": [30, 7, 3], "claude-sonnet-4.6": [29, 10, 1], "deepseek-v4-pro": [15, 24, 1], "glm-5p1": [19, 19, 2], "glm-5p2": [4, 20, 1], "gpt-5.5": [12, 28, 0], "kimi-k2p6": [12, 28, 0], "minimax-m3": [30, 10, 0], "qwen3p7-plus": [25, 15, 0], "gpt-oss-120b": [0, 0, 0], "minimax-m2p7": [0, 0, 0]}, "gpt-5.5": {"claude-opus-4.8": [34, 6, 0], "claude-sonnet-4.6": [33, 6, 1], "deepseek-v4-pro": [21, 19, 0], "glm-5p1": [20, 18, 2], "glm-5p2": [10, 29, 1], "gpt-5.4": [28, 12, 0], "kimi-k2p6": [16, 24, 0], "minimax-m3": [38, 1, 1], "qwen3p7-plus": [28, 12, 0], "gpt-oss-120b": [0, 0, 0], "minimax-m2p7": [0, 0, 0]}, "kimi-k2p6": {"claude-opus-4.8": [34, 5, 1], "claude-sonnet-4.6": [34, 4, 2], "deepseek-v4-pro": [10, 9, 1], "glm-5p1": [9, 10, 1], "glm-5p2": [16, 4, 0], "gpt-5.4": [28, 12, 0], "gpt-5.5": [24, 16, 0], "minimax-m3": [17, 3, 0], "qwen3p7-plus": [10, 10, 0], "gpt-oss-120b": [19, 1, 0], "minimax-m2p7": [20, 0, 0]}, "minimax-m3": {"claude-opus-4.8": [20, 19, 1], "claude-sonnet-4.6": [26, 14, 0], "deepseek-v4-pro": [1, 19, 0], "glm-5p1": [3, 16, 1], "glm-5p2": [1, 19, 0], "gpt-5.4": [10, 30, 0], "gpt-5.5": [1, 38, 1], "kimi-k2p6": [3, 17, 0], "qwen3p7-plus": [5, 15, 0], "gpt-oss-120b": [17, 3, 0], "minimax-m2p7": [16, 4, 0]}, "qwen3p7-plus": {"claude-opus-4.8": [32, 7, 1], "claude-sonnet-4.6": [28, 11, 1], "deepseek-v4-pro": [11, 9, 0], "glm-5p1": [9, 9, 2], "glm-5p2": [8, 12, 0], "gpt-5.4": [15, 25, 0], "gpt-5.5": [12, 28, 0], "kimi-k2p6": [10, 10, 0], "minimax-m3": [15, 5, 0], "gpt-oss-120b": [20, 0, 0], "minimax-m2p7": [0, 0, 0]}, "gpt-oss-120b": {"claude-opus-4.8": [0, 0, 0], "claude-sonnet-4.6": [0, 0, 0], "deepseek-v4-pro": [1, 19, 0], "glm-5p1": [0, 20, 0], "glm-5p2": [0, 20, 0], "gpt-5.4": [0, 0, 0], "gpt-5.5": [0, 0, 0], "kimi-k2p6": [1, 19, 0], "minimax-m3": [3, 17, 0], "qwen3p7-plus": [0, 20, 0], "minimax-m2p7": [13, 7, 0]}, "minimax-m2p7": {"claude-opus-4.8": [0, 0, 0], "claude-sonnet-4.6": [0, 0, 0], "deepseek-v4-pro": [1, 18, 1], "glm-5p1": [2, 18, 0], "glm-5p2": [0, 0, 0], "gpt-5.4": [0, 0, 0], "gpt-5.5": [0, 0, 0], "kimi-k2p6": [0, 20, 0], "minimax-m3": [4, 16, 0], "qwen3p7-plus": [0, 0, 0], "gpt-oss-120b": [7, 13, 0]}}, "elo": {"claude-opus-4.8": 1371, "claude-sonnet-4.6": 1347, "deepseek-v4-pro": 1715, "glm-5p1": 1657, "glm-5p2": 1717, "gpt-5.4": 1595, "gpt-5.5": 1688, "kimi-k2p6": 1727, "minimax-m3": 1376, "qwen3p7-plus": 1599, "gpt-oss-120b": 1114, "minimax-m2p7": 1094}, "elo_ci": {"claude-opus-4.8": {"sd": 22.9, "lo": 1326, "hi": 1412}, "claude-sonnet-4.6": {"sd": 24.7, "lo": 1295, "hi": 1390}, "deepseek-v4-pro": {"sd": 24.4, "lo": 1667, "hi": 1768}, "glm-5p1": {"sd": 22.6, "lo": 1616, "hi": 1706}, "glm-5p2": {"sd": 23.1, "lo": 1671, "hi": 1761}, "gpt-5.4": {"sd": 21.0, "lo": 1559, "hi": 1635}, "gpt-5.5": {"sd": 21.9, "lo": 1652, "hi": 1742}, "kimi-k2p6": {"sd": 26.6, "lo": 1676, "hi": 1777}, "minimax-m3": {"sd": 21.7, "lo": 1332, "hi": 1420}, "qwen3p7-plus": {"sd": 24.8, "lo": 1552, "hi": 1651}, "gpt-oss-120b": {"sd": 49.8, "lo": 1014, "hi": 1204}, "minimax-m2p7": {"sd": 64.7, "lo": 941, "hi": 1185}}, "elo_basis": "wins", "len_bins": ["40\u201340"], "first_player_win_rate": 0.4786, "num_games": 1705, "episodes_per_pair": 40, "avg_tokens": {"claude-opus-4.8": 849, "claude-sonnet-4.6": 2149, "deepseek-v4-pro": 25782, "glm-5p1": 15518, "glm-5p2": 24286, "gpt-5.4": 7474, "gpt-5.5": 4758, "kimi-k2p6": 34537, "minimax-m3": 24787, "qwen3p7-plus": 18941, "gpt-oss-120b": 3365, "minimax-m2p7": 39353}};
 const pm=R.per_model, M=R.models;
-const DN = {"deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "glm-5p2": "GLM-5.2", "gpt-oss-120b": "GPT-OSS 120B", "minimax-m2p7": "MiniMax-M2.7", "minimax-m3": "MiniMax-M3", "qwen3p7-plus": "Qwen3.7 Plus", "kimi-k2p6": "Kimi K2.6"};
+const DN = {"claude-opus-4.8": "Claude Opus 4.8", "claude-sonnet-4.6": "Claude Sonnet 4.6", "deepseek-v4-pro": "DeepSeek V4 Pro", "glm-5p1": "GLM-5.1", "glm-5p2": "GLM-5.2", "gpt-5.4": "GPT 5.4", "gpt-5.5": "GPT 5.5", "kimi-k2p6": "Kimi K2.6", "minimax-m3": "MiniMax-M3", "qwen3p7-plus": "Qwen3.7 Plus", "gpt-oss-120b": "GPT-OSS 120B", "minimax-m2p7": "MiniMax-M2.7"};
 const dn = m => DN[m] || m;
 
 Chart.defaults.color='#1c1c1c'; Chart.defaults.borderColor='#e7e2d8';

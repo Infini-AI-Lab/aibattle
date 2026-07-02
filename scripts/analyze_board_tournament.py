@@ -716,9 +716,10 @@ def _index_card(entry: dict) -> str:
 # gets its own report and landing-page card; these are just the ones averaged
 # into the headline ranking (a curated, comparable subset). Blackjack is excluded
 # — it's vs-dealer (no head-to-head Elo) and luck-dominated, so it would add noise
-# to both the rank score and the Elo composite.
-ARENA_GAMES = {"connect4", "gomoku", "holdem", "match",
-               "repeated_colonel_blotto", "leduc_poker"}
+# to both the rank score and the Elo composite. Colonel Blotto is also excluded:
+# its winning skill (unpredictable value-weighted allocation) is orthogonal to the
+# other games and inverts the field, so it distorts the headline ranking.
+ARENA_GAMES = {"connect4", "gomoku", "holdem", "match", "leduc_poker"}
 
 
 def _arena_scores(entries: list) -> list:
@@ -807,6 +808,9 @@ def _arena_board(entries: list) -> str:
         return ""
     elo = _arena_elo_scores(arena_entries)
     total = len(arena_entries)
+    _evals = [elo[r["model"]]["arena_elo"] for r in rows if elo.get(r["model"])]
+    _emin = min(_evals) if _evals else 0
+    _espan = ((max(_evals) - _emin) or 1) if _evals else 1
     body = ""
     for i, r in enumerate(rows, 1):
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(i, f"{i}")
@@ -814,18 +818,18 @@ def _arena_board(entries: list) -> str:
         ae_disp = (f"{ae['arena_elo']}<div class='small'>{ae['z']:+.2f} SD</div>"
                    if ae else "—")
         ae_elo = ae.get("arena_elo", "") if ae else ""
+        ew = ((ae["arena_elo"] - _emin) / _espan * 100) if ae else 0
         body += (
             f"<tr data-score='{r['score']}' data-elo='{ae_elo}'><td class='rk'>{medal}</td>"
             f"<td class='model'>{model_cell(r['model'])}</td>"
             f"<td class='scorecell'><span class='bar' style='width:{r['score']}%'></span>"
             f"<span class='sval'>{r['score']:.0f}</span></td>"
-            f"<td><b>{ae_disp}</b></td>"
-            f"<td class='cov'>{r['games']}/{total}</td>"
-            f"<td class='best'>{r['best']}</td></tr>")
+            f"<td class='elocell'><span class='ebar' style='width:{ew:.0f}%'></span>"
+            f"<span class='eval'>{ae_disp}</span></td></tr>")
     return f"""
   <section class="board">
     <div class="arena-head"><h2>🏅 Model leaderboard</h2>
-      <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
+      <span class="arena-tag">5 core games · click a score column to re-rank</span></div>
     <table class="lb">
       <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
@@ -842,16 +846,15 @@ def _arena_board(entries: list) -> str:
           Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
           <code>z = (rating − mean) / SD</code>. A model's z is averaged across games and rescaled to
           <code>1500 + 150·z</code>, so a model one SD above the field reads as 1650. Unlike the rank
-          score it rewards <i>how much</i> you win by. Built from the six head-to-head games only —
+          score it rewards <i>how much</i> you win by. Built from the five head-to-head games only —
           Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
-        <th>coverage</th><th>best game</th></tr>
+        </tr>
       </thead>
       <tbody>{body}</tbody>
     </table>
-    <div class="note lb-note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
-      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
-      low coverage as provisional).</div>
+    <div class="note lb-note">Two cross-game summaries over five head-to-head games: Connect Four, Gomoku,
+      Hold'em 1-Hand, Hold'em Match and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed.</div>
   </section>"""
 
 
@@ -977,6 +980,11 @@ def render_index(reps: dict) -> str:
   .scorecell .bar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
     height:16px; background:var(--red); opacity:.16; }}
   .scorecell .sval {{ position:relative; font-weight:700; color:var(--red); }}
+  .elocell {{ position:relative; min-width:120px; }}
+  .elocell .ebar {{ position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:16px; background:#4338ca; opacity:.16; }}
+  .elocell .eval {{ position:relative; font-weight:700; color:#4338ca; }}
+  .elocell .eval .small {{ font-weight:400; color:var(--dim); }}
   .cta {{ display:flex; align-items:center; justify-content:space-between; gap:16px;
     flex-wrap:wrap; border:1px dashed var(--line); padding:22px; background:var(--faint); }}
   .cta .ctatext b {{ color:var(--fg); font-size:15px; }}
