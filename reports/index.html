@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Battle Arena</title>
+<html><head><meta charset="utf-8"><title>AI Battle Arena</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -11,19 +10,6 @@
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
   .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
-  /* On phones a wide table scrolls inside its OWN area (display:block) so it
-     doesn't widen the page; on desktop it stays display:table and fills the
-     column to 100%. Mobile-only, so desktop leaderboards span full width. */
-  @media (max-width:760px) {
-    .wrap { padding:24px 14px 60px; }
-    .scorecell { min-width:90px; }
-    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
-    table::-webkit-scrollbar { height:10px; }
-    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
-    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
-    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
-  }
   a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
@@ -61,7 +47,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-width:100%; max-height:340px; }
+  canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -106,11 +92,32 @@
   .replaybtn { display:inline-block; margin-top:12px; background:var(--faint); color:#4338ca;
     border:1px solid var(--line); border-radius:0; padding:8px 14px; font-size:13px; text-decoration:none; }
   .replaybtn:hover { border-color:var(--red); color:var(--fg); }
+  /* Setup/rules block: folds behind a click-to-expand summary at all widths
+     (desktop + mobile); collapsed by default, click the summary to reveal it. */
+  .rules-toggle { display:none; }
+  .rules-summary { display:block; cursor:pointer; margin:18px 0; background:var(--faint);
+    border:1px solid var(--line); border-left:3px solid var(--red); padding:12px 14px;
+    font-size:13.5px; font-weight:700; color:var(--fg); -webkit-user-select:none; user-select:none; }
+  .rules-summary .rules-hint { font-weight:400; color:var(--dim); font-size:12px; }
+  .rules-summary::before { content:"▸ "; color:var(--red); }
+  .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
+  .rules { display:none; margin-top:-6px; }
+  .rules-toggle:checked ~ .rules { display:block; }
+  /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
+     inside their own area (display:block) instead of widening the page. On
+     desktop tables stay display:table so leaderboards fill the column to 100%. */
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
     .sub { font-size:12px; } .note { font-size:11px; }
-    table { font-size:12px; } th, td { padding:6px 7px; }
+    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint);
+      font-size:12px; }
+    table::-webkit-scrollbar { height:10px; }
+    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+    th, td { padding:6px 7px; }
     .kpi .v { font-size:18px; }
   }
 
@@ -122,8 +129,7 @@
   .arena-tag { font-size:11px; color:var(--dim); }
   .arena-tag::before { content:"["; color:var(--red); } .arena-tag::after { content:"]"; color:var(--red); }
   .group-label { display:flex; align-items:center; gap:10px; font-size:13px;
-    font-weight:700; margin:24px 0 12px; padding-left:10px; border-left:3px solid var(--red);
-    scroll-margin-top:60px; }
+    font-weight:700; margin:24px 0 12px; padding-left:10px; border-left:3px solid var(--red); }
   .group-label.perfect { border-left-color:var(--pos); }
   .group-label.imperfect { border-left-color:#b45309; }
   .group-label .gl-sub { font-size:11px; font-weight:400; color:var(--dim); }
@@ -152,6 +158,11 @@
   .scorecell .bar { position:absolute; left:0; top:50%; transform:translateY(-50%);
     height:16px; background:var(--red); opacity:.16; }
   .scorecell .sval { position:relative; font-weight:700; color:var(--red); }
+  .elocell { position:relative; min-width:120px; }
+  .elocell .ebar { position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:16px; background:#4338ca; opacity:.16; }
+  .elocell .eval { position:relative; font-weight:700; color:#4338ca; }
+  .elocell .eval .small { font-weight:400; color:var(--dim); }
   .cta { display:flex; align-items:center; justify-content:space-between; gap:16px;
     flex-wrap:wrap; border:1px dashed var(--line); padding:22px; background:var(--faint); }
   .cta .ctatext b { color:var(--fg); font-size:15px; }
@@ -168,7 +179,7 @@
   
   <section class="board">
     <div class="arena-head"><h2>🏅 Model leaderboard</h2>
-      <span class="arena-tag">6 core games · click a score column to re-rank</span></div>
+      <span class="arena-tag">5 core games · click a score column to re-rank</span></div>
     <table class="lb">
       <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
@@ -185,16 +196,15 @@
           Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
           <code>z = (rating − mean) / SD</code>. A model's z is averaged across games and rescaled to
           <code>1500 + 150·z</code>, so a model one SD above the field reads as 1650. Unlike the rank
-          score it rewards <i>how much</i> you win by. Built from the six head-to-head games only —
+          score it rewards <i>how much</i> you win by. Built from the five head-to-head games only —
           Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
-        <th>coverage</th><th>best game</th></tr>
+        </tr>
       </thead>
-      <tbody><tr data-score='88.0' data-elo='1678'><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='scorecell'><span class='bar' style='width:88.0%'></span><span class='sval'>88</span></td><td><b>1678<div class='small'>+1.19 SD</div></b></td><td class='cov'>5/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='82.2' data-elo='1615'><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:82.2%'></span><span class='sval'>82</span></td><td><b>1615<div class='small'>+0.77 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='72.0' data-elo='1620'><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='scorecell'><span class='bar' style='width:72.0%'></span><span class='sval'>72</span></td><td><b>1620<div class='small'>+0.80 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🃏 Hold'em Match</td></tr><tr data-score='63.3' data-elo='1558'><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:63.3%'></span><span class='sval'>63</span></td><td><b>1558<div class='small'>+0.39 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='56.7' data-elo='1555'><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:56.7%'></span><span class='sval'>57</span></td><td><b>1555<div class='small'>+0.37 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚔️ Colonel Blotto</td></tr><tr data-score='55.6' data-elo='1554'><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:55.6%'></span><span class='sval'>56</span></td><td><b>1554<div class='small'>+0.36 SD</div></b></td><td class='cov'>6/6</td><td class='best'>⚫ Gomoku-Lite</td></tr><tr data-score='46.0' data-elo='1493'><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:46.0%'></span><span class='sval'>46</span></td><td><b>1493<div class='small'>-0.05 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🃏 Hold'em 1-Hand</td></tr><tr data-score='38.0' data-elo='1442'><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:38.0%'></span><span class='sval'>38</span></td><td><b>1442<div class='small'>-0.39 SD</div></b></td><td class='cov'>5/6</td><td class='best'>🔴 Connect Four</td></tr><tr data-score='34.4' data-elo='1458'><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:34.4%'></span><span class='sval'>34</span></td><td><b>1458<div class='small'>-0.28 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='19.4' data-elo='1353'><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:19.4%'></span><span class='sval'>19</span></td><td><b>1353<div class='small'>-0.98 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🎴 Leduc Holdem</td></tr><tr data-score='1.7' data-elo='1212'><td class='rk'>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:1.7%'></span><span class='sval'>2</span></td><td><b>1212<div class='small'>-1.92 SD</div></b></td><td class='cov'>6/6</td><td class='best'>🃏 Hold'em Match</td></tr></tbody>
+      <tbody><tr data-score='88.0' data-elo='1678'><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='scorecell'><span class='bar' style='width:88.0%'></span><span class='sval'>88</span></td><td class='elocell'><span class='ebar' style='width:100%'></span><span class='eval'>1678<div class='small'>+1.19 SD</div></span></td></tr><tr data-score='82.0' data-elo='1616'><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:82.0%'></span><span class='sval'>82</span></td><td class='elocell'><span class='ebar' style='width:87%'></span><span class='eval'>1616<div class='small'>+0.77 SD</div></span></td></tr><tr data-score='72.0' data-elo='1620'><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='scorecell'><span class='bar' style='width:72.0%'></span><span class='sval'>72</span></td><td class='elocell'><span class='ebar' style='width:87%'></span><span class='eval'>1620<div class='small'>+0.80 SD</div></span></td></tr><tr data-score='66.0' data-elo='1558'><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:66.0%'></span><span class='sval'>66</span></td><td class='elocell'><span class='ebar' style='width:74%'></span><span class='eval'>1558<div class='small'>+0.39 SD</div></span></td></tr><tr data-score='60.0' data-elo='1554'><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:60.0%'></span><span class='sval'>60</span></td><td class='elocell'><span class='ebar' style='width:73%'></span><span class='eval'>1554<div class='small'>+0.36 SD</div></span></td></tr><tr data-score='48.0' data-elo='1539'><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:48.0%'></span><span class='sval'>48</span></td><td class='elocell'><span class='ebar' style='width:70%'></span><span class='eval'>1539<div class='small'>+0.26 SD</div></span></td></tr><tr data-score='46.0' data-elo='1493'><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:46.0%'></span><span class='sval'>46</span></td><td class='elocell'><span class='ebar' style='width:60%'></span><span class='eval'>1493<div class='small'>-0.05 SD</div></span></td></tr><tr data-score='38.0' data-elo='1442'><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:38.0%'></span><span class='sval'>38</span></td><td class='elocell'><span class='ebar' style='width:49%'></span><span class='eval'>1442<div class='small'>-0.39 SD</div></span></td></tr><tr data-score='28.0' data-elo='1434'><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:28.0%'></span><span class='sval'>28</span></td><td class='elocell'><span class='ebar' style='width:47%'></span><span class='eval'>1434<div class='small'>-0.44 SD</div></span></td></tr><tr data-score='20.0' data-elo='1349'><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:20.0%'></span><span class='sval'>20</span></td><td class='elocell'><span class='ebar' style='width:29%'></span><span class='eval'>1349<div class='small'>-1.00 SD</div></span></td></tr><tr data-score='2.0' data-elo='1216'><td class='rk'>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:2.0%'></span><span class='sval'>2</span></td><td class='elocell'><span class='ebar' style='width:0%'></span><span class='eval'>1216<div class='small'>-1.89 SD</div></span></td></tr></tbody>
     </table>
-    <div class="note lb-note">Two cross-game summaries over six head-to-head games: Connect Four, Gomoku,
-      Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. Click a <b>score header</b> to
-      sort by it, or the <b>ⓘ</b> for how it's computed. Coverage = games a model has entered (treat
-      low coverage as provisional).</div>
+    <div class="note lb-note">Two cross-game summaries over five head-to-head games: Connect Four, Gomoku,
+      Hold'em 1-Hand, Hold'em Match and Leduc Holdem. Click a <b>score header</b> to
+      sort by it, or the <b>ⓘ</b> for how it's computed.</div>
   </section>
 
   <section class="arena" id="model">
@@ -203,7 +213,7 @@
     <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
       measures the model, not the scaffolding. <b>Open-weight models are served via
       Fireworks AI</b>; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
-    <div class="group-label imperfect" id="imperfect">🎭 Imperfect information
+    <div class="group-label imperfect">🎭 Imperfect information
       <span class="gl-sub">hidden cards · stochastic</span></div>
     <div class='cards'>
         <a class="card" href="holdem_tournament_report.html">
@@ -237,11 +247,11 @@
         <a class="card" href="blotto_report.html">
           <div class="ctitle">⚔️ Colonel Blotto</div>
           <div class="badges"><span class='badge'>Imperfect info</span><span class='badge'>Heads-up</span><span class='badge'>Simultaneous</span></div>
-          <div class="cmeta">520 games · 10 deals/pair · first-mover 48%</div>
-          <div class='minirank'><div class='mr-row'><span class='mr-rk'>1</span><span class='mr-nm'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</span><span class='mr-bar'><i style='width:100%'></i></span><span class='mr-val'>1764</span></div><div class='mr-row'><span class='mr-rk'>2</span><span class='mr-nm'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</span><span class='mr-bar'><i style='width:96%'></i></span><span class='mr-val'>1725</span></div><div class='mr-row'><span class='mr-rk'>3</span><span class='mr-nm'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</span><span class='mr-bar'><i style='width:90%'></i></span><span class='mr-val'>1671</span></div><div class='mr-row'><span class='mr-rk'>4</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</span><span class='mr-bar'><i style='width:86%'></i></span><span class='mr-val'>1640</span></div><div class='mr-row'><span class='mr-rk'>5</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</span><span class='mr-bar'><i style='width:86%'></i></span><span class='mr-val'>1638</span></div><div class='mr-row'><span class='mr-rk'>6</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</span><span class='mr-bar'><i style='width:56%'></i></span><span class='mr-val'>1363</span></div><div class='mr-row'><span class='mr-rk'>7</span><span class='mr-nm'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</span><span class='mr-bar'><i style='width:27%'></i></span><span class='mr-val'>1110</span></div><div class='mr-row'><span class='mr-rk'>8</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</span><span class='mr-bar'><i style='width:25%'></i></span><span class='mr-val'>1088</span></div></div>
+          <div class="cmeta">1705 games · 20 deals/pair · first-mover 48%</div>
+          <div class='minirank'><div class='mr-row'><span class='mr-rk'>1</span><span class='mr-nm'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</span><span class='mr-bar'><i style='width:100%'></i></span><span class='mr-val'>1727</span></div><div class='mr-row'><span class='mr-rk'>2</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</span><span class='mr-bar'><i style='width:99%'></i></span><span class='mr-val'>1717</span></div><div class='mr-row'><span class='mr-rk'>3</span><span class='mr-nm'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</span><span class='mr-bar'><i style='width:99%'></i></span><span class='mr-val'>1715</span></div><div class='mr-row'><span class='mr-rk'>4</span><span class='mr-nm'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</span><span class='mr-bar'><i style='width:95%'></i></span><span class='mr-val'>1688</span></div><div class='mr-row'><span class='mr-rk'>5</span><span class='mr-nm'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</span><span class='mr-bar'><i style='width:92%'></i></span><span class='mr-val'>1657</span></div><div class='mr-row'><span class='mr-rk'>6</span><span class='mr-nm'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</span><span class='mr-bar'><i style='width:85%'></i></span><span class='mr-val'>1599</span></div><div class='mr-row'><span class='mr-rk'>7</span><span class='mr-nm'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</span><span class='mr-bar'><i style='width:84%'></i></span><span class='mr-val'>1595</span></div><div class='mr-row'><span class='mr-rk'>8</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</span><span class='mr-bar'><i style='width:58%'></i></span><span class='mr-val'>1376</span></div><div class='mr-row'><span class='mr-rk'>9</span><span class='mr-nm'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</span><span class='mr-bar'><i style='width:58%'></i></span><span class='mr-val'>1371</span></div><div class='mr-row'><span class='mr-rk'>10</span><span class='mr-nm'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</span><span class='mr-bar'><i style='width:55%'></i></span><span class='mr-val'>1347</span></div><div class='mr-row'><span class='mr-rk'>11</span><span class='mr-nm'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT-OSS 120B</span><span class='mr-bar'><i style='width:27%'></i></span><span class='mr-val'>1114</span></div><div class='mr-row'><span class='mr-rk'>12</span><span class='mr-nm'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</span><span class='mr-bar'><i style='width:25%'></i></span><span class='mr-val'>1094</span></div></div>
           <div class="cgo">View analysis →</div>
         </a></div>
-    <div class="group-label perfect" id="perfect">♟ Perfect information
+    <div class="group-label perfect">♟ Perfect information
       <span class="gl-sub">full state visible · deterministic</span></div>
     <div class='cards'>
         <a class="card" href="connect4_report.html">

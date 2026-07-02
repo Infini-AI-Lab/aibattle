@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🎴 Leduc Holdem</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=33"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -13,19 +12,6 @@
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }
   .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 80px; }
-  /* On phones a wide table scrolls inside its OWN area (display:block) so it
-     doesn't widen the page; on desktop it stays display:table and fills the
-     column to 100%. Mobile-only, so desktop leaderboards span full width. */
-  @media (max-width:760px) {
-    .wrap { padding:24px 14px 60px; }
-    .scorecell { min-width:90px; }
-    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
-      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint); }
-    table::-webkit-scrollbar { height:10px; }
-    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
-    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
-    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
-  }
   a { color:var(--red); }
   h1 { font-size:22px; margin:0 0 4px; color:var(--red); font-weight:700; }
   h1 .cursor { display:inline-block; width:11px; height:1em; background:var(--red);
@@ -63,7 +49,7 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px; }
   .cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:0; padding:16px; }
-  canvas { max-width:100%; max-height:340px; }
+  canvas { max-height:340px; }
   .callout { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
     padding:12px 14px; margin:14px 0; font-size:13px; }
   /* Company logo before a model name in leaderboard cells. The brand SVGs are
@@ -119,11 +105,21 @@
   .rules-toggle:checked ~ .rules-summary::before { content:"▾ "; }
   .rules { display:none; margin-top:-6px; }
   .rules-toggle:checked ~ .rules { display:block; }
+  /* Mobile: stack grids, shrink the type scale, and let wide tables scroll
+     inside their own area (display:block) instead of widening the page. On
+     desktop tables stay display:table so leaderboards fill the column to 100%. */
   @media (max-width:760px) {
     .grid2, .cards { grid-template-columns:1fr; }
     h1 { font-size:18px; } h2 { font-size:14px; } h3 { font-size:13px; }
     .sub { font-size:12px; } .note { font-size:11px; }
-    table { font-size:12px; } th, td { padding:6px 7px; }
+    table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin; scrollbar-color:var(--red) var(--faint);
+      font-size:12px; }
+    table::-webkit-scrollbar { height:10px; }
+    table::-webkit-scrollbar-track { background:var(--faint); border-top:1px solid var(--line); }
+    table::-webkit-scrollbar-thumb { background:var(--red); border:2px solid var(--faint); }
+    table::-webkit-scrollbar-thumb:hover { background:#6e1616; }
+    th, td { padding:6px 7px; }
     .kpi .v { font-size:18px; }
   }
 </style></head>
@@ -131,9 +127,7 @@
   <h1>$ ~/aibattle/leduc<span class="cursor"></span></h1>
   <div class="sub">🎴 Leduc Holdem · Imperfect-information poker · 6-card deck · round-robin, seat-swapped · 3850 games</div>
   <a class="replaybtn" href="leduc_replay.html?cacheBust=19">🎬 Watch featured replays →</a>
-  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden>
-  <label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label>
-  <div class="rules"><h3>How Leduc Holdem works</h3>A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of <span class="card">J</span><span class="card">Q</span><span class="card">K</span> (J &lt; Q &lt; K). Heads-up, two betting rounds:<ul><li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li><li><b>Round 1 (pre-flop):</b> players bet on their private card alone. Actions are <code>check</code>/<code>bet</code> and <code>call</code>/<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li><li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li><li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li><li>At <b>showdown</b>, pairing your private card with the public card wins; otherwise the <b>higher card</b> wins. A fold concedes the pot.</li></ul><div class="seq">Small enough to reason about precisely, yet it has genuine bluffing, value-betting and pot odds — pairing the board is the nuts, and a lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so the size of pots won/lost matters, not just who won the hand.</div><div class="seq"><b>What the model sees each turn:</b> its own private card, the public card once it is revealed, the pot and the bets so far, and its legal actions — never the opponent's card.</div></div>
+  <input type="checkbox" class="rules-toggle" id="rules-toggle" hidden><label class="rules-summary" for="rules-toggle">Setup &amp; rules<span class="rules-hint"> · expand</span></label><div class="rules"><h3>How Leduc Holdem works</h3>A tiny <b>imperfect-information</b> poker on a 6-card deck — two each of <span class="card">J</span><span class="card">Q</span><span class="card">K</span> (J &lt; Q &lt; K). Heads-up, two betting rounds:<ul><li>Both players <b>ante 1 chip</b>, then each is dealt <b>one private card</b>.</li><li><b>Round 1 (pre-flop):</b> players bet on their private card alone. Actions are <code>check</code>/<code>bet</code> and <code>call</code>/<code>raise</code>/<code>fold</code>; bets this round are <b>2 chips</b>.</li><li>One <b>public card</b> is then revealed (the “flop”), shared by both.</li><li><b>Round 2:</b> another betting round, now with bets of <b>4 chips</b>.</li><li>At <b>showdown</b>, pairing your private card with the public card wins; otherwise the <b>higher card</b> wins. A fold concedes the pot.</li></ul><div class="seq">Small enough to reason about precisely, yet it has genuine bluffing, value-betting and pot odds — pairing the board is the nuts, and a lone King bluffs well. Rated by a <b>chip-weighted Elo</b> (like Hold'em), so the size of pots won/lost matters, not just who won the hand.</div><div class="seq"><b>What the model sees each turn:</b> its own private card, the public card once it is revealed, the pot and the bets so far, and its legal actions — never the opponent's card.</div></div>
 
 
   <h2>🏆 Leaderboard</h2>
