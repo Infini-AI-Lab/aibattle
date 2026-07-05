@@ -117,7 +117,7 @@
     <div class="fig" style="height:380px;margin-top:6px;"><img src="assets/leaderboard.png" alt="AI Battle Arena cross-game leaderboard"></div>
     <div class="meta" style="margin-top:1em;">Haizhong Zheng · 07/02/2026</div>
   </div>
-  <aside class="notes">One sentence: we benchmark LLMs by having them play 9 adversarial games head-to-head under one fair pipeline, then explain *why* they win or lose.</aside>
+  <aside class="notes">One sentence: we benchmark LLMs by having them play 8 adversarial games head-to-head under one fair pipeline, then explain *why* they win or lose.</aside>
 </section>
 
 <!-- S2 — Why adversarial games -->
@@ -142,7 +142,7 @@
       </ul>
     </div>
   </div>
-  <div class="callout">→ We built an arena where models play <b>9 games</b> head-to-head under <b>one identical pipeline</b>, so results are directly comparable.</div>
+  <div class="callout">→ We built an arena where models play <b>8 games</b> head-to-head under <b>one identical pipeline</b>, so results are directly comparable.</div>
   <aside class="notes">Frame the gap: existing evals measure what a model knows; games measure how it decides against a reacting opponent.</aside>
 </section>
 
@@ -166,7 +166,6 @@
         <tr><td>Leduc Hold'em</td><td class="dim">imperfect</td></tr>
         <tr><td>Hold'em 1-Hand</td><td class="dim">imperfect</td></tr>
         <tr><td>Hold'em Match</td><td class="dim">imperfect</td></tr>
-        <tr><td>Hold'em Table (5p)</td><td class="dim">imperfect</td></tr>
         <tr><td>Blackjack (vs dealer)</td><td class="dim">imperfect</td></tr>
         <tr><td>Connect Four</td><td class="dim">perfect</td></tr>
         <tr><td>Gomoku-Lite</td><td class="dim">perfect</td></tr>
@@ -241,11 +240,22 @@
 <section>
   <div class="kicker">Case study · Gomoku · behavior</div>
   <h2>Offense is solved — defense decides</h2>
-  <div class="fig" style="height:300px;"><img src="assets/gomoku_tac.png" alt="win-take / block / late blunders"></div>
-  <ul>
-    <li><b>win-take</b> (converting an available five) is <b>~saturated, 86–100%</b> — everyone grabs the win; <b>block %</b> and <b>late-game blunders</b> fan out wide, so skill lives in <b>defense</b></li>
-    <li>On the sparse 9×9, weak models' late-blunder rate balloons to <b>~43%</b>; overall a threat is missed <b>12.8%</b> of the time</li>
-  </ul>
+  <table class="t" style="max-width:840px;margin:0 auto;">
+    <tr><th>model</th><th class="r">win%</th><th class="r">win-take%</th><th class="r">block%</th><th class="r">late-blunder%</th></tr>
+    <tr><td>Kimi K2.6</td><td class="r">69</td><td class="r dim">100</td><td class="r pos">75</td><td class="r pos">23</td></tr>
+    <tr><td><b>GPT 5.5</b></td><td class="r">68</td><td class="r dim">99</td><td class="r pos">80</td><td class="r pos">22</td></tr>
+    <tr><td>GLM-5.1</td><td class="r">61</td><td class="r dim">94</td><td class="r">68</td><td class="r">32</td></tr>
+    <tr><td>GLM-5.2</td><td class="r">59</td><td class="r dim">96</td><td class="r">67</td><td class="r">33</td></tr>
+    <tr><td>DeepSeek V4 Pro</td><td class="r">58</td><td class="r dim">98</td><td class="r">68</td><td class="r">32</td></tr>
+    <tr><td><b>GPT 5.4</b></td><td class="r">55</td><td class="r dim">99</td><td class="r pos">73</td><td class="r">33</td></tr>
+    <tr><td>Claude Opus 4.8</td><td class="r">53</td><td class="r dim">92</td><td class="r">67</td><td class="r">38</td></tr>
+    <tr><td>Claude Sonnet 4.6</td><td class="r">50</td><td class="r dim">98</td><td class="r">65</td><td class="r">40</td></tr>
+    <tr><td>Qwen3.7 Plus</td><td class="r">38</td><td class="r dim">93</td><td class="r">60</td><td class="r">49</td></tr>
+    <tr><td>MiniMax-M3</td><td class="r">27</td><td class="r dim">89</td><td class="r neg">50</td><td class="r neg">61</td></tr>
+    <tr><td>GPT-OSS 120B</td><td class="r">18</td><td class="r dim">87</td><td class="r neg">43</td><td class="r neg">68</td></tr>
+    <tr><td>MiniMax-M2.7</td><td class="r">17</td><td class="r dim">90</td><td class="r neg">47</td><td class="r neg">70</td></tr>
+  </table>
+  <div class="callout"><b>win-take is saturated (87–100%)</b> — everyone grabs an available five. What fans out is <b>defense</b>: <b>block%</b> and <b>late-game blunders</b> track win-rate almost 1:1. <b>GPT 5.5 is the field's best blocker</b> (80%, #2); GPT 5.4 sits mid-pack. A threat is missed <b>12.8%</b> of the time overall.</div>
 </section>
 <section>
   <div class="kicker">Case study · Gomoku · in-depth</div>
