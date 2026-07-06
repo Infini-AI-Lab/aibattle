@@ -532,7 +532,7 @@ new Chart(document.getElementById('phase'), {{ type:'line',
   data:{{ labels:PH, datasets:M.map((m,i)=>({{label:m, borderColor:COLORS[i%COLORS.length],
     backgroundColor:COLORS[i%COLORS.length], tension:.2,
     data:PH.map(ph=>pm[m].phase_blunder_rate[ph]*100)}}))}},
-  options:{{ scales:{{y:{{min:0, title:{{display:true,text:'blunder %'}}}}}},
+  options:{{ scales:{{y:{{min:0, title:{{display:true,text:'error %'}}}}}},
     plugins:{{legend:{{position:'bottom'}}}} }} }});
 
 new Chart(document.getElementById('len'), {{ type:'bar',
@@ -645,7 +645,7 @@ def render_game(game: str, rep: dict) -> str:
   <h2 class="section">2 · Why — what decides win &amp; loss</h2>
   <div class="grid2">
     <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
-    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
+    <div><h3>Error rate by game phase</h3><canvas id="phase"></canvas></div>
   </div>
   {_why_analysis(game)}
 

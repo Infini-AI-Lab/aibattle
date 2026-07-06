@@ -1,10 +1,10 @@
   <h3>🛡️ Defense, not offense, decides games</h3>
   <div class="callout">Converting an available immediate win (<b>win-take</b>) is near-saturated for everyone —
     it doesn't separate the field. The spread is all in <b>defense</b> (blocking the opponent's immediate
-    threat) and in <b>late-game blunders</b>: every model plays the opening cleanly, so skill is just not
+    threat) and in <b>late-game errors</b>: every model plays the opening cleanly, so skill is just not
     collapsing once threats pile up.</div>
   <table>
-    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-phase blunder %</th></tr>
+    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-game error %</th></tr>
     <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Opus 4.8</td><td>96</td><td>84</td><td>17</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>99</td><td>83</td><td>20</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek">DeepSeek V4 Pro</td><td>99</td><td>79</td><td>21</td></tr>
@@ -16,7 +16,7 @@
     <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>91</td><td>68</td><td class='neg'>43</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>95</td><td>64</td><td class='neg'>50</td></tr>
   </table>
-  <div class="callout">win-take clusters at 91–100% (offense solved); block% and late-blunder% fan out across
+  <div class="callout">win-take clusters at 91–100% (offense solved); block% and late-game error % fan out across
     the whole field and track the Elo order almost monotonically.</div>
 
   <h3>🎯 The decisive test: miss-rate by threat axis</h3>
