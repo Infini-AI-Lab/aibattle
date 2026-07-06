@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🎰 Blackjack Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
-<link rel="stylesheet" href="replay.css?v=11">
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<link rel="stylesheet" href="replay.css">
 <style>
   .stage{grid-template-columns:minmax(340px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
@@ -115,7 +115,7 @@ let manifest=null, featured=[], modelData=null, ep=null, cursor=0, playing=false
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=17")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -124,7 +124,7 @@ async function init(){
   }
   $("modelSel").innerHTML = manifest.models.map((m,i) =>
     `<option value="${i}">${disp(m.model)}</option>`).join("");
-  try { featured = (await (await fetch("blackjack_featured.json?v=1")).json()).featured || []; }
+  try { featured = (await (await fetch("blackjack_featured.json")).json()).featured || []; }
   catch(e){ featured = []; }
   $("featSel").innerHTML = featured.map((f,i) => `<option value="${i}">${f.label}</option>`).join("")
     || `<option value="-1">(no featured hands)</option>`;
@@ -159,7 +159,7 @@ async function loadFeatured(i){
 
 async function loadModel(i){
   const m = manifest.models[i];
-  modelData = await (await fetch(BASE + m.file + "?v=17")).json();
+  modelData = await (await fetch(BASE + m.file + "")).json();
   $("epSel").innerHTML = modelData.episodes.map((e,idx) => {
     const r = e.net>0 ? `won ${fmt(e.net)}` : (e.net<0 ? `lost ${fmt(e.net)}` : "push");
     const n = e.moves.filter(m=>m.actor==="player").length;

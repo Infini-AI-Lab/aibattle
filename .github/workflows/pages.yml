@@ -1,0 +1,37 @@
+# Publish the static site (reports/ = site root, slides included) to GitHub Pages.
+# Enable once in repo Settings -> Pages -> Source: "GitHub Actions".
+name: Deploy site to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # site root = reports/ ; bundle slides/ inside it (dereference the local symlink)
+      - name: Assemble site
+        run: |
+          rm -rf _site
+          cp -rL reports _site
+          rm -rf _site/slides && cp -r slides _site/slides
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

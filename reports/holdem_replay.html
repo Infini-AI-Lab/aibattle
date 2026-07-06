@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — 🃏 Hold'em Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
-<link rel="stylesheet" href="replay.css?v=11">
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<link rel="stylesheet" href="replay.css">
 <style>
   .stage{grid-template-columns:minmax(360px,1fr) minmax(300px,400px);}
   @media (max-width:920px){ .stage{grid-template-columns:1fr;} }
@@ -105,7 +105,7 @@ const PARAMS = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
 
 async function init(){
-  try { manifest = await (await fetch(BASE + "manifest.json?v=17")).json(); }
+  try { manifest = await (await fetch(BASE + "manifest.json")).json(); }
   catch(e){
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -114,7 +114,7 @@ async function init(){
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
     `<option value="${i}">${disp(p.a)} vs ${disp(p.b)} · rep ${p.rep}</option>`).join("");
-  try { featured = (await (await fetch("holdem_featured.json?v=1")).json()).featured || []; }
+  try { featured = (await (await fetch("holdem_featured.json")).json()).featured || []; }
   catch(e){ featured = []; }
   $("featSel").innerHTML = featured.map((f,i) => `<option value="${i}">${f.label}</option>`).join("")
     || `<option value="-1">(no featured hands)</option>`;
@@ -164,7 +164,7 @@ async function loadFeatured(i){
 async function loadPair(i){
   const p = manifest.pairs[i];
   $("pairSel").value = String(i);
-  pairData = await (await fetch(BASE + p.file + "?v=17")).json();
+  pairData = await (await fetch(BASE + p.file + "")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const w = e.winner_name ? `${disp(e.winner_name)} ${fmt(e.returns[e.winner])}` : "—";
     const n = e.moves.length;

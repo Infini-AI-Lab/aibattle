@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Battle Arena — ⚫ Gomoku-Lite Replay</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
-<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
-<link rel="stylesheet" href="replay.css?v=11">
+<link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>
+<link rel="stylesheet" href="replay.css">
 <style>
   .stage{grid-template-columns:minmax(320px,440px) 1fr;}
   @media (max-width:880px){ .stage{grid-template-columns:1fr;} }
@@ -111,7 +111,7 @@ const $ = id => document.getElementById(id);
 
 async function init() {
   try {
-    manifest = await (await fetch(BASE + "manifest.json?v=17")).json();
+    manifest = await (await fetch(BASE + "manifest.json")).json();
   } catch (e) {
     $("panel").innerHTML = "<div class='invalid'>Could not load replay data.</div>" +
       "<div class='hint'>Expected <code>" + BASE + "manifest.json</code>. Run " +
@@ -120,7 +120,7 @@ async function init() {
   }
   $("pairSel").innerHTML = manifest.pairs.map((p,i) =>
     `<option value="${i}">${disp(p.a)} vs ${disp(p.b)}</option>`).join("");
-  try { featured = (await (await fetch("gomoku_featured.json?v=1")).json()).featured || []; } catch(e){ featured=[]; }
+  try { featured = (await (await fetch("gomoku_featured.json")).json()).featured || []; } catch(e){ featured=[]; }
   $("featSel").innerHTML = featured.map((f,i)=>`<option value="${i}">${f.label}</option>`).join("") || `<option value="-1">(none)</option>`;
   $("featSel").onchange = () => loadFeatured(+$("featSel").value);
   $("pairSel").onchange = () => loadPair(+$("pairSel").value);
@@ -167,7 +167,7 @@ async function loadFeatured(i){
 
 async function loadPair(i) {
   const p = manifest.pairs[i];
-  pairData = await (await fetch(BASE + p.file + "?v=17")).json();
+  pairData = await (await fetch(BASE + p.file + "")).json();
   $("epSel").innerHTML = pairData.episodes.map((e,idx) => {
     const r = e.reason==="win" ? `${disp(e.winner_name)} wins` : (e.reason||"");
     return `<option value="${idx}">#${e.episode+1} · ${e.length} plies · ${r}</option>`;

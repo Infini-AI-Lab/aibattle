@@ -53,7 +53,7 @@ def _pair_models(pair: dict) -> set:
 # The site navbar is a shared client-side component (reports/nav.css + nav.js);
 # pages include those two files in <head> via NAV_HEAD and the bar is injected
 # by JS, so the nav markup lives in one place.
-NAV_HEAD = '<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>'
+NAV_HEAD = '<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
 
 # Page-specific styles that used to ride along with the nav CSS.
 EXTRA_CSS = ""
@@ -274,7 +274,7 @@ def _match_strategy(data: dict, models: list[str]) -> dict:
             if hand is not None:
                 href += f"&hand={hand}"
             step_param = "end" if hand is not None and step == 0 else step
-            href += f"&step={step_param}&cacheBust=18"
+            href += f"&step={step_param}"
         s[model]["cases"].append({
             "dimension": dimension, "title": title, "signal": signal,
             "opponent": opponent, "episode": episode, "hand": hand, "step": step, "href": href,
@@ -753,7 +753,7 @@ def render_html(rep: dict, beh: dict) -> str:
     dq_html = _match_decision_quality_html(rep)
     strategy_html, strategy_js = _match_strategy_html(rep)
     traj_html, traj_js = _lead_traj_html(rep)
-    replay_btn = ('<a class="replaybtn" href="match_replay.html?cacheBust=19">'
+    replay_btn = ('<a class="replaybtn" href="match_replay.html">'
                   '🎬 Watch featured replays →</a>')
     ep_range = rep.get("episode_count_range") or [rep["episodes_per_pair"], rep["episodes_per_pair"]]
     if ep_range[0] == ep_range[1]:

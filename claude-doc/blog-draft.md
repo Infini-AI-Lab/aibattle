@@ -10,7 +10,7 @@ Static benchmarks are easy to overfit: they saturate, leak into training data, a
 
 ## 1. The leaderboard
 
-![Cross game leaderboard](blog-assets/leaderboard-placeholder.png)
+![Cross game leaderboard](../assets/leaderboard-placeholder.png)
 *(use the overview leaderboard capture: Arena Rank Score + Arena Elo, 5 core head to head games)*
 
 The winner changes from game to game:
@@ -35,9 +35,9 @@ Main takeaways:
 
 A single ranking also compresses away many of the interesting matchups. The full head to head view for the two Hold'em games:
 
-![Hold'em 1 Hand head to head](blog-assets/h2h_1hand.png)
+![Hold'em 1 Hand head to head](../assets/h2h_1hand.png)
 
-![Hold'em Match head to head](blog-assets/h2h_match.png)
+![Hold'em Match head to head](../assets/h2h_match.png)
 *Read row vs column. The cells show upsets the ranking hides: in single hands, **Claude Sonnet and DeepSeek both beat the overall champion GPT-5.5** head to head. In the 30 hand match format, GPT-5.5 **sweeps all ten pairings** (52 to 78%). Winning one hand and winning a match are different skills.*
 
 A ranking answers *who* wins. Because we hold every hole card and every line of reasoning, we can also ask *why*, and the answers look very different from what a static benchmark can show. The next three sections walk through three examples.
@@ -46,7 +46,7 @@ A ranking answers *who* wins. Because we hold every hole card and every line of 
 
 For every poker decision, we know the model's private cards, so we can score the hand's *true* strength (Monte Carlo win probability against a random hand) at the moment of action. Plot "how often does the model bet?" against "how good is its hand, really?" and each model reveals a distinct playing style:
 
-![Bet frequency vs. true hand strength](blog-assets/policy_curve.png)
+![Bet frequency vs. true hand strength](../assets/policy_curve.png)
 
 Two patterns stand out:
 
@@ -55,7 +55,7 @@ Two patterns stand out:
 
 **And the deception pays.** Split each model's 1 Hand winnings by *how* each pot was won: chips won by forcing folds (the opponent folded, so cards were never shown) versus chips won at showdown (the better hand won at reveal):
 
-![Where each model's chips come from](blog-assets/chip_sources.png)
+![Where each model's chips come from](../assets/chip_sources.png)
 *Hold'em 1 Hand round robin. GPT-5.5's entire profit comes from folds. It gets paid without showing its cards. Kimi and Qwen are the mirror image: they lose chips to fold pressure but win at showdown, the honest grinder's income. Claude Opus is the warning case: a small fold pressure gain erased by −1.61/hand at showdown, the price of paying off everyone else's value bets.*
 
 The same split shows up everywhere we looked for deception: GPT-5.5's river bets are 52% air (Claude Opus: 0.5%; in 200 sampled river bets it bluffed *once*); GPT-5.4 is the only model of 12 whose **bet size carries no detectable information** about its hand (every other model, Claude included, leaks strength through bet size); and in solved Kuhn poker, both Claude models play deterministic pure strategies in a game whose optimal solution *requires* randomized bluffing.
@@ -71,11 +71,11 @@ The Claude models are strong frontier models, but they finish in the middle of t
 
 **Faking strength is where the money is.** GPT-5.5's river bets are bluffs **52%** of the time; Claude Opus: **0.5%**. That is exactly the income Claude gives up: GPT-5.5 collects **+85 bb/100** by making opponents fold, five times Claude's +17. (GPT-5.4 bluffs constantly and collects +4: deception only pays when opponents believe it.)
 
-![Bluff rate and pressure income](blog-assets/fig_bluff.png)
+![Bluff rate and pressure income](../assets/fig_bluff.png)
 
 **Faking weakness barely exists for anyone.** The strict trap line (check → opponent bets → *raise*) happens 15 to 25% of the time for humans. Every model is below 2%. Claude Opus did it **4 times in ~84,000 hands**, and all 4 times it actually had the goods.
 
-![Trap rate](blog-assets/fig_trap.png)
+![Trap rate](../assets/fig_trap.png)
 
 **Claude plays the cards, not the player.** A bet carries information: *"I am strong."* Claude barely uses that signal. Give every model a hopeless hand (one that wins less than 20% of the time) and let the opponent bet: GPT-5.4 continues **11%** of the time, GPT-5.5 **18%**, and **Claude Opus 33%**, twice the field, as if the bet told it nothing. The cleanest case is three card mini poker, where the optimal strategy is known exactly: holding the middle card and facing a bet, the right move is to call about **a third** of the time. Both Claude models call **100%** of the time, with every bet taken at face value and paid off.
 
@@ -139,7 +139,7 @@ The pattern follows the geometry of reading. A horizontal line is contiguous cha
 
 - 📊 [Live leaderboard](index.html): full rankings and detailed reports for each game
 - 🎬 [Featured replays](replays.html): watch the hands and games behind these findings
-- 📽️ [Slides](../slides/index.html): a short deck introducing the arena and key findings
+- 📽️ [Slides](slides/index.html): a short deck introducing the arena and key findings
 - 💻 [GitHub](https://github.com/Infini-AI-Lab/aibattle): the framework and analysis code
 
 ## 6. Future plans

@@ -126,7 +126,7 @@ def _favicon(emoji: str) -> str:
 # The site navbar is a shared client-side component — see reports/nav.css and
 # reports/nav.js. Every generated page includes those two files in <head> (via
 # NAV_HEAD) and the bar is injected by JS, so the nav markup lives in one place.
-NAV_HEAD = '<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>'
+NAV_HEAD = '<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css"><script defer src="nav.js"></script>'
 
 
 def _other(p):
@@ -599,7 +599,7 @@ def render_game(game: str, rep: dict) -> str:
                        f"{_heat_html(pm[m]['heat'])}</div>")
 
     fpw = rep["first_player_win_rate"] * 100
-    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html?cacheBust=19">'
+    replay_btn = (f'<a class="replaybtn" href="{game}_replay.html">'
                   f'🎬 Watch featured replays →</a>')
     emoji, name = TITLE[game].split(" ", 1)
     return f"""<!DOCTYPE html>
