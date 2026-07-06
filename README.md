@@ -4,9 +4,10 @@
 
 **A game arena for evaluating how AI agents make decisions under competition**
 
+[![Website](https://img.shields.io/badge/%F0%9F%8E%B2_website-live-8f1d1d.svg)](https://infini-ai-lab.github.io/aibattle/)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Games](https://img.shields.io/badge/games-10-orange.svg)](#-games)
+[![Games](https://img.shields.io/badge/games-8-orange.svg)](#-games)
 [![Status](https://img.shields.io/badge/status-v0-lightgrey.svg)](#)
 
 </div>
@@ -23,7 +24,7 @@ The shared runner keeps the evaluation comparable across games and agents.
 
 It is built around four ideas:
 
-- **Same setup, many games.** The same runner and scoring code cover **10 games**
+- **Same setup, many games.** The same runner and scoring code cover **8 games**
   across perfect information, imperfect information, and simultaneous play.
 - **Fair comparisons.** Matches are round robin and seat swapped where that
   matters, so the reported skill is not just a seating or first move advantage.
@@ -35,7 +36,7 @@ It is built around four ideas:
 
 ## 📰 News
 
-- **v0**: initial public arena with 10 games, a
+- **v0**: initial public arena with 8 games, a
   [live leaderboard](https://infini-ai-lab.github.io/aibattle/), generated game reports,
   [curated replays](https://infini-ai-lab.github.io/aibattle/replays.html),
   a [blog post](https://infini-ai-lab.github.io/aibattle/blog.html), and a
@@ -98,11 +99,9 @@ Set a player's agent `type: human` to play any game from the terminal.
 | **Leduc Hold'em** | imperfect | 6 card, two street poker |
 | **Hold'em 1 Hand** | imperfect | heads up Texas Hold'em, one hand per deal |
 | **Hold'em Match** | imperfect | heads up Hold'em, 30 hand matches with carried stacks |
-| **Hold'em Table** | imperfect | 5 handed ring game, ranked by finishing place |
 | **Blackjack** | imperfect | vs the house dealer (no opponent) |
 | **Connect Four** | perfect | solved 7×6 line up game, scored on tactical accuracy |
 | **Gomoku Lite** | perfect | 9×9 five in a row |
-| **Othello Lite** | perfect | reversi on a small board |
 | **Colonel Blotto** | simultaneous | resource allocation game |
 
 ## 🧩 Concepts
@@ -159,11 +158,6 @@ copies and the build only Table and Blackjack viewers.
 }
 ```
 
-## 🙏 Acknowledgments
-
-Reuses ideas and design from open source agent evaluation and poker research
-projects. Company logos shown in the reports are the trademarks of their
-respective owners, used only to identify each model's maker.
 
 ## License
 
