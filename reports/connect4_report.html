@@ -3,7 +3,7 @@
 <title>AI Battle Arena — 🔴 Connect Four</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -267,15 +267,15 @@
   <h2 class="section">2 · Why — what decides win &amp; loss</h2>
   <div class="grid2">
     <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
-    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
+    <div><h3>Error rate by game phase</h3><canvas id="phase"></canvas></div>
   </div>
   <h3>🛡️ Defense, not offense, decides games</h3>
   <div class="callout">Converting an available immediate win (<b>win-take</b>) is near-saturated for everyone —
     it doesn't separate the field. The spread is all in <b>defense</b> (blocking the opponent's immediate
-    threat) and in <b>late-game blunders</b>: every model plays the opening cleanly, so skill is just not
+    threat) and in <b>late-game errors</b>: every model plays the opening cleanly, so skill is just not
     collapsing once threats pile up.</div>
   <table>
-    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-phase blunder %</th></tr>
+    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-game error %</th></tr>
     <tr><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic">Claude Opus 4.8</td><td>96</td><td>84</td><td>17</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>99</td><td>83</td><td>20</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek">DeepSeek V4 Pro</td><td>99</td><td>79</td><td>21</td></tr>
@@ -287,7 +287,7 @@
     <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>91</td><td>68</td><td class='neg'>43</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>95</td><td>64</td><td class='neg'>50</td></tr>
   </table>
-  <div class="callout">win-take clusters at 91–100% (offense solved); block% and late-blunder% fan out across
+  <div class="callout">win-take clusters at 91–100% (offense solved); block% and late-game error % fan out across
     the whole field and track the Elo order almost monotonically.</div>
 
   <h3>🎯 The decisive test: miss-rate by threat axis</h3>
@@ -402,7 +402,7 @@ new Chart(document.getElementById('phase'), { type:'line',
   data:{ labels:PH, datasets:M.map((m,i)=>({label:m, borderColor:COLORS[i%COLORS.length],
     backgroundColor:COLORS[i%COLORS.length], tension:.2,
     data:PH.map(ph=>pm[m].phase_blunder_rate[ph]*100)}))},
-  options:{ scales:{y:{min:0, title:{display:true,text:'blunder %'}}},
+  options:{ scales:{y:{min:0, title:{display:true,text:'error %'}}},
     plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('len'), { type:'bar',

@@ -3,7 +3,7 @@
 <title>AI Battle Arena — ⚫ Gomoku-Lite</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚫</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=32"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
 <style>
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
   :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
@@ -267,16 +267,16 @@
   <h2 class="section">2 · Why — what decides win &amp; loss</h2>
   <div class="grid2">
     <div><h3>Tactical accuracy (win-take / block %)</h3><canvas id="tac"></canvas></div>
-    <div><h3>Blunder rate by game phase</h3><canvas id="phase"></canvas></div>
+    <div><h3>Error rate by game phase</h3><canvas id="phase"></canvas></div>
   </div>
   <h3>🛡️ Defense, not offense, decides games</h3>
   <div class="callout">Completing an available five (<b>win-take</b>) is near-saturated for everyone — it doesn't
     separate the field. The spread is all in <b>defense</b> (blocking the opponent's immediate five-threat)
-    and in <b>late-game blunders</b>: every model plays the opening cleanly, so skill is just not collapsing
+    and in <b>late-game errors</b>: every model plays the opening cleanly, so skill is just not collapsing
     once threats pile up. Gomoku's bigger 9×9 board makes defense harder, so block% sits lower than in
     Connect Four across the board.</div>
   <table>
-    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-phase blunder %</th></tr>
+    <tr><th class='model'>model</th><th>win-take %</th><th>block %</th><th>late-game error %</th></tr>
     <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.2</td><td>92</td><td>70</td><td>24</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI">Kimi K2.6</td><td>100</td><td>74</td><td>19</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai">GLM-5.1</td><td>94</td><td>67</td><td>31</td></tr>
@@ -288,9 +288,9 @@
     <tr><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI">GPT-OSS 120B</td><td>86</td><td>47</td><td class='neg'>65</td></tr>
     <tr><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax">MiniMax-M2.7</td><td>90</td><td>47</td><td class='neg'>70</td></tr>
   </table>
-  <div class="callout">win-take clusters at 86–100% (offense solved); block% and late-blunder% fan out across
+  <div class="callout">win-take clusters at 86–100% (offense solved); block% and late-game error % fan out across
     the whole field and track the Elo order almost monotonically. Claude is the standout anomaly — strong in
-    Connect Four but its late-blunder rate balloons to ~43% here on the sparse 9×9 board.</div>
+    Connect Four but its late-game error rate balloons to ~43% here on the sparse 9×9 board.</div>
 
   <h3>🎯 The decisive test: miss-rate by threat axis</h3>
   <div class="callout">Boards are sent as <b>space-separated text</b>, read row by row (<code> X . O . .</code>). The cost of this
@@ -403,7 +403,7 @@ new Chart(document.getElementById('phase'), { type:'line',
   data:{ labels:PH, datasets:M.map((m,i)=>({label:m, borderColor:COLORS[i%COLORS.length],
     backgroundColor:COLORS[i%COLORS.length], tension:.2,
     data:PH.map(ph=>pm[m].phase_blunder_rate[ph]*100)}))},
-  options:{ scales:{y:{min:0, title:{display:true,text:'blunder %'}}},
+  options:{ scales:{y:{min:0, title:{display:true,text:'error %'}}},
     plugins:{legend:{position:'bottom'}} } });
 
 new Chart(document.getElementById('len'), { type:'bar',

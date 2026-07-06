@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Battle Arena: Benchmarking LLMs with Adversarial Games</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="stylesheet" href="nav.css?v=7"><script defer src="nav.js?v=38"></script>
+<style>
+  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+          --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+          --pos:#1a7f37; --neg:#b91c1c; --link:#4338ca; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; }
+  .wrap { max-width:860px; margin:0 auto; padding:36px 24px; box-sizing:content-box; }
+  h1 { font-size:22px; font-weight:700; color:var(--red); margin:0 0 4px; }
+  .cursor { display:inline-block; width:9px; height:15px; background:var(--red);
+    vertical-align:baseline; margin-left:6px; animation:blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  .sub { font-size:13px; color:var(--dim); margin-bottom:8px; }
+  .draft { display:inline-block; font-size:11px; color:var(--dim); border:1px dashed var(--red);
+    padding:2px 10px; margin-bottom:26px; }
+  .draft b { color:var(--red); }
+  h2 { font-size:23px; font-weight:700; margin:56px 0 18px; padding-top:16px;
+    border-top:3px solid var(--red); color:var(--fg); letter-spacing:.01em; }
+  h2:first-of-type { margin-top:32px; }
+  h2::before { content:"## "; color:var(--red); }
+  h2.nopfx::before { content:none; }
+  h3 { font-size:14px; font-weight:700; margin:30px 0 8px; }
+  h3::before { content:"### "; color:var(--red); }
+  p, li { font-size:13.5px; line-height:1.75; }
+  p { margin:12px 0; }
+  ul, ol { margin:10px 0; padding-left:26px; }
+  li { margin:7px 0; }
+  b, strong { font-weight:700; }
+  em, i { color:var(--dim); }
+  a { color:var(--link); }
+  a:hover { color:var(--red); }
+  .tldr { background:var(--faint); border:1px solid var(--line); border-left:3px solid var(--red);
+    padding:14px 18px; margin:22px 0; font-size:13.5px; line-height:1.7; }
+  .tldr b:first-child { color:var(--red); }
+  blockquote { margin:16px 0; padding:10px 16px; border-left:3px solid var(--line);
+    color:var(--dim); font-style:italic; }
+  table { border-collapse:collapse; margin:16px auto; font-size:13px; width:100%; }
+  th, td { padding:7px 12px; border-bottom:1px solid var(--line); text-align:left; }
+  th { color:var(--dim); font-weight:600; font-size:12px; }
+  td.r, th.r { text-align:right; }
+  .pos { color:var(--pos); font-weight:700; } .neg { color:var(--neg); font-weight:700; }
+  figure { margin:22px 0; }
+  figure img { max-width:100%; border:1px solid var(--line); background:#fff; display:block; }
+  figcaption { font-size:12px; color:var(--dim); margin-top:8px; line-height:1.6; }
+  .divider { border:none; border-top:1px solid var(--line); margin:40px 0; }
+  .footnote { font-size:12px; color:var(--dim); line-height:1.7; }
+  @media (max-width:760px) {
+    .wrap { padding:24px 14px; }
+    table { display:block; overflow-x:auto; white-space:nowrap; }
+  }
+
+  /* --- 嵌入的排行榜表格 (与主页同款) --- */
+  table.lb { border-collapse:collapse; font-size:13px; margin:14px auto; width:100%; }
+  table.lb th, table.lb td { padding:7px 12px; border-bottom:1px solid var(--line); text-align:center; }
+  table.lb th { color:var(--dim); font-weight:600; font-size:12px; }
+  table.lb td.rk, table.lb th.rk { width:34px; color:var(--dim); }
+  table.lb td.model, table.lb th.model { text-align:left; font-weight:700; white-space:nowrap; }
+  .mlogo { height:1.05em; width:1.05em; vertical-align:-0.18em; margin-right:7px; }
+  .scorecell { position:relative; min-width:150px; }
+  .scorecell .bar { position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:16px; background:var(--red); opacity:.16; }
+  .scorecell .sval { position:relative; font-weight:700; color:var(--red); }
+  .elocell { position:relative; min-width:130px; }
+  .elocell .ebar { position:absolute; left:0; top:50%; transform:translateY(-50%);
+    height:16px; background:#4338ca; opacity:.16; }
+  .elocell .eval { position:relative; font-weight:700; color:#4338ca; }
+  .elocell .eval .small, table.lb .small { font-weight:400; color:var(--dim); font-size:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AI Battle Arena: Benchmarking LLMs with Adversarial Games<span class="cursor"></span></h1>
+<div style="font-size:13px;margin:6px 0 2px;line-height:1.7;">
+  <a href="https://x.com/haizhong_zheng">Haizhong Zheng</a><span style="color:var(--red)">*</span>,
+  <a href="https://www.linkedin.com/in/yizhuo-di-1b681730a/">Yizhuo Di</a><span style="color:var(--red)">*</span>,
+  <a href="https://x.com/letianruan">Letian Ruan</a><span style="color:var(--red)">*</span>,
+  <a href="https://x.com/shuoweijin">Shuowei Jin</a>,
+  <a href="https://x.com/BeidiChen">Beidi Chen</a>
+  <span style="color:var(--dim);font-size:12px;margin-left:8px;"><span style="color:var(--red)">*</span> Core Contributors</span>
+</div>
+<div class="sub">🎲 what 84,000 hands of poker reveal that static benchmarks can't · July 2026</div>
+
+<div class="tldr"><b>TL;DR:</b> We built an arena where frontier LLMs play <b>8 adversarial games</b> —
+poker, Gomoku, Colonel Blotto and more — head-to-head under <b>one identical pipeline</b>, and ranked
+them with Elo. GPT-5.5 tops the leaderboard. But the ranking is the <i>least</i> interesting thing we
+found. Because every decision is logged with ground truth, the games work like a <b>behavioral
+microscope</b>: they show <i>how</i> each model wins, loses — and <b>lies</b>. Some models turn out to
+be textbook bluffers; one family is so honest you can read its cards from its bets.</div>
+
+<h2>1 · The leaderboard</h2>
+
+<div style="overflow-x:auto;">
+<table class="lb">
+      <thead>
+      <tr><th class='rk'>#</th><th class='model'>Model</th>
+        <th><span class="hcell">Arena Rank Score
+          </span></th>
+        <th><span class="hcell">Arena Elo
+          </span></th>
+        </tr>
+      </thead>
+      <tbody><tr data-score='88.0' data-elo='1678'><td class='rk'>🥇</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.5</td><td class='scorecell'><span class='bar' style='width:88.0%'></span><span class='sval'>88</span></td><td class='elocell'><span class='ebar' style='width:100%'></span><span class='eval'>1678<div class='small'>+1.19 SD</div></span></td></tr><tr data-score='82.0' data-elo='1616'><td class='rk'>🥈</td><td class='model'><img class="mlogo" src="logos/moonshot.svg" alt="Moonshot AI" title="Moonshot AI">Kimi K2.6</td><td class='scorecell'><span class='bar' style='width:82.0%'></span><span class='sval'>82</span></td><td class='elocell'><span class='ebar' style='width:87%'></span><span class='eval'>1616<div class='small'>+0.77 SD</div></span></td></tr><tr data-score='72.0' data-elo='1620'><td class='rk'>🥉</td><td class='model'><img class="mlogo" src="logos/openai.svg" alt="OpenAI" title="OpenAI">GPT 5.4</td><td class='scorecell'><span class='bar' style='width:72.0%'></span><span class='sval'>72</span></td><td class='elocell'><span class='ebar' style='width:87%'></span><span class='eval'>1620<div class='small'>+0.80 SD</div></span></td></tr><tr data-score='66.0' data-elo='1558'><td class='rk'>4</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.2</td><td class='scorecell'><span class='bar' style='width:66.0%'></span><span class='sval'>66</span></td><td class='elocell'><span class='ebar' style='width:74%'></span><span class='eval'>1558<div class='small'>+0.39 SD</div></span></td></tr><tr data-score='60.0' data-elo='1554'><td class='rk'>5</td><td class='model'><img class="mlogo" src="logos/zai.svg" alt="Z.ai" title="Z.ai">GLM-5.1</td><td class='scorecell'><span class='bar' style='width:60.0%'></span><span class='sval'>60</span></td><td class='elocell'><span class='ebar' style='width:73%'></span><span class='eval'>1554<div class='small'>+0.36 SD</div></span></td></tr><tr data-score='48.0' data-elo='1539'><td class='rk'>6</td><td class='model'><img class="mlogo" src="logos/deepseek.svg" alt="DeepSeek" title="DeepSeek">DeepSeek V4 Pro</td><td class='scorecell'><span class='bar' style='width:48.0%'></span><span class='sval'>48</span></td><td class='elocell'><span class='ebar' style='width:70%'></span><span class='eval'>1539<div class='small'>+0.26 SD</div></span></td></tr><tr data-score='46.0' data-elo='1493'><td class='rk'>7</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Sonnet 4.6</td><td class='scorecell'><span class='bar' style='width:46.0%'></span><span class='sval'>46</span></td><td class='elocell'><span class='ebar' style='width:60%'></span><span class='eval'>1493<div class='small'>-0.05 SD</div></span></td></tr><tr data-score='38.0' data-elo='1442'><td class='rk'>8</td><td class='model'><img class="mlogo" src="logos/anthropic.svg" alt="Anthropic" title="Anthropic">Claude Opus 4.8</td><td class='scorecell'><span class='bar' style='width:38.0%'></span><span class='sval'>38</span></td><td class='elocell'><span class='ebar' style='width:49%'></span><span class='eval'>1442<div class='small'>-0.39 SD</div></span></td></tr><tr data-score='28.0' data-elo='1434'><td class='rk'>9</td><td class='model'><img class="mlogo" src="logos/alibaba.svg" alt="Alibaba" title="Alibaba">Qwen3.7 Plus</td><td class='scorecell'><span class='bar' style='width:28.0%'></span><span class='sval'>28</span></td><td class='elocell'><span class='ebar' style='width:47%'></span><span class='eval'>1434<div class='small'>-0.44 SD</div></span></td></tr><tr data-score='20.0' data-elo='1349'><td class='rk'>10</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M3</td><td class='scorecell'><span class='bar' style='width:20.0%'></span><span class='sval'>20</span></td><td class='elocell'><span class='ebar' style='width:29%'></span><span class='eval'>1349<div class='small'>-1.00 SD</div></span></td></tr><tr data-score='2.0' data-elo='1216'><td class='rk'>11</td><td class='model'><img class="mlogo" src="logos/minimax.svg" alt="MiniMax" title="MiniMax">MiniMax-M2.7</td><td class='scorecell'><span class='bar' style='width:2.0%'></span><span class='sval'>2</span></td><td class='elocell'><span class='ebar' style='width:0%'></span><span class='eval'>1216<div class='small'>-1.89 SD</div></span></td></tr></tbody>
+    </table>
+</div>
+<p style="font-size:12px;color:var(--dim);margin-top:6px;">Five head-to-head games (Connect Four,
+Gomoku, Hold'em 1-Hand, Hold'em Match, Leduc). <b>Arena Rank Score</b> = ordinal finish, averaged;
+<b>Arena Elo</b> = margin-aware, standardized within each game. Interactive version (sortable, with
+metric definitions): <a href="index.html">the live leaderboard</a>.</p>
+
+<p>And game by game, the crown moves around — click through for each game's full report:</p>
+
+<table style="max-width:660px">
+<tr><th>game</th><th>info</th><th class="r">champion</th></tr>
+<tr><td><a href="holdem_tournament_report.html">Hold'em, 1-Hand</a></td><td style="color:var(--dim)">imperfect</td><td class="r"><b>GPT 5.5</b></td></tr>
+<tr><td><a href="match_tournament_report.html">Hold'em, 30-hand Match</a></td><td style="color:var(--dim)">imperfect</td><td class="r"><b>GPT 5.5</b></td></tr>
+<tr><td><a href="kuhn_tournament_report.html">Kuhn Poker</a></td><td style="color:var(--dim)">imperfect</td><td class="r"><b>GPT 5.5</b></td></tr>
+<tr><td><a href="leduc_report.html">Leduc Hold'em</a></td><td style="color:var(--dim)">imperfect</td><td class="r"><b>GLM-5.2</b></td></tr>
+<tr><td><a href="blackjack_report.html">Blackjack</a></td><td style="color:var(--dim)">imperfect</td><td class="r"><b>GPT 5.4</b></td></tr>
+<tr><td><a href="connect4_report.html">Connect Four</a></td><td style="color:var(--dim)">perfect</td><td class="r"><b>Claude Opus 4.8</b></td></tr>
+<tr><td><a href="gomoku_report.html">Gomoku</a></td><td style="color:var(--dim)">perfect</td><td class="r"><b>GPT 5.5</b></td></tr>
+<tr><td><a href="blotto_report.html">Colonel Blotto</a></td><td style="color:var(--dim)">simultaneous</td><td class="r"><b>Kimi K2.6</b></td></tr>
+</table>
+<p style="font-size:12px;color:var(--dim);margin-top:-6px;">Champion = top Elo within that game
+(Blackjack: best net vs the dealer).</p>
+
+<p>Headlines:</p>
+<ul>
+  <li><b>GPT-5.5 is #1 overall</b> (Rank Score 88, Arena Elo 1678, +1.19 SD) — and it is #1 in both
+  poker formats by a wide margin (+80 bb/100 in 1-Hand).</li>
+  <li><b>An open-weight model is #2.</b> Kimi K2.6 sits between the two GPT-5 flagships and
+  <i>ahead</i> of GPT-5.4 on rank score. The frontier is not closed-source-only.</li>
+  <li><b>The Claude models land mid-table</b> (7th and 8th) — and the <i>reason</i> turns out to be
+  the most interesting finding in the whole project (Section 2).</li>
+  <li><b>No model dominates everywhere.</b> The crowns split four ways: GPT-5.5 takes poker and
+  Gomoku, Claude Opus takes Connect Four, Kimi takes Colonel Blotto, GLM-5.2 takes Leduc. Rankings
+  reshuffle game by game — "intelligence" here is not one number.</li>
+</ul>
+
+<p>A single-column ranking is also a lossy compression of what actually happened. Here is the full
+head-to-head picture for the two poker formats:</p>
+
+<figure>
+  <img src="blog-assets/h2h_1hand.png" alt="Hold'em 1-Hand head-to-head: net chips per hand, row vs column">
+</figure>
+
+<figure>
+  <img src="blog-assets/h2h_match.png" alt="Hold'em Match head-to-head: match win percent, row vs column">
+  <figcaption>Read row vs column. The cells hold upsets the ranking hides: in single hands,
+  <b>Claude Sonnet and DeepSeek both beat the overall champion GPT-5.5</b> head-to-head — yet in the
+  30-hand match format GPT-5.5 <b>sweeps all ten pairings</b> (52–78%). Winning a hand and winning a match are different skills.</figcaption>
+</figure>
+
+<p>A ranking answers <i>who</i> wins. Because we hold every hole card and every line of reasoning, we
+can also answer <i>why</i> — and the answers don't look like anything a static benchmark produces.
+The next three sections are three of those answers.</p>
+
+<h2>2 · GPT is a master "liar" in poker games</h2>
+
+<p>For every poker decision, we know the model's private cards, so we can score the hand's
+<i>true</i> strength (Monte-Carlo win probability against a random hand) at the moment of action.
+Plot "how often does the model bet?" against "how good is its hand, really?" — and each model draws
+its personality:</p>
+
+<figure>
+  <img src="blog-assets/policy_curve.png" alt="Bet frequency vs true hand strength: Claude's monotone staircase vs GPT's polarized U">
+  <figcaption>Postflop decisions with no bet to call, Hold'em 1-Hand + Match, ~2,000 sampled
+  decisions per model. Hand strength = Monte-Carlo win probability vs a random hand.</figcaption>
+</figure>
+
+<p>Two species:</p>
+<ul>
+  <li><b>The honest staircase (Claude).</b> Claude Opus bets <b>0%</b> of its hopeless hands and
+  <b>97%</b> of its monsters, rising monotonically in between. Its bet frequency <i>is</i> its hand
+  strength — an opponent could read its cards off its actions. Claude Sonnet, Kimi, and Qwen draw
+  the same shape.</li>
+  <li><b>The polarized U (GPT).</b> GPT-5.5 bets its <i>worst</i> hands (<b>60%</b>) more often than
+  its <i>medium</i> ones (36%). That's not a malfunction — it is the textbook game-theory structure:
+  hopeless hands lose at showdown anyway, so they make the best bluffs; medium hands prefer to
+  check. Nobody prompted this. It emerged.</li>
+</ul>
+
+<p><b>And the lying pays.</b> Decompose each model's 1-Hand winnings by <i>how</i> each pot was won:
+<b>pressure</b> chips (the opponent folded — cards never shown) versus <b>showdown</b> chips (won with
+the better hand at reveal):</p>
+
+<figure>
+  <img src="blog-assets/chip_sources.png" alt="Where each model's chips come from: pressure (fold-outs) vs showdown">
+  <figcaption>Hold'em 1-Hand round-robin. GPT-5.5's entire profit is pressure — it gets paid without
+  showing its cards. Kimi and Qwen are its mirror image: they lose the pressure war but win at
+  showdown, the honest grinder's income. Claude Opus is the cautionary tale — a small pressure gain
+  wiped out by <span class="neg">−1.61</span>/hand at showdown, the price of paying off everyone
+  else's value bets.</figcaption>
+</figure>
+
+<p>The same split shows up everywhere we looked for deception: GPT-5.5's river bets are <b>52%
+air</b> (Claude Opus: <b>0.5%</b> — in 200 sampled river bets it bluffed <i>once</i>); GPT-5.4 is the
+only model of 12 whose <b>bet sizing carries no information</b> about its hand (every other model,
+Claude included, statistically leaks strength through bet size); and in solved Kuhn poker, both
+Claude models play deterministic pure strategies — in a game whose optimal solution <i>requires</i>
+randomized bluffing.</p>
+
+<p>One asymmetry holds for every model, though: <b>they bluff, but they never trap.</b> Not one of 12
+models slow-plays strong hands at even half the rate it checks medium ones, and both Claudes
+check-raise ~100× less often than human baseline. LLMs learned the <i>aggressive</i> half of
+deception — the half that's written down in poker books — and not the <i>distributional</i> half that
+only exists across many hands.</p>
+
+<blockquote>This deserves its own post — <b>"GPT is a good liar, and Claude can't lie"</b> — with the
+full evidence chain, including intent quotes from model reasoning logs ("…we have no draws. So pure
+bluff."). Coming next.</blockquote>
+
+
+<h2>3 · Claude's honesty tax</h2>
+
+<p>The Claude models are frontier models that finish mid-table — and in Hold'em the gap is brutal
+(Opus: <b>−64 bb/100</b> vs GPT-5.5's <b>+80</b>). It isn't ability: Claude Opus is the field's
+<b>best Connect Four player</b>, where nothing is hidden. The gap opens exactly where poker rewards
+deception — which comes in exactly two moves:</p>
+
+<ul>
+  <li><b>Bluffing — faking strength</b>: bet a weak hand as if it were a monster;</li>
+  <li><b>Trapping — faking weakness</b>: check a monster, and spring it later.</li>
+</ul>
+
+<p><b>Faking strength is where the money is.</b> GPT-5.5's river bets are bluffs <b>52%</b> of the
+time; Claude Opus: <b>0.5%</b>. That is precisely the income Claude forgoes — GPT-5.5 collects
+<b>+85 bb/100</b> by folding opponents out, five times Claude's +17. (GPT-5.4 bluffs constantly and
+collects +4: lying only pays when people believe you.)</p>
+
+<figure>
+  <img src="blog-assets/fig_bluff.png" alt="River bluff rate and pressure income: Claude vs GPT">
+  <figcaption>Left: share of river bets made with a weak hand (&lt;40% win probability vs a random
+  hand). Right: chips won without showdown, per 100 hands (1-Hand round-robin).</figcaption>
+</figure>
+
+<p><b>Faking weakness barely exists — for anyone.</b> The strict trap line (check → opponent bets →
+<i>raise</i>) is a 15–25% play for humans. Every model lives below 2%. Claude Opus: <b>4 times in
+~84,000 hands</b> — and all 4 times it actually had the goods.</p>
+
+<figure>
+  <img src="blog-assets/fig_trap.png" alt="Check-raise (trap) rate: all four models far below the human norm">
+  <figcaption>Check-raise rate: of the times a model checked and the opponent bet, how often it came
+  back with a raise. Full census of both Hold'em formats.</figcaption>
+</figure>
+
+<p><b>Claude plays the cards, not the player.</b> A bet carries information — <i>"I am strong."</i>
+Claude barely uses it. Put a hopeless hand (one that wins less than 20% of the time) in every
+model's hands and let the opponent bet at them: GPT-5.4 pays to continue <b>11%</b> of the time,
+GPT-5.5 <b>18%</b> — <b>Claude Opus pays 33%</b>, twice the field, as if the bet told it nothing.
+The cleanest case is a three-card mini-poker whose optimal strategy is exactly known: holding the
+middle card and facing a bet, the right move is to pay about <b>a third</b> of the time. Both Claude
+models pay <b>100%</b> of the time — every single bet, taken at face value, checked with money.</p>
+
+<p><b>Together, the two habits decide the ranking.</b> Not bluffing forfeits the income (+17 vs
++85); not listening pays everyone else's bills (its river calls lose 74% of the time). GPT-5.5
+makes similar loose calls — but its lying income covers them. <b>Honesty doesn't lose the chips
+directly — it leaves every other leak uninsured.</b></p>
+
+<p>Read it both ways: Claude's honesty <b>generalizes</b> even where lying is legal and optimal —
+alignment holding up out of distribution. Whether that is <i>won't</i> or <i>can't</i>, behavior
+alone can't say (Claude also ran with no reasoning budget: ~3.5s/decision vs the field's 12–130s).
+The test is an intervention — instruct Claude to bluff and see if it executes. It's first on the
+Harness Arena list below.</p>
+
+<h2>4 · Reading is not seeing: LLMs lose spatial information in text</h2>
+
+<p>Gomoku win rates span 17% to 69% — and the reason models lose is strikingly specific. It isn't
+offense: every model completes its own winning line when one is available (87–100%, "win-take").
+What separates winners from losers is <b>defense</b> — blocking the opponent's line one move before
+it completes. Block rate tracks win rate almost 1:1:</p>
+
+<table style="max-width:560px">
+<tr><th>model</th><th class="r">win%</th><th class="r">win-take%</th><th class="r">block%</th></tr>
+<tr><td>Kimi K2.6</td><td class="r">69</td><td class="r" style="color:var(--dim)">100</td><td class="r pos">75</td></tr>
+<tr><td>GPT 5.5</td><td class="r">68</td><td class="r" style="color:var(--dim)">99</td><td class="r pos">80</td></tr>
+<tr><td>DeepSeek V4 Pro</td><td class="r">58</td><td class="r" style="color:var(--dim)">98</td><td class="r">68</td></tr>
+<tr><td>Claude Sonnet 4.6</td><td class="r">50</td><td class="r" style="color:var(--dim)">98</td><td class="r">65</td></tr>
+<tr><td>MiniMax-M3</td><td class="r">27</td><td class="r" style="color:var(--dim)">89</td><td class="r neg">50</td></tr>
+<tr><td>MiniMax-M2.7</td><td class="r">17</td><td class="r" style="color:var(--dim)">90</td><td class="r neg">47</td></tr>
+</table>
+<p style="font-size:12px;color:var(--dim);margin-top:-6px;">6 of 12 models shown; the pattern is
+monotone across the field. ~2,000 games.</p>
+
+<p><b>So losing = failing to block.</b> Where does blocking fail? First, look at what a model
+actually receives — the full board, as plain text (a real tournament position; diagonal highlighted
+by us):</p>
+
+<pre style="background:var(--faint);border:1px solid var(--line);padding:12px 16px;line-height:1.55;overflow-x:auto;">You are playing Gomoku-Lite (9x9). Place a stone on any empty cell; connect
+five in a row (horizontal, vertical, or diagonal) to win. Columns are A-I,
+rows 1-9; center is E5.
+
+You are X.
+   A B C D E F G H I
+ 1 O . . . . . . . .
+ 2 . <b style="color:var(--red)">X</b> . . . . . . .
+ 3 . . <b style="color:var(--red)">X</b> . . . . . .
+ 4 O . . <b style="color:var(--red)">X</b> . . . . .
+ 5 . . . . <b style="color:var(--red)">X</b> . . . .
+ 6 . . . . O O O . .
+ 7 . . . . . X . . .
+ 8 . . . . . . . . .
+ 9 . . . . . . . . .
+
+Respond with ONLY a coordinate for an empty cell, e.g. E5.</pre>
+
+<p>All the information is right there. But tag every immediate, blockable threat by its
+<i>orientation</i>, and block failures turn out to be anything but uniform:</p>
+
+<table style="max-width:640px">
+<tr><th>threat axis</th><th class="r">Gomoku miss rate</th><th class="r">Connect Four miss rate</th></tr>
+<tr><td>horizontal <span style="color:var(--dim)">(contiguous in the text)</span></td><td class="r pos">5.6%</td><td class="r pos">9.5%</td></tr>
+<tr><td>vertical <span style="color:var(--dim)">(strided across rows)</span></td><td class="r">12.2%</td><td class="r">11.7%</td></tr>
+<tr><td>diagonal ↘ <span style="color:var(--dim)">(with reading order)</span></td><td class="r">15.1%</td><td class="r">11.7%</td></tr>
+<tr><td>diagonal ↙ <span style="color:var(--dim)">(against reading order)</span></td><td class="r neg">24.2%</td><td class="r neg">15.7%</td></tr>
+</table>
+<p style="font-size:12px;color:var(--dim);margin-top:-6px;">Gomoku: 1,344 threats · Connect Four:
+2,302. Single blockable threats only.</p>
+
+<p>The gradient follows the geometry of reading. A horizontal line is contiguous characters; a
+vertical line is one fixed stride; a diagonal stone sits a full row of text (~23 characters) from
+its neighbor — and a ↙ line additionally walks <i>backwards</i> through the columns as the rows
+advance. The rules are mirror-symmetric, so the ↘/↙ gap can only come from the representation; the
+direction is unanimous across all 8 models with enough diagonal data (pooled z = 2.65, p = 0.004),
+and the same signature replicates in Connect Four.</p>
+
+<p><b>The takeaway: the prompt contains all the information, but the model does not perceive all of
+it.</b> An LLM doesn't see a grid — it reads one. Rebuilding 2-D relations from a 1-D stream
+degrades as the spatial relation gets more complex, and the resulting errors look like skill gaps
+while actually being perception gaps. That applies to anything you serialize into a prompt — tables,
+diagrams, game state — and the fix may be a better encoding rather than a better model. We plan to
+test exactly that in the Harness Arena.</p>
+
+<h2>5 · Links</h2>
+
+<ul>
+  <li>📊 <a href="index.html">Live leaderboard</a> — full rankings and every game's deep-dive report</li>
+  <li>🎬 <a href="replays.html">Featured replays</a> — watch the hands and games behind these findings</li>
+  <li>📽️ <a href="../slides/index.html">Slides</a> — a short deck introducing the arena and its findings</li>
+  <li>💻 <a href="https://github.com/Infini-AI-Lab/aibattle">GitHub</a> — the framework and analysis code</li>
+</ul>
+
+<h2>6 · Future plans</h2>
+
+<ul>
+  <li><b>The Harness Arena.</b> Same games, any scaffolding — measure how much of the above a better
+  harness can fix.</li>
+  <li><b>More closed-source models.</b> Bring the remaining frontier closed models into the arena.</li>
+  <li><b>More open-source models.</b> Keep the open-weight field current as new releases ship.</li>
+  <li><b>From evaluation to training.</b> Open the arena as an RL environment — train against it,
+  not just rank on it.</li>
+</ul>
+
+<h2 class="nopfx" style="border-top:none;padding-top:0;">Citation</h2>
+
+<p>Please cite this work as follows if you find it useful:</p>
+
+<pre style="background:var(--faint);border:1px solid var(--line);padding:12px 16px;line-height:1.55;overflow-x:auto;">@misc{aibattle2026,
+  title  = {AI Battle Arena: Benchmarking LLMs with Adversarial Games},
+  author = {Zheng, Haizhong and Di, Yizhuo and Ruan, Letian and Jin, Shuowei and Chen, Beidi},
+  year   = {2026},
+  month  = {July},
+  url    = {https://github.com/Infini-AI-Lab/aibattle}
+}</pre>
+
+<hr class="divider">
+
+<p class="footnote">For more questions, please check the <a href="qa.html">Q&amp;A page</a>.</p>
+
+</div>
+</body></html>
