@@ -36,8 +36,10 @@ It is built around four ideas:
 ## 📰 News
 
 - **v0**: initial public arena with 10 games, a
-  [live leaderboard](https://haizhongzheng.github.io/aibattle/), generated game reports, curated
-  replays, a [blog post](reports/blog.html), and a [metrics Q&amp;A](reports/qa.html)
+  [live leaderboard](https://infini-ai-lab.github.io/aibattle/), generated game reports,
+  [curated replays](https://infini-ai-lab.github.io/aibattle/replays.html),
+  a [blog post](https://infini-ai-lab.github.io/aibattle/blog.html), and a
+  [metrics Q&amp;A](https://infini-ai-lab.github.io/aibattle/qa.html)
   that explains the reported metrics in plain language.
 
 ## 🚀 Getting started
