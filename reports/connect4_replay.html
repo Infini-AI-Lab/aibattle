@@ -38,7 +38,7 @@
 <body>
 <div class="wrap">
   <h1>$ ~/aibattle/connect4/replay<span class="cursor"></span></h1>
-  <div class="sub">🔴 Connect Four · step through any game move by move — <b>show reasoning</b>
+  <div class="sub">🔴 Connect Four · seeded with one random opening move per player · step through any game move by move — <b>show reasoning</b>
     reveals the model's full chain-of-thought for that move.</div>
 
   <div class="selectors">
@@ -280,7 +280,7 @@ function renderPanel() {
     p.innerHTML =
       `<div class="movenum">Opening</div>` +
       `<div class="meta">${disp(ep.seat_assignment.player_0)} = black · ${disp(ep.seat_assignment.player_1)} = white<br>` +
-      `The board is seeded with one opening piece per player before play begins.</div>` +
+      `The board is seeded with one random opening piece per player before model play begins.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to watch the game unfold.</div>`;
     return;
   }

@@ -15,8 +15,8 @@ drop into a generator's f-string template via `{BASE_CSS}`.
 # Canonical design tokens + the components shared across every report page.
 BASE_CSS = """
   /* Terminal theme: paper-white background, dark-red accent, monospace. */
-  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
-    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+  :root { --bg:#ffffff; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f5f5f5;
     --pos:#1a7f37; --neg:#b91c1c; --diag:#c9c2b6; }
   body { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     margin:0; background:var(--bg); color:var(--fg); }

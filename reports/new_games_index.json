@@ -78,7 +78,7 @@
       "gpt-oss-120b": 1501,
       "minimax-m2p7": 1476
     },
-    "meta": "3850 games \u00b7 50 deals/pair \u00b7 first-mover 41%",
+    "meta": "3850 episodes \u00b7 50 deals/pair \u00b7 first-mover 41%",
     "champ_line": "\ud83c\udfc6 glm-5p2 <span class='metric'>Elo 1511</span>"
   },
   {
@@ -119,7 +119,7 @@
       "gpt-oss-120b": 1114,
       "minimax-m2p7": 1094
     },
-    "meta": "1705 games \u00b7 20 deals/pair \u00b7 first-mover 48%",
+    "meta": "1705 episodes \u00b7 20 deals/pair \u00b7 first-mover 48%",
     "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>Elo 1727</span>"
   },
   {
@@ -146,7 +146,7 @@
       "minimax-m2p7": 1287,
       "kimi-k2p6": 1645
     },
-    "meta": "500 games \u00b7 25 deals/pair \u00b7 first-mover 47%",
+    "meta": "500 episodes \u00b7 25 deals/pair \u00b7 first-mover 47%",
     "champ_line": "\ud83c\udfc6 kimi-k2p6 <span class='metric'>Elo 1645</span>"
   }
 ]

@@ -81,10 +81,10 @@ def render() -> str:
   OpenAI-compatible client; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
 
   <div class="qa"><b>8. How is the overall ranking and Elo calculated?</b>
-  The overview leaderboard shows two cross-game summaries over six head-to-head games: Connect Four,
-  Gomoku, Hold'em 1-Hand, Hold'em Match, Colonel Blotto and Leduc Holdem. On that table, click a
-  <b>score header</b> to sort by it, or the <b>ⓘ</b> for how each is computed. Coverage = games a model
-  has entered (treat low coverage as provisional).</div>
+  The overview leaderboard shows two cross-environment summaries over the core head-to-head
+  strategic settings: Connect Four, Gomoku, Hold'em 1-Hand, Hold'em Match, and Leduc Holdem. On
+  that table, click a <b>score header</b> to sort by it, or the <b>ⓘ</b> for how each is computed.
+  Coverage = environments a model has entered (treat low coverage as provisional).</div>
 
 </div></body></html>"""
 

@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <style>
   /* ---- Terminal theme (mirrors reports/index.html tokens) ---- */
-  :root { --bg:#fbfbf8; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
-    --line:#ddd8cf; --panel:#ffffff; --faint:#f4f1ea;
+  :root { --bg:#ffffff; --fg:#1c1c1c; --red:#8f1d1d; --dim:#6b6b6b;
+    --line:#ddd8cf; --panel:#ffffff; --faint:#f5f5f5;
     --pos:#1a7f37; --neg:#b91c1c; --link:#4338ca; --amber:#b45309; }
   .reveal { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     font-size:36px; color:var(--fg); }
@@ -113,17 +113,17 @@
 <section>
   <div class="title-wrap">
     <h1>🎲 AI Battle Arena<span class="cursor"></span></h1>
-    <div class="tagline">An <b>evaluation-first arena</b> for adversarial games between AI agents.</div>
-    <div class="fig" style="height:380px;margin-top:6px;"><img src="assets/leaderboard.png" alt="AI Battle Arena cross-game leaderboard"></div>
+    <div class="tagline">An <b>evaluation-first arena</b> for strategic interaction between AI agents.</div>
+    <div class="fig" style="height:380px;margin-top:6px;"><img src="assets/leaderboard.png" alt="AI Battle Arena cross-environment leaderboard"></div>
     <div class="meta" style="margin-top:1em;">Haizhong Zheng · 07/02/2026</div>
   </div>
-  <aside class="notes">One sentence: we benchmark LLMs by having them play 8 adversarial games head-to-head under one fair pipeline, then explain *why* they win or lose.</aside>
+  <aside class="notes">One sentence: we benchmark LLMs in 8 controlled game-theoretic environments under one fair pipeline, then explain *why* they win or lose.</aside>
 </section>
 
-<!-- S2 — Why adversarial games -->
+<!-- S2 — Why strategic interaction -->
 <section>
   <div class="kicker">Part 1 · What we're building</div>
-  <h2>Why benchmark LLMs with adversarial games?</h2>
+  <h2>Why benchmark strategic interaction?</h2>
   <div class="cols">
     <div>
       <h3>Static benchmarks wear out</h3>
@@ -134,34 +134,34 @@
       </ul>
     </div>
     <div>
-      <h3>Games give a renewable skill signal</h3>
+      <h3>Strategic interaction gives a renewable skill signal</h3>
       <ul>
-        <li><b>Adversarial</b> → difficulty regenerates with the opponent</li>
+        <li><b>Interactive</b> → difficulty regenerates with the opponent</li>
         <li>Demand <b>hidden-info reasoning</b> + <b>long-horizon planning</b></li>
         <li>Produce a natural, <b>relative</b> ranking</li>
       </ul>
     </div>
   </div>
-  <div class="callout">→ We built an arena where models play <b>8 games</b> head-to-head under <b>one identical pipeline</b>, so results are directly comparable.</div>
-  <aside class="notes">Frame the gap: existing evals measure what a model knows; games measure how it decides against a reacting opponent.</aside>
+  <div class="callout">→ We built an arena where models act in <b>8 controlled game-theoretic environments</b> under <b>one identical pipeline</b>, so results are directly comparable.</div>
+  <aside class="notes">Frame the gap: existing evals measure what a model knows; strategic interaction measures how it decides against a reacting opponent.</aside>
 </section>
 
 <!-- S3 — Core idea + game lineup -->
 <section>
   <div class="kicker">Part 1 · What we're building</div>
-  <h2>One pipeline, many games</h2>
+  <h2>One pipeline, many environments</h2>
   <div class="cols w">
     <div>
       <ul class="pillars">
-        <li><b>One pipeline · many games</b> — same prompt / parse / retry / scoring everywhere</li>
+        <li><b>One pipeline · many environments</b> — same prompt / parse / retry / scoring everywhere</li>
         <li><b>Position-neutral, opponent-adjusted</b> — round-robin, seat-swapped, bootstrap Elo with error bars</li>
         <li><b>Logs that explain</b> — every step logged → why-win / why-lose, not just a number</li>
-        <li><b>Agents, not models</b> — agents see only <em>observations</em>, never game state → hidden info stays hidden</li>
+        <li><b>Agents, not models</b> — agents see only <em>observations</em>, never hidden state → private information stays private</li>
       </ul>
     </div>
     <div>
       <table class="t">
-        <tr><th>Game</th><th>Info</th></tr>
+        <tr><th>Environment</th><th>Info</th></tr>
         <tr><td>Kuhn Poker</td><td class="dim">imperfect</td></tr>
         <tr><td>Leduc Hold'em</td><td class="dim">imperfect</td></tr>
         <tr><td>Hold'em 1-Hand</td><td class="dim">imperfect</td></tr>
@@ -173,7 +173,7 @@
       </table>
     </div>
   </div>
-  <aside class="notes">The 4 pillars are the thesis of the system. The game grid shows breadth across information structure.</aside>
+  <aside class="notes">The 4 pillars are the thesis of the system. The environment grid shows breadth across information structure.</aside>
 </section>
 
 <!-- S3b — Agenda / what we'll cover -->
@@ -186,7 +186,7 @@
       <div>
         <h3>🤖 Model Arena <span class="dim">— raw models, one simple prompt</span></h3>
         <ul>
-          <li>Two game families: <b>perfect-info</b> (Connect Four · Gomoku) and <b>imperfect-info</b> (Hold'em family · Leduc · Kuhn · Blotto · Blackjack)</li>
+          <li>Two strategic-interaction families: <b>perfect-info</b> (Connect Four · Gomoku) and <b>hidden-info</b> (Hold'em family · Leduc · Kuhn · Blotto · Blackjack)</li>
           <li>The <b>rankings</b> — who wins, and who wins <em>where</em></li>
           <li>The <b>findings</b> — diagonal blind spot · pressure-vs-showdown · why models win &amp; lose</li>
         </ul>
@@ -197,12 +197,12 @@
       <div>
         <h3>🛠️ Harness Arena <span class="dim">— beyond the raw model</span></h3>
         <ul>
-          <li><b>Preliminary</b>: what kind of <b>harness / pipeline</b> helps a model play these games better</li>
+          <li><b>Preliminary</b>: what kind of <b>harness / pipeline</b> helps a model act more strategically</li>
         </ul>
       </div>
     </div>
   </div>
-  <aside class="notes">Roadmap: most of today is the Model Arena (games → rankings → findings); we close with early Harness Arena results — which scaffolding lifts performance.</aside>
+  <aside class="notes">Roadmap: most of today is the Model Arena (environments → rankings → findings); we close with early Harness Arena results — which scaffolding lifts performance.</aside>
 </section>
 
 <!-- ============ PART 2 · RESULTS (Model Arena) ============ -->
@@ -210,19 +210,19 @@
 <!-- S4 (merged) — Overall leaderboard -->
 <section>
   <div class="kicker">Model Arena · results</div>
-  <h2>The cross-game leaderboard</h2>
-  <div class="fig" style="height:400px;"><img src="assets/leaderboard.png" alt="cross-game leaderboard"></div>
-  <div class="callout"><b>Arena Rank Score</b> — average finishing place (ordinal) · <b>Arena Elo</b> — margin-aware, ±1 bootstrap SD · round-robin &amp; seat-swapped so models that met different opponents stay comparable. Frontier closed models lead, but several open-weight models sit <b>within the error bars</b>, and <b>rankings reshuffle game-to-game</b>.</div>
-  <aside class="notes">One slide: how the two scores work + the headline ranking. No model dominates every game; the per-game detail lives in the live reports.</aside>
+  <h2>The cross-environment leaderboard</h2>
+  <div class="fig" style="height:400px;"><img src="assets/leaderboard.png" alt="cross-environment leaderboard"></div>
+  <div class="callout"><b>Arena Rank Score</b> — average finishing place (ordinal) · <b>Arena Elo</b> — margin-aware, ±1 bootstrap SD · round-robin &amp; seat-swapped so models that met different opponents stay comparable. Frontier closed models lead, but several open-weight models sit <b>within the error bars</b>, and <b>rankings reshuffle by environment</b>.</div>
+  <aside class="notes">One slide: how the two scores work + the headline ranking. No model dominates every environment; the per-environment detail lives in the live reports.</aside>
 </section>
 
 <!-- ============ PART 3 · CASE STUDY (Model Arena) ============ -->
 
 <!-- Case study divider -->
 <section>
-  <div class="kicker">Model Arena · what the games reveal</div>
+  <div class="kicker">Model Arena · what strategic environments reveal</div>
   <h2>Case study</h2>
-  <p>Three games up close. For each: the <b>ranking</b> first, then two slices of <b>behavior</b> — and a <b>replay</b> to watch it happen.</p>
+  <p>Three environments up close. For each: the <b>ranking</b> first, then two slices of <b>behavior</b> — and a <b>replay</b> to watch it happen.</p>
   <div class="agenda">
     <div class="ag-row"><div class="ag-num">🔴</div><div><h3>Gomoku <span class="dim">— do they spot &amp; block threats?</span></h3></div></div>
     <div class="ag-row"><div class="ag-num">🃏</div><div><h3>Hold'em 1-Hand <span class="dim">— how chips are earned: pressure vs showdown</span></h3></div></div>
@@ -303,7 +303,7 @@
   <div class="kicker">Case study · Hold'em Match</div>
   <h2>Hold'em Match — the ranking</h2>
   <div class="fig" style="height:455px;"><img src="assets/match_lb.png" alt="Hold'em Match leaderboard"></div>
-  <div class="callout">Same models, new game: win-or-lose over 30 carry-stack hands. <b>Chip management</b> now matters more than any single pot.</div>
+  <div class="callout">Same models, longer-horizon poker setting: win-or-lose over 30 carry-stack hands. <b>Chip management</b> now matters more than any single pot.</div>
 </section>
 <section>
   <div class="kicker">Case study · Hold'em Match · why they win &amp; lose</div>
@@ -357,7 +357,7 @@
       <ul>
         <li>Current results: a <b>single simple system prompt</b>, each model plays <b>independently</b> → a score</li>
         <li>That measures the model <em>as-is</em> — not its <b>ceiling</b></li>
-        <li>Scaffolding, tools, search, or training on game logs could move it a lot</li>
+        <li>Scaffolding, tools, search, or training on strategic-interaction logs could move it a lot</li>
         <li class="dim">(cf. the "Harness Arena": are we measuring the model, or the scaffolding?)</li>
       </ul>
     </div>
@@ -374,7 +374,7 @@
     <div>
       <ul>
         <li>Research question: <b>how much does the pipeline move performance?</b></li>
-        <li>Variants: richer prompts · tools/search · self-play · <b>SFT / RL on game logs</b></li>
+        <li>Variants: richer prompts · tools/search · self-play · <b>SFT / RL on interaction logs</b></li>
         <li>The arena stays the <b>fixed measuring stick</b> across all variants</li>
       </ul>
     </div>
@@ -529,13 +529,13 @@
   <div class="agenda">
     <div class="ag-row"><div class="ag-num">①</div><div>
       <h3>From evaluation → a training environment</h3>
-      <ul><li>Ship the arena as a <b>reinforcement-learning environment</b> — so others can not just <b>benchmark / evaluate</b> models, but <b>train</b> them against it (self-play, RL on game logs)</li></ul></div></div>
+      <ul><li>Ship the arena as a <b>reinforcement-learning environment</b> — so others can not just <b>benchmark / evaluate</b> models, but <b>train</b> them in it (self-play, RL on interaction logs)</li></ul></div></div>
     <div class="ag-row"><div class="ag-num">②</div><div>
-      <h3>From games → adversarial security</h3>
+      <h3>From controlled interaction → adversarial security</h3>
       <ul><li>Extend AI Battle Arena into a <b>real adversarial environment</b>. Long-term, the contest isn't <b>human-vs-AI</b> — it's <b>AI-vs-AI</b> adversarial security <span class="dim">— our next project</span></li></ul></div></div>
     <div class="ag-row"><div class="ag-num">③</div><div>
-      <h3>From fixed games → auto-generated meta-games</h3>
-      <ul><li><b>Procedurally generate brand-new games</b> that never existed before — no rules in any training set, no memorized strategy — so the arena tests <b>on-the-fly reasoning on novel rules</b>, not recalled play, and stays <b>contamination-proof</b> as models improve</li></ul></div></div>
+      <h3>From fixed environments → auto-generated meta-games</h3>
+      <ul><li><b>Procedurally generate brand-new strategic environments</b> that never existed before — no rules in any training set, no memorized strategy — so the arena tests <b>on-the-fly reasoning on novel rules</b>, not recalled play, and stays <b>contamination-proof</b> as models improve</li></ul></div></div>
   </div>
   <aside class="notes">Two future directions: (1) turn the eval substrate into a training env so the arena trains as well as ranks; (2) push toward AI-vs-AI adversarial security — the long-run shape of the contest.</aside>
 </section>

@@ -2,7 +2,7 @@
 
 # 🎲 AI Battle Arena
 
-**A game arena for evaluating how AI agents make decisions under competition**
+**A benchmark for evaluating AI agents in strategic interaction**
 
 [![Website](https://img.shields.io/badge/%F0%9F%8E%B2_website-live-8f1d1d.svg)](https://infini-ai-lab.github.io/aibattle/)
 [![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
@@ -12,20 +12,24 @@
 
 </div>
 
-AI Battle Arena evaluates AI agents by making them play adversarial games against
-live opponents. Instead of asking models to answer a fixed test set, the arena
-creates fresh game states through interaction, logs every decision, and turns the
-results into rankings, replays, and behavior analyses.
+AI Battle Arena evaluates AI agents in strategic interaction: settings where
+opponents react, information can be hidden, incentives matter, and payoffs depend
+on long-term choices. Instead of asking models to answer a fixed test set, the
+arena uses controlled game-theoretic environments to create fresh states through
+interaction, logs every decision, and turns the results into rankings, replays,
+and behavior analyses.
 
 Every participant is an *agent*. An agent can be a built in baseline, a wrapper
-around a model API, a local model, or a custom external system. Every game is a
-modular environment with clear rules, legal actions, observations, and payoffs.
-The shared runner keeps the evaluation comparable across games and agents.
+around a model API, a local model, or a custom external system. Every environment
+is modular, with clear rules, legal actions, observations, payoffs, and hidden
+information when the setting requires it. The shared runner keeps the evaluation
+comparable across environments and agents.
 
 It is built around four ideas:
 
-- **Same setup, many games.** The same runner and scoring code cover **8 games**
-  across perfect information, imperfect information, and simultaneous play.
+- **Same setup, many strategic environments.** The same runner and scoring code
+  cover **8 game-theoretic settings** across perfect information, hidden
+  information, and simultaneous play.
 - **Fair comparisons.** Matches are round robin and seat swapped where that
   matters, so the reported skill is not just a seating or first move advantage.
 - **Logs that explain results.** Every step is logged. The analysis scripts can
@@ -36,8 +40,8 @@ It is built around four ideas:
 
 ## 📰 News
 
-- **v0**: initial public arena with 8 games, a
-  [live leaderboard](https://infini-ai-lab.github.io/aibattle/), generated game reports,
+- **v0**: initial public arena with 8 strategic environments, a
+  [live leaderboard](https://infini-ai-lab.github.io/aibattle/leaderboard.html), generated environment reports,
   [curated replays](https://infini-ai-lab.github.io/aibattle/replays.html),
   a [blog post](https://infini-ai-lab.github.io/aibattle/blog.html), and a
   [metrics Q&amp;A](https://infini-ai-lab.github.io/aibattle/qa.html)
@@ -93,6 +97,11 @@ Set a player's agent `type: human` to play any game from the terminal.
 
 ## 🎮 Games
 
+The games are controlled testbeds for strategic interaction. They are small
+enough to audit, but cover the same core pressures that appear in broader
+multi-agent settings: hidden information, opponent modeling, deception, tactical
+planning, resource allocation, and long-horizon payoff.
+
 | Game | Information | What it is |
 |------|-------------|------------|
 | **Kuhn Poker** | imperfect | 3 card, one street poker and the v0 reference game |
@@ -142,9 +151,9 @@ copies and the build only Table and Blackjack viewers.
 
 ## 🗺️ Roadmap
 
-- **Harness Arena:** open the same games to any model plus any scaffolding, not
-  just the single generic pipeline.
-- More games and deeper imperfect information settings.
+- **Harness Arena:** open the same strategic environments to any model plus any
+  scaffolding, not just the single generic pipeline.
+- More environments and deeper hidden-information settings.
 - Pinned model snapshot provenance on every report.
 - Live, continuously updated public leaderboard.
 

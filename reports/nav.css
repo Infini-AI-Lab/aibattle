@@ -1,21 +1,45 @@
-/* Site nav styling (markup injected by nav.js). Terminal theme:
-   fixed LEFT SIDEBAR — white background, dark-red right border separating it
-   from the content, monospace. Brand reads like a shell prompt, links are
-   lowercase commands, the active page is marked with [brackets]. Brackets are
-   rendered transparent on inactive links so activating one shifts no layout.
+/* Site nav styling (markup injected by nav.js). Terminal theme, TWO bars:
+   - TOP BAR: fixed horizontal strip — brand at left, site-level links
+     (Overview / Leaderboard / Featured replays / Q&A), GitHub pinned right.
+   - SIDEBAR: fixed left column below the top bar — the game-report tree.
+   Brand reads like a shell prompt, links are lowercase commands, the active
+   page is marked with [brackets]; brackets are transparent on inactive links
+   so activating one shifts no layout.
    body padding (not margin) offsets the pages: every page sets `margin:0` in
    its own later <style>, which would clobber a margin-left set here.
-   Colours are hard-coded so the bar looks identical across pages regardless
-   of each page's own theme. On narrow screens it falls back to a top bar. */
-body { padding-left:210px; }
-.navbar { position:fixed; left:0; top:0; bottom:0; width:210px; box-sizing:border-box;
+   Colours are hard-coded so the bars look identical across pages regardless
+   of each page's own theme. On narrow screens both collapse into one top bar
+   with a ☰ dropdown. */
+body { padding-left:210px; padding-top:46px; }
+
+/* ---- top bar ---- */
+.topbar { position:fixed; top:0; left:0; right:0; height:46px; z-index:60;
+  box-sizing:border-box; display:flex; align-items:center; gap:22px;
+  padding:0 20px; background:#ffffff; border-bottom:2px solid #8f1d1d;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.topbar .brand { font-weight:700; color:#8f1d1d; text-decoration:none;
+  font-size:14px; line-height:1; white-space:nowrap; }
+.topbar .brand .prompt { color:#1c1c1c; font-weight:400; }
+.tblinks { display:flex; align-items:center; gap:26px; }
+.tblinks a.tnav + a.tnav { border-left:1px solid #ddd8cf; padding-left:26px; }
+.topbar a.tnav { color:#6b6b6b; text-decoration:none; font-size:14px;
+  white-space:nowrap; }
+.topbar a.tnav:hover { color:#1c1c1c; }
+.topbar a.tnav.active { color:#8f1d1d; font-weight:700; }
+.tbright { margin-left:auto; display:flex; align-items:center; gap:18px; }
+.topbar a.tnav.gh { display:inline-flex; align-items:center; gap:6px;
+  color:#1c1c1c; font-weight:700; }
+.topbar a.tnav.gh:hover { color:#8f1d1d; }
+.topbar a.tnav.gh::before, .topbar a.tnav.gh::after { content:none; }
+.navtoggle { display:none; }
+.tbmenu { display:none; }
+
+/* ---- left sidebar (game tree) ---- */
+.navbar { position:fixed; left:0; top:46px; bottom:0; width:210px; box-sizing:border-box;
   z-index:50; display:flex; flex-direction:column; align-items:stretch; gap:2px;
-  padding:18px 16px; overflow-y:auto;
+  padding:16px 16px; overflow-y:auto;
   background:#ffffff; border-right:2px solid #8f1d1d;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-.navbar .brand { font-weight:700; color:#8f1d1d; text-decoration:none;
-  font-size:13px; margin-bottom:16px; line-height:1.4; }
-.navbar .brand .prompt { color:#1c1c1c; font-weight:400; }
 .navbar a.nav { color:#6b6b6b; text-decoration:none; font-size:12px;
   padding:5px 0; }
 .navbar a.nav::before { content:"["; opacity:0; }
@@ -25,36 +49,29 @@ body { padding-left:210px; }
 .navbar a.nav.active { color:#8f1d1d; font-weight:700; }
 .navbar a.nav.active::before, .navbar a.nav.active::after { opacity:1; }
 .navbar a.nav.navsub { padding-left:22px; }
-/* Top class: overview / gpt-vs-claude / open-source model elo. A dark-red
-   section header (a link when it has a landing page, a plain span otherwise). */
 .navbar a.nav.navtop, .navbar .navtop { color:#8f1d1d; font-weight:700;
-  font-size:12px; margin-top:12px; padding:4px 0 2px; }
+  font-size:12px; margin-top:2px; padding:4px 0 2px; }
 .navbar a.nav.navtop:hover { color:#1c1c1c; }
 .navbar .navclust { font-size:12px; color:#b0a99c; margin-top:6px; padding:2px 0 2px 10px; }
-/* The compact 4-column mobile bar lives in the markup at all times but is only
-   shown under the breakpoint below; on desktop the full sidebar list is used. */
-/* Desktop: the full link list is the sidebar column; the ☰ toggle is hidden. */
 .navlinks { display:flex; flex-direction:column; gap:2px; }
-.navtoggle { display:none; }
 
 @media (max-width:760px) {
-  /* Mobile: the sidebar becomes a sticky top bar (brand + ☰); the link list
-     collapses into a dropdown panel revealed when .navbar gets .open. */
-  body { padding-left:0; }
-  .navbar { position:sticky; top:0; bottom:auto; left:0; width:auto; display:block;
-    padding:0; overflow:visible;
-    border-right:none; border-bottom:2px solid #8f1d1d; }
-  .navhead { display:flex; align-items:center; justify-content:space-between;
-    padding:9px 16px; }
-  .navbar .brand { margin-bottom:0; }
+  /* Mobile: sidebar hidden; the top bar keeps brand + ☰ and the link list
+     (site pages + game tree) collapses into a dropdown panel on .open. */
+  body { padding-left:0; padding-top:46px; }
+  .navbar { display:none; }
+  .tblinks, .tbright { display:none; }
+  .topbar { gap:0; justify-content:space-between; }
   .navtoggle { display:inline-block; background:none; border:none; cursor:pointer;
     color:#8f1d1d; font-size:22px; line-height:1; padding:2px 6px; font-family:inherit; }
-  .navlinks { display:none; gap:0; background:#ffffff;
-    border-top:1px solid #ddd8cf; padding:4px 0 10px;
+  .tbmenu { display:none; position:absolute; top:46px; left:0; right:0;
+    flex-direction:column; gap:0; background:#ffffff;
+    border-bottom:2px solid #8f1d1d; padding:4px 0 10px;
     max-height:75vh; overflow-y:auto; }
-  .navbar.open .navlinks { display:flex; }
-  .navbar a.nav { padding:9px 18px; font-size:13px; }
-  .navbar a.nav.navsub { padding-left:30px; }
-  .navbar a.nav.navtop { margin-top:4px; padding:9px 18px; }
-  .navbar .navclust { margin-top:6px; padding:4px 18px; }
+  .topbar.open .tbmenu { display:flex; }
+  .tbmenu a.nav { color:#6b6b6b; text-decoration:none; padding:9px 18px; font-size:13px; }
+  .tbmenu a.nav.navsub { padding-left:30px; }
+  .tbmenu a.nav.navtop { color:#8f1d1d; font-weight:700; margin-top:4px; padding:9px 18px; }
+  .tbmenu a.nav.active { color:#8f1d1d; font-weight:700; }
+  .tbmenu .navclust { font-size:12px; color:#b0a99c; margin-top:6px; padding:4px 18px; }
 }

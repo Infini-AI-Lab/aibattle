@@ -2,7 +2,7 @@
 head-to-head run (runs/gpt_vs_claude).
 
 That run pits two GPT models (gpt-5.5, gpt-5.4) against two Claude models
-(claude-opus-4.8, claude-sonnet-4.6) across four games, all with one-line
+(claude-opus-4.8, claude-sonnet-4.6) across four strategic environments, all with one-line
 coaching in the prompt. This script reuses the existing per-game analyzers and
 adds a GPT-family-vs-Claude-family framing on top:
 
@@ -99,7 +99,7 @@ def family_h2h(games: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Per-model invalid-move rate, pooled across all four games (the Sonnet story).
+# Per-model invalid-move rate, pooled across all four environments (the Sonnet story).
 # ---------------------------------------------------------------------------
 def invalid_rates(games: dict, models: list) -> dict:
     moves = {m: 0 for m in models}
@@ -306,12 +306,12 @@ def render_index(fh: dict, rates: dict, cards: list, arena_rows: list,
 <body><div class="wrap">
   <h1>$ ~/aibattle/gpt-vs-claude<span class="cursor"></span></h1>
   <div class="sub">🥊 Two GPT models ({", ".join(GPT)}) vs two Claude models ({", ".join(CLAUDE)})
-    across four games, every move prompted with one-line coaching · reasoning effort medium.</div>
+    across four strategic environments, every move prompted with one-line coaching · reasoning effort medium.</div>
 
   <section>
     <div class="arena-head"><h2>🏆 Family scoreboard</h2></div>
-    <div class="note">Aggregated over the inter-family games only (GPT-vs-Claude pairings;
-      intra-family games excluded). Each episode is one win/loss/draw by winner.</div>
+    <div class="note">Aggregated over the inter-family strategic settings only (GPT-vs-Claude pairings;
+      intra-family episodes excluded). Each episode is one win/loss/draw by winner.</div>
     <div class="vs">
       <div class="side gptside">
         <div class="fname">GPT family</div>
@@ -325,29 +325,29 @@ def render_index(fh: dict, rates: dict, cards: list, arena_rows: list,
         <div class="fpct">{cla_pct:.0f}% of decided</div>
       </div>
     </div>
-    <div class="note" style="text-align:center">{lead} leads across {n_inter} inter-family games.</div>
+    <div class="note" style="text-align:center">{lead} leads across {n_inter} inter-family episodes.</div>
 
     <table style="margin-top:14px">
-      <tr><th class='model'>game</th><th>GPT W–L–D</th><th>GPT win%</th>
+      <tr><th class='model'>environment</th><th>GPT W–L–D</th><th>GPT win%</th>
           <th class='barcell'>GPT ◄ ► Claude</th><th class='best'>poker margin</th></tr>
       {pg_rows}
     </table>
   </section>
 
   <section>
-    <div class="arena-head"><h2>🏅 Cross-game leaderboard</h2></div>
-    <div class="note">Arena Score = mean within-game finishing position (best 100, worst 0)
-      across all four games. Invalid% is illegal-move rate pooled over every decision.</div>
+    <div class="arena-head"><h2>🏅 Cross-environment leaderboard</h2></div>
+    <div class="note">Arena Score = mean within-environment finishing position (best 100, worst 0)
+      across all four settings. Invalid% is illegal-move rate pooled over every decision.</div>
     <table>
       <tr><th class='rk'>#</th><th class='model'>model</th><th>Arena Score</th>
-          <th>coverage</th><th>invalid%</th><th class='best'>best game</th></tr>
+          <th>coverage</th><th>invalid%</th><th class='best'>best environment</th></tr>
       {lb_rows}
     </table>
   </section>
 
   <section>
-    <div class="arena-head"><h2>🎮 Per-game analysis</h2></div>
-    <div class="note">Full per-game breakdowns — tactical accuracy for the board games,
+    <div class="arena-head"><h2>🎮 Per-environment analysis</h2></div>
+    <div class="note">Full per-environment breakdowns — tactical accuracy for the board settings,
       poker behavior and results for Hold'em.</div>
     <div class="cards">{card_html}</div>
   </section>

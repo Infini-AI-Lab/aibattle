@@ -21,7 +21,7 @@ rate, average game length, latency, a head-to-head win matrix, and:
 
 Reads runs/<game>/<game>_data.json (per-game coached folders) for each of
 connect4, gomoku; writes <game>_report.html to runs/<game>/ and a tracked copy
-under reports/. Also regenerates the unified reports/index.html.
+under reports/. Also regenerates the unified reports/leaderboard.html.
 """
 
 from __future__ import annotations
@@ -71,13 +71,16 @@ INTRO = {
         "<ul>"
         "<li>On your turn you pick a <b>column</b>; the disc falls to the "
         "<b>lowest empty cell</b> in it. A full column can't be chosen.</li>"
-        "<li><b>Player 0 moves first</b> — a real edge in a solved game.</li>"
+        "<li>For variety, each episode starts with <b>two forced random opening moves</b> "
+        "— one by each player — before model-controlled play begins.</li>"
+        "<li><b>Player 0 makes the first model-controlled move</b> after that seeded opening — "
+        "a real edge in a solved game.</li>"
         "<li>The first to line up <b>four of their discs in a row</b> — horizontally, "
         "vertically, or diagonally — wins immediately.</li>"
         "<li>If the board fills with no four-in-a-row, the game is a <b>draw</b>.</li>"
         "</ul>"
         '<div class="seq">Connect Four is <b>solved</b>: with perfect play the first '
-        "player always wins. There's no hidden information or chance, so every position "
+        "player always wins. After the seeded opening, there's no hidden information or chance, so every position "
         "has a known best move — which lets us score <b>tactical accuracy</b> directly: "
         "did the model take an available immediate win, and did it block the opponent's "
         "immediate winning threat?</div>"
@@ -94,14 +97,16 @@ INTRO = {
         "<ul>"
         "<li>On your turn, name an empty cell — e.g. <code>E5</code> — and a stone is "
         "placed there.</li>"
-        "<li><b>Player 0 moves first.</b></li>"
+        "<li>For variety, each episode starts with <b>two forced random opening moves</b> "
+        "— one by each player — before model-controlled play begins.</li>"
+        "<li><b>Player 0 makes the first model-controlled move</b> after that seeded opening.</li>"
         "<li>The first to make <b>five of their stones in a row</b> — horizontally, "
         "vertically, or diagonally — wins immediately.</li>"
         "<li>If the board fills with no five-in-a-row, the game is a <b>draw</b> (rare "
         "on 9×9).</li>"
         "</ul>"
         '<div class="seq">Free-style Gomoku — no forbidden-move restrictions — and like '
-        "Connect Four there's no hidden information or chance, so we score "
+        "Connect Four there's no hidden information or chance after the seeded opening, so we score "
         "<b>tactical accuracy</b>: did the model complete an available five (win-take) "
         "and block the opponent's immediate five-threat (block rate)?</div>"
         '<div class="seq"><b>What the model sees each turn:</b> the full current board, whose '
@@ -621,7 +626,7 @@ def render_game(game: str, rep: dict) -> str:
 </style></head>
 <body><div class="wrap">
   <h1>$ ~/aibattle/{game}<span class="cursor"></span></h1>
-  <div class="sub">{emoji} {name} · Perfect-information game · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
+  <div class="sub">{emoji} {name} · Perfect-information game · seeded with one random opening move per player · round-robin · {rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}</div>
   {replay_btn}
 
   {_intro_html(game)}
@@ -829,30 +834,30 @@ def _arena_board(entries: list) -> str:
     return f"""
   <section class="board">
     <div class="arena-head"><h2>🏅 Model leaderboard</h2>
-      <span class="arena-tag">5 core games · click a score column to re-rank</span></div>
+      <span class="arena-tag">5 core strategic environments · click a score column to re-rank</span></div>
     <table class="lb">
       <thead>
       <tr><th class='rk'>#</th><th class='model'>Model</th>
         <th class="sortable sorted" data-sort="score"><span class="hcell">Arena Rank Score<button class="info" aria-controls="info-score"
           aria-label="How Arena Rank Score is calculated">i</button>
           <span class="infobox" id="info-score" hidden><b>Arena Rank Score — ordinal.</b>
-          In each game a model's finish becomes a 0–1 score, evenly spaced
+          In each environment a model's finish becomes a 0–1 score, evenly spaced
           (1st&nbsp;=&nbsp;1.0, last&nbsp;=&nbsp;0.0) via <code>(N−1−rank)/(N−1)</code> where N is the
-          field size. The score is the mean of those across the games played, ×100. It ignores
+          field size. The score is the mean of those across the environments played, ×100. It ignores
           <i>margin</i> — winning by a mile or a hair both score 1.0.</span></span></th>
         <th class="sortable" data-sort="elo"><span class="hcell">Arena Elo<button class="info" aria-controls="info-elo"
           aria-label="How Arena Elo is calculated">i</button>
           <span class="infobox" id="info-elo" hidden><b>Arena Elo — margin-aware.</b>
-          Each game's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
-          <code>z = (rating − mean) / SD</code>. A model's z is averaged across games and rescaled to
+          Each environment's Elo (Bradley-Terry / chip-weighted) is standardized within its field,
+          <code>z = (rating − mean) / SD</code>. A model's z is averaged across environments and rescaled to
           <code>1500 + 150·z</code>, so a model one SD above the field reads as 1650. Unlike the rank
-          score it rewards <i>how much</i> you win by. Built from the five head-to-head games only —
+          score it rewards <i>how much</i> you win by. Built from the five head-to-head environments only —
           Blackjack is excluded (no opponent Elo, luck-dominated).</span></span></th>
         </tr>
       </thead>
       <tbody>{body}</tbody>
     </table>
-    <div class="note lb-note">Two cross-game summaries over five head-to-head games: Connect Four, Gomoku,
+    <div class="note lb-note">Two cross-environment summaries over five head-to-head strategic settings: Connect Four, Gomoku,
       Hold'em 1-Hand, Hold'em Match and Leduc Holdem. Click a <b>score header</b> to
       sort by it, or the <b>ⓘ</b> for how it's computed.</div>
   </section>"""
@@ -876,7 +881,7 @@ def render_index(reps: dict) -> str:
         champ = ordered[0]
         entries.append({
             "key": game, "title": TITLE[game], "href": f"{game}_report.html",
-            "meta": (f"{rep['num_games']} games · board {rep['size'][0]}×{rep['size'][1]}"
+            "meta": (f"{rep['num_games']} episodes · board {rep['size'][0]}×{rep['size'][1]}"
                      f" · first-mover {rep['first_player_win_rate']*100:.0f}%"),
             "champ_line": f"🏆 {champ} <span class='metric'>Elo {_elo_txt(rep['elo'][champ])}</span>",
             "ranking": ordered, "ratings": dict(rep["elo"]), **GAME_TAXONOMY[game],
@@ -934,7 +939,7 @@ def render_index(reps: dict) -> str:
     def _group(name):
         cards = "".join(_index_card(e) for e in entries if e["group"] == name)
         return f"<div class='cards'>{cards}</div>" if cards else \
-            "<div class='empty'>No games yet.</div>"
+            "<div class='empty'>No environments yet.</div>"
 
     board = _arena_board(entries)
 
@@ -995,22 +1000,25 @@ def render_index(reps: dict) -> str:
 </style></head>
 <body><div class="wrap">
   <h1>$ ai-battle-arena -<span class="cursor"></span></h1>
-  <div class="sub">Two arenas, same games. <b>Model Arena</b> pits raw models through one
-    identical pipeline; <b>Harness Arena</b> is open to any model + any scaffolding.</div>
+  <div class="sub">A benchmark for <b>strategic interaction</b>: controlled game-theoretic
+    environments where agents must reason about opponents, hidden information,
+    uncertainty, incentives and long-term payoff.</div>
 
   {board}
 
   <section class="arena" id="model">
     <div class="arena-head"><h2>🤖 Model Arena</h2>
-      <span class="arena-tag">fair · one identical generic pipeline</span></div>
-    <div class="note">Every model plays through the same prompt/parse/retry wrapper — this
-      measures the model, not the scaffolding. <b>Open-weight models are served via
+      <span class="arena-tag">fair · one generic decision pipeline</span></div>
+    <div class="note">Games are the controlled testbeds; the measured capability is
+      strategic decision-making under interaction. Every model acts through the same
+      prompt/parse/retry wrapper, so this measures the model, not the scaffolding.
+      <b>Open-weight models are served via
       Fireworks AI</b>; the closed models (Claude, GPT-5.x) run on their own provider APIs.</div>
-    <div class="group-label imperfect">🎭 Imperfect information
-      <span class="gl-sub">hidden cards · stochastic</span></div>
+    <div class="group-label imperfect">🎭 Hidden-information interaction
+      <span class="gl-sub">private state · uncertainty · opponent modeling</span></div>
     {_group("imperfect")}
-    <div class="group-label perfect">♟ Perfect information
-      <span class="gl-sub">full state visible · deterministic</span></div>
+    <div class="group-label perfect">♟ Perfect-information interaction
+      <span class="gl-sub">visible state · tactical planning · defense</span></div>
     {_group("perfect")}
   </section>
 
@@ -1119,9 +1127,9 @@ def main():
         # Unified index lives in reports/, where every *_report.html (board games
         # AND holdem) resides, so all relative links resolve.
         index = render_index(reps)
-        with open(os.path.join(REPORT_DIR, "index.html"), "w", encoding="utf-8") as f:
+        with open(os.path.join(REPORT_DIR, "leaderboard.html"), "w", encoding="utf-8") as f:
             f.write(index)
-        print(f"Wrote index.html to {REPORT_DIR}")
+        print(f"Wrote leaderboard.html to {REPORT_DIR}")
 
 
 if __name__ == "__main__":

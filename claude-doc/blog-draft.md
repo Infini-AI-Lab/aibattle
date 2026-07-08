@@ -1,48 +1,21 @@
-# AI Battle Arena: Benchmarking LLMs with Adversarial Games
+# AI Battle Arena: Good Reasoners Are Not Always Good Strategists
 
-*what 84,000 poker hands reveal that static benchmarks miss*
+*what 84,000 poker hands reveal about strategic decision-making*
 
 [Haizhong Zheng](https://x.com/haizhong_zheng)\*, [Yizhuo Di](https://www.linkedin.com/in/yizhuo-di-1b681730a/)\*, [Letian Ruan](https://x.com/letianruan)\*, [Shuowei Jin](https://x.com/shuoweijin), [Beidi Chen](https://x.com/BeidiChen) · \*Core Contributors
 
 *July 2026*
 
-Static benchmarks are easy to overfit: they saturate, leak into training data, and often reward recall more than decisions. We built an arena instead. Frontier LLMs play **8 adversarial games**, including poker, Gomoku, Colonel Blotto, and more, head to head through **the same evaluation pipeline**, then get ranked by Elo. Each position is created by a live opponent, so there is no fixed test set to memorize. The arena measures what static benchmarks usually miss: **how a model performs in a competitive setting**, with every decision logged against the true game state.
+Static benchmarks often reward recall over decisions. AI Battle Arena instead evaluates **strategic interaction**: how models act when opponents react, information is incomplete, and payoffs depend on long-term choices. Frontier LLMs face **8 controlled game-theoretic environments**, from poker to Gomoku to Colonel Blotto, through the same pipeline. The games are auditable testbeds, not the point; the target is decision-making under competition, uncertainty, and incentives.
 
 ## 1. The leaderboard
 
 ![Cross game leaderboard](../assets/leaderboard-placeholder.png)
-*(use the overview leaderboard capture: Arena Rank Score + Arena Elo, 5 core head to head games)*
+*(use the overview leaderboard capture: Arena Rank Score + Arena Elo, 5 core head-to-head strategic environments)*
 
-The winner changes from game to game:
+The first surprise: **the best reasoner is not always the best strategist.** Claude models are strong on reasoning-heavy tasks like coding, but that advantage does not cleanly transfer to strategic interaction. **In poker, GPT pulls far ahead because it does something Claude rarely does: it bluffs.** GPT randomizes, hides information, and puts opponents under pressure; Claude plays more honestly and conservatively. The arena exposes a capability static benchmarks rarely test: not just solving the state, but acting strategically against another agent.
 
-| game | info | champion |
-|---|---|---|
-| [Hold'em, 1 Hand](holdem_tournament_report.html) | imperfect | **GPT 5.5** |
-| [Hold'em, 30 Hand Match](match_tournament_report.html) | imperfect | **GPT 5.5** |
-| [Kuhn Poker](kuhn_tournament_report.html) | imperfect | **GPT 5.5** |
-| [Leduc Hold'em](leduc_report.html) | imperfect | **GLM-5.2** |
-| [Blackjack](blackjack_report.html) | imperfect | **GPT 5.4** |
-| [Connect Four](connect4_report.html) | perfect | **Claude Opus 4.8** |
-| [Gomoku](gomoku_report.html) | perfect | **GPT 5.5** |
-| [Colonel Blotto](blotto_report.html) | simultaneous | **Kimi K2.6** |
-
-Main takeaways:
-
-- **GPT-5.5 is #1 overall** (Rank Score 88, Arena Elo 1678, +1.19 SD), and leads both Hold'em games by a wide margin (+80 bb/100 in 1 Hand).
-- **An open weight model is #2.** Kimi K2.6 sits between the two GPT-5 flagships and *ahead* of GPT-5.4 on rank score. Strong play is not limited to closed source models.
-- **The Claude models land in the middle of the table** (7th and 8th), and the *reason* turns out to be the most interesting finding in the project (Section 2).
-- **No model dominates everywhere.** The crowns split four ways: GPT-5.5 takes poker and Gomoku, Claude Opus takes Connect Four, Kimi takes Colonel Blotto, and GLM-5.2 takes Leduc. Rankings reshuffle game by game, so "intelligence" here is not one number.
-
-A single ranking also compresses away many of the interesting matchups. The full head to head view for the two Hold'em games:
-
-![Hold'em 1 Hand head to head](../assets/h2h_1hand.png)
-
-![Hold'em Match head to head](../assets/h2h_match.png)
-*Read row vs column. The cells show upsets the ranking hides: in single hands, **Claude Sonnet and DeepSeek both beat the overall champion GPT-5.5** head to head. In the 30 hand match format, GPT-5.5 **sweeps all ten pairings** (52 to 78%). Winning one hand and winning a match are different skills.*
-
-A ranking answers *who* wins. Because we hold every hole card and every line of reasoning, we can also ask *why*, and the answers look very different from what a static benchmark can show. The next three sections walk through three examples.
-
-## 2. GPT is a master "liar" in poker games
+## 2. GPT is a master "liar" in hidden-information poker
 
 For every poker decision, we know the model's private cards, so we can score the hand's *true* strength (Monte Carlo win probability against a random hand) at the moment of action. Plot "how often does the model bet?" against "how good is its hand, really?" and each model reveals a distinct playing style:
 
@@ -96,7 +69,7 @@ Gomoku win rates span 17% to 69%. The reason models lose is strikingly specific.
 | MiniMax-M3 | 27 | 89 | 50 |
 | MiniMax-M2.7 | 17 | 90 | 47 |
 
-*(6 of 12 shown; monotone across the field. ~2,000 games.)*
+*(6 of 12 shown; monotone across the field. ~2,000 episodes.)*
 
 **So losing mostly means failing to block.** Where does blocking fail? First, what a model actually receives: the full board, as plain text (a real tournament position; diagonal highlighted by us):
 
@@ -131,23 +104,52 @@ All the information is present. But when we tag every immediate, blockable threa
 
 *(Gomoku: 1,344 threats; Connect Four: 2,302.)*
 
-The pattern follows the geometry of reading. A horizontal line is contiguous characters; a vertical line is one fixed stride; a diagonal stone sits a full row of text (~23 characters) from its neighbor, and a ↙ line also moves *backward* through the columns as the rows advance. The rules are mirror symmetric, so the ↘/↙ gap comes from the representation, not the game itself. The direction is consistent across all 8 models with enough diagonal data (pooled z = 2.65, p = 0.004), and the same signature appears in Connect Four.
+The pattern follows the geometry of reading. A horizontal line is contiguous characters; a vertical line is one fixed stride; a diagonal stone sits a full row of text (~23 characters) from its neighbor, and a ↙ line also moves *backward* through the columns as the rows advance. The rules are mirror symmetric, so the ↘/↙ gap comes from the representation, not the environment itself. The direction is consistent across all 8 models with enough diagonal data (pooled z = 2.65, p = 0.004), and the same signature appears in Connect Four.
 
-**The takeaway: the prompt contains all the information, but the model does not perceive all of it.** An LLM does not see a grid; it reads one. Reconstructing two dimensional relations from a one dimensional text stream gets harder as the spatial relation becomes more complex. The resulting errors can look like strategy failures when they are partly perception failures. That matters for anything we serialize into a prompt, including tables, diagrams, and game state, and the fix may be a better encoding rather than a better model. We plan to test exactly that in the Harness Arena.
+**The takeaway: the prompt contains all the information, but the model does not perceive all of it.** An LLM does not see a grid; it reads one. Reconstructing two dimensional relations from a one dimensional text stream gets harder as the spatial relation becomes more complex. The resulting errors can look like strategy failures when they are partly perception failures. That matters for anything we serialize into a prompt, including tables, diagrams, and strategic state, and the fix may be a better encoding rather than a better model. We plan to test exactly that in the Harness Arena.
 
-## 5. Links
+## 5. More leaderboard details
 
-- 📊 [Live leaderboard](index.html): full rankings and detailed reports for each game
-- 🎬 [Featured replays](replays.html): watch the hands and games behind these findings
+The winner changes from environment to environment:
+
+| environment | interaction type | champion |
+|---|---|---|
+| [Hold'em, 1 Hand](holdem_tournament_report.html) | imperfect | **GPT 5.5** |
+| [Hold'em, 30 Hand Match](match_tournament_report.html) | imperfect | **GPT 5.5** |
+| [Kuhn Poker](kuhn_tournament_report.html) | imperfect | **GPT 5.5** |
+| [Leduc Hold'em](leduc_report.html) | imperfect | **GLM-5.2** |
+| [Blackjack](blackjack_report.html) | imperfect | **GPT 5.4** |
+| [Connect Four](connect4_report.html) | perfect | **Claude Opus 4.8** |
+| [Gomoku](gomoku_report.html) | perfect | **GPT 5.5** |
+| [Colonel Blotto](blotto_report.html) | simultaneous | **Kimi K2.6** |
+
+Main takeaways:
+
+- **GPT-5.5 is #1 overall** (Rank Score 88, Arena Elo 1678, +1.19 SD), and leads both Hold'em environments by a wide margin (+80 bb/100 in 1 Hand).
+- **An open weight model is #2.** Kimi K2.6 sits between the two GPT-5 flagships and *ahead* of GPT-5.4 on rank score. Strong play is not limited to closed source models.
+- **The Claude models land in the middle of the table** (7th and 8th), and the *reason* turns out to be the most interesting finding in the project (Section 3).
+- **No model dominates everywhere.** The crowns split four ways: GPT-5.5 takes poker and Gomoku, Claude Opus takes Connect Four, Kimi takes Colonel Blotto, and GLM-5.2 takes Leduc. Rankings reshuffle by environment, so "intelligence" here is not one number.
+
+A single ranking also compresses away many of the interesting matchups. The full head-to-head view for the two Hold'em environments:
+
+![Hold'em 1 Hand head-to-head](../assets/h2h_1hand.png)
+
+![Hold'em Match head-to-head](../assets/h2h_match.png)
+*Read row vs column. The cells show upsets the ranking hides: in single hands, **Claude Sonnet and DeepSeek both beat the overall champion GPT-5.5** head to head. In the 30 hand match format, GPT-5.5 **sweeps all ten pairings** (52 to 78%). Short-horizon and long-horizon strategic interaction reward different skills.*
+
+## 6. Links
+
+- 📊 [Live leaderboard](leaderboard.html): full rankings and detailed reports for each environment
+- 🎬 [Featured replays](replays.html): watch the decisions behind these findings
 - 📽️ [Slides](slides/index.html): a short deck introducing the arena and key findings
 - 💻 [GitHub](https://github.com/Infini-AI-Lab/aibattle): the framework and analysis code
 
-## 6. Future plans
+## 7. Future plans
 
-- **The Harness Arena.** Same games, any scaffolding. Measure how much a better harness can fix.
+- **The Harness Arena.** Same strategic environments, any scaffolding. Measure how much a better harness can fix.
 - **More closed source models.** Bring the remaining frontier closed models into the arena.
 - **More open source models.** Keep the open weight field current as new releases ship.
-- **From evaluation to training.** Open the arena as an RL environment. Train against it, not just rank models on it.
+- **From evaluation to training.** Open the arena as an RL environment for strategic interaction. Train against it, not just rank models on it.
 
 *(Closing sections: methodology and why to trust these numbers, limitations, what's next, and call to action. TBD pending: site URL, CTA decision, byline.)*
 
@@ -157,7 +159,7 @@ Please cite this work as follows if you find it useful:
 
 ```bibtex
 @misc{aibattle2026,
-  title  = {AI Battle Arena: Benchmarking LLMs with Adversarial Games},
+  title  = {AI Battle Arena: Good Reasoners Are Not Always Good Strategists},
   author = {Zheng, Haizhong and Di, Yizhuo and Ruan, Letian and Jin, Shuowei and Chen, Beidi},
   year   = {2026},
   month  = {July},

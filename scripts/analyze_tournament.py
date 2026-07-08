@@ -884,7 +884,7 @@ def render_html(report: dict) -> str:
             # red (accent) heatmap: a single hue scaled by open-rate on the paper
             # background. Flip to white text once the red fill is dark enough.
             bg = f"rgba(143,29,29,{rate:.2f})"
-            txt = "#fbfbf8" if rate > 0.5 else "#1c1c1c"
+            txt = "#ffffff" if rate > 0.5 else "#1c1c1c"
             sub = "#f1d9d9" if rate > 0.5 else "#6b6b6b"
             bucket_rows += (
                 f"<td style='background:{bg};color:{txt}'>{open_pct:.0f}%"

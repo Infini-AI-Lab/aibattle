@@ -42,7 +42,7 @@
 <body>
 <div class="wrap">
   <h1>$ ~/aibattle/gomoku/replay<span class="cursor"></span></h1>
-  <div class="sub">⚫ Gomoku-Lite · five-in-a-row on a 9×9 board · step through any game move by move —
+  <div class="sub">⚫ Gomoku-Lite · five-in-a-row on a 9×9 board · seeded with one random opening move per player · step through any game move by move —
     <b>show reasoning</b> reveals the model's full chain-of-thought for that move.</div>
 
   <div class="selectors">
@@ -251,7 +251,7 @@ function renderPanel() {
     p.innerHTML =
       `<div class="movenum">Opening</div>` +
       `<div class="meta">${ep.seat_assignment.player_0} = black · ${ep.seat_assignment.player_1} = white<br>` +
-      `The board is seeded with one opening stone per player before play begins.</div>` +
+      `The board is seeded with one random opening stone per player before model play begins.</div>` +
       `<div class="hint">Use “Next ▶” / → or press Play to watch the game unfold.</div>`;
     return;
   }
