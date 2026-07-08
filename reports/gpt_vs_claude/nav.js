@@ -144,4 +144,12 @@
   } else {
     mount();
   }
+
+  // Page-view analytics (GoatCounter). Injected here so every page that loads
+  // the nav is counted once; localhost visits are ignored by count.js itself.
+  var gc = document.createElement("script");
+  gc.async = true;
+  gc.src = "https://gc.zgo.at/count.js";
+  gc.setAttribute("data-goatcounter", "https://aibattle.goatcounter.com/count");
+  document.head.appendChild(gc);
 })();
