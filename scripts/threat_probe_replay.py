@@ -239,20 +239,20 @@ def analyze(args):
           "frame-slips shown separately\n")
     for m in models:
         print(f"== {m}")
-        print(f"   {'arm':10s} " + "".join(f"{ax:>22s}" for ax in axes))
+        print(f"   {'arm':10s} " + "".join(f"{ax:>24s}" for ax in axes))
         for arm in arms:
             cells = []
             for ax in axes:
                 rs = [r for r in rows if r["model"] == m and r["arm"] == arm
                       and r["axis"] == ax]
                 if not rs:
-                    cells.append(f"{'—':>22s}")
+                    cells.append("—")
                     continue
                 miss = sum(r["missed"] for r in rs)
                 slip = sum(r["frame_slip"] for r in rs)
-                extra = f" (+{slip} slip)" if slip else ""
-                cells.append(f"{miss}/{len(rs)} = {miss / len(rs):5.1%}{extra:>10s}")
-            print(f"   {arm:10s} " + "".join(f"{c:>22s}" for c in cells))
+                extra = f" +{slip}slip" if slip else ""
+                cells.append(f"{miss}/{len(rs)}={miss / len(rs):.1%}{extra}")
+            print(f"   {arm:10s} " + "".join(f"{c:>24s}" for c in cells))
         # paired McNemar per axis between the two arms
         if len(arms) == 2:
             a0, a1 = arms
