@@ -72,5 +72,3 @@ runs-backup/
 
 # Claude-vs-field tournament log (cloned locally, like runs/)
 aibattle-logs/
-
-analysis/
