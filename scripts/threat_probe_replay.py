@@ -57,10 +57,13 @@ RESULTS = "runs/threat_probes/replays_gomoku.jsonl"
 # The image arm keeps its own home: results + (with --save-images) the PNGs sent.
 IMG_DIR = "runs/threat_probes/images"
 IMG_RESULTS = os.path.join(IMG_DIR, "replays_gomoku_image.jsonl")
+# So does the diagonal-serialization arm.
+SERIAL_DIR = "runs/threat_probes/serial_dl"
+SERIAL_RESULTS = os.path.join(SERIAL_DIR, "replays_gomoku_serial_dl.jsonl")
 
 
 def results_path(arm: str) -> str:
-    return IMG_RESULTS if arm == "image" else RESULTS
+    return {"image": IMG_RESULTS, "serial_dl": SERIAL_RESULTS}.get(arm, RESULTS)
 _COLS = "ABCDEFGHI"
 _COORD = re.compile(r"\b([A-I])-?([1-9])\b", re.IGNORECASE)
 _BOARD_LINE = re.compile(r"^ ?([1-9]) ((?:[XO.] ){8}[XO.])\s*$")
@@ -82,10 +85,62 @@ _IMG_POINTER = ("The current board is shown in the attached image: a 9x9 grid, "
                 "marking the stones.")
 _HEADER_LINE = re.compile(r"^   A B C D E F G H I\s*$")
 
+# --- serial_dl: 45°-rotated board with its own coordinate system -------------
+# The 17 anti-diagonals become text rows 1-17; the 17 visual columns of the
+# diamond become letters A-Q. Cell (r,c) sits at row r+c+1, column 8+r-c.
+# The model answers in these coordinates; scoring remaps them to the original
+# cell. Original ↙ lines are horizontal (contiguous) in this view.
+_NEWCOLS = "ABCDEFGHIJKLMNOPQ"
+_NEW_COORD = re.compile(r"\b([A-Q])-?(1[0-7]|[1-9])\b", re.IGNORECASE)
+_SERIAL_INTRO = (
+    "The board below is shown rotated 45 degrees and uses its own coordinates: "
+    "columns A-Q (left to right) and rows 1-17 (top to bottom). Each cell of the "
+    "original 9x9 board appears at exactly one (column, row) position in this view; "
+    "neighbouring stones in a text row are neighbours on a board diagonal.")
+_RULES_SUB_OLD = ("connect five in a row (horizontal, vertical, or diagonal) to win. "
+                  "Columns are A-I, rows 1-9; center is E5.")
+_RULES_SUB_NEW = ("connect five in a row (horizontal, vertical, or diagonal on the "
+                  "original board) to win. In the rotated view below, columns are A-Q, "
+                  "rows 1-17; the board center is I9.")
+_INSTR_SUB_OLD = ("Respond with ONLY a coordinate for an empty cell, e.g. E5 "
+                  "(column letter A-I, row number 1-9).")
+_INSTR_SUB_NEW = ("Respond with ONLY a coordinate for an empty cell in the rotated "
+                  "view, e.g. I9 (column letter A-Q, row number 1-17).")
+_REPAIR_SERIAL = ("Your previous reply was not a valid empty cell. Reply with one "
+                  "coordinate in the rotated view, like I9 (column letter A-Q, row "
+                  "number 1-17), for a cell that is currently empty.")
 
-def transform_prompt(prompt: str, arm: str) -> str:
+
+def serial_coord_of(r: int, c: int) -> str:
+    return f"{_NEWCOLS[8 + r - c]}{r + c + 1}"
+
+
+def serial_rc_of(coord: str):
+    k, x = int(coord[1:]) - 1, _NEWCOLS.index(coord[0])
+    return (k + x - 8) // 2, (k - x + 8) // 2
+
+
+def diamond_block(board) -> str:
+    lines = ["    " + " ".join(_NEWCOLS)]
+    for k in range(17):
+        r, c = max(0, k - 8), k - max(0, k - 8)
+        cells = []
+        while r <= 8 and c >= 0:
+            cells.append(board[r][c] or ".")
+            r += 1
+            c -= 1
+        lines.append(f"{k + 1:>2}  " + "  " * abs(8 - k) + "   ".join(cells))
+    return "\n".join(lines)
+
+
+def transform_prompt(prompt: str, arm: str, board=None) -> str:
     if arm == "base":
         return prompt
+    if arm == "serial_dl":
+        if _RULES_SUB_OLD not in prompt or _INSTR_SUB_OLD not in prompt:
+            raise ValueError("rules/instruction text not found for serial_dl rewrite")
+        prompt = (prompt.replace(_RULES_SUB_OLD, _RULES_SUB_NEW)
+                  .replace(_INSTR_SUB_OLD, _INSTR_SUB_NEW))
     out, labels = [], []
     for line in prompt.splitlines():
         m = _BOARD_LINE.match(line)
@@ -94,9 +149,13 @@ def transform_prompt(prompt: str, arm: str) -> str:
             labels.append(l)
             if arm == "flip_rows":
                 out.append(f"{10 - l:>2} {m.group(2)}")
-            elif l == 1:  # image: replace the whole block with one pointer line
+            elif l == 1 and arm == "image":  # replace block with one pointer line
                 out.append(_IMG_POINTER)
-        elif not (arm == "image" and _HEADER_LINE.match(line)):
+            elif l == 1 and arm == "serial_dl":
+                out.append(_SERIAL_INTRO)
+                out.append("")
+                out.append(diamond_block(board))
+        elif not (arm in ("image", "serial_dl") and _HEADER_LINE.match(line)):
             out.append(line)
     if labels != list(range(1, 10)):
         raise ValueError(f"board block not found/complete in prompt (labels={labels})")
@@ -145,13 +204,13 @@ def image_messages(text: str, png: bytes) -> list:
     ]}]
 
 
-def parse_answer(raw: str, legal: set) -> str | None:
+def parse_answer(raw: str, legal: set, regex=_COORD) -> str | None:
     """GomokuTemplate.parse logic: bottom-up, first line naming exactly ONE
     distinct legal coordinate."""
     if not raw:
         return None
     for ln in reversed([l for l in raw.splitlines() if l.strip()]):
-        coords = {f"{m.group(1).upper()}{m.group(2)}" for m in _COORD.finditer(ln)} & legal
+        coords = {f"{m.group(1).upper()}{m.group(2)}" for m in regex.finditer(ln)} & legal
         if len(coords) == 1:
             return next(iter(coords))
     return None
@@ -175,7 +234,7 @@ def load_probes(axes, limit, seed):
 
 def done_keys():
     keys = set()
-    for path in (RESULTS, IMG_RESULTS):
+    for path in (RESULTS, IMG_RESULTS, SERIAL_RESULTS):
         if os.path.exists(path):
             for l in open(path):
                 r = json.loads(l)
@@ -184,12 +243,20 @@ def done_keys():
 
 
 async def replay_one(client, probe, arm, max_tokens, save_images=False):
-    label_to_r, r_to_label = FRAMES[arm]
-    prompt = transform_prompt(probe["prompt"], arm)
-    legal = {f"{_COLS[c]}{r_to_label(r)}"
-             for r in range(9) for c in range(9) if probe["board"][r][c] is None}
+    board = probe["board"]
+    prompt = transform_prompt(probe["prompt"], arm, board)
+    if arm == "serial_dl":
+        coord_of, rc_of = serial_coord_of, serial_rc_of
+        regex, repair = _NEW_COORD, _REPAIR_SERIAL
+    else:
+        label_to_r, r_to_label = FRAMES[arm]
+        coord_of = lambda r, c: f"{_COLS[c]}{r_to_label(r)}"
+        rc_of = lambda coord: (label_to_r(int(coord[1:])), _COLS.index(coord[0]))
+        regex, repair = _COORD, _REPAIR
+    legal = {coord_of(r, c)
+             for r in range(9) for c in range(9) if board[r][c] is None}
 
-    png = render_board_png(probe["board"]) if arm == "image" else None
+    png = render_board_png(board) if arm == "image" else None
     if png is not None and save_images:
         fn = os.path.join(IMG_DIR, probe["id"].replace(":", "__") + ".png")
         if not os.path.exists(fn):
@@ -202,10 +269,10 @@ async def replay_one(client, probe, arm, max_tokens, save_images=False):
         attempts += 1
         req = image_messages(p, png) if png else p
         out = await client.generate(req, max_tokens=max_tokens)
-        coord = parse_answer(out.content, legal)
+        coord = parse_answer(out.content, legal, regex)
         if coord:
             break
-        p = f"{prompt}\n\n{_REPAIR}"
+        p = f"{prompt}\n\n{repair}"
 
     rec = {
         "model": None, "arm": arm, "id": probe["id"], "axis": probe["axis"],
@@ -217,17 +284,23 @@ async def replay_one(client, probe, arm, max_tokens, save_images=False):
         rec.update(parsed=False, blocked=False, won_instead=False,
                    missed=True, frame_slip=False)
         return rec
-    r, c = label_to_r(int(coord[1:])), _COLS.index(coord[0])
+    r, c = rc_of(coord)
     cell = tuple(probe["threat_cell"])
     blocked = (r, c) == cell
     won_instead = [r, c] in probe["own_win_cells"]
-    # Would the answer have blocked under the OTHER frame? (frame confusion,
-    # not detection failure)
-    other = [a for a in FRAMES if a != arm][0]
-    ro = FRAMES[other][0](int(coord[1:]))
+    # Frame confusion (not detection failure): would the answer have blocked
+    # under the confusable coordinate reading?
+    if arm == "serial_dl":
+        # answer given in ORIGINAL A-I/1-9 coords despite the rotated view
+        slip = (not blocked and coord[0] in _COLS and int(coord[1:]) <= 9
+                and (int(coord[1:]) - 1, _COLS.index(coord[0])) == cell)
+    else:
+        other = [a for a in ("base", "flip_rows") if a != arm][0]
+        ro = FRAMES[other][0](int(coord[1:]))
+        slip = not blocked and (ro, c) == cell
     rec.update(parsed=True, blocked=blocked, won_instead=won_instead,
                missed=not blocked and not won_instead,
-               frame_slip=not blocked and (ro, c) == cell)
+               frame_slip=slip)
     return rec
 
 
@@ -256,6 +329,7 @@ async def run(args):
 
     os.makedirs(os.path.dirname(RESULTS), exist_ok=True)
     os.makedirs(IMG_DIR, exist_ok=True)
+    os.makedirs(SERIAL_DIR, exist_ok=True)
     sem = asyncio.Semaphore(args.concurrency)
     lock = asyncio.Lock()
     t0, n_done = time.time(), 0
@@ -293,7 +367,7 @@ def mcnemar_p(b: int, c: int) -> float:
 
 def analyze(args):
     probes = {p["id"]: p for p in (json.loads(l) for l in open(PROBES))}
-    rows = [json.loads(l) for path in (RESULTS, IMG_RESULTS)
+    rows = [json.loads(l) for path in (RESULTS, IMG_RESULTS, SERIAL_RESULTS)
             if os.path.exists(path) for l in open(path)]
     # keep the last record per key (re-runs append)
     latest = {}
